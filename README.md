@@ -23,5 +23,5 @@ Se precisar fazer deploy manual por terminal, use:
 
 ```sh
 npm run build
-npx wrangler pages deploy dist --project-name=portalnovoalvo
+npx wrangler pages deploy dist --project-name=novo-alvo-astro
 ```
