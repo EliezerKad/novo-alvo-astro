@@ -7,6 +7,7 @@
     "dev": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
+    "deploy:pages": "wrangler pages deploy dist --project-name=novo-alvo-astro",
     "astro": "astro"
   },
   "dependencies": {
