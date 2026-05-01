@@ -1,6 +1,2 @@
-{
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "novo-alvo-astro",
-  "pages_build_output_dir": "dist",
-  "compatibility_date": "2026-05-01"
-}
+// wrangler.jsonc
+"name": "portalnovoalvo",
