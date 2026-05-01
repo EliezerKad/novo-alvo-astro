@@ -1,0 +1,120 @@
+---
+import '../styles.css';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+  image?: string;
+  type?: string;
+  publishedTime?: string;
+  modifiedTime?: string;
+  author?: string;
+  section?: string;
+  imageAlt?: string;
+  preloadImage?: string;
+  preloadImageSrcset?: string;
+  preloadImageSizes?: string;
+  breadcrumbs?: Array<{ name: string; url: string }>;
+}
+
+const {
+  title,
+  description = 'Novo Alvo reúne notícias, análise e cobertura editorial com foco em fatos relevantes.',
+  canonical = Astro.url.href,
+  image,
+  type = 'website',
+  publishedTime,
+  modifiedTime,
+  author,
+  section,
+  imageAlt = title,
+  preloadImage,
+  preloadImageSrcset,
+  preloadImageSizes,
+  breadcrumbs = [],
+} = Astro.props;
+const siteName = 'Novo Alvo';
+const fallbackImage = new URL('/og-default.svg', Astro.site ?? Astro.url.origin).href;
+const socialImage = image || fallbackImage;
+const fontStylesheet = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:ital,wght@0,900;1,900&display=swap';
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsMediaOrganization',
+  name: siteName,
+  url: new URL('/', Astro.site ?? Astro.url.origin).href,
+  logo: new URL('/og-default.svg', Astro.site ?? Astro.url.origin).href,
+  sameAs: [],
+};
+const breadcrumbSchema = breadcrumbs.length > 0
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: breadcrumbs.map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: item.name,
+        item: item.url,
+      })),
+    }
+  : undefined;
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="application/rss+xml" title="Novo Alvo RSS" href="/rss.xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href={fontStylesheet} />
+    <link rel="stylesheet" href={fontStylesheet} />
+    {preloadImage && (
+      <link
+        rel="preload"
+        as="image"
+        href={preloadImage}
+        imagesrcset={preloadImageSrcset}
+        imagesizes={preloadImageSizes}
+        fetchpriority="high"
+      />
+    )}
+    <title>{title}</title>
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta property="og:locale" content="pt_BR" />
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+    {author && <meta property="article:author" content={author} />}
+    {section && <meta property="article:section" content={section} />}
+    <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
+    <script is:inline async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4967503094814982" crossorigin="anonymous"></script>
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(organizationSchema)}></script>
+    {breadcrumbSchema && <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)}></script>}
+    <script is:inline>
+      try {
+        const stored = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', stored === 'dark' || (!stored && prefersDark));
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <slot />
+    <Footer />
+  </body>
+</html>

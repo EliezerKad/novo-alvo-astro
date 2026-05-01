@@ -1,0 +1,35 @@
+---
+import ArticleCard from './ArticleCard.astro';
+import type { Article } from '../types';
+
+interface Props {
+  articles: Article[];
+}
+
+const { articles } = Astro.props;
+---
+
+{
+  articles.length > 0 && (
+    <section class="relative group">
+      <div class="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar rounded-[2.5rem]">
+        {articles.map((article, index) => (
+          <div id={`destaque-${index + 1}`} class="min-w-full snap-start">
+            <ArticleCard article={article} variant="feature" />
+          </div>
+        ))}
+      </div>
+      {articles.length > 1 && (
+        <div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+          {articles.map((_, index) => (
+            <a
+              href={`#destaque-${index + 1}`}
+              class="h-1.5 w-8 rounded-full bg-white/50 hover:bg-red-600 shadow-[0_0_15px_rgba(239,68,68,0.25)] transition-all duration-300"
+              aria-label={`Ver destaque ${index + 1}`}
+            ></a>
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}

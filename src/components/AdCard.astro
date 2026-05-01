@@ -1,0 +1,14 @@
+---
+import AdsenseBlock from './AdsenseBlock.astro';
+
+interface Props {
+  label?: string;
+  size?: '728x90' | '300x250';
+  class?: string;
+}
+
+const { label = 'Publicidade', size = '300x250', class: className = '' } = Astro.props;
+const minHeight = size === '728x90' ? '90px' : '250px';
+---
+
+<AdsenseBlock label={label} minHeight={minHeight} class={className} />

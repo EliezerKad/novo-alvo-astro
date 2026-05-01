@@ -1,0 +1,69 @@
+---
+import type { Article } from '../types';
+import { getCategoryColor } from '../lib/utils';
+import Icon from './Icon.astro';
+import AdsenseBlock from './AdsenseBlock.astro';
+
+interface Props {
+  current: Article;
+  articles: Article[];
+}
+
+const { current, articles } = Astro.props;
+---
+
+{
+  articles.length > 0 && (
+    <div class="mt-24 pt-12 border-t border-zinc-100 dark:border-zinc-800 transition-colors">
+      <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+            <Icon name="trending" class="w-5 h-5" />
+          </div>
+          <div>
+            <h3 class="text-2xl font-serif font-black tracking-tighter italic dark:text-zinc-50">Giro de Notícias</h3>
+            <p class="text-zinc-400 text-[9px] font-black uppercase tracking-[0.3em] dark:text-zinc-500">Mais em {current.category}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-8 py-8 border-y border-zinc-100 dark:border-zinc-800">
+        <AdsenseBlock label="Publicidade entre relacionadas" minHeight="90px" class="w-full max-w-[728px] h-[90px] mx-auto" />
+      </div>
+
+      <div class="relative overflow-hidden group/carousel">
+        <div class="flex animate-[ticker_40s_linear_infinite] hover:pause w-max gap-6 pb-8">
+          {[...articles, ...articles].map((rel) => (
+            <a href={`/noticia/${rel.slug}`} class="w-[300px] flex-shrink-0 group/card space-y-4">
+              <div class="aspect-[16/10] bg-zinc-100 dark:bg-zinc-800 rounded-3xl overflow-hidden relative border border-zinc-100 dark:border-zinc-800">
+                {rel.imageUrl ? (
+                  <img
+                    src={rel.imageUrl}
+                    referrerpolicy="no-referrer"
+                    class="w-full h-full object-cover grayscale group-hover/card:grayscale-0 group-hover/card:scale-110 transition-all duration-1000"
+                    alt={rel.title}
+                    loading="lazy"
+                    decoding="async"
+                    sizes="300px"
+                  />
+                ) : (
+                  <div class="w-full h-full flex items-center justify-center text-zinc-300 dark:text-zinc-700">
+                    <Icon name="zap" class="w-8 h-8" />
+                  </div>
+                )}
+                <div class="absolute top-3 left-3">
+                  <span class={`text-white px-2 py-0.5 text-[7px] font-black uppercase tracking-widest rounded-md ${getCategoryColor(rel.category)}`}>
+                    {rel.category}
+                  </span>
+                </div>
+              </div>
+              <h4 class="text-base font-serif font-black leading-tight tracking-tighter group-hover/card:text-red-700 dark:text-zinc-50 dark:group-hover/card:text-red-400 transition-colors line-clamp-2">
+                {rel.title}
+              </h4>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}

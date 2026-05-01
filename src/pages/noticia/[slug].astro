@@ -1,0 +1,259 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleTopBar from '../../components/ArticleTopBar.astro';
+import RelatedArticles from '../../components/RelatedArticles.astro';
+import AdCard from '../../components/AdCard.astro';
+import Icon from '../../components/Icon.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { getCollection, render } from 'astro:content';
+import type { NewsEntry } from '../../lib/news';
+import { newsEntryToArticle, relatedNews, sortNewsByDate } from '../../lib/news';
+import {
+  formatEditorialDate,
+  getCategoryColor,
+  getReadingTime,
+  getResponsiveImageSet,
+} from '../../lib/utils';
+
+export async function getStaticPaths() {
+  const newsEntries = sortNewsByDate(await getCollection('news'));
+
+  return newsEntries.map((article) => ({
+    params: { slug: article.data.slug },
+    props: { article, newsEntries },
+  }));
+}
+
+interface Props {
+  article: NewsEntry;
+  newsEntries: NewsEntry[];
+}
+
+const { article, newsEntries } = Astro.props;
+const { Content } = await render(article);
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin).href;
+const heroImage = article.data.ogImage || article.data.cover.src || `https://picsum.photos/seed/${article.id}/1600/900`;
+const responsiveHero = getResponsiveImageSet(heroImage);
+const readingTime = getReadingTime(article.body ?? '');
+const related = relatedNews(article, newsEntries);
+const title = `${article.data.title} | Novo Alvo`;
+const author = article.data.author;
+const publishedIso = article.data.publishedAt.toISOString();
+const modifiedIso = (article.data.updatedAt ?? article.data.publishedAt).toISOString();
+const breadcrumbs = [
+  { name: 'Inicio', url: new URL('/', Astro.site ?? Astro.url.origin).href },
+  { name: article.data.category, url: new URL(`/?category=${encodeURIComponent(article.data.category)}`, Astro.site ?? Astro.url.origin).href },
+  { name: article.data.title, url: canonicalUrl },
+];
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: article.data.title,
+  description: article.data.seoDescription,
+  image: [heroImage],
+  datePublished: publishedIso,
+  dateModified: modifiedIso,
+  author: [{ '@type': 'Person', name: author }],
+  publisher: {
+    '@type': 'Organization',
+    name: 'Novo Alvo',
+    logo: {
+      '@type': 'ImageObject',
+      url: new URL('/logo.png', canonicalUrl).href,
+    },
+  },
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': canonicalUrl,
+  },
+  articleSection: article.data.category,
+  keywords: article.data.tags.join(', '),
+  wordCount: (article.body ?? '').trim().split(/\s+/).filter(Boolean).length,
+  thumbnailUrl: heroImage,
+  isAccessibleForFree: true,
+  inLanguage: 'pt-BR',
+};
+---
+
+<BaseLayout
+  title={title}
+  description={article.data.seoDescription}
+  canonical={canonicalUrl}
+  image={heroImage}
+  type="article"
+  publishedTime={publishedIso}
+  modifiedTime={modifiedIso}
+  author={author}
+  section={article.data.category}
+  imageAlt={article.data.cover.alt}
+  preloadImage={heroImage}
+  preloadImageSrcset={responsiveHero}
+  preloadImageSizes="(min-width: 1024px) 1152px, 100vw"
+  breadcrumbs={breadcrumbs}
+>
+  <article class="bg-white dark:bg-zinc-950 min-h-screen pb-40 transition-colors duration-300">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)}></script>
+    <ArticleTopBar title={article.data.title} url={canonicalUrl} />
+
+    <div class="pt-24 lg:pt-32 bg-white dark:bg-zinc-900 transition-colors"></div>
+    <Breadcrumbs items={breadcrumbs} />
+
+    <header class="pt-8 lg:pt-14 max-w-6xl mx-auto px-4">
+      <div class="space-y-8 mb-12 lg:mb-20">
+        <div class="flex flex-wrap items-center gap-6">
+          <span class={`${getCategoryColor(article.data.category)} text-white px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg shadow-lg`}>
+            {article.data.category}
+          </span>
+          <div class="flex flex-wrap items-center gap-6 text-zinc-400 text-[10px] font-black uppercase tracking-widest leading-none">
+            <div class="flex items-center gap-2">
+              <Icon name="clock" class="w-4 h-4" />
+              {formatEditorialDate(article.data.publishedAt.toISOString())}
+            </div>
+            <div class="flex items-center gap-2 border-l border-zinc-100 dark:border-zinc-800 pl-6">
+              <Icon name="eye" class="w-4 h-4" />
+              {article.data.views || 0} ACESSOS
+            </div>
+            <div class="flex items-center gap-2 border-l border-zinc-100 dark:border-zinc-800 pl-6">
+              <Icon name="bookOpen" class="w-4 h-4" />
+              {readingTime} MIN DE LEITURA
+            </div>
+          </div>
+        </div>
+
+        <h1 class="text-4xl md:text-6xl lg:text-7xl font-serif font-black leading-[1.0] tracking-tighter text-zinc-900 dark:text-zinc-50">
+          {article.data.title}
+        </h1>
+
+        <div class="h-px w-full bg-zinc-100 dark:bg-zinc-800"></div>
+
+        <p class="text-2xl md:text-3xl font-medium italic text-zinc-500 dark:text-zinc-400 leading-tight">
+          {article.data.summary}
+        </p>
+        <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-500">
+          <Icon name="user" class="w-3.5 h-3.5" />
+          <span>Por {author}</span>
+        </div>
+      </div>
+
+      {
+        article.data.cover.layout !== 'none' && (
+          <figure class={`mb-16 lg:mb-24 ${article.data.cover.layout === 'half' ? 'max-w-3xl mx-auto' : ''}`}>
+            <div class={`rounded-[2.5rem] overflow-hidden shadow-2xl bg-zinc-100 dark:bg-zinc-800 ${article.data.cover.layout === 'half' ? 'aspect-video' : 'aspect-[21/9]'}`}>
+              <img
+                src={heroImage}
+                srcset={responsiveHero}
+                sizes="(min-width: 1024px) 1152px, 100vw"
+                alt={article.data.cover.alt}
+                class="w-full h-full object-cover"
+                referrerpolicy="no-referrer"
+                loading="eager"
+                decoding="async"
+                fetchpriority="high"
+              />
+            </div>
+            {article.data.cover.caption && (
+              <figcaption class="text-xs text-zinc-500 mt-4 text-center italic break-words px-4">
+                {article.data.cover.caption}
+              </figcaption>
+            )}
+          </figure>
+        )
+      }
+    </header>
+
+    <div class="max-w-4xl mx-auto px-4">
+      <div
+        class="prose prose-xl prose-zinc max-w-none
+          prose-p:text-zinc-800 prose-p:leading-[1.8] prose-p:mb-10 prose-p:font-serif
+          prose-headings:font-serif prose-headings:font-black prose-headings:tracking-tighter prose-headings:mb-12 prose-headings:text-zinc-900
+          prose-h2:text-4xl prose-h2:italic prose-h2:border-l-4 prose-h2:border-red-600 prose-h2:pl-6 prose-h2:mt-32
+          prose-h3:text-2xl prose-h3:mt-20 prose-h3:text-zinc-700
+          prose-strong:text-zinc-950 prose-strong:font-black
+          prose-ul:list-disc prose-ul:pl-6 prose-ul:mb-10
+          prose-li:text-zinc-800 prose-li:mb-2
+          prose-a:text-red-600 prose-a:font-bold prose-a:no-underline hover:prose-a:underline
+          dark:prose-invert dark:prose-p:text-zinc-300 dark:prose-headings:text-zinc-50
+          article-content overflow-hidden break-words [word-break:break-word] [overflow-wrap:break-word]"
+      >
+        <Content />
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-zinc-100/50 dark:border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="flex flex-wrap gap-2 items-center">
+          <span class="text-[9px] font-black text-zinc-300 dark:text-zinc-600 uppercase tracking-widest mr-2">Fontes:</span>
+          {article.data.sources.map((source) => (
+            <span class="px-2 py-0.5 bg-zinc-50 dark:bg-zinc-900 text-zinc-500 rounded-md text-[9px] font-bold uppercase tracking-widest border border-zinc-100 dark:border-zinc-800">
+              {source}
+            </span>
+          ))}
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(`${article.data.title} - ${canonicalUrl}`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="w-11 h-11 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+            title="WhatsApp"
+          >
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.067 2.877 1.216 3.075.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"></path></svg>
+          </a>
+          <a
+            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(article.data.title)}&url=${encodeURIComponent(canonicalUrl)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="w-11 h-11 bg-zinc-50 dark:bg-zinc-900 rounded-xl flex items-center justify-center text-zinc-900 dark:text-zinc-50 hover:bg-zinc-900 hover:text-white transition-all shadow-sm"
+            title="X"
+          >
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
+          </a>
+          <a
+            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonicalUrl)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+            title="Facebook"
+          >
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path></svg>
+          </a>
+        </div>
+      </div>
+
+      <RelatedArticles current={newsEntryToArticle(article)} articles={related} />
+
+      <div class="mt-16 bg-zinc-50 dark:bg-zinc-900 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-8 border border-zinc-100 dark:border-zinc-800">
+        <div class="space-y-2 text-center md:text-left">
+          <h4 class="text-xl font-serif font-black italic text-zinc-900 dark:text-zinc-50">Assine o Pulso do Brasil</h4>
+          <p class="text-[10px] font-black uppercase tracking-widest text-zinc-400">As principais pautas no seu e-mail, sem ruído.</p>
+        </div>
+        <form class="relative w-full md:w-96" action="/" method="get">
+          <input
+            type="email"
+            required
+            placeholder="SEU MELHOR E-MAIL"
+            class="w-full bg-white dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-red-600 transition-all placeholder:text-zinc-300 dark:placeholder:text-zinc-700"
+          />
+          <button type="submit" class="absolute right-1.5 top-1.5 bottom-1.5 px-6 rounded-lg flex items-center justify-center transition-all bg-zinc-900 text-white hover:bg-red-600">
+            <span class="text-[10px] font-black uppercase tracking-widest">Enviar</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="mt-12 flex justify-center pb-12">
+        <a href="/" class="group inline-flex flex-col items-center gap-3">
+          <div class="w-14 h-14 bg-zinc-900 rounded-[1.8rem] flex items-center justify-center text-white group-hover:scale-110 group-hover:bg-red-600 transition-all duration-500 shadow-xl shadow-zinc-900/20">
+            <Icon name="home" class="w-6 h-6" />
+          </div>
+        </a>
+      </div>
+
+      <div class="mt-10 pt-8 border-t border-zinc-100 dark:border-zinc-800 flex flex-col items-center">
+        <div class="w-full flex flex-col items-center bg-white dark:bg-zinc-950 transition-colors">
+          <div class="w-full flex justify-center py-8">
+            <AdCard size="728x90" class="w-full max-w-[728px] h-[90px]" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+</BaseLayout>

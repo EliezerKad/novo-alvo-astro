@@ -1,0 +1,43 @@
+---
+interface Props {
+  compact?: boolean;
+  class?: string;
+}
+
+const { compact = false, class: className = '' } = Astro.props;
+---
+
+<section class={`bg-zinc-900 dark:bg-zinc-800 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden group border border-white/5 ${className}`}>
+  <div class="relative z-10 space-y-6">
+    <div class={compact ? 'space-y-2 text-center' : 'space-y-2'}>
+      <span class="text-[8px] font-black uppercase tracking-[0.4em] text-red-500">Newsletter</span>
+      <h3 class={compact ? 'text-xl font-serif font-black leading-tight italic group-hover:text-red-500 transition-colors' : 'text-2xl md:text-3xl font-serif font-black leading-tight italic group-hover:text-red-500 transition-colors'}>
+        O pulso do Brasil no seu e-mail.
+      </h3>
+      {!compact && (
+        <p class="text-xs text-zinc-400 font-bold uppercase tracking-widest leading-relaxed">
+          Um resumo editorial direto, visual e sem ruido para voltar ao portal com contexto.
+        </p>
+      )}
+    </div>
+    <form class="relative" action="/newsletter" method="get">
+      <input
+        type="email"
+        required
+        name="email"
+        placeholder="E-MAIL"
+        class="w-full bg-zinc-800 border-none rounded-xl px-5 py-3 text-[9px] font-black uppercase tracking-widest focus:ring-2 focus:ring-red-600 transition-all placeholder:text-zinc-600"
+      />
+      <button
+        type="submit"
+        class="absolute right-1.5 top-1.5 bottom-1.5 px-4 rounded-lg flex items-center justify-center transition-all scale-90 bg-red-600 text-white hover:bg-white hover:text-red-600"
+      >
+        <span class="text-[9px] font-black uppercase tracking-widest">Entrar</span>
+      </button>
+    </form>
+    <p class="text-[8px] text-zinc-500 font-bold uppercase tracking-widest text-center opacity-70">
+      Sem backend por enquanto. Estrutura pronta para integracao futura.
+    </p>
+  </div>
+  <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-red-600/10 blur-[80px] rounded-full group-hover:bg-red-600/20 transition-all"></div>
+</section>

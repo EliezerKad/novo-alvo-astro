@@ -1,0 +1,55 @@
+---
+interface Props {
+  label?: string;
+  slot?: string;
+  class?: string;
+  minHeight?: string;
+}
+
+const {
+  label = 'Publicidade',
+  slot = '6563206826',
+  class: className = '',
+  minHeight = '250px',
+} = Astro.props;
+const style = `display:block;min-height:${minHeight}`;
+---
+
+<div class={`overflow-hidden relative flex flex-col items-center justify-center ${className}`}>
+  <div class="absolute top-1 left-2 z-10 pointer-events-none">
+    <span class="text-[7px] font-black text-zinc-400 dark:text-zinc-600 uppercase tracking-widest">{label}</span>
+  </div>
+  <ins
+    class="adsbygoogle"
+    style={style}
+    data-ad-client="ca-pub-4967503094814982"
+    data-ad-slot={slot}
+    data-ad-format="auto"
+    data-full-width-responsive="true"
+  ></ins>
+  <script is:inline>
+    (() => {
+      const script = document.currentScript;
+      const ad = script && script.previousElementSibling;
+      const loadAd = () => {
+        if (!ad || ad.dataset.adsenseLoaded === 'true') return;
+        ad.dataset.adsenseLoaded = 'true';
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch {}
+      };
+
+      if ('IntersectionObserver' in window && ad) {
+        const observer = new IntersectionObserver((entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            observer.disconnect();
+            loadAd();
+          }
+        }, { rootMargin: '600px 0px' });
+        observer.observe(ad);
+      } else {
+        loadAd();
+      }
+    })();
+  </script>
+</div>
