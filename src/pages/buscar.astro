@@ -100,6 +100,29 @@ const breadcrumbs = [
             </a>
           </div>
 
+          <div data-search-loading class="hidden space-y-8" aria-live="polite">
+            <div class="flex items-center gap-3 border-b-2 border-red-600 pb-3">
+              <span class="h-2 w-2 rounded-full bg-red-600 animate-pulse"></span>
+              <h2 class="uppercase text-xs font-black tracking-[0.2em] italic text-zinc-900 dark:text-zinc-50">
+                Buscando matérias
+              </h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+              {Array.from({ length: 6 }).map(() => (
+                <article class="space-y-6 animate-pulse">
+                  <div class="aspect-[16/10] rounded-[2rem] bg-zinc-200 dark:bg-zinc-800"></div>
+                  <div class="space-y-3">
+                    <div class="h-2 w-32 rounded-full bg-zinc-200 dark:bg-zinc-800"></div>
+                    <div class="h-5 w-11/12 rounded-full bg-zinc-200 dark:bg-zinc-800"></div>
+                    <div class="h-5 w-8/12 rounded-full bg-zinc-200 dark:bg-zinc-800"></div>
+                    <div class="h-2 w-full rounded-full bg-zinc-100 dark:bg-zinc-900"></div>
+                    <div class="h-2 w-2/3 rounded-full bg-zinc-100 dark:bg-zinc-900"></div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+
           <div data-search-results class="hidden space-y-8">
             <div class="flex items-center gap-3 border-b-2 border-red-600 pb-3">
               <Icon name="trending" class="w-5 h-5 text-red-600" />
@@ -150,6 +173,7 @@ const breadcrumbs = [
               const results = document.querySelector('[data-search-results]');
               const grid = document.querySelector('[data-search-grid]');
               const empty = document.querySelector('[data-search-empty]');
+              const loading = document.querySelector('[data-search-loading]');
               const suggestions = document.querySelector('[data-search-suggestions]');
               const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (char) => ({
                 '&': '&amp;',
@@ -207,6 +231,7 @@ const breadcrumbs = [
 
               if (title) title.textContent = `Resultados para "${query}"`;
               if (suggestions) suggestions.classList.add('hidden');
+              if (loading) loading.classList.remove('hidden');
 
               const matches = articles
                 .map((article) => ({ article, score: scoreArticle(article) }))
@@ -222,11 +247,13 @@ const breadcrumbs = [
               }
 
               if (!visible.length) {
+                if (loading) loading.classList.add('hidden');
                 if (empty) empty.classList.remove('hidden');
                 return;
               }
 
               if (grid) grid.innerHTML = visible.map(renderCard).join('');
+              if (loading) loading.classList.add('hidden');
               if (results) results.classList.remove('hidden');
             })();
           </script>
