@@ -1,5 +1,6 @@
 ---
 import LogoSymbol from './LogoSymbol.astro';
+import VisitorCounter from './VisitorCounter.astro';
 import { categoryUrl } from '../lib/news';
 
 const categories = [
@@ -28,8 +29,9 @@ const year = new Date().getFullYear();
             NOVO ALVO
           </h2>
         </a>
+        <VisitorCounter />
         <p class="text-zinc-500 text-[11px] max-w-sm leading-relaxed font-medium uppercase tracking-wider">
-          Sua fonte primaria para noticias de impacto. Cobertura profunda e analitica dos fatos que moldam o mundo, 24 horas por dia.
+          Sua fonte primária para notícias de impacto. Cobertura profunda e analítica dos fatos que moldam o mundo, 24 horas por dia.
         </p>
       </div>
 
@@ -55,7 +57,7 @@ const year = new Date().getFullYear();
         </h4>
         <nav class="flex flex-col gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
           <a href="/sobre" class="hover:text-white transition-colors">
-            Sobre Nos
+            Sobre Nós
           </a>
           <a href="/privacidade" class="hover:text-white transition-colors">
             Privacidade
@@ -69,14 +71,14 @@ const year = new Date().getFullYear();
 
     <div class="pt-4 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-3">
       <p class="text-zinc-600 text-[8px] font-bold uppercase tracking-[0.2em]">
-        © {year} Redacao Novo Alvo • Fatos e Impacto
+        © {year} Redação Novo Alvo • Fatos e Impacto
       </p>
       <div class="flex gap-6 text-zinc-600 text-[8px] font-bold uppercase tracking-[0.2em]">
         <a href="/admin" class="hover:text-zinc-400 transition-colors">
-          Redacao
+          Redação
         </a>
         <a href="/sobre" class="hover:text-zinc-400 transition-colors">
-          Sobre Nos
+          Sobre Nós
         </a>
         <a href="/privacidade" class="hover:text-zinc-400 transition-colors">
           Privacidade

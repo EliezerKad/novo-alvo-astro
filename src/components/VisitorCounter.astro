@@ -1,0 +1,72 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<span
+  data-visitor-counter
+  class={`hidden items-center gap-1 text-[7px] font-black uppercase tracking-[0.24em] text-zinc-400 dark:text-zinc-500 ${className}`}
+  aria-live="polite"
+>
+  <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
+  <span data-visitor-counter-text>Ao vivo</span>
+</span>
+
+<script is:inline>
+  (() => {
+    if (window.__novoAlvoVisitorCounter) return;
+    window.__novoAlvoVisitorCounter = true;
+
+    const endpoint = '/api/visits';
+    const sessionKey = 'novo-alvo-visitor-id';
+    const formatNumber = (value) => {
+      const number = Number(value || 0);
+      if (number >= 1000000) return `${(number / 1000000).toFixed(1).replace('.0', '')}M`;
+      if (number >= 1000) return `${(number / 1000).toFixed(1).replace('.0', '')}K`;
+      return String(number);
+    };
+    const getVisitorId = () => {
+      try {
+        const existing = localStorage.getItem(sessionKey);
+        if (existing) return existing;
+        const next = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+        localStorage.setItem(sessionKey, next);
+        return next;
+      } catch {
+        return `${Date.now()}-${Math.random()}`;
+      }
+    };
+    const render = (payload) => {
+      if (!payload || payload.enabled === false) return;
+      document.querySelectorAll('[data-visitor-counter]').forEach((element) => {
+        const text = element.querySelector('[data-visitor-counter-text]');
+        if (!text) return;
+        const online = Number(payload.online || 0);
+        const total = Number(payload.total || 0);
+        text.textContent = `${formatNumber(online)} online · ${formatNumber(total)} visitas`;
+        element.classList.remove('hidden');
+        element.classList.add('inline-flex');
+      });
+    };
+    const ping = async () => {
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            visitorId: getVisitorId(),
+            path: window.location.pathname,
+          }),
+        });
+        if (!response.ok) return;
+        render(await response.json());
+      } catch {}
+    };
+
+    ping();
+    window.setInterval(ping, 30000);
+  })();
+</script>

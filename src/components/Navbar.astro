@@ -5,6 +5,7 @@ import NavbarMobileSearch from './NavbarMobileSearch';
 import NavbarSearch from './NavbarSearch.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import TopTicker from './TopTicker.astro';
+import VisitorCounter from './VisitorCounter.astro';
 import { categoryUrl } from '../lib/news';
 import type { Article } from '../types';
 
@@ -35,6 +36,7 @@ const { tickerArticles = [], category, categories, subCategories } = Astro.props
           <p class="uppercase text-[6px] tracking-[0.4em] font-black text-zinc-400 italic mt-0.5 md:ml-[3.25rem]">
             Fatos e Impacto 24h
           </p>
+          <VisitorCounter class="mt-1 md:ml-[3.25rem]" />
         </a>
 
         <div class="md:hidden flex items-center gap-2">
