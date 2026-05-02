@@ -63,7 +63,8 @@ const scoredEntries = newsEntries
   .filter((item) => item.score > 0)
   .sort((a, b) => b.score - a.score || b.entry.data.publishedAt.getTime() - a.entry.data.publishedAt.getTime());
 
-const results = scoredEntries.map((item) => newsEntryToArticle(item.entry));
+const results = scoredEntries.slice(0, 30).map((item) => newsEntryToArticle(item.entry));
+const totalMatches = scoredEntries.length;
 const canonical = new URL('/buscar', Astro.site ?? Astro.url.origin).href;
 const title = query
   ? `Busca por "${query}" | Portal Novo Alvo`
@@ -122,7 +123,9 @@ const breadcrumbs = [
           {query && (
             <div class="flex items-center justify-between border-y border-zinc-200 dark:border-zinc-800 py-4">
               <p class="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-400">
-                {results.length === 1 ? '1 resultado encontrado' : `${results.length} resultados encontrados`}
+                {totalMatches === 1
+                  ? '1 matéria relacionada'
+                  : `${Math.min(totalMatches, 30)} matérias relacionadas${totalMatches > 30 ? ' · exibindo as 30 mais relevantes' : ''}`}
               </p>
               <a href="/buscar" class="text-[10px] font-black uppercase tracking-widest text-red-600 hover:text-red-700">
                 Limpar busca
@@ -132,8 +135,16 @@ const breadcrumbs = [
 
           {query ? (
             results.length > 0 ? (
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div class="space-y-8">
+                <div class="flex items-center gap-3 border-b-2 border-red-600 pb-3">
+                  <Icon name="trending" class="w-5 h-5 text-red-600" />
+                  <h2 class="uppercase text-xs font-black tracking-[0.2em] italic text-zinc-900 dark:text-zinc-50">
+                    Pulso da busca
+                  </h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                 {results.map((article) => <ArticleCard article={article} variant="pulse" />)}
+                </div>
               </div>
             ) : (
               <section class="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-10 text-center">
