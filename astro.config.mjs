@@ -9,6 +9,9 @@ export default defineConfig({
   integrations: [
     react(),
     sitemap({
+      filter(page) {
+        return !page.includes('/admin/');
+      },
       serialize(item) {
         if (item.url.endsWith('/')) {
           item.changefreq = ChangeFreqEnum.DAILY;
