@@ -1,7 +1,6 @@
 ---
 import LogoSymbol from './LogoSymbol.astro';
 import { categoryUrl } from '../lib/news';
-import NewsletterBlock from './NewsletterBlock.astro';
 
 const categories = [
   'Brasil',
@@ -67,8 +66,6 @@ const year = new Date().getFullYear();
         </nav>
       </div>
     </div>
-
-    <NewsletterBlock compact class="mb-6" />
 
     <div class="pt-4 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-3">
       <p class="text-zinc-600 text-[8px] font-bold uppercase tracking-[0.2em]">
