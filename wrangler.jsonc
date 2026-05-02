@@ -1,5 +1,11 @@
 {
   "name": "novo-alvo-astro",
   "compatibility_date": "2025-01-01",
-  "pages_build_output_dir": "dist"
+  "pages_build_output_dir": "dist",
+  "kv_namespaces": [
+    {
+      "binding": "VISITOR_COUNTER",
+      "id": "d73052d6da584a3186bf3bd72f917a55"
+    }
+  ]
 }
