@@ -1,0 +1,39 @@
+<div class="hidden lg:block relative">
+  <svg
+    class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="11" cy="11" r="8"></circle>
+    <path d="m21 21-4.3-4.3"></path>
+  </svg>
+  <input
+    type="text"
+    placeholder="BUSCAR..."
+    class="bg-zinc-100 dark:bg-zinc-800 border-none rounded-lg pl-9 pr-3 py-2 text-[8px] font-black uppercase tracking-widest focus:ring-2 focus:ring-red-600/20 w-24 focus:w-40 transition-all dark:text-white"
+    data-navbar-search
+  />
+</div>
+
+<script>
+  document.querySelectorAll<HTMLInputElement>('[data-navbar-search]').forEach((input) => {
+    const url = new URL(window.location.href);
+    input.value = url.searchParams.get('search') || '';
+
+    input.addEventListener('input', () => {
+      const nextUrl = new URL(window.location.href);
+      if (input.value) {
+        nextUrl.searchParams.set('search', input.value);
+      } else {
+        nextUrl.searchParams.delete('search');
+      }
+      window.history.replaceState({}, '', nextUrl);
+    });
+  });
+</script>

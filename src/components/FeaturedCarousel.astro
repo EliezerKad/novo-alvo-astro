@@ -11,25 +11,90 @@ const { articles } = Astro.props;
 
 {
   articles.length > 0 && (
-    <section class="relative group">
-      <div class="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar rounded-[2.5rem]">
-        {articles.map((article, index) => (
-          <div id={`destaque-${index + 1}`} class="min-w-full snap-start">
-            <ArticleCard article={article} variant="feature" />
-          </div>
-        ))}
+    <section class="relative group" data-featured-carousel>
+      <div
+        class="overflow-hidden rounded-[2.5rem]"
+        data-featured-track
+      >
+        <div class="flex transition-transform duration-700 ease-out will-change-transform" data-featured-list>
+          {articles.map((article, index) => (
+            <div id={`destaque-${index + 1}`} class="min-w-full" data-featured-slide>
+              <ArticleCard article={article} variant="feature" />
+            </div>
+          ))}
+        </div>
       </div>
       {articles.length > 1 && (
         <div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-20">
           {articles.map((_, index) => (
-            <a
-              href={`#destaque-${index + 1}`}
-              class="h-1.5 w-8 rounded-full bg-white/50 hover:bg-red-600 shadow-[0_0_15px_rgba(239,68,68,0.25)] transition-all duration-300"
+            <button
+              type="button"
+              class="h-1.5 w-8 rounded-full bg-white/50 hover:bg-red-600 data-[active=true]:bg-red-600 shadow-[0_0_15px_rgba(239,68,68,0.25)] transition-all duration-300"
               aria-label={`Ver destaque ${index + 1}`}
-            ></a>
+              data-featured-dot
+              data-index={index}
+            ></button>
           ))}
         </div>
       )}
     </section>
   )
 }
+
+<script>
+  const carousels = document.querySelectorAll<HTMLElement>('[data-featured-carousel]');
+
+  carousels.forEach((carousel) => {
+    const track = carousel.querySelector<HTMLElement>('[data-featured-track]');
+    const list = carousel.querySelector<HTMLElement>('[data-featured-list]');
+    const slides = Array.from(carousel.querySelectorAll<HTMLElement>('[data-featured-slide]'));
+    const dots = Array.from(carousel.querySelectorAll<HTMLButtonElement>('[data-featured-dot]'));
+
+    if (!track || !list || slides.length < 2) return;
+
+    let currentIndex = 0;
+    let intervalId: number | undefined;
+
+    const setActiveDot = (index: number) => {
+      dots.forEach((dot, dotIndex) => {
+        dot.dataset.active = dotIndex === index ? 'true' : 'false';
+      });
+    };
+
+    const scrollToSlide = (index: number) => {
+      const nextIndex = (index + slides.length) % slides.length;
+      currentIndex = nextIndex;
+      list.style.transform = `translateX(-${nextIndex * 100}%)`;
+      setActiveDot(nextIndex);
+    };
+
+    const start = () => {
+      window.clearInterval(intervalId);
+      intervalId = window.setInterval(() => scrollToSlide(currentIndex + 1), 8000);
+    };
+
+    const stop = () => {
+      window.clearInterval(intervalId);
+    };
+
+    dots.forEach((dot) => {
+      dot.addEventListener('click', () => {
+        scrollToSlide(Number(dot.dataset.index || 0));
+        start();
+      });
+    });
+
+    carousel.addEventListener('focusin', stop);
+    carousel.addEventListener('focusout', start);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stop();
+      } else {
+        start();
+      }
+    });
+
+    setActiveDot(0);
+    start();
+  });
+</script>

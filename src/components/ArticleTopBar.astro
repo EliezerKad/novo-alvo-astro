@@ -1,5 +1,5 @@
 ---
-import ThemeToggle from './ThemeToggle';
+import ThemeToggle from './ThemeToggle.astro';
 import Icon from './Icon.astro';
 
 interface Props {
@@ -29,7 +29,7 @@ const encodedTitle = encodeURIComponent(title);
     </a>
 
     <div class="flex items-center gap-2">
-      <ThemeToggle client:load />
+      <ThemeToggle />
       <a
         href={`https://wa.me/?text=${encodedTitle}%20-%20${encodedUrl}`}
         target="_blank"
