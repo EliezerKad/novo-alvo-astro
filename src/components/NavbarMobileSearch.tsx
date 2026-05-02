@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 function SearchIcon({ className }: { className: string }) {
   return (
@@ -10,28 +10,17 @@ function SearchIcon({ className }: { className: string }) {
 }
 
 export default function NavbarMobileSearch() {
-  const [searchTerm, setSearchTerm] = useState('');
-
-  function updateSearch(value: string) {
-    setSearchTerm(value);
-    const url = new URL(window.location.href);
-    if (value) url.searchParams.set('search', value);
-    else url.searchParams.delete('search');
-    window.history.replaceState({}, '', url);
-  }
-
   return (
     <div className="md:hidden bg-white dark:bg-zinc-900 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
-      <div className="relative">
+      <form className="relative" action="/buscar" method="get" role="search">
         <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
         <input
-          type="text"
+          type="search"
+          name="q"
           placeholder="PESQUISAR NOTÍCIAS..."
-          value={searchTerm}
-          onChange={(event) => updateSearch(event.target.value)}
           className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 pr-4 py-3 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-red-600/20 dark:text-white"
         />
-      </div>
+      </form>
     </div>
   );
 }

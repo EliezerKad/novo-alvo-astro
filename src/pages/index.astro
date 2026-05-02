@@ -21,11 +21,9 @@ import { getCategoryColor } from '../lib/utils';
 const newsEntries = sortNewsByDate(await getCollection('news'));
 const articles = newsEntries.map(newsEntryToArticle);
 const category = Astro.url.searchParams.get('category') || undefined;
-const search = Astro.url.searchParams.get('search')?.toLowerCase() || '';
 const filteredArticles = articles.filter((article) => {
   if (category && category !== 'Início' && article.category !== category) return false;
-  if (!search) return true;
-  return [article.title, article.summary, article.category].some((value) => value.toLowerCase().includes(search));
+  return true;
 });
 
 const visibleArticles = filteredArticles.length > 0 ? filteredArticles : articles;

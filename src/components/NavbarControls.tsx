@@ -71,23 +71,18 @@ export default function NavbarControls({ category }: Props) {
               </button>
             </div>
 
-            <div className="relative mb-8">
+            <form className="relative mb-8" action="/buscar" method="get" role="search">
               <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.3-4.3" />
               </svg>
               <input
-                type="text"
+                type="search"
+                name="q"
                 placeholder="PESQUISAR..."
-                onChange={(event) => {
-                  const url = new URL(window.location.href);
-                  if (event.currentTarget.value) url.searchParams.set('search', event.currentTarget.value);
-                  else url.searchParams.delete('search');
-                  window.history.replaceState({}, '', url);
-                }}
                 className="w-full bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 pr-4 py-3 text-xs font-black uppercase tracking-widest focus:ring-2 focus:ring-red-600/20 dark:text-white"
               />
-            </div>
+            </form>
 
             <div className="space-y-8">
               <nav className="space-y-4">
