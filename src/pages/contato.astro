@@ -10,7 +10,7 @@ const tickerArticles = urgentNews(newsEntries).map(newsEntryToArticle);
 
 <BaseLayout
   title="Contato | Novo Alvo"
-  description="Entre em contato com a redacao do Novo Alvo para pautas, sugestoes, correcoes, parcerias comerciais e assuntos institucionais."
+  description="Entre em contato com a redação do Novo Alvo para pautas, sugestões, correções, parcerias comerciais e assuntos institucionais."
   canonical={new URL('/contato', Astro.site ?? Astro.url.origin).href}
 >
   <div class="min-h-screen bg-zinc-50 dark:bg-zinc-950">
@@ -21,7 +21,7 @@ const tickerArticles = urgentNews(newsEntries).map(newsEntryToArticle);
       </h1>
 
       <p class="text-zinc-600 dark:text-zinc-400 mb-8 max-w-2xl text-lg">
-        Duvidas, sugestoes de pautas, correcoes ou propostas comerciais? Envie sua mensagem preenchendo o formulario abaixo, ou envie um e-mail diretamente para
+        Dúvidas, sugestões de pautas, correções ou propostas comerciais? Envie sua mensagem preenchendo o formulário abaixo, ou envie um e-mail diretamente para
         <a href="mailto:contato@portalnovoalvo.com.br" class="text-red-600 font-bold hover:underline"> contato@portalnovoalvo.com.br</a>.
       </p>
 
@@ -60,8 +60,8 @@ const tickerArticles = urgentNews(newsEntries).map(newsEntryToArticle);
             class="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 focus:ring-2 focus:ring-red-600/20 focus:border-red-600 outline-none transition-all dark:text-white"
           >
             <option value="" disabled selected>Selecione um assunto</option>
-            <option value="Sugestao de Pauta">Sugestao de Pauta</option>
-            <option value="Correcao de Materia">Correcao de Materia</option>
+            <option value="Sugestão de Pauta">Sugestão de Pauta</option>
+            <option value="Correção de Matéria">Correção de Matéria</option>
             <option value="Comercial / Parcerias">Comercial / Parcerias</option>
             <option value="Outros">Outros</option>
           </select>
