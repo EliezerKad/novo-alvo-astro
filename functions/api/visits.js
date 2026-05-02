@@ -42,7 +42,7 @@ export async function onRequestPost({ request, env }) {
       path: String(payload.path || '/').slice(0, 160),
       updatedAt: now,
     }),
-    { expirationTtl: 90 },
+    { expirationTtl: 300 },
   );
 
   const online = await store.list({ prefix: 'online:', limit: 1000 });
