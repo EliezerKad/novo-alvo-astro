@@ -235,7 +235,9 @@ const canonical = new URL('/buscar', Astro.site ?? Astro.url.origin).href;
             })();
           </script>
 
-          <NewsletterBlock />
+          <div class="py-4 border-y border-zinc-100 dark:border-zinc-800">
+            <AdCard label="Publicidade" class="min-h-[120px] md:min-h-[160px] w-full" />
+          </div>
         </div>
 
         <aside class="lg:col-span-3 lg:pl-10 lg:border-l border-zinc-200 dark:border-zinc-800 transition-colors duration-300 relative h-full">
