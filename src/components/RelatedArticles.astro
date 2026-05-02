@@ -10,6 +10,7 @@ interface Props {
 }
 
 const { current, articles } = Astro.props;
+const carouselArticles = articles.length > 1 ? [...articles, ...articles] : articles;
 ---
 
 {
@@ -58,7 +59,7 @@ const { current, articles } = Astro.props;
           class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-8 pr-4 no-scrollbar"
           data-related-track
         >
-          {articles.map((rel) => (
+          {carouselArticles.map((rel) => (
             <a href={`/noticia/${rel.slug}`} class="w-[78vw] sm:w-[340px] md:w-[300px] flex-shrink-0 snap-start group/card space-y-4">
               <div class="aspect-[16/10] bg-zinc-100 dark:bg-zinc-800 rounded-3xl overflow-hidden relative border border-zinc-100 dark:border-zinc-800">
                 {rel.imageUrl ? (
@@ -91,12 +92,14 @@ const { current, articles } = Astro.props;
       </div>
 
       <script is:inline>
-        document.querySelectorAll('[data-related-carousel]').forEach((carousel) => {
+        const setupRelatedCarousels = () => document.querySelectorAll('[data-related-carousel]').forEach((carousel) => {
+          if (carousel.dataset.relatedReady === 'true') return;
           const track = carousel.querySelector('[data-related-track]');
           const root = carousel.closest('.mt-24');
           const prev = root?.querySelector('[data-related-prev]');
           const next = root?.querySelector('[data-related-next]');
           if (!track || !prev || !next) return;
+          carousel.dataset.relatedReady = 'true';
 
           const getStep = () => {
             const card = track.querySelector('a');
@@ -134,14 +137,15 @@ const { current, articles } = Astro.props;
 
           const startAuto = () => {
             stopAuto();
-            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || track.scrollWidth <= track.clientWidth) return;
+            if (track.scrollWidth <= track.clientWidth + 4) return;
 
             autoTimer = window.setInterval(() => {
-              const maxScroll = track.scrollWidth - track.clientWidth - 2;
+              const step = getStep();
+              const maxScroll = track.scrollWidth - track.clientWidth - step;
               const shouldRestart = track.scrollLeft >= maxScroll;
               track.scrollTo({
-                left: shouldRestart ? 0 : track.scrollLeft + getStep(),
-                behavior: 'smooth',
+                left: shouldRestart ? 0 : track.scrollLeft + step,
+                behavior: shouldRestart ? 'auto' : 'smooth',
               });
             }, autoDelay);
           };
@@ -154,8 +158,6 @@ const { current, articles } = Astro.props;
 
           [prev, next].forEach((button) => button.addEventListener('click', pauseThenResume));
           track.addEventListener('pointerdown', pauseThenResume, { passive: true });
-          track.addEventListener('mouseenter', stopAuto);
-          track.addEventListener('mouseleave', startAuto);
           track.addEventListener('focusin', stopAuto);
           track.addEventListener('focusout', startAuto);
 
@@ -164,6 +166,9 @@ const { current, articles } = Astro.props;
             startAuto();
           });
         });
+
+        setupRelatedCarousels();
+        document.addEventListener('astro:page-load', setupRelatedCarousels);
       </script>
     </div>
   )
