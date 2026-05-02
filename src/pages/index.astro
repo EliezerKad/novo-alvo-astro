@@ -44,9 +44,9 @@ const isCategoryView = !!category && category !== 'Início';
 ---
 
 <BaseLayout
-  title="Novo Alvo"
+  title="Portal Novo Alvo - Notícias, Fatos e Impacto"
   canonical={new URL('/', Astro.site ?? Astro.url.origin).href}
-  description="Novo Alvo reune noticias, analise e cobertura editorial com foco em fatos relevantes."
+  description="Portal Novo Alvo reúne notícias, análise e cobertura editorial com foco em fatos relevantes do Brasil e do mundo."
 >
   <div class="min-h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300">
     <Navbar tickerArticles={tickerArticles} category={category} categories={categoriesList} subCategories={subCategoriesList} />
