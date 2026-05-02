@@ -3,7 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Navbar from '../components/Navbar.astro';
 import AdCard from '../components/AdCard.astro';
 import ArticleCard from '../components/ArticleCard.astro';
-import Breadcrumbs from '../components/Breadcrumbs.astro';
 import Icon from '../components/Icon.astro';
 import NewsletterBlock from '../components/NewsletterBlock.astro';
 import { getCollection } from 'astro:content';
@@ -45,21 +44,15 @@ const searchDocuments = newsEntries.map((entry) => {
   };
 });
 const canonical = new URL('/buscar', Astro.site ?? Astro.url.origin).href;
-const breadcrumbs = [
-  { name: 'Início', url: new URL('/', Astro.site ?? Astro.url.origin).href },
-  { name: 'Busca', url: canonical },
-];
 ---
 
 <BaseLayout
   title="Buscar notícias | Portal Novo Alvo"
   description="Busque notícias, categorias, temas e coberturas editoriais no Portal Novo Alvo."
   canonical={canonical}
-  breadcrumbs={breadcrumbs}
 >
   <div class="min-h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300">
     <Navbar tickerArticles={tickerArticles} categories={categoriesList} subCategories={subCategoriesList} />
-    <Breadcrumbs items={breadcrumbs} />
 
     <main class="max-w-7xl mx-auto px-4 mt-8 mb-20 transition-all duration-500">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -67,7 +60,7 @@ const breadcrumbs = [
           <header class="space-y-6">
             <div class="space-y-2">
               <span class="text-[10px] font-black uppercase tracking-[0.4em] text-red-600">Busca editorial</span>
-              <h1 data-search-title class="text-5xl md:text-7xl font-serif font-black italic tracking-tighter text-zinc-900 dark:text-zinc-50">
+              <h1 data-search-title class="text-3xl md:text-4xl font-serif font-black italic tracking-tighter text-zinc-900 dark:text-zinc-50">
                 Buscar notícias
               </h1>
               <p class="text-zinc-500 dark:text-zinc-400 text-sm md:text-base font-medium leading-relaxed max-w-2xl">
@@ -142,20 +135,6 @@ const breadcrumbs = [
             </p>
           </section>
 
-          <section data-search-suggestions class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[...categoriesList, ...subCategoriesList].slice(0, 10).map((category) => (
-              <a
-                href={`/buscar?q=${encodeURIComponent(category)}`}
-                class="group rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-red-600/40 transition-colors"
-              >
-                <span class="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400">Pesquisar</span>
-                <h2 class="mt-2 text-2xl font-serif font-black italic tracking-tighter text-zinc-900 dark:text-zinc-50 group-hover:text-red-600 transition-colors">
-                  {category}
-                </h2>
-              </a>
-            ))}
-          </section>
-
           <script id="search-data" type="application/json" is:inline set:html={JSON.stringify(searchDocuments)}></script>
           <script is:inline>
             (() => {
@@ -174,7 +153,6 @@ const breadcrumbs = [
               const grid = document.querySelector('[data-search-grid]');
               const empty = document.querySelector('[data-search-empty]');
               const loading = document.querySelector('[data-search-loading]');
-              const suggestions = document.querySelector('[data-search-suggestions]');
               const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (char) => ({
                 '&': '&amp;',
                 '<': '&lt;',
@@ -230,7 +208,6 @@ const breadcrumbs = [
               if (!query || !terms.length) return;
 
               if (title) title.textContent = `Resultados para "${query}"`;
-              if (suggestions) suggestions.classList.add('hidden');
               if (loading) loading.classList.remove('hidden');
 
               const matches = articles
