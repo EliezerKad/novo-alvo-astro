@@ -41,13 +41,41 @@ const navItems = [
           const theme = localStorage.getItem('theme');
           const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
           if (theme === 'dark' || (!theme && prefersDark)) document.documentElement.classList.add('dark');
+          if (localStorage.getItem('admin-sidebar') === 'collapsed') document.documentElement.classList.add('admin-sidebar-collapsed');
         } catch {}
       })();
     </script>
+    <style is:inline>
+      @media (min-width: 1024px) {
+        .admin-shell {
+          grid-template-columns: 280px minmax(0, 1fr);
+          transition: grid-template-columns 220ms ease;
+        }
+
+        .admin-sidebar {
+          transition: opacity 180ms ease, transform 220ms ease, visibility 220ms ease;
+        }
+
+        .admin-main {
+          min-width: 0;
+        }
+
+        .admin-sidebar-collapsed .admin-shell {
+          grid-template-columns: 0 minmax(0, 1fr);
+        }
+
+        .admin-sidebar-collapsed .admin-sidebar {
+          visibility: hidden;
+          opacity: 0;
+          transform: translateX(-24px);
+          pointer-events: none;
+        }
+      }
+    </style>
   </head>
   <body class="min-h-screen bg-zinc-100 text-zinc-950 antialiased dark:bg-zinc-950 dark:text-zinc-50">
-    <div class="min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
-      <aside class="border-b border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-950 lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r lg:px-5 lg:py-6">
+    <div class="admin-shell min-h-screen lg:grid">
+      <aside class="admin-sidebar border-b border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-950 lg:sticky lg:top-0 lg:h-screen lg:overflow-hidden lg:border-b-0 lg:border-r lg:px-5 lg:py-6">
         <div class="flex items-center justify-between gap-4 lg:block">
           <a href="/admin/" class="flex items-center gap-3">
             <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-600 text-white shadow-lg shadow-red-600/20">
@@ -84,9 +112,43 @@ const navItems = [
         </div>
       </aside>
 
-      <main class="px-4 py-6 md:px-8 lg:px-10 lg:py-8">
+      <main class="admin-main px-4 py-6 md:px-8 lg:px-10 lg:py-8">
+        <button
+          type="button"
+          class="mb-5 hidden items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 shadow-sm transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-900 lg:inline-flex"
+          aria-label="Alternar menu lateral"
+          data-admin-sidebar-toggle
+        >
+          <span data-admin-sidebar-toggle-icon>←</span>
+          <span data-admin-sidebar-toggle-text>Esconder menu</span>
+        </button>
         <slot />
       </main>
     </div>
+    <script is:inline>
+      (() => {
+        const button = document.querySelector('[data-admin-sidebar-toggle]');
+        if (!button) return;
+        const text = button.querySelector('[data-admin-sidebar-toggle-text]');
+        const icon = button.querySelector('[data-admin-sidebar-toggle-icon]');
+
+        const render = () => {
+          const collapsed = document.documentElement.classList.contains('admin-sidebar-collapsed');
+          if (text) text.textContent = collapsed ? 'Mostrar menu' : 'Esconder menu';
+          if (icon) icon.textContent = collapsed ? '→' : '←';
+          button.setAttribute('aria-expanded', String(!collapsed));
+        };
+
+        button.addEventListener('click', () => {
+          const collapsed = document.documentElement.classList.toggle('admin-sidebar-collapsed');
+          try {
+            localStorage.setItem('admin-sidebar', collapsed ? 'collapsed' : 'expanded');
+          } catch {}
+          render();
+        });
+
+        render();
+      })();
+    </script>
   </body>
 </html>
