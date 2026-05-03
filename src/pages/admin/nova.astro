@@ -860,8 +860,39 @@ const aiActions = [
       content: none !important;
     }
 
-    .article-preview .media-controls {
+    .article-preview .media-controls,
+    .article-preview .carousel-item-controls,
+    .article-preview .carousel-nav {
       display: none !important;
+    }
+
+    .article-preview [data-editor-media="carousel"] {
+      background: transparent !important;
+      margin: 3rem auto;
+      padding: 0 !important;
+    }
+
+    .article-preview [data-editor-media="carousel"] .carousel-shell {
+      overflow: hidden;
+    }
+
+    .article-preview [data-editor-media="carousel"] .carousel-track {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: 1fr;
+      overflow: visible;
+      padding: 0;
+    }
+
+    .article-preview [data-editor-media="carousel"] .carousel-slide {
+      flex: none;
+      margin: 0;
+      scroll-snap-align: unset;
+    }
+
+    .article-preview [data-editor-media="carousel"] .carousel-slide img {
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
     }
 
     .article-preview [data-align="left"] {
