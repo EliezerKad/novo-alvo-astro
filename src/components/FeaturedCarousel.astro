@@ -25,17 +25,30 @@ const { articles } = Astro.props;
         </div>
       </div>
       {articles.length > 1 && (
-        <div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-20">
-          {articles.map((_, index) => (
-            <button
-              type="button"
-              class="h-1.5 w-8 rounded-full bg-white/50 hover:bg-red-600 data-[active=true]:bg-red-600 shadow-[0_0_15px_rgba(239,68,68,0.25)] transition-all duration-300"
-              aria-label={`Ver destaque ${index + 1}`}
-              data-featured-dot
-              data-index={index}
-            ></button>
-          ))}
-        </div>
+        <>
+          <button
+            type="button"
+            class="absolute right-5 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-zinc-950/35 text-white shadow-xl backdrop-blur-md transition-all hover:bg-red-600 hover:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 md:flex"
+            aria-label="Avançar destaque"
+            data-featured-next
+          >
+            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m9 18 6-6-6-6"></path>
+            </svg>
+          </button>
+
+          <div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+            {articles.map((_, index) => (
+              <button
+                type="button"
+                class="h-1.5 w-8 rounded-full bg-white/50 hover:bg-red-600 data-[active=true]:bg-red-600 shadow-[0_0_15px_rgba(239,68,68,0.25)] transition-all duration-300"
+                aria-label={`Ver destaque ${index + 1}`}
+                data-featured-dot
+                data-index={index}
+              ></button>
+            ))}
+          </div>
+        </>
       )}
     </section>
   )
@@ -49,6 +62,7 @@ const { articles } = Astro.props;
     const list = carousel.querySelector<HTMLElement>('[data-featured-list]');
     const slides = Array.from(carousel.querySelectorAll<HTMLElement>('[data-featured-slide]'));
     const dots = Array.from(carousel.querySelectorAll<HTMLButtonElement>('[data-featured-dot]'));
+    const next = carousel.querySelector<HTMLButtonElement>('[data-featured-next]');
 
     if (!track || !list || slides.length < 2) return;
 
@@ -82,6 +96,11 @@ const { articles } = Astro.props;
         scrollToSlide(Number(dot.dataset.index || 0));
         start();
       });
+    });
+
+    next?.addEventListener('click', () => {
+      scrollToSlide(currentIndex + 1);
+      start();
     });
 
     carousel.addEventListener('focusin', stop);
