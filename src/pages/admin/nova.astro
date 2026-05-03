@@ -140,6 +140,31 @@ const aiActions = [
           ))}
         </div>
 
+        <button type="button" data-block-inserter class="absolute left-8 top-72 z-20 hidden h-10 w-10 items-center justify-center rounded-full border border-zinc-200 bg-white/90 text-xl font-black text-zinc-400 shadow-xl shadow-zinc-950/10 backdrop-blur-xl transition hover:border-red-600 hover:bg-red-600 hover:text-white dark:border-zinc-800 dark:bg-zinc-950/90" aria-label="Inserir bloco">
+          +
+        </button>
+
+        <div data-block-menu class="absolute left-8 top-84 z-30 hidden w-[min(320px,calc(100%-4rem))] overflow-hidden rounded-3xl border border-zinc-200 bg-white/95 p-2 shadow-2xl shadow-zinc-950/12 backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/95">
+          {[
+            ['image', 'Imagem', 'Upload inline com compressão WebP'],
+            ['carousel', 'Carrossel', 'Sequência visual narrativa'],
+            ['embed', 'Embed', 'Link social ou iframe'],
+            ['video', 'Vídeo', 'YouTube, Shorts ou link'],
+            ['quote', 'Quote', 'Citação editorial'],
+            ['separator', 'Separador', 'Pausa visual no texto'],
+          ].map(([action, label, hint]) => (
+            <button type="button" data-block-action={action} class="flex w-full items-center justify-between gap-4 rounded-2xl px-4 py-3 text-left transition hover:bg-zinc-50 dark:hover:bg-zinc-900">
+              <span>
+                <span class="block text-sm font-black text-zinc-950 dark:text-zinc-50">{label}</span>
+                <span class="block text-xs font-medium text-zinc-400">{hint}</span>
+              </span>
+              <span class="text-red-600">+</span>
+            </button>
+          ))}
+        </div>
+
+        <input type="file" accept="image/jpeg,image/png,image/webp" multiple class="sr-only" data-inline-image-input />
+
         <label class="block">
           <span class="sr-only">Resumo editorial</span>
           <textarea data-summary-input class="field-clean w-full resize-none bg-transparent px-8 pt-8 text-xl font-medium leading-8 text-zinc-500 outline-none placeholder:text-zinc-300 dark:text-zinc-400 dark:placeholder:text-zinc-700" rows="2" placeholder="Escreva um resumo forte para cards, SEO e redes sociais"></textarea>
@@ -154,7 +179,7 @@ const aiActions = [
         <textarea data-editor-output class="hidden" aria-hidden="true"></textarea>
       </section>
 
-      <section class="grid gap-4 md:grid-cols-3">
+      <section class="hidden">
         <label data-drop-zone class="group flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-[2rem] border border-dashed border-zinc-300 bg-white/70 p-6 text-center shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-red-600 hover:bg-white hover:shadow-[0_24px_70px_rgba(15,23,42,0.10)] dark:border-zinc-700 dark:bg-zinc-900/70">
           <span class="text-sm font-black text-zinc-950 dark:text-zinc-50">Solte imagens aqui</span>
           <span class="mt-2 max-w-56 text-xs font-medium leading-6 text-zinc-400">Upload com preview, compressão WebP e inserção no ponto do texto.</span>
@@ -410,18 +435,26 @@ const aiActions = [
     }
 
     .editor-canvas [data-editor-media] {
-      border-radius: 1.75rem;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(250, 250, 250, 0.38));
+      border-radius: 2rem;
       cursor: pointer;
       margin: 2.5rem 0;
       max-width: 100%;
       min-width: min(260px, 100%);
-      overflow: auto;
+      overflow: hidden;
       position: relative;
       resize: horizontal;
+      transition: box-shadow 220ms ease, transform 220ms ease, background 220ms ease;
       width: 100%;
     }
 
     .dark .editor-canvas [data-editor-media] {
+      background: linear-gradient(180deg, rgba(24, 24, 27, 0.72), rgba(9, 9, 11, 0.42));
+    }
+
+    .editor-canvas [data-editor-media]:hover {
+      box-shadow: 0 28px 80px rgba(15, 23, 42, 0.14);
+      transform: translateY(-1px);
     }
 
     .editor-canvas [data-editor-media].is-selected {
@@ -477,7 +510,7 @@ const aiActions = [
     }
 
     .editor-canvas img {
-      border-radius: 1.25rem;
+      border-radius: 1.6rem;
       display: block;
       width: 100%;
     }
@@ -489,6 +522,90 @@ const aiActions = [
       font-style: italic;
       margin-top: 0.65rem;
       text-align: center;
+    }
+
+    .editor-canvas .media-credit {
+      color: rgb(161 161 170);
+      display: block;
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.62rem;
+      font-style: normal;
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      margin-top: 0.35rem;
+      text-transform: uppercase;
+    }
+
+    .editor-canvas .media-controls {
+      align-items: center;
+      backdrop-filter: blur(16px);
+      background: rgba(9, 9, 11, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      display: flex;
+      gap: 0.2rem;
+      left: 50%;
+      opacity: 0;
+      padding: 0.3rem;
+      pointer-events: none;
+      position: absolute;
+      top: 0.9rem;
+      transform: translate(-50%, -0.35rem);
+      transition: opacity 180ms ease, transform 180ms ease;
+      z-index: 5;
+    }
+
+    .editor-canvas [data-editor-media]:hover .media-controls,
+    .editor-canvas [data-editor-media].is-selected .media-controls {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, 0);
+    }
+
+    .editor-canvas .media-controls button {
+      border-radius: 999px;
+      color: white;
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.54rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      padding: 0.45rem 0.55rem;
+      text-transform: uppercase;
+      transition: background 160ms ease, color 160ms ease;
+    }
+
+    .editor-canvas .media-controls button:hover {
+      background: white;
+      color: rgb(24 24 27);
+    }
+
+    .editor-canvas.is-dragging-media {
+      border-radius: 2rem;
+      box-shadow: inset 0 0 0 2px rgba(220, 38, 38, 0.38), inset 0 0 60px rgba(220, 38, 38, 0.08);
+    }
+
+    .editor-canvas .narrative-separator {
+      align-items: center;
+      display: flex;
+      gap: 1rem;
+      margin: 3rem 0;
+    }
+
+    .editor-canvas .narrative-separator::before,
+    .editor-canvas .narrative-separator::after {
+      background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.28), transparent);
+      content: "";
+      flex: 1;
+      height: 1px;
+    }
+
+    .editor-canvas .narrative-separator span {
+      color: rgb(220 38 38);
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.65rem;
+      font-weight: 900;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
     }
 
     .editor-canvas .editor-note {
@@ -554,6 +671,10 @@ const aiActions = [
 
     .article-preview [data-editor-media]::after {
       content: none !important;
+    }
+
+    .article-preview .media-controls {
+      display: none !important;
     }
 
     .article-preview [data-align="left"] {
@@ -654,6 +775,9 @@ const aiActions = [
       const floatingToolbar = document.querySelector('[data-floating-toolbar]');
       const mediaToolbar = document.querySelector('[data-media-toolbar]');
       const slashPalette = document.querySelector('[data-slash-palette]');
+      const blockInserter = document.querySelector('[data-block-inserter]');
+      const blockMenu = document.querySelector('[data-block-menu]');
+      const inlineImageInput = document.querySelector('[data-inline-image-input]');
       const autosave = document.querySelector('[data-autosave-status]');
       const autosaveDetail = document.querySelector('[data-autosave-detail]');
       const mediaList = document.querySelector('[data-media-list]');
@@ -682,6 +806,7 @@ const aiActions = [
       let slashRange = null;
       let selectedMedia = null;
       let autosaveTimer = null;
+      let pendingInlineAction = 'image';
       let seoTouched = false;
       let keywordsTouched = false;
       const mediaItems = [];
@@ -1006,13 +1131,69 @@ const aiActions = [
         positionSlashPalette();
       };
 
-      const createImageBlock = (url, alt) =>
-        `<figure data-editor-media="image" data-align="center" data-media-size="large" contenteditable="false"><img src="${escapeHtml(url)}" alt="${escapeHtml(alt)}" /><figcaption>${escapeHtml(alt)}</figcaption></figure><p><br></p>`;
+      const hideBlockMenu = () => {
+        blockMenu?.classList.add('hidden');
+      };
+
+      const positionBlockInserter = () => {
+        if (!blockInserter) return;
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0 || !selection.isCollapsed || !editor.contains(selection.anchorNode)) {
+          blockInserter.classList.add('hidden');
+          hideBlockMenu();
+          return;
+        }
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        const editorRect = editor.getBoundingClientRect();
+        const currentBlock = range.startContainer.nodeType === Node.ELEMENT_NODE
+          ? range.startContainer
+          : range.startContainer.parentElement;
+        const isEmptyBlock = !currentBlock?.textContent?.trim();
+        const top = rect.top ? rect.top - editorRect.top - 4 : Math.max(24, editor.scrollHeight - 40);
+        blockInserter.style.left = '1rem';
+        blockInserter.style.top = `${Math.max(22, top)}px`;
+        blockInserter.classList.toggle('hidden', !isEmptyBlock);
+        blockInserter.classList.toggle('flex', isEmptyBlock);
+      };
+
+      const positionBlockMenu = () => {
+        if (!blockMenu || !blockInserter) return;
+        blockMenu.style.left = '4rem';
+        blockMenu.style.top = blockInserter.style.top || '18rem';
+        blockMenu.classList.toggle('hidden');
+      };
+
+      const moveSelectionToPoint = (x, y) => {
+        const range = document.caretRangeFromPoint?.(x, y);
+        if (!range || !editor.contains(range.commonAncestorContainer)) return;
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+        saveSelection();
+      };
+
+      const createMediaControls = () => `
+        <div class="media-controls">
+          <button type="button" data-media-action="caption">Legenda</button>
+          <button type="button" data-media-action="credit">Crédito</button>
+          <button type="button" data-media-action="left">Esq.</button>
+          <button type="button" data-media-action="center">Centro</button>
+          <button type="button" data-media-action="right">Dir.</button>
+          <button type="button" data-media-action="small">P</button>
+          <button type="button" data-media-action="medium">M</button>
+          <button type="button" data-media-action="large">Full</button>
+          <button type="button" data-media-action="remove">Remover</button>
+        </div>
+      `;
+
+      const createImageBlock = (url, alt, credit = '') =>
+        `<figure data-editor-media="image" data-align="center" data-media-size="large" data-credit="${escapeHtml(credit)}" contenteditable="false">${createMediaControls()}<img src="${escapeHtml(url)}" alt="${escapeHtml(alt)}" /><figcaption><span data-caption>${escapeHtml(alt || 'Legenda da imagem')}</span><span class="media-credit" data-credit-label>${escapeHtml(credit)}</span></figcaption></figure><p><br></p>`;
 
       const createCarouselBlock = () => {
         const items = mediaItems.slice(0, 8);
         if (items.length < 2) return '';
-        return `<section data-editor-media="carousel" data-align="center" data-media-size="large" contenteditable="false"><div class="grid gap-3 md:grid-cols-2">${items
+        return `<section data-editor-media="carousel" data-align="center" data-media-size="large" contenteditable="false">${createMediaControls()}<div class="grid gap-3 md:grid-cols-2">${items
           .map((item) => `<figure><img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.alt)}" /><figcaption>${escapeHtml(item.alt)}</figcaption></figure>`)
           .join('')}</div></section><p><br></p>`;
       };
@@ -1026,12 +1207,12 @@ const aiActions = [
         const value = rawUrl.trim();
         const youtube = getYoutubeEmbed(value);
         if (youtube) {
-          return `<div data-editor-media="embed" data-align="center" data-media-size="large" contenteditable="false"><iframe src="${youtube}" title="${escapeHtml(label)}" loading="lazy" allowfullscreen class="aspect-video w-full rounded-2xl"></iframe></div><p><br></p>`;
+          return `<div data-editor-media="embed" data-align="center" data-media-size="large" contenteditable="false">${createMediaControls()}<iframe src="${youtube}" title="${escapeHtml(label)}" loading="lazy" allowfullscreen class="aspect-video w-full rounded-2xl"></iframe></div><p><br></p>`;
         }
         if (value.startsWith('<iframe')) {
-          return `<div data-editor-media="embed" data-align="center" data-media-size="large" contenteditable="false">${value}</div><p><br></p>`;
+          return `<div data-editor-media="embed" data-align="center" data-media-size="large" contenteditable="false">${createMediaControls()}${value}</div><p><br></p>`;
         }
-        return `<div data-editor-media="embed" data-align="center" data-media-size="large" contenteditable="false"><a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer" class="embed-card">${escapeHtml(label)} • abrir publicação</a></div><p><br></p>`;
+        return `<div data-editor-media="embed" data-align="center" data-media-size="large" contenteditable="false">${createMediaControls()}<a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer" class="embed-card">${escapeHtml(label)} • abrir publicação</a></div><p><br></p>`;
       };
 
       const renderMediaList = () => {
@@ -1052,12 +1233,14 @@ const aiActions = [
       };
 
       const addMedia = (url, alt) => {
-        mediaItems.push({ url, alt: alt || 'Imagem editorial' });
+        const item = { url, alt: alt || 'Imagem editorial' };
+        mediaItems.push(item);
         renderMediaList();
         updateEditorState();
+        return item;
       };
 
-      const compressImage = async (file) => {
+      const compressImage = async (file, options = {}) => {
         const image = await createImageBitmap(file);
         const maxWidth = 1800;
         const ratio = Math.min(1, maxWidth / image.width);
@@ -1069,8 +1252,10 @@ const aiActions = [
         canvas.getContext('2d')?.drawImage(image, 0, 0, width, height);
         const blob = await new Promise((resolve) => canvas.toBlob((result) => resolve(result), 'image/webp', 0.86));
         const url = blob ? URL.createObjectURL(blob) : URL.createObjectURL(file);
-        addMedia(url, file.name.replace(/\.[^.]+$/, ''));
-        setStatus('Imagem otimizada');
+        const item = addMedia(url, file.name.replace(/\.[^.]+$/, ''));
+        if (options.insert) insertHtml(createImageBlock(item.url, item.alt));
+        setStatus('Imagem otimizada em WebP');
+        return item;
       };
 
       const applyFormat = (action) => {
@@ -1093,17 +1278,37 @@ const aiActions = [
         if (action === 'h3') insertHtmlAtSlash('<h3>Novo intertítulo</h3>');
         if (action === 'quote') insertHtmlAtSlash('<blockquote>Citação ou dado relevante</blockquote>');
         if (action === 'image') {
-          const item = mediaItems.at(-1);
-          if (item) insertHtmlAtSlash(createImageBlock(item.url, item.alt));
+          pendingInlineAction = 'image';
+          if (slashRange) savedRange = slashRange.cloneRange();
+          inlineImageInput?.click();
         }
         if (action === 'youtube' || action === 'tweet' || action === 'embed') {
           const url = window.prompt('Cole a URL');
           if (url) insertHtmlAtSlash(createEmbedBlock(url, action === 'youtube' ? 'YouTube' : action === 'tweet' ? 'Post no X' : 'Embed editorial'));
         }
         if (action === 'carousel') {
-          const carousel = createCarouselBlock();
-          if (carousel) insertHtmlAtSlash(carousel);
+          pendingInlineAction = 'carousel';
+          if (slashRange) savedRange = slashRange.cloneRange();
+          inlineImageInput?.click();
         }
+      };
+
+      const runBlockAction = (action) => {
+        hideBlockMenu();
+        if (action === 'image') {
+          pendingInlineAction = 'image';
+          inlineImageInput?.click();
+        }
+        if (action === 'carousel') {
+          pendingInlineAction = 'carousel';
+          inlineImageInput?.click();
+        }
+        if (action === 'embed' || action === 'video') {
+          const url = window.prompt(action === 'video' ? 'Cole a URL do vídeo' : 'Cole a URL ou iframe');
+          if (url) insertHtml(createEmbedBlock(url, action === 'video' ? 'Vídeo' : 'Embed editorial'));
+        }
+        if (action === 'quote') insertHtml('<blockquote>Citação ou dado relevante</blockquote>');
+        if (action === 'separator') insertHtml('<div class="narrative-separator" contenteditable="false"><span>continua</span></div><p><br></p>');
       };
 
       document.querySelectorAll('[data-format]').forEach((button) => {
@@ -1112,6 +1317,37 @@ const aiActions = [
 
       document.querySelectorAll('[data-slash-action]').forEach((button) => {
         button.addEventListener('click', () => runSlashAction(button.dataset.slashAction));
+      });
+
+      blockInserter?.addEventListener('click', () => {
+        saveSelection();
+        positionBlockMenu();
+      });
+
+      blockMenu?.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-block-action]');
+        if (!button) return;
+        runBlockAction(button.dataset.blockAction);
+      });
+
+      inlineImageInput?.addEventListener('change', async (event) => {
+        const files = Array.from(event.target.files || []).filter((file) => file.type.startsWith('image/'));
+        if (!files.length) return;
+        const inserted = [];
+        for (const file of files) inserted.push(await compressImage(file, { insert: pendingInlineAction === 'image' }));
+        if (pendingInlineAction === 'carousel') {
+          const carouselItems = inserted.filter(Boolean);
+          if (carouselItems.length >= 2) {
+            const carousel = `<section data-editor-media="carousel" data-align="center" data-media-size="large" contenteditable="false">${createMediaControls()}<div class="grid gap-3 md:grid-cols-2">${carouselItems
+              .map((item) => `<figure><img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.alt)}" /><figcaption>${escapeHtml(item.alt)}</figcaption></figure>`)
+              .join('')}</div></section><p><br></p>`;
+            insertHtml(carousel);
+          } else if (carouselItems[0]) {
+            insertHtml(createImageBlock(carouselItems[0].url, carouselItems[0].alt));
+          }
+        }
+        event.target.value = '';
+        pendingInlineAction = 'image';
       });
 
       document.querySelectorAll('[data-media-align]').forEach((button) => {
@@ -1137,22 +1373,64 @@ const aiActions = [
 
       editor.addEventListener('input', () => {
         updateSlashPalette();
+        positionBlockInserter();
         updateEditorState();
       });
       editor.addEventListener('keyup', (event) => {
         saveSelection();
         if (event.key === 'Escape') hideSlashPalette();
         if (event.key === '/') updateSlashPalette();
+        if (event.key === 'Enter' || event.key === 'ArrowUp' || event.key === 'ArrowDown') positionBlockInserter();
       });
       editor.addEventListener('mouseup', () => {
         saveSelection();
         updateSlashPalette();
       });
-      editor.addEventListener('focus', saveSelection);
+      editor.addEventListener('focus', () => {
+        saveSelection();
+        positionBlockInserter();
+      });
       editor.addEventListener('click', (event) => {
+        const actionButton = event.target.closest('[data-media-action]');
+        if (actionButton) {
+          const mediaBlock = actionButton.closest('[data-editor-media]');
+          const action = actionButton.dataset.mediaAction;
+          if (!mediaBlock) return;
+          event.preventDefault();
+          if (['left', 'center', 'right'].includes(action)) mediaBlock.dataset.align = action;
+          if (['small', 'medium', 'large'].includes(action)) {
+            mediaBlock.dataset.mediaSize = action;
+            mediaBlock.style.width = '';
+          }
+          if (action === 'caption') {
+            const caption = window.prompt('Legenda da imagem', mediaBlock.querySelector('[data-caption]')?.textContent?.trim() || '');
+            if (caption !== null) {
+              const captionNode = mediaBlock.querySelector('[data-caption]');
+              if (captionNode) captionNode.textContent = caption;
+              const image = mediaBlock.querySelector('img');
+              if (image) image.alt = caption;
+            }
+          }
+          if (action === 'credit') {
+            const credit = window.prompt('Crédito da imagem', mediaBlock.dataset.credit || '');
+            if (credit !== null) {
+              mediaBlock.dataset.credit = credit;
+              const creditNode = mediaBlock.querySelector('[data-credit-label]');
+              if (creditNode) creditNode.textContent = credit;
+            }
+          }
+          if (action === 'remove') {
+            mediaBlock.remove();
+            setSelectedMedia(null);
+          }
+          updateEditorState();
+          positionMediaToolbar();
+          return;
+        }
         const media = event.target.closest('[data-editor-media]');
         setSelectedMedia(media && editor.contains(media) ? media : null);
         updateSlashPalette();
+        positionBlockInserter();
       });
       editor.addEventListener('pointerup', () => {
         if (!selectedMedia) return;
@@ -1170,6 +1448,21 @@ const aiActions = [
         } else {
           window.setTimeout(updateEditorState, 0);
         }
+      });
+      editor.addEventListener('dragover', (event) => {
+        if (Array.from(event.dataTransfer?.items || []).some((item) => item.type.startsWith('image/'))) {
+          event.preventDefault();
+          editor.classList.add('is-dragging-media');
+        }
+      });
+      editor.addEventListener('dragleave', () => editor.classList.remove('is-dragging-media'));
+      editor.addEventListener('drop', async (event) => {
+        const files = Array.from(event.dataTransfer?.files || []).filter((file) => file.type.startsWith('image/'));
+        if (!files.length) return;
+        event.preventDefault();
+        editor.classList.remove('is-dragging-media');
+        moveSelectionToPoint(event.clientX, event.clientY);
+        for (const file of files) await compressImage(file, { insert: true });
       });
 
       document.addEventListener('selectionchange', () => {
