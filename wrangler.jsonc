@@ -11,4 +11,21 @@
   "ai": {
     "binding": "AI"
   }
+  /*
+  Depois de criar o D1/R2 no Cloudflare, ative os bindings abaixo:
+
+  ,"d1_databases": [
+    {
+      "binding": "EDITORIAL_DB",
+      "database_name": "novo-alvo-editorial",
+      "database_id": "COLE_O_DATABASE_ID_AQUI"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA_BUCKET",
+      "bucket_name": "novo-alvo-media"
+    }
+  ]
+  */
 }

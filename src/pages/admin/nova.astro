@@ -1239,6 +1239,91 @@ const aiActions = [
         return Math.max(0, Math.ceil(words / 220));
       };
 
+      const getAdminToken = () => {
+        let token = '';
+        try {
+          token = localStorage.getItem('admin-token') || '';
+        } catch {}
+        if (!token) {
+          token = window.prompt('Token editorial do admin') || '';
+          if (token) {
+            try {
+              localStorage.setItem('admin-token', token);
+            } catch {}
+          }
+        }
+        return token;
+      };
+
+      const collectArticlePayload = (statusValue, scheduledAt = '') => {
+        updateEditorState();
+        const title = titleInput?.value.trim() || 'Matéria sem título';
+        const slug = slugInput?.value.trim() || slugify(title);
+        const coverUrl = document.querySelector('[data-cover-url]')?.value.trim() || '';
+        const coverAlt = document.querySelector('[data-cover-alt]')?.value.trim() || title;
+        return {
+          id: slug ? `article:${slug}` : undefined,
+          slug,
+          title,
+          summary: summaryInput?.value.trim() || '',
+          bodyHtml: editor.innerHTML.trim(),
+          category: categoryInput?.value || 'Política',
+          author: 'Redação Novo Alvo',
+          status: statusValue,
+          coverUrl,
+          coverAlt,
+          seoDescription: seoDescriptionInput?.value.trim() || '',
+          keywords: keywordsInput?.value.trim() || '',
+          tags,
+          sources,
+          media: mediaItems,
+          readingMinutes: getReadingTime(),
+          scheduledAt,
+          publishedAt: statusValue === 'published' ? new Date().toISOString() : '',
+        };
+      };
+
+      const saveArticle = async (statusValue, scheduledAt = '') => {
+        const token = getAdminToken();
+        if (!token) {
+          setStatus('Token obrigatório');
+          return;
+        }
+
+        const payload = collectArticlePayload(statusValue, scheduledAt);
+        setStatus(statusValue === 'published' ? 'Publicando...' : statusValue === 'scheduled' ? 'Agendando...' : 'Salvando...');
+
+        try {
+          const response = await fetch('/api/admin/articles', {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+          });
+          const result = await response.json().catch(() => ({}));
+
+          if (response.status === 401) {
+            try {
+              localStorage.removeItem('admin-token');
+            } catch {}
+            setStatus('Token inválido');
+            return;
+          }
+
+          if (!response.ok) {
+            setStatus(result.error || 'Erro ao salvar');
+            return;
+          }
+
+          setStatus(statusValue === 'published' ? 'Publicada no banco' : statusValue === 'scheduled' ? 'Agendada no banco' : 'Rascunho salvo no banco');
+          if (slugInput) slugInput.value = result.article?.slug || payload.slug;
+        } catch {
+          setStatus('Falha de conexão com CMS');
+        }
+      };
+
       const openPreview = () => {
         const clone = editor.cloneNode(true);
         clone.querySelectorAll('.is-selected').forEach((node) => node.classList.remove('is-selected'));
@@ -2037,11 +2122,15 @@ const aiActions = [
         if (event.key === 'Escape' && !previewModal?.classList.contains('hidden')) closePreview();
       });
 
-      document.querySelector('[data-save-draft]')?.addEventListener('click', () => setStatus('Rascunho salvo'));
-      document.querySelector('[data-publish-now]')?.addEventListener('click', () => setStatus('Pronta para publicar'));
+      document.querySelector('[data-save-draft]')?.addEventListener('click', () => saveArticle('draft'));
+      document.querySelector('[data-publish-now]')?.addEventListener('click', () => saveArticle('published'));
       document.querySelector('[data-schedule-post]')?.addEventListener('click', () => {
         const scheduledAt = document.querySelector('[data-schedule-at]')?.value;
-        setStatus(scheduledAt ? 'Agendada' : 'Informe data e hora');
+        if (!scheduledAt) {
+          setStatus('Informe data e hora');
+          return;
+        }
+        saveArticle('scheduled', new Date(scheduledAt).toISOString());
       });
 
       document.querySelector('[data-add-tag]')?.addEventListener('click', () => {
