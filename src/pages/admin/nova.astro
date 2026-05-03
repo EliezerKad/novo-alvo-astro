@@ -17,6 +17,7 @@ const slashCommands = [
 
 const aiActions = [
   'Sugerir título',
+  'Criar resumo',
   'Resumir texto',
   'Melhorar escrita',
   'Gerar subtítulo',
@@ -1299,10 +1300,28 @@ const aiActions = [
         return editor.contains(range.commonAncestorContainer) ? selection.toString().trim() : '';
       };
 
+      const getSavedEditorText = () => {
+        if (!savedRange || !editor.contains(savedRange.commonAncestorContainer)) return '';
+        return savedRange.toString().trim();
+      };
+
       const getAiText = (result) => {
         if (!result) return '';
         if (typeof result === 'string') return result;
         return result.text || result.subtitle || result.push || result.instagram || '';
+      };
+
+      const replaceSelectionOrInsert = (text) => {
+        const clean = String(text || '').trim();
+        if (!clean) return;
+        restoreSelection();
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0 && !selection.isCollapsed && editor.contains(selection.getRangeAt(0).commonAncestorContainer)) {
+          runCommand('insertText', clean);
+        } else {
+          insertHtml(`<p>${escapeHtml(clean).replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')}</p>`);
+        }
+        updateEditorState();
       };
 
       const renderAiOutput = (action, result) => {
@@ -1330,6 +1349,7 @@ const aiActions = [
 
       const applyAiResult = (action, result) => {
         const actionKey = normalizeAction(action);
+        const text = getAiText(result);
         if (actionKey.includes('seo')) {
           if (result?.seoDescription && seoDescriptionInput) {
             seoDescriptionInput.value = String(result.seoDescription).slice(0, 158);
@@ -1340,8 +1360,15 @@ const aiActions = [
             keywordsTouched = true;
           }
         }
-        if (actionKey.includes('resumir') && result?.text && summaryInput && !summaryInput.value.trim()) {
-          summaryInput.value = String(result.text).slice(0, 320);
+        if (actionKey.includes('criar resumo') && text && summaryInput) {
+          summaryInput.value = text.slice(0, 320);
+          summaryInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        if (actionKey.includes('resumir') && text) {
+          replaceSelectionOrInsert(text);
+        }
+        if (actionKey.includes('melhorar escrita') && text) {
+          replaceSelectionOrInsert(text);
         }
         if (actionKey.includes('subtitulo') && result?.subtitle) {
           insertHtml(`<h2>${escapeHtml(result.subtitle)}</h2>`);
@@ -1357,6 +1384,7 @@ const aiActions = [
           button.disabled = true;
           button.classList.add('opacity-60');
           try {
+            const selectedText = getSelectedEditorText() || getSavedEditorText();
             const response = await fetch('/api/editorial-ai', {
               method: 'POST',
               headers: { 'content-type': 'application/json' },
@@ -1366,7 +1394,7 @@ const aiActions = [
                 summary: summaryInput?.value || '',
                 category: categoryInput?.value || '',
                 body: getPlainText(),
-                selection: getSelectedEditorText(),
+                selection: selectedText,
                 seoDescription: seoDescriptionInput?.value || '',
                 keywords: keywordsInput?.value || '',
               }),

@@ -76,6 +76,9 @@ Retorne apenas JSON valido, sem markdown, neste formato:
 }
 Use pt-BR, tom editorial jornalistico, claro, sem clickbait exagerado.
 Para SEO automatico, priorize title, category, summary e termos reais do texto.
+Para Criar resumo, gere um resumo editorial forte, com ate 320 caracteres, para o campo de resumo da materia.
+Para Resumir texto, gere uma versao curta do trecho selecionado ou do corpo, pronta para substituir ou inserir no editor.
+Para Gerar subtitulo, preencha subtitle com uma frase curta e editorial.
 Para melhorar escrita, preserve fatos e nao invente informacoes.
 `;
 
