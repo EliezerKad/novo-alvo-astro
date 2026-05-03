@@ -48,7 +48,7 @@ const isCategoryView = !!category && category !== 'Início';
   canonical={new URL('/', Astro.site ?? Astro.url.origin).href}
   description="Portal Novo Alvo reúne notícias, análise e cobertura editorial com foco em fatos relevantes do Brasil e do mundo."
 >
-  <div class="min-h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300">
+  <div class="min-h-screen bg-[radial-gradient(circle_at_50%_0%,rgba(239,68,68,0.06),transparent_26%),linear-gradient(180deg,#fafafa_0%,#f4f4f5_48%,#fafafa_100%)] transition-colors duration-300 dark:bg-[radial-gradient(circle_at_50%_0%,rgba(239,68,68,0.10),transparent_28%),linear-gradient(180deg,#09090b_0%,#18181b_48%,#09090b_100%)]">
     <Navbar tickerArticles={tickerArticles} category={category} categories={categoriesList} subCategories={subCategoriesList} />
 
     <div class="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 py-4 md:py-6 transition-colors duration-300">
@@ -57,9 +57,9 @@ const isCategoryView = !!category && category !== 'Início';
       </div>
     </div>
 
-    <main class="max-w-7xl mx-auto px-4 mt-6 mb-20 transition-all duration-500">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <div class="lg:col-span-9 space-y-16">
+    <main class="max-w-7xl mx-auto px-4 mt-5 md:mt-8 mb-20 transition-all duration-500">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
+        <div class="lg:col-span-9 space-y-12 md:space-y-16">
           {
             isCategoryView ? (
               <div class="space-y-12">
@@ -83,19 +83,19 @@ const isCategoryView = !!category && category !== 'Início';
               <>
                 <FeaturedCarousel articles={featuredArticles.length > 0 ? featuredArticles : [featured]} />
 
-                <section class="space-y-8">
+                <section class="space-y-7 md:space-y-8">
                   <div class="flex items-center gap-3 border-b-2 border-red-600 pb-3">
                     <Icon name="trending" class="w-5 h-5 text-red-600" />
                     <h3 class="uppercase text-xs font-black tracking-[0.2em] italic text-zinc-900 dark:text-zinc-50">
                       PULSO DO BRASIL
                     </h3>
                   </div>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
                     {topNews.map((article) => <ArticleCard article={article} variant="pulse" />)}
                   </div>
                 </section>
 
-                <div class="space-y-20" data-category-sections>
+                <div class="space-y-14 md:space-y-20" data-category-sections>
                   {categorySections.map((section, sectionIndex) => (
                     <section
                       id={`category-section-${sectionIndex}`}
@@ -106,7 +106,7 @@ const isCategoryView = !!category && category !== 'Início';
                       <div class="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-4">
                         <div class="flex items-center gap-4">
                           <div class={`w-2 h-8 ${getCategoryColor(section.category)} rounded-full`}></div>
-                          <h3 class="uppercase text-2xl md:text-3xl font-serif font-black italic tracking-tighter text-zinc-900 dark:text-zinc-50">
+                          <h3 class="uppercase text-2xl md:text-3xl font-serif font-black italic tracking-tighter leading-none text-zinc-900 dark:text-zinc-50">
                             {section.category}
                           </h3>
                         </div>
@@ -116,7 +116,7 @@ const isCategoryView = !!category && category !== 'Início';
                         </a>
                       </div>
 
-                      <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+                      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
                         <div class="md:col-span-7">
                           <ArticleCard article={section.articles[0]} variant="pulse" />
                         </div>

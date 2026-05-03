@@ -12,8 +12,9 @@ const { articles } = Astro.props;
 {
   articles.length > 0 && (
     <section class="relative group" data-featured-carousel>
+      <div class="pointer-events-none absolute -inset-6 rounded-[3rem] bg-[radial-gradient(circle_at_35%_18%,rgba(239,68,68,0.16),transparent_38%),radial-gradient(circle_at_80%_82%,rgba(59,130,246,0.10),transparent_35%)] blur-2xl"></div>
       <div
-        class="overflow-hidden rounded-[2.5rem]"
+        class="relative overflow-hidden rounded-[2rem] shadow-[0_28px_80px_rgba(15,23,42,0.14)] md:rounded-[2.5rem]"
         data-featured-track
       >
         <div class="flex transition-transform duration-700 ease-out will-change-transform" data-featured-list>
