@@ -3,6 +3,25 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 import { categoriesList, subCategoriesList } from '../../lib/news';
 
 const categories = [...categoriesList, ...subCategoriesList];
+const toolbarGroups = [
+  [
+    { label: 'H2', action: 'h2' },
+    { label: 'H3', action: 'h3' },
+    { label: 'B', action: 'bold' },
+    { label: 'I', action: 'italic' },
+  ],
+  [
+    { label: 'Lista', action: 'list' },
+    { label: 'Quote', action: 'quote' },
+    { label: 'Link', action: 'link' },
+    { label: 'Linha', action: 'divider' },
+  ],
+  [
+    { label: 'Imagem', action: 'image' },
+    { label: 'Carrossel', action: 'carousel' },
+    { label: 'Embed', action: 'embed' },
+  ],
+];
 ---
 
 <AdminLayout title="Nova materia | Admin Novo Alvo" active="new">
@@ -15,7 +34,7 @@ const categories = [...categoriesList, ...subCategoriesList];
       </p>
     </header>
 
-    <form class="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_360px]">
+    <form class="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_380px]">
       <section class="space-y-5 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <label class="block">
           <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Titulo</span>
@@ -25,10 +44,71 @@ const categories = [...categoriesList, ...subCategoriesList];
           <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Resumo editorial</span>
           <textarea class="mt-2 min-h-24 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4 text-sm font-medium outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-950" placeholder="Resumo curto para chamadas, cards e redes sociais"></textarea>
         </label>
-        <label class="block">
-          <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Corpo em Markdown</span>
-          <textarea class="mt-2 min-h-[420px] w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4 font-mono text-sm leading-7 outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-950" placeholder="Escreva a materia aqui..."></textarea>
-        </label>
+        <div class="overflow-hidden rounded-[2rem] border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950">
+          <div class="border-b border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+            <div class="flex flex-wrap gap-3">
+              {toolbarGroups.map((group) => (
+                <div class="flex rounded-2xl border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-800 dark:bg-zinc-950">
+                  {group.map((item) => (
+                    <button
+                      type="button"
+                      class="rounded-xl px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:bg-red-600 hover:text-white dark:text-zinc-400"
+                      data-md-action={item.action}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 xl:grid-cols-[1fr_280px]">
+            <label class="block">
+              <span class="sr-only">Corpo em Markdown</span>
+              <textarea
+                data-editor-body
+                class="min-h-[560px] w-full resize-y border-0 bg-zinc-50 px-5 py-5 font-mono text-sm leading-7 outline-none dark:bg-zinc-950"
+                placeholder="Escreva a materia aqui..."
+              ></textarea>
+            </label>
+            <aside class="border-t border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 xl:border-l xl:border-t-0">
+              <h2 class="text-xs font-black uppercase tracking-[0.24em]">Blocos de midia</h2>
+              <p class="mt-2 text-xs font-medium leading-6 text-zinc-500 dark:text-zinc-400">
+                Use imagem unica para contexto pontual. Use carrossel quando a materia tiver 3 ou mais imagens importantes.
+              </p>
+
+              <div class="mt-5 space-y-3">
+                <input data-image-url class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs dark:border-zinc-800 dark:bg-zinc-950" placeholder="URL da imagem" />
+                <input data-image-alt class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs dark:border-zinc-800 dark:bg-zinc-950" placeholder="Alt/legenda da imagem" />
+                <button type="button" data-insert-image class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">
+                  Inserir imagem
+                </button>
+              </div>
+
+              <div class="mt-6 space-y-3 rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-950">
+                <h3 class="text-[10px] font-black uppercase tracking-widest">Carrossel</h3>
+                {[1, 2, 3].map((item) => (
+                  <input data-carousel-image class="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs dark:border-zinc-800 dark:bg-zinc-900" placeholder={`Imagem ${item}`} />
+                ))}
+                <button type="button" data-insert-carousel class="w-full rounded-xl bg-red-600 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-white">
+                  Inserir carrossel
+                </button>
+              </div>
+
+              <dl class="mt-6 grid grid-cols-2 gap-3 text-center">
+                <div class="rounded-2xl border border-zinc-200 p-3 dark:border-zinc-800">
+                  <dt class="text-[8px] font-black uppercase tracking-widest text-zinc-400">Palavras</dt>
+                  <dd class="mt-1 font-serif text-2xl font-black italic" data-word-count>0</dd>
+                </div>
+                <div class="rounded-2xl border border-zinc-200 p-3 dark:border-zinc-800">
+                  <dt class="text-[8px] font-black uppercase tracking-widest text-zinc-400">Leitura</dt>
+                  <dd class="mt-1 font-serif text-2xl font-black italic"><span data-reading-time>0</span>m</dd>
+                </div>
+              </dl>
+            </aside>
+          </div>
+        </div>
       </section>
 
       <aside class="space-y-5">
@@ -67,4 +147,76 @@ const categories = [...categoriesList, ...subCategoriesList];
       </aside>
     </form>
   </section>
+
+  <script is:inline>
+    (() => {
+      const editor = document.querySelector('[data-editor-body]');
+      if (!editor) return;
+
+      const wordCount = document.querySelector('[data-word-count]');
+      const readingTime = document.querySelector('[data-reading-time]');
+      const snippets = {
+        h2: '## Subtitulo da materia\n\n',
+        h3: '### Intertitulo\n\n',
+        bold: '**texto em destaque**',
+        italic: '*texto em italico*',
+        list: '- Item importante\n- Outro ponto\n- Contexto adicional\n\n',
+        quote: '> Frase, dado ou declaracao relevante.\n\n',
+        link: '[texto do link](https://exemplo.com)',
+        divider: '\n---\n\n',
+        embed: '<iframe src=\"https://exemplo.com/embed\" title=\"Embed editorial\" loading=\"lazy\"></iframe>\n\n',
+      };
+
+      const insertAtCursor = (text) => {
+        const start = editor.selectionStart || 0;
+        const end = editor.selectionEnd || 0;
+        const before = editor.value.slice(0, start);
+        const after = editor.value.slice(end);
+        editor.value = `${before}${text}${after}`;
+        editor.focus();
+        editor.selectionStart = editor.selectionEnd = start + text.length;
+        updateStats();
+      };
+
+      const updateStats = () => {
+        const words = editor.value.trim().split(/\s+/).filter(Boolean).length;
+        if (wordCount) wordCount.textContent = String(words);
+        if (readingTime) readingTime.textContent = String(Math.max(0, Math.ceil(words / 220)));
+      };
+
+      document.querySelectorAll('[data-md-action]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const action = button.dataset.mdAction;
+          if (action === 'image') {
+            document.querySelector('[data-image-url]')?.focus();
+            return;
+          }
+          if (action === 'carousel') {
+            document.querySelector('[data-carousel-image]')?.focus();
+            return;
+          }
+          insertAtCursor(snippets[action] || '');
+        });
+      });
+
+      document.querySelector('[data-insert-image]')?.addEventListener('click', () => {
+        const url = document.querySelector('[data-image-url]')?.value.trim();
+        const alt = document.querySelector('[data-image-alt]')?.value.trim() || 'Imagem da materia';
+        if (!url) return;
+        insertAtCursor(`\n![${alt}](${url})\n\n*${alt}*\n\n`);
+      });
+
+      document.querySelector('[data-insert-carousel]')?.addEventListener('click', () => {
+        const images = Array.from(document.querySelectorAll('[data-carousel-image]'))
+          .map((input) => input.value.trim())
+          .filter(Boolean);
+        if (images.length < 3) return;
+        const items = images.map((url, index) => `  - src: \"${url}\"\n    alt: \"Imagem ${index + 1}\"`).join('\n');
+        insertAtCursor(`\n:::image-carousel\n${items}\n:::\n\n`);
+      });
+
+      editor.addEventListener('input', updateStats);
+      updateStats();
+    })();
+  </script>
 </AdminLayout>
