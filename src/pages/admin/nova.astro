@@ -165,6 +165,54 @@ const aiActions = [
 
         <input type="file" accept="image/jpeg,image/png,image/webp" multiple class="sr-only" data-inline-image-input />
 
+        <div data-carousel-modal class="fixed inset-0 z-[120] hidden items-center justify-center bg-zinc-950/45 p-4 backdrop-blur-md">
+          <section class="relative grid max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-zinc-950/25 dark:bg-zinc-950 md:grid-cols-[minmax(0,1fr)_320px]">
+            <div class="min-h-0 overflow-y-auto p-5 md:p-7">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <p class="text-[10px] font-black uppercase tracking-[0.28em] text-red-600">Bloco narrativo</p>
+                  <h2 class="mt-2 font-serif text-4xl font-black italic tracking-tighter text-zinc-950 dark:text-white">Carrossel editorial</h2>
+                  <p class="mt-2 max-w-xl text-sm font-medium leading-6 text-zinc-500 dark:text-zinc-400">Monte uma sequência visual fluida, com legenda, crédito e ritmo de leitura antes de inserir no texto.</p>
+                </div>
+                <button type="button" data-close-carousel class="rounded-full bg-zinc-100 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:bg-zinc-950 hover:text-white dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-white dark:hover:text-zinc-950">Fechar</button>
+              </div>
+
+              <label data-carousel-drop class="group mt-6 flex min-h-56 cursor-pointer flex-col items-center justify-center rounded-[2rem] border border-dashed border-zinc-300 bg-gradient-to-br from-zinc-50 to-white p-6 text-center transition hover:border-red-600 hover:shadow-[0_24px_80px_rgba(220,38,38,0.10)] dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950">
+                <span class="rounded-full bg-red-600 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-white shadow-lg shadow-red-600/20">Adicionar imagens</span>
+                <span class="mt-4 text-sm font-bold text-zinc-500 dark:text-zinc-400">Arraste múltiplas imagens ou clique para selecionar</span>
+                <span class="mt-1 text-xs font-medium text-zinc-400">Compressão WebP automática e invisível</span>
+                <input type="file" accept="image/jpeg,image/png,image/webp" multiple class="sr-only" data-carousel-file />
+              </label>
+
+              <div data-carousel-empty class="mt-5 rounded-[1.5rem] bg-zinc-50 p-5 text-sm font-medium text-zinc-400 dark:bg-zinc-900">Nenhuma imagem ainda. Escolha pelo menos 2 para criar um carrossel.</div>
+              <div data-carousel-list class="mt-5 grid gap-4"></div>
+            </div>
+
+            <aside class="border-t border-zinc-100 bg-zinc-50/80 p-5 dark:border-zinc-800 dark:bg-zinc-900/70 md:border-l md:border-t-0">
+              <h3 class="text-xs font-black uppercase tracking-[0.24em] text-zinc-950 dark:text-white">Estilo</h3>
+              <div class="mt-4 grid gap-2" data-carousel-layouts>
+                {[
+                  ['horizontal', 'Horizontal', 'Swipe natural'],
+                  ['widescreen', 'Widescreen', 'Cinemático'],
+                  ['mosaic', 'Mosaico', 'Ritmo visual'],
+                  ['immersive', 'Imersivo', 'Impacto máximo'],
+                  ['compact', 'Compacto', 'Galeria rápida'],
+                ].map(([value, label, hint]) => (
+                  <label class="flex cursor-pointer items-center justify-between gap-3 rounded-2xl bg-white p-3 shadow-sm dark:bg-zinc-950">
+                    <span>
+                      <span class="block text-xs font-black text-zinc-950 dark:text-white">{label}</span>
+                      <span class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400">{hint}</span>
+                    </span>
+                    <input type="radio" name="carousel-layout" value={value} checked={value === 'horizontal'} class="accent-red-600" />
+                  </label>
+                ))}
+              </div>
+              <button type="button" data-insert-carousel-draft class="mt-5 w-full rounded-2xl bg-red-600 px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-white shadow-xl shadow-red-600/20 transition hover:-translate-y-0.5 hover:bg-red-500">Inserir carrossel</button>
+              <p class="mt-3 text-xs font-medium leading-5 text-zinc-400">Depois de inserido, o bloco continua editável no hover: legenda, crédito, ordem, destaque e remoção.</p>
+            </aside>
+          </section>
+        </div>
+
         <label class="block">
           <span class="sr-only">Resumo editorial</span>
           <textarea data-summary-input class="field-clean w-full resize-none bg-transparent px-8 pt-8 text-xl font-medium leading-8 text-zinc-500 outline-none placeholder:text-zinc-300 dark:text-zinc-400 dark:placeholder:text-zinc-700" rows="2" placeholder="Escreva um resumo forte para cards, SEO e redes sociais"></textarea>
@@ -579,6 +627,145 @@ const aiActions = [
       color: rgb(24 24 27);
     }
 
+    .editor-canvas [data-editor-media="carousel"] {
+      background: radial-gradient(circle at 18% 18%, rgba(220, 38, 38, 0.12), transparent 34%), linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(244, 244, 245, 0.72));
+      padding: clamp(0.85rem, 2vw, 1.25rem);
+      resize: none;
+    }
+
+    .dark .editor-canvas [data-editor-media="carousel"] {
+      background: radial-gradient(circle at 18% 18%, rgba(220, 38, 38, 0.18), transparent 34%), linear-gradient(135deg, rgba(24, 24, 27, 0.96), rgba(9, 9, 11, 0.78));
+    }
+
+    .editor-canvas .carousel-shell {
+      position: relative;
+    }
+
+    .editor-canvas .carousel-track {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      padding-bottom: 0.75rem;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .editor-canvas .carousel-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .editor-canvas .carousel-slide {
+      flex: 0 0 min(86%, 680px);
+      position: relative;
+      scroll-snap-align: center;
+    }
+
+    .editor-canvas [data-carousel-layout="widescreen"] .carousel-slide,
+    .editor-canvas [data-carousel-layout="immersive"] .carousel-slide {
+      flex-basis: 100%;
+    }
+
+    .editor-canvas [data-carousel-layout="compact"] .carousel-slide {
+      flex-basis: min(62%, 380px);
+    }
+
+    .editor-canvas [data-carousel-layout="mosaic"] .carousel-track {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      overflow: visible;
+    }
+
+    .editor-canvas [data-carousel-layout="mosaic"] .carousel-slide {
+      flex-basis: auto;
+    }
+
+    .editor-canvas .carousel-slide img {
+      aspect-ratio: 16 / 10;
+      height: auto;
+      object-fit: cover;
+      transition: transform 280ms ease, filter 280ms ease;
+    }
+
+    .editor-canvas [data-carousel-layout="immersive"] .carousel-slide img {
+      aspect-ratio: 16 / 11;
+    }
+
+    .editor-canvas .carousel-slide:hover img {
+      filter: saturate(1.04) contrast(1.02);
+      transform: scale(1.012);
+    }
+
+    .editor-canvas .carousel-nav {
+      align-items: center;
+      background: rgba(9, 9, 11, 0.62);
+      border-radius: 999px;
+      color: white;
+      display: flex;
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 1.2rem;
+      font-weight: 900;
+      height: 2.4rem;
+      justify-content: center;
+      position: absolute;
+      top: 42%;
+      transform: translateY(-50%);
+      transition: background 180ms ease, transform 180ms ease;
+      width: 2.4rem;
+      z-index: 4;
+    }
+
+    .editor-canvas .carousel-nav:hover {
+      background: rgb(220 38 38);
+      transform: translateY(-50%) scale(1.04);
+    }
+
+    .editor-canvas .carousel-nav[data-carousel-action="prev"] {
+      left: 0.75rem;
+    }
+
+    .editor-canvas .carousel-nav[data-carousel-action="next"] {
+      right: 0.75rem;
+    }
+
+    .editor-canvas .carousel-item-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      left: 0.75rem;
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+      right: 0.75rem;
+      top: 0.75rem;
+      transform: translateY(-0.25rem);
+      transition: opacity 180ms ease, transform 180ms ease;
+      z-index: 3;
+    }
+
+    .editor-canvas .carousel-slide:hover .carousel-item-controls {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .editor-canvas .carousel-item-controls button {
+      backdrop-filter: blur(14px);
+      background: rgba(9, 9, 11, 0.66);
+      border-radius: 999px;
+      color: white;
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.5rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      padding: 0.4rem 0.55rem;
+      text-transform: uppercase;
+    }
+
+    .editor-canvas .carousel-item-controls button:hover {
+      background: rgb(220 38 38);
+    }
+
     .editor-canvas.is-dragging-media {
       border-radius: 2rem;
       box-shadow: inset 0 0 0 2px rgba(220, 38, 38, 0.38), inset 0 0 60px rgba(220, 38, 38, 0.08);
@@ -778,6 +965,11 @@ const aiActions = [
       const blockInserter = document.querySelector('[data-block-inserter]');
       const blockMenu = document.querySelector('[data-block-menu]');
       const inlineImageInput = document.querySelector('[data-inline-image-input]');
+      const carouselModal = document.querySelector('[data-carousel-modal]');
+      const carouselFileInput = document.querySelector('[data-carousel-file]');
+      const carouselDrop = document.querySelector('[data-carousel-drop]');
+      const carouselList = document.querySelector('[data-carousel-list]');
+      const carouselEmpty = document.querySelector('[data-carousel-empty]');
       const autosave = document.querySelector('[data-autosave-status]');
       const autosaveDetail = document.querySelector('[data-autosave-detail]');
       const mediaList = document.querySelector('[data-media-list]');
@@ -810,6 +1002,7 @@ const aiActions = [
       let seoTouched = false;
       let keywordsTouched = false;
       const mediaItems = [];
+      const carouselDraft = [];
       const sources = [];
       const tags = [];
       const categoryKeywordMap = {
@@ -1207,12 +1400,33 @@ const aiActions = [
       const createImageBlock = (url, alt, credit = '') =>
         `<figure data-editor-media="image" data-align="center" data-media-size="large" data-credit="${escapeHtml(credit)}" contenteditable="false">${createMediaControls()}<img src="${escapeHtml(url)}" alt="${escapeHtml(alt)}" /><figcaption><span data-caption>${escapeHtml(alt || 'Legenda da imagem')}</span><span class="media-credit" data-credit-label>${escapeHtml(credit)}</span></figcaption></figure><p><br></p>`;
 
+      const createCarouselSlide = (item, index) => `
+        <figure class="carousel-slide" data-carousel-slide="${index}" data-main="${item.main ? 'true' : 'false'}">
+          <div class="carousel-item-controls">
+            <button type="button" data-carousel-slide-action="main">Capa</button>
+            <button type="button" data-carousel-slide-action="caption">Legenda</button>
+            <button type="button" data-carousel-slide-action="credit">Crédito</button>
+            <button type="button" data-carousel-slide-action="alt">Alt</button>
+            <button type="button" data-carousel-slide-action="prev">←</button>
+            <button type="button" data-carousel-slide-action="next">→</button>
+            <button type="button" data-carousel-slide-action="remove">Remover</button>
+          </div>
+          <img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.alt || item.caption || 'Imagem do carrossel')}" loading="lazy" />
+          <figcaption><span data-caption>${escapeHtml(item.caption || item.alt || 'Legenda da imagem')}</span><span class="media-credit" data-credit-label>${escapeHtml(item.credit || '')}</span></figcaption>
+        </figure>`;
+
+      const createCarouselBlockFromItems = (items, layout = 'horizontal') => {
+        const normalized = items.filter(Boolean).slice(0, 12);
+        if (normalized.length < 2) return '';
+        return `<section data-editor-media="carousel" data-carousel-layout="${escapeHtml(layout)}" data-align="center" data-media-size="large" contenteditable="false">${createMediaControls()}<div class="carousel-shell"><button type="button" class="carousel-nav" data-carousel-action="prev" aria-label="Imagem anterior">‹</button><div class="carousel-track">${normalized
+          .map((item, index) => createCarouselSlide(item, index))
+          .join('')}</div><button type="button" class="carousel-nav" data-carousel-action="next" aria-label="Próxima imagem">›</button></div></section><p><br></p>`;
+      };
+
       const createCarouselBlock = () => {
         const items = mediaItems.slice(0, 8);
         if (items.length < 2) return '';
-        return `<section data-editor-media="carousel" data-align="center" data-media-size="large" contenteditable="false">${createMediaControls()}<div class="grid gap-3 md:grid-cols-2">${items
-          .map((item) => `<figure><img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.alt)}" /><figcaption>${escapeHtml(item.alt)}</figcaption></figure>`)
-          .join('')}</div></section><p><br></p>`;
+        return createCarouselBlockFromItems(items, 'horizontal');
       };
 
       const getYoutubeEmbed = (url) => {
@@ -1275,6 +1489,86 @@ const aiActions = [
         return item;
       };
 
+      const getCarouselLayout = () => document.querySelector('input[name="carousel-layout"]:checked')?.value || 'horizontal';
+
+      const renderCarouselDraft = () => {
+        if (!carouselList || !carouselEmpty) return;
+        carouselEmpty.classList.toggle('hidden', carouselDraft.length > 0);
+        carouselList.innerHTML = carouselDraft
+          .map((item, index) => `
+            <article class="group grid gap-3 rounded-[1.6rem] bg-zinc-50 p-3 shadow-sm dark:bg-zinc-900 sm:grid-cols-[150px_minmax(0,1fr)]" draggable="true" data-carousel-draft-item="${index}">
+              <img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.alt)}" class="aspect-video w-full rounded-[1.2rem] object-cover transition group-hover:scale-[1.01]" />
+              <div class="grid gap-2">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="rounded-full ${item.main ? 'bg-red-600 text-white' : 'bg-white text-zinc-400 dark:bg-zinc-950'} px-3 py-1 text-[8px] font-black uppercase tracking-widest">${item.main ? 'Principal' : `Imagem ${index + 1}`}</span>
+                  <button type="button" data-carousel-draft-action="main" class="rounded-full bg-white px-3 py-1 text-[8px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-950">Definir principal</button>
+                  <button type="button" data-carousel-draft-action="up" class="rounded-full bg-white px-3 py-1 text-[8px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-950">Subir</button>
+                  <button type="button" data-carousel-draft-action="down" class="rounded-full bg-white px-3 py-1 text-[8px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-950">Descer</button>
+                  <button type="button" data-carousel-draft-action="remove" class="rounded-full bg-red-50 px-3 py-1 text-[8px] font-black uppercase tracking-widest text-red-600 dark:bg-red-950/30">Remover</button>
+                </div>
+                <input data-carousel-caption="${index}" value="${escapeHtml(item.caption || '')}" placeholder="Legenda editorial" class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-950" />
+                <div class="grid gap-2 sm:grid-cols-2">
+                  <input data-carousel-credit="${index}" value="${escapeHtml(item.credit || '')}" placeholder="Crédito" class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-xs font-bold outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-950" />
+                  <input data-carousel-alt="${index}" value="${escapeHtml(item.alt || '')}" placeholder="Texto alternativo" class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-xs font-bold outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-950" />
+                </div>
+              </div>
+            </article>
+          `)
+          .join('');
+      };
+
+      const openCarouselComposer = () => {
+        carouselDraft.length = 0;
+        renderCarouselDraft();
+        carouselModal?.classList.remove('hidden');
+        carouselModal?.classList.add('flex');
+      };
+
+      const closeCarouselComposer = () => {
+        carouselModal?.classList.add('hidden');
+        carouselModal?.classList.remove('flex');
+      };
+
+      const addCarouselFiles = async (files) => {
+        for (const file of files.filter((item) => item.type.startsWith('image/'))) {
+          const item = await compressImage(file);
+          carouselDraft.push({
+            ...item,
+            caption: item.alt,
+            credit: '',
+            main: carouselDraft.length === 0,
+          });
+        }
+        renderCarouselDraft();
+      };
+
+      const syncCarouselDraftInputs = () => {
+        carouselDraft.forEach((item, index) => {
+          item.caption = document.querySelector(`[data-carousel-caption="${index}"]`)?.value || item.caption || '';
+          item.credit = document.querySelector(`[data-carousel-credit="${index}"]`)?.value || item.credit || '';
+          item.alt = document.querySelector(`[data-carousel-alt="${index}"]`)?.value || item.alt || item.caption || '';
+        });
+      };
+
+      const moveCarouselDraftItem = (from, to) => {
+        if (to < 0 || to >= carouselDraft.length) return;
+        const [item] = carouselDraft.splice(from, 1);
+        carouselDraft.splice(to, 0, item);
+        renderCarouselDraft();
+      };
+
+      const insertCarouselDraft = () => {
+        syncCarouselDraftInputs();
+        if (carouselDraft.length < 2) {
+          setStatus('Adicione pelo menos 2 imagens');
+          return;
+        }
+        const html = createCarouselBlockFromItems(carouselDraft, getCarouselLayout());
+        insertHtml(html);
+        closeCarouselComposer();
+        setStatus('Carrossel editorial inserido');
+      };
+
       const applyFormat = (action) => {
         restoreSelection();
         if (action === 'bold') runCommand('bold');
@@ -1304,9 +1598,8 @@ const aiActions = [
           if (url) insertHtmlAtSlash(createEmbedBlock(url, action === 'youtube' ? 'YouTube' : action === 'tweet' ? 'Post no X' : 'Embed editorial'));
         }
         if (action === 'carousel') {
-          pendingInlineAction = 'carousel';
           if (slashRange) savedRange = slashRange.cloneRange();
-          inlineImageInput?.click();
+          openCarouselComposer();
         }
       };
 
@@ -1317,8 +1610,7 @@ const aiActions = [
           inlineImageInput?.click();
         }
         if (action === 'carousel') {
-          pendingInlineAction = 'carousel';
-          inlineImageInput?.click();
+          openCarouselComposer();
         }
         if (action === 'embed' || action === 'video') {
           const url = window.prompt(action === 'video' ? 'Cole a URL do vídeo' : 'Cole a URL ou iframe');
@@ -1347,6 +1639,52 @@ const aiActions = [
         runBlockAction(button.dataset.blockAction);
       });
 
+      document.querySelector('[data-close-carousel]')?.addEventListener('click', closeCarouselComposer);
+      document.querySelector('[data-insert-carousel-draft]')?.addEventListener('click', insertCarouselDraft);
+      carouselModal?.addEventListener('click', (event) => {
+        if (event.target === carouselModal) closeCarouselComposer();
+      });
+      carouselFileInput?.addEventListener('change', async (event) => {
+        await addCarouselFiles(Array.from(event.target.files || []));
+        event.target.value = '';
+      });
+      carouselDrop?.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        carouselDrop.classList.add('border-red-600');
+      });
+      carouselDrop?.addEventListener('dragleave', () => carouselDrop.classList.remove('border-red-600'));
+      carouselDrop?.addEventListener('drop', async (event) => {
+        event.preventDefault();
+        carouselDrop.classList.remove('border-red-600');
+        await addCarouselFiles(Array.from(event.dataTransfer?.files || []));
+      });
+      carouselList?.addEventListener('input', syncCarouselDraftInputs);
+      carouselList?.addEventListener('dragstart', (event) => {
+        const item = event.target.closest('[data-carousel-draft-item]');
+        if (item) event.dataTransfer?.setData('text/plain', item.dataset.carouselDraftItem);
+      });
+      carouselList?.addEventListener('dragover', (event) => event.preventDefault());
+      carouselList?.addEventListener('drop', (event) => {
+        event.preventDefault();
+        const target = event.target.closest('[data-carousel-draft-item]');
+        const from = Number(event.dataTransfer?.getData('text/plain'));
+        const to = Number(target?.dataset.carouselDraftItem);
+        if (Number.isInteger(from) && Number.isInteger(to) && from !== to) moveCarouselDraftItem(from, to);
+      });
+      carouselList?.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-carousel-draft-action]');
+        const item = event.target.closest('[data-carousel-draft-item]');
+        if (!button || !item) return;
+        syncCarouselDraftInputs();
+        const index = Number(item.dataset.carouselDraftItem);
+        const action = button.dataset.carouselDraftAction;
+        if (action === 'main') carouselDraft.forEach((draft, draftIndex) => (draft.main = draftIndex === index));
+        if (action === 'up') moveCarouselDraftItem(index, index - 1);
+        if (action === 'down') moveCarouselDraftItem(index, index + 1);
+        if (action === 'remove') carouselDraft.splice(index, 1);
+        if (action === 'main' || action === 'remove') renderCarouselDraft();
+      });
+
       inlineImageInput?.addEventListener('change', async (event) => {
         const files = Array.from(event.target.files || []).filter((file) => file.type.startsWith('image/'));
         if (!files.length) return;
@@ -1355,10 +1693,7 @@ const aiActions = [
         if (pendingInlineAction === 'carousel') {
           const carouselItems = inserted.filter(Boolean);
           if (carouselItems.length >= 2) {
-            const carousel = `<section data-editor-media="carousel" data-align="center" data-media-size="large" contenteditable="false">${createMediaControls()}<div class="grid gap-3 md:grid-cols-2">${carouselItems
-              .map((item) => `<figure><img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.alt)}" /><figcaption>${escapeHtml(item.alt)}</figcaption></figure>`)
-              .join('')}</div></section><p><br></p>`;
-            insertHtml(carousel);
+            insertHtml(createCarouselBlockFromItems(carouselItems, 'horizontal'));
           } else if (carouselItems[0]) {
             insertHtml(createImageBlock(carouselItems[0].url, carouselItems[0].alt));
           }
@@ -1424,6 +1759,62 @@ const aiActions = [
         positionBlockInserter();
       });
       editor.addEventListener('click', (event) => {
+        const carouselNav = event.target.closest('[data-carousel-action]');
+        if (carouselNav) {
+          const carousel = carouselNav.closest('[data-editor-media="carousel"]');
+          const track = carousel?.querySelector('.carousel-track');
+          if (track) {
+            event.preventDefault();
+            const direction = carouselNav.dataset.carouselAction === 'next' ? 1 : -1;
+            track.scrollBy({ left: direction * track.clientWidth * 0.82, behavior: 'smooth' });
+          }
+          return;
+        }
+
+        const slideActionButton = event.target.closest('[data-carousel-slide-action]');
+        if (slideActionButton) {
+          event.preventDefault();
+          const carousel = slideActionButton.closest('[data-editor-media="carousel"]');
+          const slide = slideActionButton.closest('[data-carousel-slide]');
+          const action = slideActionButton.dataset.carouselSlideAction;
+          if (!carousel || !slide) return;
+          if (action === 'caption') {
+            const captionNode = slide.querySelector('[data-caption]');
+            const caption = window.prompt('Legenda da imagem', captionNode?.textContent?.trim() || '');
+            if (caption !== null) {
+              if (captionNode) captionNode.textContent = caption;
+              const image = slide.querySelector('img');
+              if (image) image.alt = caption;
+            }
+          }
+          if (action === 'credit') {
+            const creditNode = slide.querySelector('[data-credit-label]');
+            const credit = window.prompt('Crédito da imagem', creditNode?.textContent?.trim() || '');
+            if (credit !== null && creditNode) creditNode.textContent = credit;
+          }
+          if (action === 'alt') {
+            const image = slide.querySelector('img');
+            const alt = window.prompt('Texto alternativo', image?.alt || '');
+            if (alt !== null && image) image.alt = alt;
+          }
+          if (action === 'main') {
+            carousel.querySelectorAll('[data-carousel-slide]').forEach((item) => (item.dataset.main = 'false'));
+            slide.dataset.main = 'true';
+            const track = carousel.querySelector('.carousel-track');
+            if (track && track.firstElementChild !== slide) track.prepend(slide);
+          }
+          if (action === 'prev' || action === 'next') {
+            const sibling = action === 'prev' ? slide.previousElementSibling : slide.nextElementSibling;
+            if (sibling?.matches('[data-carousel-slide]')) {
+              if (action === 'prev') sibling.before(slide);
+              else sibling.after(slide);
+            }
+          }
+          if (action === 'remove') slide.remove();
+          updateEditorState();
+          return;
+        }
+
         const actionButton = event.target.closest('[data-media-action]');
         if (actionButton) {
           const mediaBlock = actionButton.closest('[data-editor-media]');
