@@ -38,6 +38,8 @@ const categorySections = [...categoriesList, ...subCategoriesList]
     articles: articles.filter((article) => article.category === sectionCategory).slice(0, 4),
   }))
   .filter((section) => section.articles.length > 0);
+const initialCategorySections = 3;
+const hasMoreCategorySections = categorySections.length > initialCategorySections;
 const isCategoryView = !!category && category !== 'Início';
 ---
 
@@ -93,9 +95,14 @@ const isCategoryView = !!category && category !== 'Início';
                   </div>
                 </section>
 
-                <div class="space-y-20">
+                <div class="space-y-20" data-category-sections>
                   {categorySections.map((section, sectionIndex) => (
-                    <section id={`category-section-${sectionIndex}`} class="space-y-8">
+                    <section
+                      id={`category-section-${sectionIndex}`}
+                      class={`space-y-8 ${sectionIndex >= initialCategorySections ? 'hidden' : ''}`}
+                      data-category-section
+                      data-category-hidden={sectionIndex >= initialCategorySections ? 'true' : 'false'}
+                    >
                       <div class="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-4">
                         <div class="flex items-center gap-4">
                           <div class={`w-2 h-8 ${getCategoryColor(section.category)} rounded-full`}></div>
@@ -128,7 +135,35 @@ const isCategoryView = !!category && category !== 'Início';
                       )}
                     </section>
                   ))}
+
+                  {hasMoreCategorySections && (
+                    <div class="pt-2">
+                      <button
+                        type="button"
+                        class="w-full rounded-2xl bg-red-600 px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-lg shadow-red-600/20 transition-all hover:bg-red-700 hover:shadow-xl hover:shadow-red-600/25 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 dark:focus:ring-offset-zinc-950"
+                        data-show-more-categories
+                      >
+                        Mostrar mais
+                      </button>
+                    </div>
+                  )}
                 </div>
+
+                <script is:inline>
+                  (() => {
+                    const button = document.querySelector('[data-show-more-categories]');
+                    if (!button) return;
+
+                    button.addEventListener('click', () => {
+                      document.querySelectorAll('[data-category-hidden="true"]').forEach((section) => {
+                        section.classList.remove('hidden');
+                        section.dataset.categoryHidden = 'false';
+                      });
+                      button.closest('div')?.remove();
+                    });
+                  })();
+                </script>
+
                 <div class="py-12 border-y border-zinc-100 dark:border-zinc-800 flex flex-col items-center gap-4 bg-white dark:bg-zinc-950">
                   <span class="text-[7px] font-black text-zinc-300 dark:text-zinc-700 uppercase tracking-[0.4em]">
                     PUBLICIDADE
