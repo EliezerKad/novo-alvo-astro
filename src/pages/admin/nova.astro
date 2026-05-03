@@ -120,6 +120,14 @@ const toolbarGroups = [
                 <a data-download-optimized class="rounded-2xl border border-zinc-200 px-4 py-3 text-center text-[9px] font-black uppercase tracking-widest text-zinc-500 dark:border-zinc-800">Baixar</a>
                 <button type="button" data-insert-optimized class="rounded-2xl bg-red-600 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-white">Inserir</button>
               </div>
+              <div class="grid grid-cols-2 gap-3">
+                <button type="button" data-use-cover class="rounded-2xl border border-zinc-200 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">
+                  Usar capa
+                </button>
+                <button type="button" data-add-carousel class="rounded-2xl border border-zinc-200 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">
+                  Carrossel
+                </button>
+              </div>
             </div>
           </div>
 
@@ -139,9 +147,24 @@ const toolbarGroups = [
       <aside class="space-y-5 xl:sticky xl:top-6 xl:h-fit">
         <section class="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <h2 class="mb-4 text-xs font-black uppercase tracking-[0.24em]">Publicacao</h2>
-          <div class="grid grid-cols-2 gap-3">
-            <button type="button" class="rounded-2xl border border-zinc-200 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 dark:border-zinc-800">Rascunho</button>
-            <button type="button" class="rounded-2xl bg-red-600 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-white">Publicar</button>
+          <div class="mb-4 rounded-2xl bg-amber-50 p-4 dark:bg-amber-950/20">
+            <span class="text-[8px] font-black uppercase tracking-widest text-amber-600">Status atual</span>
+            <p class="mt-1 text-sm font-black" data-editor-status>Rascunho local</p>
+          </div>
+          <label class="mb-4 block">
+            <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Agendar para</span>
+            <input type="datetime-local" data-schedule-at class="mt-2 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-bold dark:border-zinc-800 dark:bg-zinc-950" />
+          </label>
+          <div class="grid gap-3">
+            <button type="button" data-save-draft class="rounded-2xl border border-zinc-200 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">
+              Salvar rascunho
+            </button>
+            <button type="button" data-schedule-post class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-700 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200">
+              Agendar publicacao
+            </button>
+            <button type="button" data-publish-now class="rounded-2xl bg-red-600 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-white">
+              Publicar agora
+            </button>
           </div>
         </section>
 
@@ -165,8 +188,8 @@ const toolbarGroups = [
 
         <section class="space-y-4 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <h2 class="text-xs font-black uppercase tracking-[0.24em]">Capa e SEO</h2>
-          <input class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="URL da imagem de capa" />
-          <input class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="Texto alternativo" />
+          <input data-cover-url class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="URL da imagem de capa" />
+          <input data-cover-alt class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="Texto alternativo" />
           <textarea class="min-h-32 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="Descricao SEO"></textarea>
         </section>
       </aside>
@@ -180,6 +203,7 @@ const toolbarGroups = [
 
       const wordCount = document.querySelector('[data-word-count]');
       const readingTime = document.querySelector('[data-reading-time]');
+      const status = document.querySelector('[data-editor-status]');
       const snippets = {
         h2: '## Subtitulo da materia\n\n',
         h3: '### Intertitulo\n\n',
@@ -208,6 +232,9 @@ const toolbarGroups = [
       };
 
       const toKb = (bytes) => `${Math.max(1, Math.round(bytes / 1024)).toLocaleString('pt-BR')} KB`;
+      const setStatus = (value) => {
+        if (status) status.textContent = value;
+      };
       const slugifyFile = (name) =>
         name
           .replace(/\.[^.]+$/, '')
@@ -288,12 +315,47 @@ const toolbarGroups = [
           download.href = optimizedUrl;
           download.download = fileName;
         }
+        setStatus('Imagem otimizada pronta');
       });
 
       document.querySelector('[data-insert-optimized]')?.addEventListener('click', () => {
         const path = document.querySelector('[data-optimized-path]')?.value.trim();
         if (!path) return;
         insertAtCursor(`\n![Imagem otimizada](${path})\n\n`);
+        setStatus('Imagem inserida no corpo');
+      });
+
+      document.querySelector('[data-use-cover]')?.addEventListener('click', () => {
+        const path = document.querySelector('[data-optimized-path]')?.value.trim();
+        if (!path) return;
+        const cover = document.querySelector('[data-cover-url]');
+        const alt = document.querySelector('[data-cover-alt]');
+        if (cover) cover.value = path;
+        if (alt && !alt.value) alt.value = 'Imagem de capa da materia';
+        setStatus('Capa definida com imagem otimizada');
+      });
+
+      document.querySelector('[data-add-carousel]')?.addEventListener('click', () => {
+        const path = document.querySelector('[data-optimized-path]')?.value.trim();
+        if (!path) return;
+        const target = Array.from(document.querySelectorAll('[data-carousel-image]')).find((input) => !input.value.trim());
+        if (target) {
+          target.value = path;
+          setStatus('Imagem adicionada ao carrossel');
+        }
+      });
+
+      document.querySelector('[data-save-draft]')?.addEventListener('click', () => {
+        setStatus('Rascunho pronto para salvar');
+      });
+
+      document.querySelector('[data-schedule-post]')?.addEventListener('click', () => {
+        const scheduledAt = document.querySelector('[data-schedule-at]')?.value;
+        setStatus(scheduledAt ? `Agendada para ${scheduledAt}` : 'Informe data e hora para agendar');
+      });
+
+      document.querySelector('[data-publish-now]')?.addEventListener('click', () => {
+        setStatus('Pronta para publicacao imediata');
       });
 
       editor.addEventListener('input', updateStats);
