@@ -1155,9 +1155,12 @@ const aiActions = [
         const rect = range.getBoundingClientRect();
         const sectionRect = editor.closest('section').getBoundingClientRect();
         const currentBlock = getCurrentTextBlock();
-        const isEmptyBlock = !currentBlock?.textContent?.trim();
+        const directTextAtCursor = range.startContainer.nodeType === Node.TEXT_NODE && range.startContainer.parentElement === editor
+          ? range.startContainer.textContent?.trim()
+          : '';
+        const isEmptyBlock = currentBlock ? !currentBlock.textContent?.trim() : !directTextAtCursor && !editor.textContent?.trim();
         const top = rect.top ? rect.top - sectionRect.top - 6 : editor.offsetTop + 20;
-        blockInserter.style.left = `${Math.max(14, editor.offsetLeft - 28)}px`;
+        blockInserter.style.left = `${Math.max(8, editor.offsetLeft - 50)}px`;
         blockInserter.style.top = `${Math.max(22, top)}px`;
         blockInserter.classList.toggle('hidden', !isEmptyBlock);
         blockInserter.classList.toggle('flex', isEmptyBlock);
@@ -1395,7 +1398,12 @@ const aiActions = [
         const isPlusShortcut = event.key === '+' || (event.key === '=' && event.shiftKey);
         if (!isPlusShortcut) return;
         const currentBlock = getCurrentTextBlock();
-        const isEmptyBlock = !currentBlock?.textContent?.trim();
+        const selection = window.getSelection();
+        const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+        const directTextAtCursor = range?.startContainer.nodeType === Node.TEXT_NODE && range.startContainer.parentElement === editor
+          ? range.startContainer.textContent?.trim()
+          : '';
+        const isEmptyBlock = currentBlock ? !currentBlock.textContent?.trim() : !directTextAtCursor && !editor.textContent?.trim();
         if (!isEmptyBlock) return;
         event.preventDefault();
         saveSelection();

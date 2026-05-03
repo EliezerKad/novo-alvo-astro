@@ -62,8 +62,8 @@ export default function NavbarControls({ category }: Props) {
 
       {isMenuOpen && (
         <>
-          <div onClick={() => setIsMenuOpen(false)} className="fixed inset-0 bg-black/50 z-[100] backdrop-blur-sm" />
-          <div className="fixed inset-y-0 left-0 w-[80%] max-w-sm bg-white dark:bg-zinc-900 z-[101] shadow-2xl p-6 overflow-y-auto transition-transform">
+          <div onClick={() => setIsMenuOpen(false)} className="fixed inset-0 bg-black/45 z-[100] backdrop-blur-[2px]" />
+          <div className="fixed inset-y-0 left-0 z-[101] w-full overflow-y-auto bg-white p-6 shadow-2xl transition-transform dark:bg-zinc-900 sm:w-[88vw] sm:max-w-sm">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-xl font-serif font-black tracking-tighter text-zinc-900 dark:text-zinc-50">MENU</h2>
               <button onClick={() => setIsMenuOpen(false)} className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
