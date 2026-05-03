@@ -610,6 +610,34 @@ const aiActions = [
         width: 100% !important;
       }
     }
+
+    .admin-focus-mode .editor-studio {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: min(1180px, calc(100vw - 3rem));
+      width: 100%;
+    }
+
+    .admin-focus-mode .editor-studio > section:first-child {
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 1120px;
+      width: 100%;
+    }
+
+    .admin-focus-mode .editor-studio header,
+    .admin-focus-mode .editor-studio section {
+      border-radius: 2.5rem;
+    }
+
+    .admin-focus-mode [data-editor-body] {
+      min-height: 72vh;
+    }
+
+    .admin-focus-mode [data-title-input] {
+      font-size: clamp(4rem, 8vw, 7.5rem);
+    }
   </style>
 
   <script is:inline>
