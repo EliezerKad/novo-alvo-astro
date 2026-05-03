@@ -7,5 +7,8 @@
       "binding": "VISITOR_COUNTER",
       "id": "d73052d6da584a3186bf3bd72f917a55"
     }
-  ]
+  ],
+  "ai": {
+    "binding": "AI"
+  }
 }
