@@ -22,6 +22,11 @@ const { class: className = '' } = Astro.props;
 
     const endpoint = '/api/visits';
     const sessionKey = 'novo-alvo-visitor-id';
+    const leaderKey = 'novo-alvo-visitor-counter-leader';
+    const cacheKey = 'novo-alvo-visitor-counter-cache';
+    const tabId = `${Date.now()}-${Math.random()}`;
+    const pingInterval = 300000;
+    const leaderTtl = 330000;
     const formatNumber = (value) => {
       const number = Number(value || 0);
       if (number >= 1000000) return `${(number / 1000000).toFixed(1).replace('.0', '')}M`;
@@ -50,7 +55,35 @@ const { class: className = '' } = Astro.props;
         element.classList.add('inline-flex');
       });
     };
+    const readCachedPayload = () => {
+      try {
+        const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+        if (cached && Date.now() - Number(cached.cachedAt || 0) < leaderTtl) render(cached.payload);
+      } catch {}
+    };
+    const cachePayload = (payload) => {
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify({ cachedAt: Date.now(), payload }));
+      } catch {}
+    };
+    const isVisible = () => document.visibilityState === 'visible';
+    const isLeader = () => {
+      if (!isVisible()) return false;
+      try {
+        const current = JSON.parse(localStorage.getItem(leaderKey) || 'null');
+        const expired = !current || Number(current.expiresAt || 0) < Date.now();
+        if (expired || current.tabId === tabId) {
+          localStorage.setItem(leaderKey, JSON.stringify({ tabId, expiresAt: Date.now() + leaderTtl }));
+          return true;
+        }
+      } catch {}
+      return false;
+    };
     const ping = async () => {
+      if (!isLeader()) {
+        readCachedPayload();
+        return;
+      }
       try {
         const response = await fetch(endpoint, {
           method: 'POST',
@@ -61,11 +94,19 @@ const { class: className = '' } = Astro.props;
           }),
         });
         if (!response.ok) return;
-        render(await response.json());
+        const payload = await response.json();
+        cachePayload(payload);
+        render(payload);
       } catch {}
     };
 
-    ping();
-    window.setInterval(ping, 180000);
+    readCachedPayload();
+    window.setTimeout(ping, 5000);
+    window.setInterval(ping, pingInterval);
+    document.addEventListener('visibilitychange', ping);
+    window.addEventListener('storage', (event) => {
+      if (event.key !== cacheKey || !event.newValue) return;
+      readCachedPayload();
+    });
   })();
 </script>

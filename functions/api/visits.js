@@ -23,18 +23,7 @@ export async function onRequestPost({ request, env }) {
   if (!visitorId) return json({ enabled: false }, { status: 400 });
 
   const now = Date.now();
-  const today = new Date(now).toISOString().slice(0, 10);
   const onlineKey = `online:${visitorId}`;
-  const dailyKey = `daily:${today}:${visitorId}`;
-  const totalKey = 'total';
-
-  const alreadyCountedToday = await store.get(dailyKey);
-  let total = Number((await store.get(totalKey)) || 0);
-  if (!alreadyCountedToday) {
-    total += 1;
-    await store.put(totalKey, String(total));
-    await store.put(dailyKey, '1', { expirationTtl: 60 * 60 * 30 });
-  }
 
   await store.put(
     onlineKey,
@@ -42,7 +31,7 @@ export async function onRequestPost({ request, env }) {
       path: String(payload.path || '/').slice(0, 160),
       updatedAt: now,
     }),
-    { expirationTtl: 300 },
+    { expirationTtl: 600 },
   );
 
   const online = await store.list({ prefix: 'online:', limit: 1000 });
@@ -50,6 +39,5 @@ export async function onRequestPost({ request, env }) {
   return json({
     enabled: true,
     online: online.keys.length,
-    total,
   });
 }
