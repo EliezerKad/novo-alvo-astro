@@ -30,7 +30,10 @@ const aiActions = [
 <AdminLayout title="Nova matéria | Admin Novo Alvo" active="new">
   <form class="editor-studio grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_390px]">
     <section class="min-w-0 space-y-6">
-      <header class="relative overflow-hidden rounded-[2.25rem] border border-white/70 bg-white/85 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-900/80">
+      <header class="relative overflow-hidden rounded-[2.25rem] border border-white/80 bg-white/78 p-5 shadow-[0_28px_90px_rgba(15,23,42,0.09)] backdrop-blur-2xl dark:border-zinc-800/90 dark:bg-zinc-900/74">
+        <div class="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-red-500/10 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-32 left-1/4 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl"></div>
+        <div class="relative">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-3">
             <span class="rounded-full bg-red-600 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.24em] text-white">Redação</span>
@@ -80,11 +83,12 @@ const aiActions = [
             <strong class="mt-1 block text-zinc-700 dark:text-zinc-200" data-current-date>Hoje</strong>
           </div>
         </div>
+        </div>
       </header>
 
-      <section class="relative overflow-hidden rounded-[2.25rem] border border-white/70 bg-white/90 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-900/80">
+      <section class="relative overflow-hidden rounded-[2.25rem] border border-white/80 bg-white/86 shadow-[0_28px_90px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-zinc-800/90 dark:bg-zinc-900/78">
         <div class="flex flex-wrap items-center gap-3 border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
-          <div class="flex items-center gap-2 rounded-full bg-zinc-50 p-1 dark:bg-zinc-950">
+          <div class="flex items-center gap-2 rounded-full bg-white/75 p-1 shadow-inner shadow-zinc-950/5 backdrop-blur dark:bg-zinc-950/75">
             {['bold', 'italic', 'link', 'quote', 'highlight', 'comment'].map((action) => (
               <button type="button" data-format={action} class="rounded-full px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:bg-white hover:text-red-600 hover:shadow-sm dark:hover:bg-zinc-900">
                 {action === 'bold' ? 'B' : action === 'italic' ? 'I' : action === 'link' ? 'Link' : action === 'quote' ? 'Quote' : action === 'highlight' ? 'Destaque' : 'Comentário'}
@@ -151,13 +155,13 @@ const aiActions = [
       </section>
 
       <section class="grid gap-4 md:grid-cols-3">
-        <label data-drop-zone class="group flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-[2rem] border border-dashed border-zinc-300 bg-white/70 p-6 text-center shadow-sm transition hover:border-red-600 hover:bg-white dark:border-zinc-700 dark:bg-zinc-900/70">
+        <label data-drop-zone class="group flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-[2rem] border border-dashed border-zinc-300 bg-white/70 p-6 text-center shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-red-600 hover:bg-white hover:shadow-[0_24px_70px_rgba(15,23,42,0.10)] dark:border-zinc-700 dark:bg-zinc-900/70">
           <span class="text-sm font-black text-zinc-950 dark:text-zinc-50">Solte imagens aqui</span>
           <span class="mt-2 max-w-56 text-xs font-medium leading-6 text-zinc-400">Upload com preview, compressão WebP e inserção no ponto do texto.</span>
           <input type="file" accept="image/jpeg,image/png,image/webp" multiple class="sr-only" data-local-image />
         </label>
 
-        <div class="rounded-[2rem] bg-white/80 p-5 shadow-sm dark:bg-zinc-900/80 md:col-span-2">
+        <div class="rounded-[2rem] border border-white/80 bg-white/72 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/72 md:col-span-2">
           <div class="flex items-center justify-between">
             <h2 class="text-xs font-black uppercase tracking-[0.24em]">Mídia da matéria</h2>
             <button type="button" data-insert-carousel class="rounded-full bg-red-600 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white">Criar carrossel</button>
@@ -169,7 +173,9 @@ const aiActions = [
     </section>
 
     <aside data-editor-aside class="space-y-4 xl:sticky xl:top-7 xl:h-[calc(100vh-3.5rem)] xl:overflow-y-auto xl:pr-1">
-      <section class="rounded-[2rem] bg-zinc-950 p-5 text-white shadow-2xl shadow-zinc-950/20 dark:bg-white dark:text-zinc-950">
+      <section class="relative overflow-hidden rounded-[2rem] bg-zinc-950 p-5 text-white shadow-2xl shadow-zinc-950/20 dark:bg-white dark:text-zinc-950">
+        <div class="pointer-events-none absolute -right-16 -top-16 h-36 w-36 rounded-full bg-red-500/30 blur-3xl"></div>
+        <div class="relative">
         <div class="flex items-center justify-between gap-3">
           <div>
             <h2 class="text-sm font-black uppercase tracking-[0.24em]">Publicação</h2>
@@ -185,6 +191,7 @@ const aiActions = [
             <input type="datetime-local" data-schedule-at class="mt-2 w-full bg-transparent text-xs font-bold outline-none" />
           </label>
           <button type="button" data-schedule-post class="rounded-2xl border border-white/15 px-4 py-3 text-[10px] font-black uppercase tracking-widest transition hover:border-white/50 dark:border-zinc-200">Confirmar agendamento</button>
+        </div>
         </div>
       </section>
 
@@ -295,12 +302,19 @@ const aiActions = [
     .input-soft {
       width: 100%;
       border-radius: 1rem;
-      border: 1px solid rgb(228 228 231);
-      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(228, 228, 231, 0.82);
+      background: rgba(255, 255, 255, 0.66);
       padding: 0.85rem 1rem;
       font-size: 0.875rem;
       font-weight: 600;
       outline: none;
+      transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .input-soft:focus {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(220, 38, 38, 0.5);
+      box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.08);
     }
 
     .dark .input-soft {
@@ -309,18 +323,30 @@ const aiActions = [
     }
 
     .editor-panel {
-      border: 1px solid rgba(228, 228, 231, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.78);
       border-radius: 2rem;
-      background: rgba(255, 255, 255, 0.78);
-      box-shadow: 0 16px 50px rgba(15, 23, 42, 0.06);
+      background: rgba(255, 255, 255, 0.68);
+      backdrop-filter: blur(24px);
+      box-shadow: 0 20px 60px rgba(15, 23, 42, 0.07);
       display: grid;
       gap: 0.85rem;
       padding: 1.25rem;
+      transition: transform 220ms ease, box-shadow 220ms ease, background 220ms ease;
+    }
+
+    .editor-panel:hover {
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 26px 72px rgba(15, 23, 42, 0.1);
+      transform: translateY(-1px);
     }
 
     .dark .editor-panel {
       border-color: rgb(39 39 42);
-      background: rgba(24, 24, 27, 0.76);
+      background: rgba(24, 24, 27, 0.7);
+    }
+
+    .dark .editor-panel:hover {
+      background: rgba(24, 24, 27, 0.84);
     }
 
     .editor-panel h2 {
@@ -339,6 +365,8 @@ const aiActions = [
     .editor-canvas {
       color: rgb(39 39 42);
       font-family: Georgia, 'Times New Roman', serif;
+      background-image: linear-gradient(90deg, rgba(220, 38, 38, 0.05), transparent 18%, transparent 82%, rgba(59, 130, 246, 0.04));
+      background-size: 100% 1px;
     }
 
     .dark .editor-canvas {
