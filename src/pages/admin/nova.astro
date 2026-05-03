@@ -29,24 +29,27 @@ const toolbarGroups = [
     <header class="rounded-[2rem] bg-white p-6 shadow-sm dark:bg-zinc-900">
       <span class="text-[10px] font-black uppercase tracking-[0.35em] text-red-600">Editor</span>
       <h1 class="mt-3 font-serif text-4xl font-black italic tracking-tighter md:text-5xl">Nova materia</h1>
-      <p class="mt-2 max-w-2xl text-sm font-medium leading-7 text-zinc-500 dark:text-zinc-400">
-        Estrutura visual do editor. Na proxima fase, este formulario pode gerar Markdown com frontmatter compativel com as Content Collections.
+      <p class="mt-2 max-w-3xl text-sm font-medium leading-7 text-zinc-500 dark:text-zinc-400">
+        Editor editorial amplo, com ferramentas de Markdown, upload local otimizado e estrutura para imagens/carrossel. A proxima fase liga isso ao gerador real de arquivos.
       </p>
     </header>
 
-    <form class="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_380px]">
-      <section class="space-y-5 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <label class="block">
-          <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Titulo</span>
-          <input class="mt-2 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4 text-2xl font-black outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-950" placeholder="Titulo da materia" />
-        </label>
-        <label class="block">
-          <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Resumo editorial</span>
-          <textarea class="mt-2 min-h-24 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4 text-sm font-medium outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-950" placeholder="Resumo curto para chamadas, cards e redes sociais"></textarea>
-        </label>
-        <div class="overflow-hidden rounded-[2rem] border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950">
-          <div class="border-b border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="flex flex-wrap gap-3">
+    <form class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div class="space-y-6">
+        <section class="space-y-5 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <label class="block">
+            <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Titulo</span>
+            <input class="mt-2 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4 text-2xl font-black outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-950" placeholder="Titulo da materia" />
+          </label>
+          <label class="block">
+            <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Resumo editorial</span>
+            <textarea class="mt-2 min-h-24 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4 text-sm font-medium outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-950" placeholder="Resumo curto para chamadas, cards e redes sociais"></textarea>
+          </label>
+        </section>
+
+        <section class="overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div class="border-b border-zinc-200 p-3 dark:border-zinc-800">
+            <div class="flex flex-wrap items-center gap-3">
               {toolbarGroups.map((group) => (
                 <div class="flex rounded-2xl border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-800 dark:bg-zinc-950">
                   {group.map((item) => (
@@ -60,58 +63,80 @@ const toolbarGroups = [
                   ))}
                 </div>
               ))}
+              <div class="ml-auto hidden grid-cols-2 gap-3 text-center md:grid">
+                <div class="rounded-2xl border border-zinc-200 px-4 py-2 dark:border-zinc-800">
+                  <span class="block text-[8px] font-black uppercase tracking-widest text-zinc-400">Palavras</span>
+                  <strong class="font-serif text-xl font-black italic" data-word-count>0</strong>
+                </div>
+                <div class="rounded-2xl border border-zinc-200 px-4 py-2 dark:border-zinc-800">
+                  <span class="block text-[8px] font-black uppercase tracking-widest text-zinc-400">Leitura</span>
+                  <strong class="font-serif text-xl font-black italic"><span data-reading-time>0</span>m</strong>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 xl:grid-cols-[1fr_280px]">
-            <label class="block">
-              <span class="sr-only">Corpo em Markdown</span>
-              <textarea
-                data-editor-body
-                class="min-h-[560px] w-full resize-y border-0 bg-zinc-50 px-5 py-5 font-mono text-sm leading-7 outline-none dark:bg-zinc-950"
-                placeholder="Escreva a materia aqui..."
-              ></textarea>
-            </label>
-            <aside class="border-t border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 xl:border-l xl:border-t-0">
-              <h2 class="text-xs font-black uppercase tracking-[0.24em]">Blocos de midia</h2>
-              <p class="mt-2 text-xs font-medium leading-6 text-zinc-500 dark:text-zinc-400">
-                Use imagem unica para contexto pontual. Use carrossel quando a materia tiver 3 ou mais imagens importantes.
-              </p>
+          <label class="block">
+            <span class="sr-only">Corpo em Markdown</span>
+            <textarea
+              data-editor-body
+              class="min-h-[760px] w-full resize-y border-0 bg-zinc-50 px-6 py-6 font-mono text-base leading-8 outline-none dark:bg-zinc-950"
+              placeholder="Escreva a materia aqui..."
+            ></textarea>
+          </label>
+        </section>
 
-              <div class="mt-5 space-y-3">
-                <input data-image-url class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs dark:border-zinc-800 dark:bg-zinc-950" placeholder="URL da imagem" />
-                <input data-image-alt class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs dark:border-zinc-800 dark:bg-zinc-950" placeholder="Alt/legenda da imagem" />
-                <button type="button" data-insert-image class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">
-                  Inserir imagem
-                </button>
-              </div>
-
-              <div class="mt-6 space-y-3 rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-950">
-                <h3 class="text-[10px] font-black uppercase tracking-widest">Carrossel</h3>
-                {[1, 2, 3].map((item) => (
-                  <input data-carousel-image class="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs dark:border-zinc-800 dark:bg-zinc-900" placeholder={`Imagem ${item}`} />
-                ))}
-                <button type="button" data-insert-carousel class="w-full rounded-xl bg-red-600 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-white">
-                  Inserir carrossel
-                </button>
-              </div>
-
-              <dl class="mt-6 grid grid-cols-2 gap-3 text-center">
-                <div class="rounded-2xl border border-zinc-200 p-3 dark:border-zinc-800">
-                  <dt class="text-[8px] font-black uppercase tracking-widest text-zinc-400">Palavras</dt>
-                  <dd class="mt-1 font-serif text-2xl font-black italic" data-word-count>0</dd>
-                </div>
-                <div class="rounded-2xl border border-zinc-200 p-3 dark:border-zinc-800">
-                  <dt class="text-[8px] font-black uppercase tracking-widest text-zinc-400">Leitura</dt>
-                  <dd class="mt-1 font-serif text-2xl font-black italic"><span data-reading-time>0</span>m</dd>
-                </div>
-              </dl>
-            </aside>
+        <section class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div class="space-y-4 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <h2 class="text-xs font-black uppercase tracking-[0.24em]">Imagem por URL</h2>
+            <input data-image-url class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="URL da imagem" />
+            <input data-image-alt class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="Alt/legenda da imagem" />
+            <button type="button" data-insert-image class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">
+              Inserir imagem
+            </button>
           </div>
-        </div>
-      </section>
 
-      <aside class="space-y-5">
+          <div class="space-y-4 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <h2 class="text-xs font-black uppercase tracking-[0.24em]">Upload local</h2>
+            <label class="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-4 text-center transition hover:border-red-600 dark:border-zinc-700 dark:bg-zinc-950">
+              <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Selecionar imagem</span>
+              <span class="mt-2 text-xs text-zinc-400">JPG, PNG ou WebP</span>
+              <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" data-local-image />
+            </label>
+            <div class="hidden space-y-3" data-optimized-panel>
+              <img data-optimized-preview alt="" class="aspect-video w-full rounded-2xl object-cover" />
+              <div class="grid grid-cols-2 gap-3 text-center">
+                <div class="rounded-2xl bg-zinc-50 p-3 dark:bg-zinc-950">
+                  <span class="block text-[8px] font-black uppercase tracking-widest text-zinc-400">Original</span>
+                  <strong class="text-sm" data-original-size>0 KB</strong>
+                </div>
+                <div class="rounded-2xl bg-zinc-50 p-3 dark:bg-zinc-950">
+                  <span class="block text-[8px] font-black uppercase tracking-widest text-zinc-400">Otimizada</span>
+                  <strong class="text-sm" data-optimized-size>0 KB</strong>
+                </div>
+              </div>
+              <input data-optimized-path class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs dark:border-zinc-800 dark:bg-zinc-950" readonly />
+              <div class="grid grid-cols-2 gap-3">
+                <a data-download-optimized class="rounded-2xl border border-zinc-200 px-4 py-3 text-center text-[9px] font-black uppercase tracking-widest text-zinc-500 dark:border-zinc-800">Baixar</a>
+                <button type="button" data-insert-optimized class="rounded-2xl bg-red-600 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-white">Inserir</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-4 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <h2 class="text-xs font-black uppercase tracking-[0.24em]">Carrossel</h2>
+            <p class="text-xs font-medium leading-6 text-zinc-500 dark:text-zinc-400">Use quando a materia tiver 3 ou mais imagens importantes.</p>
+            {[1, 2, 3].map((item) => (
+              <input data-carousel-image class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder={`Imagem ${item}`} />
+            ))}
+            <button type="button" data-insert-carousel class="w-full rounded-2xl bg-red-600 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-white">
+              Inserir carrossel
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <aside class="space-y-5 xl:sticky xl:top-6 xl:h-fit">
         <section class="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <h2 class="mb-4 text-xs font-black uppercase tracking-[0.24em]">Publicacao</h2>
           <div class="grid grid-cols-2 gap-3">
@@ -142,7 +167,7 @@ const toolbarGroups = [
           <h2 class="text-xs font-black uppercase tracking-[0.24em]">Capa e SEO</h2>
           <input class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="URL da imagem de capa" />
           <input class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="Texto alternativo" />
-          <textarea class="min-h-24 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="Descricao SEO"></textarea>
+          <textarea class="min-h-32 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="Descricao SEO"></textarea>
         </section>
       </aside>
     </form>
@@ -164,15 +189,13 @@ const toolbarGroups = [
         quote: '> Frase, dado ou declaracao relevante.\n\n',
         link: '[texto do link](https://exemplo.com)',
         divider: '\n---\n\n',
-        embed: '<iframe src=\"https://exemplo.com/embed\" title=\"Embed editorial\" loading=\"lazy\"></iframe>\n\n',
+        embed: '<iframe src="https://exemplo.com/embed" title="Embed editorial" loading="lazy"></iframe>\n\n',
       };
 
       const insertAtCursor = (text) => {
         const start = editor.selectionStart || 0;
         const end = editor.selectionEnd || 0;
-        const before = editor.value.slice(0, start);
-        const after = editor.value.slice(end);
-        editor.value = `${before}${text}${after}`;
+        editor.value = `${editor.value.slice(0, start)}${text}${editor.value.slice(end)}`;
         editor.focus();
         editor.selectionStart = editor.selectionEnd = start + text.length;
         updateStats();
@@ -183,6 +206,17 @@ const toolbarGroups = [
         if (wordCount) wordCount.textContent = String(words);
         if (readingTime) readingTime.textContent = String(Math.max(0, Math.ceil(words / 220)));
       };
+
+      const toKb = (bytes) => `${Math.max(1, Math.round(bytes / 1024)).toLocaleString('pt-BR')} KB`;
+      const slugifyFile = (name) =>
+        name
+          .replace(/\.[^.]+$/, '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .slice(0, 72);
 
       document.querySelectorAll('[data-md-action]').forEach((button) => {
         button.addEventListener('click', () => {
@@ -211,8 +245,55 @@ const toolbarGroups = [
           .map((input) => input.value.trim())
           .filter(Boolean);
         if (images.length < 3) return;
-        const items = images.map((url, index) => `  - src: \"${url}\"\n    alt: \"Imagem ${index + 1}\"`).join('\n');
+        const items = images.map((url, index) => `  - src: "${url}"\n    alt: "Imagem ${index + 1}"`).join('\n');
         insertAtCursor(`\n:::image-carousel\n${items}\n:::\n\n`);
+      });
+
+      document.querySelector('[data-local-image]')?.addEventListener('change', async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const image = await createImageBitmap(file);
+        const maxWidth = 1800;
+        const ratio = Math.min(1, maxWidth / image.width);
+        const width = Math.round(image.width * ratio);
+        const height = Math.round(image.height * ratio);
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d')?.drawImage(image, 0, 0, width, height);
+
+        const blob = await new Promise((resolve) => {
+          canvas.toBlob((result) => resolve(result), 'image/webp', 0.86);
+        });
+        if (!blob) return;
+
+        const optimizedUrl = URL.createObjectURL(blob);
+        const fileName = `${slugifyFile(file.name) || 'imagem-editorial'}.webp`;
+        const suggestedPath = `/uploads/news/${fileName}`;
+
+        const panel = document.querySelector('[data-optimized-panel]');
+        const preview = document.querySelector('[data-optimized-preview]');
+        const originalSize = document.querySelector('[data-original-size]');
+        const optimizedSize = document.querySelector('[data-optimized-size]');
+        const path = document.querySelector('[data-optimized-path]');
+        const download = document.querySelector('[data-download-optimized]');
+
+        panel?.classList.remove('hidden');
+        if (preview) preview.src = optimizedUrl;
+        if (originalSize) originalSize.textContent = toKb(file.size);
+        if (optimizedSize) optimizedSize.textContent = toKb(blob.size);
+        if (path) path.value = suggestedPath;
+        if (download) {
+          download.href = optimizedUrl;
+          download.download = fileName;
+        }
+      });
+
+      document.querySelector('[data-insert-optimized]')?.addEventListener('click', () => {
+        const path = document.querySelector('[data-optimized-path]')?.value.trim();
+        if (!path) return;
+        insertAtCursor(`\n![Imagem otimizada](${path})\n\n`);
       });
 
       editor.addEventListener('input', updateStats);
