@@ -4,7 +4,7 @@ import '../styles.css';
 interface Props {
   title: string;
   description?: string;
-  active?: 'dashboard' | 'news' | 'new' | 'home' | 'seo' | 'settings';
+  active?: 'dashboard' | 'news' | 'new' | 'drafts' | 'scheduled' | 'published' | 'media' | 'categories' | 'seo' | 'settings' | 'home';
 }
 
 const {
@@ -14,13 +14,28 @@ const {
 } = Astro.props;
 
 const navItems = [
-  { href: '/admin/', label: 'Visao geral', id: 'dashboard' },
-  { href: '/admin/noticias/', label: 'Noticias', id: 'news' },
-  { href: '/admin/nova/', label: 'Nova materia', id: 'new' },
-  { href: '/admin/home/', label: 'Home editorial', id: 'home' },
-  { href: '/admin/seo/', label: 'SEO e distribuicao', id: 'seo' },
-  { href: '/admin/configuracoes/', label: 'Configuracoes', id: 'settings' },
+  { href: '/admin/', label: 'Dashboard', id: 'dashboard', icon: 'grid' },
+  { href: '/admin/nova/', label: 'Nova matéria', id: 'new', icon: 'pen' },
+  { href: '/admin/noticias/?status=rascunho', label: 'Rascunhos', id: 'drafts', icon: 'file' },
+  { href: '/admin/noticias/?status=agendada', label: 'Agendadas', id: 'scheduled', icon: 'clock' },
+  { href: '/admin/noticias/?status=publicada', label: 'Publicadas', id: 'published', icon: 'check' },
+  { href: '/admin/noticias/?view=midia', label: 'Mídia', id: 'media', icon: 'image' },
+  { href: '/admin/home/', label: 'Categorias', id: 'categories', icon: 'tag' },
+  { href: '/admin/seo/', label: 'SEO', id: 'seo', icon: 'spark' },
+  { href: '/admin/configuracoes/', label: 'Configurações', id: 'settings', icon: 'gear' },
 ] as const;
+
+const iconPath = {
+  grid: '<rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect>',
+  pen: '<path d="M12 20h9"></path><path d="m16.5 3.5 4 4L7 21H3v-4z"></path>',
+  file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path>',
+  clock: '<circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path>',
+  check: '<path d="M20 6 9 17l-5-5"></path>',
+  image: '<rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="2"></circle><path d="m21 15-3-3a2 2 0 0 0-3 0l-6 6"></path>',
+  tag: '<path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L3 13V3h10l7.59 7.59a2 2 0 0 1 0 2.82Z"></path><circle cx="7.5" cy="7.5" r="1.5"></circle>',
+  spark: '<path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"></path>',
+  gear: '<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h.1a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"></path>',
+};
 ---
 
 <!doctype html>
@@ -34,59 +49,81 @@ const navItems = [
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:ital,wght@0,900;1,900&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Playfair+Display:ital,wght@0,900;1,900&display=swap" />
     <script is:inline>
       (() => {
         try {
           const theme = localStorage.getItem('theme');
           const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
           if (theme === 'dark' || (!theme && prefersDark)) document.documentElement.classList.add('dark');
-          if (localStorage.getItem('admin-sidebar') === 'collapsed') document.documentElement.classList.add('admin-sidebar-collapsed');
+          if (localStorage.getItem('admin-sidebar') === 'expanded') document.documentElement.classList.add('admin-sidebar-expanded');
         } catch {}
       })();
     </script>
     <style is:inline>
       @media (min-width: 1024px) {
         .admin-shell {
-          grid-template-columns: 280px minmax(0, 1fr);
+          grid-template-columns: 108px minmax(0, 1fr);
           transition: grid-template-columns 220ms ease;
         }
 
-        .admin-sidebar {
-          transition: opacity 180ms ease, transform 220ms ease, visibility 220ms ease;
+        .admin-sidebar-expanded .admin-shell {
+          grid-template-columns: 260px minmax(0, 1fr);
         }
 
+        .admin-sidebar,
         .admin-main {
           min-width: 0;
         }
 
-        .admin-sidebar-collapsed .admin-shell {
-          grid-template-columns: 0 minmax(0, 1fr);
+        .admin-nav-label {
+          display: none;
         }
 
-        .admin-sidebar-collapsed .admin-sidebar {
-          visibility: hidden;
-          opacity: 0;
-          transform: translateX(-24px);
-          pointer-events: none;
+        .admin-sidebar-expanded .admin-nav-label {
+          display: inline;
         }
+
+        .admin-sidebar-expanded .admin-brand {
+          flex-direction: row;
+          justify-content: flex-start;
+        }
+
+        .admin-sidebar-expanded .admin-nav-link {
+          justify-content: flex-start;
+        }
+      }
+
+      .admin-focus-mode .admin-sidebar,
+      .admin-focus-mode [data-admin-sidebar-toggle],
+      .admin-focus-mode [data-editor-aside] {
+        display: none !important;
+      }
+
+      .admin-focus-mode .admin-shell {
+        display: block;
+      }
+
+      .admin-focus-mode .admin-main {
+        max-width: 1040px;
+        margin: 0 auto;
       }
     </style>
   </head>
-  <body class="min-h-screen bg-zinc-100 text-zinc-950 antialiased dark:bg-zinc-950 dark:text-zinc-50">
+  <body class="min-h-screen bg-[#f6f6f3] text-zinc-950 antialiased dark:bg-zinc-950 dark:text-zinc-50">
     <div class="admin-shell min-h-screen lg:grid">
-      <aside class="admin-sidebar border-b border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-950 lg:sticky lg:top-0 lg:h-screen lg:overflow-hidden lg:border-b-0 lg:border-r lg:px-5 lg:py-6">
+      <aside class="admin-sidebar border-b border-zinc-200 bg-white/80 px-4 py-4 backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/80 lg:sticky lg:top-0 lg:h-screen lg:overflow-hidden lg:border-b-0 lg:border-r lg:px-4 lg:py-5">
         <div class="flex items-center justify-between gap-4 lg:block">
-          <a href="/admin/" class="flex items-center gap-3">
-            <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-600 text-white shadow-lg shadow-red-600/20">
+          <a href="/admin/" class="admin-brand flex items-center justify-center gap-3 lg:flex-col">
+            <span class="flex h-12 w-12 items-center justify-center rounded-3xl bg-red-600 text-white shadow-lg shadow-red-600/20">
               <img src="/favicon.svg" alt="" class="h-6 w-6" />
             </span>
-            <span>
+            <span class="admin-nav-label text-center">
               <span class="block text-sm font-black uppercase tracking-[0.18em]">Novo Alvo</span>
-              <span class="block text-[9px] font-black uppercase tracking-[0.24em] text-zinc-400">Redacao</span>
+              <span class="block text-[9px] font-black uppercase tracking-[0.24em] text-zinc-400">Redação</span>
             </span>
           </a>
-          <a href="/" class="rounded-full border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 lg:mt-8 lg:inline-flex">
+          <a href="/" class="admin-nav-label rounded-full border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 lg:mt-6 lg:inline-flex">
             Ver portal
           </a>
         </div>
@@ -95,32 +132,34 @@ const navItems = [
           {navItems.map((item) => (
             <a
               href={item.href}
-              class={`whitespace-nowrap rounded-2xl px-4 py-3 text-[10px] font-black uppercase tracking-widest transition lg:flex lg:w-full ${
+              title={item.label}
+              class={`admin-nav-link group whitespace-nowrap rounded-3xl px-4 py-3 text-[10px] font-black uppercase tracking-widest transition lg:flex lg:w-full lg:items-center lg:justify-center lg:gap-3 ${
                 active === item.id
-                  ? 'bg-red-600 text-white shadow-lg shadow-red-600/15'
-                  : 'bg-zinc-50 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-950 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50'
+                  ? 'bg-zinc-950 text-white shadow-lg shadow-zinc-950/10 dark:bg-white dark:text-zinc-950'
+                  : 'bg-zinc-50 text-zinc-500 hover:bg-white hover:text-zinc-950 hover:shadow-sm dark:bg-zinc-900/70 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-50'
               }`}
             >
-              {item.label}
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" set:html={iconPath[item.icon]} />
+              <span class="admin-nav-label">{item.label}</span>
             </a>
           ))}
         </nav>
 
-        <div class="mt-8 hidden rounded-3xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900 lg:block">
+        <div class="admin-nav-label mt-8 hidden rounded-3xl border border-zinc-200 bg-zinc-50/80 p-5 dark:border-zinc-800 dark:bg-zinc-900/80 lg:block">
           <p class="text-[9px] font-black uppercase tracking-[0.24em] text-zinc-400">Modo atual</p>
-          <p class="mt-2 text-sm font-bold text-zinc-700 dark:text-zinc-300">Estrutura inicial sem autenticacao. Ideal para desenhar fluxo editorial antes do CMS.</p>
+          <p class="mt-2 text-sm font-bold text-zinc-700 dark:text-zinc-300">Redação visual em evolução, pronta para conectar CMS e publicação em tempo real.</p>
         </div>
       </aside>
 
-      <main class="admin-main px-4 py-6 md:px-8 lg:px-10 lg:py-8">
+      <main class="admin-main px-4 py-6 md:px-8 lg:px-8 lg:py-7">
         <button
           type="button"
-          class="mb-5 hidden items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 shadow-sm transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-900 lg:inline-flex"
+          class="mb-5 hidden items-center gap-2 rounded-full border border-zinc-200 bg-white/90 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 shadow-sm backdrop-blur transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-900/90 lg:inline-flex"
           aria-label="Alternar menu lateral"
           data-admin-sidebar-toggle
         >
-          <span data-admin-sidebar-toggle-icon>←</span>
-          <span data-admin-sidebar-toggle-text>Esconder menu</span>
+          <span data-admin-sidebar-toggle-icon>→</span>
+          <span data-admin-sidebar-toggle-text>Expandir menu</span>
         </button>
         <slot />
       </main>
@@ -133,16 +172,16 @@ const navItems = [
         const icon = button.querySelector('[data-admin-sidebar-toggle-icon]');
 
         const render = () => {
-          const collapsed = document.documentElement.classList.contains('admin-sidebar-collapsed');
-          if (text) text.textContent = collapsed ? 'Mostrar menu' : 'Esconder menu';
-          if (icon) icon.textContent = collapsed ? '→' : '←';
-          button.setAttribute('aria-expanded', String(!collapsed));
+          const expanded = document.documentElement.classList.contains('admin-sidebar-expanded');
+          if (text) text.textContent = expanded ? 'Recolher menu' : 'Expandir menu';
+          if (icon) icon.textContent = expanded ? '←' : '→';
+          button.setAttribute('aria-expanded', String(expanded));
         };
 
         button.addEventListener('click', () => {
-          const collapsed = document.documentElement.classList.toggle('admin-sidebar-collapsed');
+          const expanded = document.documentElement.classList.toggle('admin-sidebar-expanded');
           try {
-            localStorage.setItem('admin-sidebar', collapsed ? 'collapsed' : 'expanded');
+            localStorage.setItem('admin-sidebar', expanded ? 'expanded' : 'compact');
           } catch {}
           render();
         });

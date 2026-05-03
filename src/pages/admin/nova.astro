@@ -3,239 +3,386 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 import { categoriesList, subCategoriesList } from '../../lib/news';
 
 const categories = [...categoriesList, ...subCategoriesList];
-const toolbarGroups = [
-  [
-    { label: 'H2', action: 'h2' },
-    { label: 'H3', action: 'h3' },
-    { label: 'B', action: 'bold' },
-    { label: 'I', action: 'italic' },
-  ],
-  [
-    { label: 'Lista', action: 'list' },
-    { label: 'Quote', action: 'quote' },
-    { label: 'Link', action: 'link' },
-    { label: 'Linha', action: 'divider' },
-  ],
-  [
-    { label: 'Imagem', action: 'image' },
-    { label: 'Carrossel', action: 'carousel' },
-    { label: 'Embed', action: 'embed' },
-    { label: 'Ponto', action: 'marker' },
-  ],
+
+const slashCommands = [
+  { command: '/h2', label: 'Subtítulo H2', action: 'h2', hint: 'Abre uma nova seção editorial' },
+  { command: '/h3', label: 'Intertítulo H3', action: 'h3', hint: 'Organiza um trecho curto' },
+  { command: '/quote', label: 'Citação', action: 'quote', hint: 'Destaca fala ou dado importante' },
+  { command: '/imagem', label: 'Imagem', action: 'image', hint: 'Insere a próxima imagem no texto' },
+  { command: '/youtube', label: 'YouTube', action: 'youtube', hint: 'Cole o link do vídeo' },
+  { command: '/tweet', label: 'Tweet / X', action: 'tweet', hint: 'Cole o link do post' },
+  { command: '/carrossel', label: 'Carrossel', action: 'carousel', hint: 'Cria bloco visual com múltiplas imagens' },
+  { command: '/embed', label: 'Embed', action: 'embed', hint: 'Insere URL ou iframe confiável' },
+];
+
+const aiActions = [
+  'Sugerir título',
+  'Resumir texto',
+  'Melhorar escrita',
+  'Gerar subtítulo',
+  'Criar chamada push',
+  'Legenda Instagram',
+  'SEO automático',
 ];
 ---
 
-<AdminLayout title="Nova materia | Admin Novo Alvo" active="new">
-  <section class="space-y-6">
-    <header class="rounded-[2rem] bg-white p-6 shadow-sm dark:bg-zinc-900">
-      <span class="text-[10px] font-black uppercase tracking-[0.35em] text-red-600">Editor</span>
-      <h1 class="mt-3 font-serif text-4xl font-black italic tracking-tighter md:text-5xl">Nova materia</h1>
-      <p class="mt-2 max-w-3xl text-sm font-medium leading-7 text-zinc-500 dark:text-zinc-400">
-        Editor editorial amplo, com ferramentas de Markdown, upload local otimizado e estrutura para imagens/carrossel. A proxima fase liga isso ao gerador real de arquivos.
-      </p>
-    </header>
+<AdminLayout title="Nova matéria | Admin Novo Alvo" active="new">
+  <form class="editor-studio grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_390px]">
+    <section class="min-w-0 space-y-6">
+      <header class="relative overflow-hidden rounded-[2.25rem] border border-white/70 bg-white/85 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-900/80">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="rounded-full bg-red-600 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.24em] text-white">Redação</span>
+            <span class="text-[11px] font-bold text-zinc-400" data-autosave-status>salvo agora</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" data-focus-mode class="rounded-full border border-zinc-200 bg-white px-4 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 shadow-sm transition hover:border-zinc-950 hover:text-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-white dark:hover:text-white">
+              Modo foco
+            </button>
+            <button type="button" class="rounded-full bg-zinc-950 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950">
+              Preview
+            </button>
+          </div>
+        </div>
 
-    <form class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-      <div class="space-y-6">
-        <section class="space-y-5 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <label class="block">
-            <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Titulo</span>
-            <input class="mt-2 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4 text-2xl font-black outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-950" placeholder="Titulo da materia" />
+        <label class="mt-8 block">
+          <span class="sr-only">Título</span>
+          <textarea
+            data-title-input
+            rows="1"
+            class="field-clean w-full resize-none bg-transparent font-serif text-5xl font-black italic leading-[0.95] tracking-tighter outline-none placeholder:text-zinc-300 md:text-7xl dark:placeholder:text-zinc-700"
+            placeholder="Título da matéria"
+          ></textarea>
+        </label>
+
+        <div class="mt-5 grid gap-3 text-[11px] font-black uppercase tracking-widest text-zinc-400 md:grid-cols-5">
+          <label class="rounded-2xl bg-zinc-50 px-4 py-3 dark:bg-zinc-950/70">
+            <span class="block text-[8px] text-zinc-300">Slug</span>
+            <input data-slug-input class="mt-1 w-full bg-transparent lowercase text-zinc-700 outline-none dark:text-zinc-200" placeholder="slug-automatico" />
           </label>
-          <label class="block">
-            <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Resumo editorial</span>
-            <textarea class="mt-2 min-h-24 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4 text-sm font-medium outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-950" placeholder="Resumo curto para chamadas, cards e redes sociais"></textarea>
-          </label>
-        </section>
-
-        <section class="overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <div class="border-b border-zinc-200 p-3 dark:border-zinc-800">
-            <div class="flex flex-wrap items-center gap-3">
-              {toolbarGroups.map((group) => (
-                <div class="flex rounded-2xl border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-800 dark:bg-zinc-950">
-                  {group.map((item) => (
-                    <button
-                      type="button"
-                      class="rounded-xl px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:bg-red-600 hover:text-white dark:text-zinc-400"
-                      data-md-action={item.action}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-              ))}
-              <div class="ml-auto hidden grid-cols-2 gap-3 text-center md:grid">
-                <div class="rounded-2xl border border-zinc-200 px-4 py-2 dark:border-zinc-800">
-                  <span class="block text-[8px] font-black uppercase tracking-widest text-zinc-400">Palavras</span>
-                  <strong class="font-serif text-xl font-black italic" data-word-count>0</strong>
-                </div>
-                <div class="rounded-2xl border border-zinc-200 px-4 py-2 dark:border-zinc-800">
-                  <span class="block text-[8px] font-black uppercase tracking-widest text-zinc-400">Leitura</span>
-                  <strong class="font-serif text-xl font-black italic"><span data-reading-time>0</span>m</strong>
-                </div>
-              </div>
-            </div>
-            <div class="mt-3 hidden items-center justify-between gap-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-200" data-media-toolbar>
-              <span class="text-[9px] font-black uppercase tracking-widest">Midia selecionada</span>
-              <div class="flex flex-wrap gap-2">
-                <button type="button" data-media-move="up" class="rounded-xl bg-white px-3 py-2 text-[8px] font-black uppercase tracking-widest shadow-sm dark:bg-zinc-900">Subir</button>
-                <button type="button" data-media-move="down" class="rounded-xl bg-white px-3 py-2 text-[8px] font-black uppercase tracking-widest shadow-sm dark:bg-zinc-900">Descer</button>
-                <button type="button" data-media-remove class="rounded-xl bg-red-600 px-3 py-2 text-[8px] font-black uppercase tracking-widest text-white">Remover</button>
-              </div>
-            </div>
-          </div>
-
-          <label class="block">
-            <span class="sr-only">Corpo da materia</span>
-            <div
-              data-editor-body
-              contenteditable="true"
-              data-placeholder="Escreva a materia aqui..."
-              class="min-h-[760px] w-full overflow-y-auto border-0 bg-zinc-50 px-6 py-6 text-lg leading-9 outline-none dark:bg-zinc-950 [&_.editor-insert-marker]:my-6 [&_.editor-insert-marker]:rounded-2xl [&_.editor-insert-marker]:border [&_.editor-insert-marker]:border-dashed [&_.editor-insert-marker]:border-red-300 [&_.editor-insert-marker]:bg-red-50 [&_.editor-insert-marker]:px-4 [&_.editor-insert-marker]:py-3 [&_.editor-insert-marker]:text-center [&_.editor-insert-marker]:text-[9px] [&_.editor-insert-marker]:font-black [&_.editor-insert-marker]:uppercase [&_.editor-insert-marker]:tracking-widest [&_.editor-insert-marker]:text-red-600 [&_[data-editor-media]]:my-8 [&_[data-editor-media]]:cursor-pointer [&_[data-editor-media]]:rounded-3xl [&_[data-editor-media]]:border [&_[data-editor-media]]:border-zinc-200 [&_[data-editor-media]]:bg-white [&_[data-editor-media]]:p-4 [&_[data-editor-media]]:shadow-sm [&_[data-editor-media].is-selected]:border-red-600 [&_[data-editor-media].is-selected]:ring-4 [&_[data-editor-media].is-selected]:ring-red-100 [&_a]:font-bold [&_a]:text-red-600 [&_blockquote]:border-l-4 [&_blockquote]:border-red-600 [&_blockquote]:pl-5 [&_blockquote]:italic [&_figcaption]:mt-2 [&_figcaption]:text-center [&_figcaption]:text-xs [&_figcaption]:italic [&_figcaption]:text-zinc-500 [&_h2]:mt-10 [&_h2]:font-serif [&_h2]:text-4xl [&_h2]:font-black [&_h2]:italic [&_h2]:tracking-tighter [&_h3]:mt-8 [&_h3]:text-2xl [&_h3]:font-black [&_hr]:my-10 [&_hr]:border-zinc-200 [&_img]:rounded-2xl [&_img]:shadow-lg [&_li]:my-2 [&_p]:my-5"
-            ></div>
-            <textarea data-editor-output class="hidden" aria-hidden="true"></textarea>
-          </label>
-        </section>
-
-        <section class="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-4">
-          <div class="space-y-4 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <h2 class="text-xs font-black uppercase tracking-[0.24em]">Imagem por URL</h2>
-            <input data-image-url class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="URL da imagem" />
-            <input data-image-alt class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="Alt/legenda da imagem" />
-            <button type="button" data-insert-image class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">
-              Inserir imagem
-            </button>
-          </div>
-
-          <div class="space-y-4 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <h2 class="text-xs font-black uppercase tracking-[0.24em]">Upload local</h2>
-            <label class="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-4 text-center transition hover:border-red-600 dark:border-zinc-700 dark:bg-zinc-950">
-              <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Selecionar imagem</span>
-              <span class="mt-2 text-xs text-zinc-400">JPG, PNG ou WebP</span>
-              <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" data-local-image />
-            </label>
-            <div class="hidden space-y-3" data-optimized-panel>
-              <img data-optimized-preview alt="" class="aspect-video w-full rounded-2xl object-cover" />
-              <div class="grid grid-cols-2 gap-3 text-center">
-                <div class="rounded-2xl bg-zinc-50 p-3 dark:bg-zinc-950">
-                  <span class="block text-[8px] font-black uppercase tracking-widest text-zinc-400">Original</span>
-                  <strong class="text-sm" data-original-size>0 KB</strong>
-                </div>
-                <div class="rounded-2xl bg-zinc-50 p-3 dark:bg-zinc-950">
-                  <span class="block text-[8px] font-black uppercase tracking-widest text-zinc-400">Otimizada</span>
-                  <strong class="text-sm" data-optimized-size>0 KB</strong>
-                </div>
-              </div>
-              <input data-optimized-path class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs dark:border-zinc-800 dark:bg-zinc-950" readonly />
-              <div class="grid grid-cols-2 gap-3">
-                <a data-download-optimized class="rounded-2xl border border-zinc-200 px-4 py-3 text-center text-[9px] font-black uppercase tracking-widest text-zinc-500 dark:border-zinc-800">Baixar</a>
-                <button type="button" data-insert-optimized class="rounded-2xl bg-red-600 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-white">Inserir</button>
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <button type="button" data-use-cover class="rounded-2xl border border-zinc-200 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">
-                  Usar capa
-                </button>
-                <button type="button" data-add-carousel class="rounded-2xl border border-zinc-200 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">
-                  Carrossel
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="space-y-4 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <h2 class="text-xs font-black uppercase tracking-[0.24em]">Carrossel</h2>
-            <p class="text-xs font-medium leading-6 text-zinc-500 dark:text-zinc-400">Use quando a materia tiver 3 ou mais imagens importantes.</p>
-            {[1, 2, 3].map((item) => (
-              <input data-carousel-image class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder={`Imagem ${item}`} />
-            ))}
-            <button type="button" data-insert-carousel class="w-full rounded-2xl bg-red-600 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-white">
-              Inserir carrossel
-            </button>
-          </div>
-
-          <div class="space-y-4 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <h2 class="text-xs font-black uppercase tracking-[0.24em]">Embed</h2>
-            <p class="text-xs font-medium leading-6 text-zinc-500 dark:text-zinc-400">Cole uma URL de video/post permitido ou um iframe confiavel.</p>
-            <input data-embed-url class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="URL ou iframe embed" />
-            <input data-embed-title class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="Titulo do embed" />
-            <button type="button" data-insert-embed class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">
-              Inserir embed
-            </button>
-          </div>
-        </section>
-      </div>
-
-      <aside class="space-y-5 xl:sticky xl:top-6 xl:h-fit">
-        <section class="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <h2 class="mb-4 text-xs font-black uppercase tracking-[0.24em]">Publicacao</h2>
-          <div class="mb-4 rounded-2xl bg-amber-50 p-4 dark:bg-amber-950/20">
-            <span class="text-[8px] font-black uppercase tracking-widest text-amber-600">Status atual</span>
-            <p class="mt-1 text-sm font-black" data-editor-status>Rascunho local</p>
-          </div>
-          <label class="mb-4 block">
-            <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Agendar para</span>
-            <input type="datetime-local" data-schedule-at class="mt-2 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-bold dark:border-zinc-800 dark:bg-zinc-950" />
-          </label>
-          <div class="grid gap-3">
-            <button type="button" data-save-draft class="rounded-2xl border border-zinc-200 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">
-              Salvar rascunho
-            </button>
-            <button type="button" data-schedule-post class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-700 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200">
-              Agendar publicacao
-            </button>
-            <button type="button" data-publish-now class="rounded-2xl bg-red-600 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-white">
-              Publicar agora
-            </button>
-          </div>
-        </section>
-
-        <section class="space-y-4 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <h2 class="text-xs font-black uppercase tracking-[0.24em]">Classificacao</h2>
-          <label class="block">
-            <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Categoria</span>
-            <select class="mt-2 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-bold dark:border-zinc-800 dark:bg-zinc-950">
+          <label class="rounded-2xl bg-zinc-50 px-4 py-3 dark:bg-zinc-950/70">
+            <span class="block text-[8px] text-zinc-300">Categoria</span>
+            <select data-category-input class="mt-1 w-full bg-transparent text-zinc-700 outline-none dark:text-zinc-200">
               {categories.map((category) => <option>{category}</option>)}
             </select>
           </label>
-          <div class="grid grid-cols-2 gap-3">
-            <label class="flex items-center gap-2 rounded-2xl border border-zinc-200 p-3 text-[10px] font-black uppercase tracking-widest dark:border-zinc-800">
-              <input type="checkbox" /> Destaque
-            </label>
-            <label class="flex items-center gap-2 rounded-2xl border border-zinc-200 p-3 text-[10px] font-black uppercase tracking-widest dark:border-zinc-800">
-              <input type="checkbox" /> Urgente
-            </label>
+          <label class="rounded-2xl bg-zinc-50 px-4 py-3 dark:bg-zinc-950/70">
+            <span class="block text-[8px] text-zinc-300">Autor</span>
+            <input class="mt-1 w-full bg-transparent text-zinc-700 outline-none dark:text-zinc-200" value="Redação Novo Alvo" />
+          </label>
+          <div class="rounded-2xl bg-zinc-50 px-4 py-3 dark:bg-zinc-950/70">
+            <span class="block text-[8px] text-zinc-300">Status</span>
+            <strong class="mt-1 block text-zinc-700 dark:text-zinc-200" data-editor-status>Rascunho</strong>
           </div>
-        </section>
+          <div class="rounded-2xl bg-zinc-50 px-4 py-3 dark:bg-zinc-950/70">
+            <span class="block text-[8px] text-zinc-300">Data</span>
+            <strong class="mt-1 block text-zinc-700 dark:text-zinc-200" data-current-date>Hoje</strong>
+          </div>
+        </div>
+      </header>
 
-        <section class="space-y-4 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <h2 class="text-xs font-black uppercase tracking-[0.24em]">Capa e SEO</h2>
-          <input data-cover-url class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="URL da imagem de capa" />
-          <input data-cover-alt class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="Texto alternativo" />
-          <textarea class="min-h-32 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="Descricao SEO"></textarea>
-        </section>
+      <section class="relative overflow-hidden rounded-[2.25rem] border border-white/70 bg-white/90 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-900/80">
+        <div class="flex flex-wrap items-center gap-3 border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
+          <div class="flex items-center gap-2 rounded-full bg-zinc-50 p-1 dark:bg-zinc-950">
+            {['bold', 'italic', 'link', 'quote', 'highlight', 'comment'].map((action) => (
+              <button type="button" data-format={action} class="rounded-full px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:bg-white hover:text-red-600 hover:shadow-sm dark:hover:bg-zinc-900">
+                {action === 'bold' ? 'B' : action === 'italic' ? 'I' : action === 'link' ? 'Link' : action === 'quote' ? 'Quote' : action === 'highlight' ? 'Destaque' : 'Comentário'}
+              </button>
+            ))}
+          </div>
+          <div class="ml-auto text-[11px] font-bold text-zinc-400" data-editor-stats>
+            0 palavras • leitura de 0 min • SEO inicial
+          </div>
+        </div>
 
-        <section class="space-y-4 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <h2 class="text-xs font-black uppercase tracking-[0.24em]">Fontes</h2>
-          <p class="text-xs font-medium leading-6 text-zinc-500 dark:text-zinc-400">
-            Cadastre as fontes aqui. Elas ficam separadas do texto e aparecem no fim da materia.
-          </p>
-          <input data-source-name class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="Nome da fonte" />
-          <input data-source-url class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950" placeholder="URL opcional" />
-          <button type="button" data-add-source class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">
-            Adicionar fonte
-          </button>
-          <div class="space-y-2" data-source-list></div>
-          <textarea data-sources-output class="hidden" aria-hidden="true"></textarea>
-        </section>
-      </aside>
-    </form>
-  </section>
+        <div
+          data-floating-toolbar
+          class="pointer-events-auto fixed z-50 hidden -translate-x-1/2 rounded-full border border-zinc-200 bg-zinc-950 p-1 text-white shadow-2xl shadow-zinc-950/20 dark:border-zinc-700"
+        >
+          {['bold', 'italic', 'link', 'quote', 'highlight', 'comment'].map((action) => (
+            <button type="button" data-format={action} class="rounded-full px-3 py-2 text-[9px] font-black uppercase tracking-widest transition hover:bg-white hover:text-zinc-950">
+              {action === 'bold' ? 'B' : action === 'italic' ? 'I' : action === 'link' ? 'Link' : action === 'quote' ? 'Quote' : action === 'highlight' ? 'Mark' : 'Nota'}
+            </button>
+          ))}
+        </div>
+
+        <div
+          data-slash-palette
+          class="absolute left-8 top-24 z-30 hidden w-[min(420px,calc(100%-4rem))] overflow-hidden rounded-3xl border border-zinc-200 bg-white p-2 shadow-2xl shadow-zinc-950/10 dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          {slashCommands.map((item) => (
+            <button type="button" data-slash-action={item.action} class="flex w-full items-center justify-between gap-4 rounded-2xl px-4 py-3 text-left transition hover:bg-zinc-50 dark:hover:bg-zinc-900">
+              <span>
+                <span class="block text-sm font-black text-zinc-950 dark:text-zinc-50">{item.label}</span>
+                <span class="block text-xs font-medium text-zinc-400">{item.command} • {item.hint}</span>
+              </span>
+              <span class="text-red-600">↵</span>
+            </button>
+          ))}
+        </div>
+
+        <label class="block">
+          <span class="sr-only">Resumo editorial</span>
+          <textarea data-summary-input class="field-clean w-full resize-none bg-transparent px-8 pt-8 text-xl font-medium leading-8 text-zinc-500 outline-none placeholder:text-zinc-300 dark:text-zinc-400 dark:placeholder:text-zinc-700" rows="2" placeholder="Escreva um resumo forte para cards, SEO e redes sociais"></textarea>
+        </label>
+
+        <div
+          data-editor-body
+          contenteditable="true"
+          data-placeholder='Digite "/" para inserir blocos, imagens, carrossel ou embeds...'
+          class="editor-canvas min-h-[760px] px-8 pb-14 pt-5 text-xl leading-9 outline-none"
+        ></div>
+        <textarea data-editor-output class="hidden" aria-hidden="true"></textarea>
+      </section>
+
+      <section class="grid gap-4 md:grid-cols-3">
+        <label data-drop-zone class="group flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-[2rem] border border-dashed border-zinc-300 bg-white/70 p-6 text-center shadow-sm transition hover:border-red-600 hover:bg-white dark:border-zinc-700 dark:bg-zinc-900/70">
+          <span class="text-sm font-black text-zinc-950 dark:text-zinc-50">Solte imagens aqui</span>
+          <span class="mt-2 max-w-56 text-xs font-medium leading-6 text-zinc-400">Upload com preview, compressão WebP e inserção no ponto do texto.</span>
+          <input type="file" accept="image/jpeg,image/png,image/webp" multiple class="sr-only" data-local-image />
+        </label>
+
+        <div class="rounded-[2rem] bg-white/80 p-5 shadow-sm dark:bg-zinc-900/80 md:col-span-2">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-black uppercase tracking-[0.24em]">Mídia da matéria</h2>
+            <button type="button" data-insert-carousel class="rounded-full bg-red-600 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white">Criar carrossel</button>
+          </div>
+          <div data-media-list class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"></div>
+          <p class="mt-4 text-xs font-medium text-zinc-400">Arraste mentalmente por enquanto: use subir/descer nos blocos inseridos no texto. Reorder real entra quando conectarmos o CMS.</p>
+        </div>
+      </section>
+    </section>
+
+    <aside data-editor-aside class="space-y-4 xl:sticky xl:top-7 xl:h-[calc(100vh-3.5rem)] xl:overflow-y-auto xl:pr-1">
+      <section class="rounded-[2rem] bg-zinc-950 p-5 text-white shadow-2xl shadow-zinc-950/20 dark:bg-white dark:text-zinc-950">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <h2 class="text-sm font-black uppercase tracking-[0.24em]">Publicação</h2>
+            <p class="mt-2 text-xs font-medium text-white/50 dark:text-zinc-500" data-autosave-detail>Autosave ativo</p>
+          </div>
+          <span class="rounded-full bg-emerald-400/15 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-emerald-300 dark:text-emerald-600">Online</span>
+        </div>
+        <div class="mt-5 grid gap-2">
+          <button type="button" data-save-draft class="rounded-2xl bg-white/10 px-4 py-3 text-[10px] font-black uppercase tracking-widest transition hover:bg-white hover:text-zinc-950 dark:bg-zinc-100 dark:hover:bg-zinc-950 dark:hover:text-white">Salvar rascunho</button>
+          <button type="button" data-publish-now class="rounded-2xl bg-red-600 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white transition hover:bg-red-500">Publicar agora</button>
+          <label class="rounded-2xl bg-white/10 p-3 dark:bg-zinc-100">
+            <span class="text-[8px] font-black uppercase tracking-widest text-white/40 dark:text-zinc-400">Agendar</span>
+            <input type="datetime-local" data-schedule-at class="mt-2 w-full bg-transparent text-xs font-bold outline-none" />
+          </label>
+          <button type="button" data-schedule-post class="rounded-2xl border border-white/15 px-4 py-3 text-[10px] font-black uppercase tracking-widest transition hover:border-white/50 dark:border-zinc-200">Confirmar agendamento</button>
+        </div>
+      </section>
+
+      <section class="editor-panel">
+        <h2>SEO</h2>
+        <textarea data-seo-description class="input-soft min-h-28" placeholder="Descrição SEO"></textarea>
+        <input data-keywords-input class="input-soft" placeholder="Palavras-chave separadas por vírgula" />
+        <div class="rounded-2xl bg-white p-4 shadow-sm dark:bg-zinc-950">
+          <span class="text-[10px] text-blue-600">portalnovoalvo.com.br</span>
+          <strong class="mt-1 block text-sm text-zinc-900 dark:text-zinc-50" data-google-title>Portal Novo Alvo - título da matéria</strong>
+          <p class="mt-1 line-clamp-2 text-xs leading-5 text-zinc-500" data-google-description>Prévia Google será montada com título e descrição.</p>
+        </div>
+        <div class="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+          <div class="h-full w-1/3 rounded-full bg-amber-400 transition-all" data-seo-bar></div>
+        </div>
+      </section>
+
+      <section class="editor-panel">
+        <h2>Capa</h2>
+        <label data-cover-drop class="group flex aspect-video cursor-pointer flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed border-zinc-300 bg-white text-center dark:border-zinc-700 dark:bg-zinc-950">
+          <img data-cover-preview alt="" class="hidden h-full w-full object-cover" />
+          <span data-cover-empty class="px-6 text-xs font-black uppercase tracking-widest text-zinc-400">Upload ou soltar capa</span>
+          <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" data-cover-file />
+        </label>
+        <input data-cover-url class="input-soft" placeholder="URL da capa" />
+        <input data-cover-alt class="input-soft" placeholder="Alt text da capa" />
+      </section>
+
+      <section class="editor-panel">
+        <h2>Tags</h2>
+        <div class="flex gap-2">
+          <input data-tag-input class="input-soft" placeholder="Adicionar tag" />
+          <button type="button" data-add-tag class="rounded-2xl bg-zinc-950 px-4 text-[9px] font-black uppercase tracking-widest text-white dark:bg-white dark:text-zinc-950">Add</button>
+        </div>
+        <div data-tag-list class="flex flex-wrap gap-2"></div>
+      </section>
+
+      <section class="editor-panel">
+        <h2>Fontes</h2>
+        <input data-source-name class="input-soft" placeholder="Nome da fonte" />
+        <input data-source-url class="input-soft" placeholder="URL" />
+        <textarea data-source-note class="input-soft min-h-20" placeholder="Observação editorial"></textarea>
+        <button type="button" data-add-source class="rounded-2xl border border-zinc-200 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">Adicionar fonte</button>
+        <div data-source-list class="space-y-2"></div>
+        <textarea data-sources-output class="hidden" aria-hidden="true"></textarea>
+      </section>
+
+      <section class="editor-panel">
+        <h2>IA editorial</h2>
+        <div class="grid gap-2">
+          {aiActions.map((action) => (
+            <button type="button" data-ai-action={action} class="rounded-2xl bg-white px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-zinc-600 transition hover:bg-red-600 hover:text-white dark:bg-zinc-950 dark:text-zinc-300">
+              {action}
+            </button>
+          ))}
+        </div>
+      </section>
+    </aside>
+  </form>
 
   <style is:inline>
+    .field-clean {
+      scrollbar-width: none;
+    }
+
+    .field-clean::-webkit-scrollbar {
+      display: none;
+    }
+
+    .input-soft {
+      width: 100%;
+      border-radius: 1rem;
+      border: 1px solid rgb(228 228 231);
+      background: rgba(255, 255, 255, 0.75);
+      padding: 0.85rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      outline: none;
+    }
+
+    .dark .input-soft {
+      border-color: rgb(39 39 42);
+      background: rgba(9, 9, 11, 0.75);
+    }
+
+    .editor-panel {
+      border: 1px solid rgba(228, 228, 231, 0.8);
+      border-radius: 2rem;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 16px 50px rgba(15, 23, 42, 0.06);
+      display: grid;
+      gap: 0.85rem;
+      padding: 1.25rem;
+    }
+
+    .dark .editor-panel {
+      border-color: rgb(39 39 42);
+      background: rgba(24, 24, 27, 0.76);
+    }
+
+    .editor-panel h2 {
+      font-size: 0.75rem;
+      font-weight: 900;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+    }
+
     [data-editor-body]:empty::before {
       color: rgb(161 161 170);
       content: attr(data-placeholder);
       pointer-events: none;
+    }
+
+    .editor-canvas {
+      color: rgb(39 39 42);
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .dark .editor-canvas {
+      color: rgb(228 228 231);
+    }
+
+    .editor-canvas p {
+      margin: 1.4rem 0;
+    }
+
+    .editor-canvas h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(2.3rem, 4vw, 3.6rem);
+      font-style: italic;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin: 4rem 0 1.5rem;
+    }
+
+    .editor-canvas h3 {
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 1.55rem;
+      font-weight: 900;
+      margin: 3rem 0 1rem;
+    }
+
+    .editor-canvas blockquote {
+      border-left: 4px solid rgb(220 38 38);
+      color: rgb(82 82 91);
+      font-size: 1.45rem;
+      font-style: italic;
+      margin: 2.5rem 0;
+      padding-left: 1.5rem;
+    }
+
+    .editor-canvas mark {
+      border-radius: 0.45rem;
+      background: rgb(254 240 138);
+      padding: 0.05rem 0.28rem;
+    }
+
+    .editor-canvas [data-editor-media] {
+      border: 1px solid rgb(228 228 231);
+      border-radius: 1.75rem;
+      background: white;
+      cursor: pointer;
+      margin: 2.5rem 0;
+      padding: 1rem;
+      box-shadow: 0 18px 55px rgba(15, 23, 42, 0.08);
+    }
+
+    .dark .editor-canvas [data-editor-media] {
+      border-color: rgb(39 39 42);
+      background: rgb(9 9 11);
+    }
+
+    .editor-canvas [data-editor-media].is-selected {
+      border-color: rgb(220 38 38);
+      box-shadow: 0 0 0 5px rgba(220, 38, 38, 0.12);
+    }
+
+    .editor-canvas img {
+      border-radius: 1.25rem;
+      display: block;
+      width: 100%;
+    }
+
+    .editor-canvas figcaption {
+      color: rgb(113 113 122);
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.8rem;
+      font-style: italic;
+      margin-top: 0.65rem;
+      text-align: center;
+    }
+
+    .editor-canvas .editor-note {
+      border-radius: 1rem;
+      background: rgb(254 242 242);
+      color: rgb(185 28 28);
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.85rem;
+      font-weight: 800;
+      padding: 0.9rem 1rem;
+    }
+
+    .editor-canvas .embed-card {
+      border-radius: 1.25rem;
+      border: 1px solid rgb(228 228 231);
+      display: block;
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.8rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      padding: 1.1rem;
+      text-transform: uppercase;
     }
   </style>
 
@@ -245,29 +392,58 @@ const toolbarGroups = [
       if (!editor) return;
 
       const output = document.querySelector('[data-editor-output]');
-      const wordCount = document.querySelector('[data-word-count]');
-      const readingTime = document.querySelector('[data-reading-time]');
+      const titleInput = document.querySelector('[data-title-input]');
+      const slugInput = document.querySelector('[data-slug-input]');
+      const summaryInput = document.querySelector('[data-summary-input]');
+      const stats = document.querySelector('[data-editor-stats]');
       const status = document.querySelector('[data-editor-status]');
-      const mediaToolbar = document.querySelector('[data-media-toolbar]');
+      const floatingToolbar = document.querySelector('[data-floating-toolbar]');
+      const slashPalette = document.querySelector('[data-slash-palette]');
+      const autosave = document.querySelector('[data-autosave-status]');
+      const autosaveDetail = document.querySelector('[data-autosave-detail]');
+      const mediaList = document.querySelector('[data-media-list]');
       const sourcesOutput = document.querySelector('[data-sources-output]');
       const sourceList = document.querySelector('[data-source-list]');
+      const tagList = document.querySelector('[data-tag-list]');
+      const googleTitle = document.querySelector('[data-google-title]');
+      const googleDescription = document.querySelector('[data-google-description]');
+      const seoBar = document.querySelector('[data-seo-bar]');
 
       let savedRange = null;
       let selectedMedia = null;
+      let autosaveTimer = null;
+      const mediaItems = [];
       const sources = [];
+      const tags = [];
+
       const escapeHtml = (value) =>
-        String(value)
+        String(value || '')
           .replace(/&/g, '&amp;')
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;')
           .replace(/"/g, '&quot;')
           .replace(/'/g, '&#039;');
+
+      const slugify = (value) =>
+        String(value || '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .slice(0, 90);
+
+      const setStatus = (value) => {
+        if (status) status.textContent = value;
+      };
+
       const saveSelection = () => {
         const selection = window.getSelection();
         if (!selection || selection.rangeCount === 0) return;
         const range = selection.getRangeAt(0);
         if (editor.contains(range.commonAncestorContainer)) savedRange = range.cloneRange();
       };
+
       const restoreSelection = () => {
         editor.focus();
         if (!savedRange) return;
@@ -275,129 +451,118 @@ const toolbarGroups = [
         selection?.removeAllRanges();
         selection?.addRange(savedRange);
       };
-      const syncOutput = () => {
-        if (output) output.value = editor.innerHTML.trim();
-        if (sourcesOutput) sourcesOutput.value = JSON.stringify(sources);
-      };
-      const runEditorCommand = (command, value = null) => {
+
+      const runCommand = (command, value = null) => {
         const commandRunner = Reflect.get(document, 'execCommand')?.bind(document);
         if (!commandRunner) return false;
         return commandRunner(command, false, value);
       };
+
       const insertHtml = (html) => {
         restoreSelection();
-        runEditorCommand('insertHTML', html);
-        updateStats();
+        runCommand('insertHTML', html);
+        updateEditorState();
       };
-      const createImageBlock = (url, alt) =>
-        `<figure data-editor-media="image" contenteditable="false"><img src="${escapeHtml(url)}" alt="${escapeHtml(alt)}" /><figcaption>${escapeHtml(alt)}</figcaption></figure><p><br></p>`;
-      const createEmbedBlock = (rawValue, title) => {
-        const value = rawValue.trim();
-        const safeTitle = escapeHtml(title || 'Embed editorial');
-        if (value.startsWith('<iframe')) {
-          return `<div data-editor-media="embed" contenteditable="false">${value}</div><p><br></p>`;
+
+      const syncOutput = () => {
+        if (output) output.value = editor.innerHTML.trim();
+        if (sourcesOutput) sourcesOutput.value = JSON.stringify(sources);
+      };
+
+      const scoreSeo = (words) => {
+        let score = 20;
+        if ((titleInput?.value || '').length >= 35) score += 20;
+        if ((summaryInput?.value || '').length >= 80) score += 15;
+        if (words >= 450) score += 20;
+        if (tags.length >= 3) score += 10;
+        if (sources.length >= 1) score += 10;
+        if (mediaItems.length >= 1) score += 5;
+        return Math.min(100, score);
+      };
+
+      const updateEditorState = () => {
+        const words = editor.innerText.trim().split(/\s+/).filter(Boolean).length;
+        const reading = Math.max(0, Math.ceil(words / 220));
+        const seo = scoreSeo(words);
+        const seoText = seo >= 75 ? 'SEO bom' : seo >= 50 ? 'SEO em ajuste' : 'SEO inicial';
+        if (stats) stats.textContent = `${words.toLocaleString('pt-BR')} palavras • leitura de ${reading} min • ${seoText}`;
+        if (seoBar) {
+          seoBar.style.width = `${seo}%`;
+          seoBar.className = `h-full rounded-full transition-all ${seo >= 75 ? 'bg-emerald-500' : seo >= 50 ? 'bg-amber-400' : 'bg-red-500'}`;
         }
-        return `<div data-editor-media="embed" contenteditable="false"><a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer" class="block rounded-2xl border border-zinc-200 p-5 text-sm font-black uppercase tracking-widest text-red-600">${safeTitle}</a></div><p><br></p>`;
+        if (googleTitle) googleTitle.textContent = titleInput?.value ? `Portal Novo Alvo - ${titleInput.value}` : 'Portal Novo Alvo - título da matéria';
+        if (googleDescription) googleDescription.textContent = document.querySelector('[data-seo-description]')?.value || summaryInput?.value || 'Prévia Google será montada com título e descrição.';
+        syncOutput();
+        scheduleAutosave();
       };
+
+      const scheduleAutosave = () => {
+        if (autosave) autosave.textContent = 'salvando...';
+        window.clearTimeout(autosaveTimer);
+        autosaveTimer = window.setTimeout(() => {
+          if (autosave) autosave.textContent = 'salvo agora';
+          if (autosaveDetail) autosaveDetail.textContent = 'Autosave local há poucos segundos';
+        }, 700);
+      };
+
       const setSelectedMedia = (media) => {
         selectedMedia?.classList.remove('is-selected');
         selectedMedia = media;
         selectedMedia?.classList.add('is-selected');
-        mediaToolbar?.classList.toggle('hidden', !selectedMedia);
-        mediaToolbar?.classList.toggle('flex', Boolean(selectedMedia));
       };
 
-      const updateStats = () => {
-        const words = editor.innerText.trim().split(/\s+/).filter(Boolean).length;
-        if (wordCount) wordCount.textContent = String(words);
-        if (readingTime) readingTime.textContent = String(Math.max(0, Math.ceil(words / 220)));
-        syncOutput();
+      const createImageBlock = (url, alt) =>
+        `<figure data-editor-media="image" contenteditable="false"><img src="${escapeHtml(url)}" alt="${escapeHtml(alt)}" /><figcaption>${escapeHtml(alt)}</figcaption></figure><p><br></p>`;
+
+      const createCarouselBlock = () => {
+        const items = mediaItems.slice(0, 8);
+        if (items.length < 2) return '';
+        return `<section data-editor-media="carousel" contenteditable="false"><div class="grid gap-3 md:grid-cols-2">${items
+          .map((item) => `<figure><img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.alt)}" /><figcaption>${escapeHtml(item.alt)}</figcaption></figure>`)
+          .join('')}</div></section><p><br></p>`;
       };
 
-      const toKb = (bytes) => `${Math.max(1, Math.round(bytes / 1024)).toLocaleString('pt-BR')} KB`;
-      const setStatus = (value) => {
-        if (status) status.textContent = value;
+      const getYoutubeEmbed = (url) => {
+        const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]+)/);
+        return match ? `https://www.youtube.com/embed/${match[1]}` : '';
       };
-      const slugifyFile = (name) =>
-        name
-          .replace(/\.[^.]+$/, '')
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '')
-          .slice(0, 72);
 
-      document.querySelectorAll('[data-md-action]').forEach((button) => {
-        button.addEventListener('click', () => {
-          const action = button.dataset.mdAction;
-          if (action === 'image') {
-            saveSelection();
-            document.querySelector('[data-image-url]')?.focus();
-            return;
-          }
-          if (action === 'carousel') {
-            saveSelection();
-            document.querySelector('[data-carousel-image]')?.focus();
-            return;
-          }
-          if (action === 'embed') {
-            saveSelection();
-            document.querySelector('[data-embed-url]')?.focus();
-            return;
-          }
-          restoreSelection();
-          if (action === 'h2') runEditorCommand('formatBlock', 'h2');
-          if (action === 'h3') runEditorCommand('formatBlock', 'h3');
-          if (action === 'bold') runEditorCommand('bold');
-          if (action === 'italic') runEditorCommand('italic');
-          if (action === 'list') runEditorCommand('insertUnorderedList');
-          if (action === 'quote') runEditorCommand('formatBlock', 'blockquote');
-          if (action === 'divider') runEditorCommand('insertHorizontalRule');
-          if (action === 'link') {
-            const url = window.prompt('URL do link');
-            if (url) runEditorCommand('createLink', url);
-          }
-          if (action === 'marker') {
-            insertHtml('<p class="editor-insert-marker">Ponto de insercao de midia</p>');
-          }
-          updateStats();
-          saveSelection();
-        });
-      });
+      const createEmbedBlock = (rawUrl, label = 'Embed editorial') => {
+        const value = rawUrl.trim();
+        const youtube = getYoutubeEmbed(value);
+        if (youtube) {
+          return `<div data-editor-media="embed" contenteditable="false"><iframe src="${youtube}" title="${escapeHtml(label)}" loading="lazy" allowfullscreen class="aspect-video w-full rounded-2xl"></iframe></div><p><br></p>`;
+        }
+        if (value.startsWith('<iframe')) {
+          return `<div data-editor-media="embed" contenteditable="false">${value}</div><p><br></p>`;
+        }
+        return `<div data-editor-media="embed" contenteditable="false"><a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer" class="embed-card">${escapeHtml(label)} • abrir publicação</a></div><p><br></p>`;
+      };
 
-      document.querySelector('[data-insert-image]')?.addEventListener('click', () => {
-        const url = document.querySelector('[data-image-url]')?.value.trim();
-        const alt = document.querySelector('[data-image-alt]')?.value.trim() || 'Imagem da materia';
-        if (!url) return;
-        insertHtml(createImageBlock(url, alt));
-        setStatus('Imagem inserida no ponto selecionado');
-      });
-
-      document.querySelector('[data-insert-carousel]')?.addEventListener('click', () => {
-        const images = Array.from(document.querySelectorAll('[data-carousel-image]'))
-          .map((input) => input.value.trim())
-          .filter(Boolean);
-        if (images.length < 3) return;
-        const items = images
-          .map((url, index) => `<figure><img src="${escapeHtml(url)}" alt="Imagem ${index + 1}" /><figcaption>Imagem ${index + 1}</figcaption></figure>`)
+      const renderMediaList = () => {
+        if (!mediaList) return;
+        mediaList.innerHTML = mediaItems
+          .map(
+            (item, index) => `
+              <article class="group overflow-hidden rounded-3xl bg-zinc-50 p-2 dark:bg-zinc-950">
+                <img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.alt)}" class="aspect-video w-full rounded-2xl object-cover" />
+                <div class="mt-2 flex gap-2">
+                  <button type="button" data-insert-media="${index}" class="flex-1 rounded-full bg-white px-3 py-2 text-[8px] font-black uppercase tracking-widest text-zinc-600 shadow-sm dark:bg-zinc-900">Inserir</button>
+                  <button type="button" data-cover-media="${index}" class="flex-1 rounded-full bg-red-600 px-3 py-2 text-[8px] font-black uppercase tracking-widest text-white">Capa</button>
+                </div>
+              </article>
+            `
+          )
           .join('');
-        insertHtml(`<section data-editor-media="carousel" contenteditable="false"><p class="mb-3 text-xs font-black uppercase tracking-widest text-red-600">Carrossel editorial</p><div class="grid gap-3 md:grid-cols-3">${items}</div></section><p><br></p>`);
-        setStatus('Carrossel inserido no ponto selecionado');
-      });
+      };
 
-      document.querySelector('[data-insert-embed]')?.addEventListener('click', () => {
-        const value = document.querySelector('[data-embed-url]')?.value.trim();
-        const title = document.querySelector('[data-embed-title]')?.value.trim();
-        if (!value) return;
-        insertHtml(createEmbedBlock(value, title));
-        setStatus('Embed inserido no ponto selecionado');
-      });
+      const addMedia = (url, alt) => {
+        mediaItems.push({ url, alt: alt || 'Imagem editorial' });
+        renderMediaList();
+        updateEditorState();
+      };
 
-      document.querySelector('[data-local-image]')?.addEventListener('change', async (event) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
+      const compressImage = async (file) => {
         const image = await createImageBitmap(file);
         const maxWidth = 1800;
         const ratio = Math.min(1, maxWidth / image.width);
@@ -407,130 +572,218 @@ const toolbarGroups = [
         canvas.width = width;
         canvas.height = height;
         canvas.getContext('2d')?.drawImage(image, 0, 0, width, height);
+        const blob = await new Promise((resolve) => canvas.toBlob((result) => resolve(result), 'image/webp', 0.86));
+        const url = blob ? URL.createObjectURL(blob) : URL.createObjectURL(file);
+        addMedia(url, file.name.replace(/\.[^.]+$/, ''));
+        setStatus('Imagem otimizada');
+      };
 
-        const blob = await new Promise((resolve) => {
-          canvas.toBlob((result) => resolve(result), 'image/webp', 0.86);
+      const applyFormat = (action) => {
+        restoreSelection();
+        if (action === 'bold') runCommand('bold');
+        if (action === 'italic') runCommand('italic');
+        if (action === 'link') {
+          const url = window.prompt('URL do link');
+          if (url) runCommand('createLink', url);
+        }
+        if (action === 'quote') runCommand('formatBlock', 'blockquote');
+        if (action === 'highlight') runCommand('backColor', '#fef08a');
+        if (action === 'comment') insertHtml('<span class="editor-note">Comentário editorial</span>');
+        updateEditorState();
+      };
+
+      const runSlashAction = (action) => {
+        slashPalette?.classList.add('hidden');
+        if (action === 'h2') insertHtml('<h2>Novo subtítulo</h2>');
+        if (action === 'h3') insertHtml('<h3>Novo intertítulo</h3>');
+        if (action === 'quote') insertHtml('<blockquote>Citação ou dado relevante</blockquote>');
+        if (action === 'image') {
+          const item = mediaItems.at(-1);
+          if (item) insertHtml(createImageBlock(item.url, item.alt));
+        }
+        if (action === 'youtube' || action === 'tweet' || action === 'embed') {
+          const url = window.prompt('Cole a URL');
+          if (url) insertHtml(createEmbedBlock(url, action === 'youtube' ? 'YouTube' : action === 'tweet' ? 'Post no X' : 'Embed editorial'));
+        }
+        if (action === 'carousel') {
+          const carousel = createCarouselBlock();
+          if (carousel) insertHtml(carousel);
+        }
+      };
+
+      document.querySelectorAll('[data-format]').forEach((button) => {
+        button.addEventListener('click', () => applyFormat(button.dataset.format));
+      });
+
+      document.querySelectorAll('[data-slash-action]').forEach((button) => {
+        button.addEventListener('click', () => runSlashAction(button.dataset.slashAction));
+      });
+
+      editor.addEventListener('input', () => {
+        const text = editor.innerText.trimEnd();
+        slashPalette?.classList.toggle('hidden', !text.endsWith('/'));
+        updateEditorState();
+      });
+      editor.addEventListener('keyup', saveSelection);
+      editor.addEventListener('mouseup', saveSelection);
+      editor.addEventListener('focus', saveSelection);
+      editor.addEventListener('click', (event) => {
+        const media = event.target.closest('[data-editor-media]');
+        setSelectedMedia(media && editor.contains(media) ? media : null);
+      });
+      editor.addEventListener('paste', (event) => {
+        const text = event.clipboardData?.getData('text/plain') || '';
+        if (/https?:\/\/\S+/.test(text) && /(youtube|youtu\.be|twitter|x\.com|instagram|tiktok)/i.test(text)) {
+          event.preventDefault();
+          insertHtml(createEmbedBlock(text, 'Embed social'));
+        } else {
+          window.setTimeout(updateEditorState, 0);
+        }
+      });
+
+      document.addEventListener('selectionchange', () => {
+        const selection = window.getSelection();
+        if (!selection || selection.isCollapsed || !editor.contains(selection.anchorNode)) {
+          floatingToolbar?.classList.add('hidden');
+          return;
+        }
+        const rect = selection.getRangeAt(0).getBoundingClientRect();
+        if (!rect.width) return;
+        floatingToolbar.style.left = `${rect.left + rect.width / 2}px`;
+        floatingToolbar.style.top = `${Math.max(12, rect.top - 54)}px`;
+        floatingToolbar?.classList.remove('hidden');
+        saveSelection();
+      });
+
+      titleInput?.addEventListener('input', () => {
+        titleInput.style.height = 'auto';
+        titleInput.style.height = `${titleInput.scrollHeight}px`;
+        if (slugInput && !slugInput.dataset.edited) slugInput.value = slugify(titleInput.value);
+        updateEditorState();
+      });
+      slugInput?.addEventListener('input', () => {
+        slugInput.dataset.edited = 'true';
+      });
+      summaryInput?.addEventListener('input', updateEditorState);
+      document.querySelector('[data-seo-description]')?.addEventListener('input', updateEditorState);
+
+      document.querySelector('[data-local-image]')?.addEventListener('change', async (event) => {
+        const files = Array.from(event.target.files || []);
+        for (const file of files) await compressImage(file);
+      });
+      document.querySelector('[data-cover-file]')?.addEventListener('change', async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        const preview = document.querySelector('[data-cover-preview]');
+        const empty = document.querySelector('[data-cover-empty]');
+        const coverUrl = document.querySelector('[data-cover-url]');
+        if (preview) {
+          preview.src = url;
+          preview.classList.remove('hidden');
+        }
+        empty?.classList.add('hidden');
+        if (coverUrl) coverUrl.value = url;
+      });
+
+      document.querySelectorAll('[data-drop-zone], [data-cover-drop]').forEach((zone) => {
+        zone.addEventListener('dragover', (event) => {
+          event.preventDefault();
+          zone.classList.add('border-red-600');
         });
-        if (!blob) return;
+        zone.addEventListener('dragleave', () => zone.classList.remove('border-red-600'));
+        zone.addEventListener('drop', async (event) => {
+          event.preventDefault();
+          zone.classList.remove('border-red-600');
+          const files = Array.from(event.dataTransfer?.files || []).filter((file) => file.type.startsWith('image/'));
+          for (const file of files) await compressImage(file);
+        });
+      });
 
-        const optimizedUrl = URL.createObjectURL(blob);
-        const fileName = `${slugifyFile(file.name) || 'imagem-editorial'}.webp`;
-        const suggestedPath = `/uploads/news/${fileName}`;
-
-        const panel = document.querySelector('[data-optimized-panel]');
-        const preview = document.querySelector('[data-optimized-preview]');
-        const originalSize = document.querySelector('[data-original-size]');
-        const optimizedSize = document.querySelector('[data-optimized-size]');
-        const path = document.querySelector('[data-optimized-path]');
-        const download = document.querySelector('[data-download-optimized]');
-
-        panel?.classList.remove('hidden');
-        if (preview) preview.src = optimizedUrl;
-        if (originalSize) originalSize.textContent = toKb(file.size);
-        if (optimizedSize) optimizedSize.textContent = toKb(blob.size);
-        if (path) path.value = suggestedPath;
-        if (download) {
-          download.href = optimizedUrl;
-          download.download = fileName;
+      mediaList?.addEventListener('click', (event) => {
+        const insertButton = event.target.closest('[data-insert-media]');
+        const coverButton = event.target.closest('[data-cover-media]');
+        if (insertButton) {
+          const item = mediaItems[Number(insertButton.dataset.insertMedia)];
+          if (item) insertHtml(createImageBlock(item.url, item.alt));
         }
-        setStatus('Imagem otimizada pronta');
-      });
-
-      document.querySelector('[data-insert-optimized]')?.addEventListener('click', () => {
-        const path = document.querySelector('[data-optimized-path]')?.value.trim();
-        if (!path) return;
-        insertHtml(createImageBlock(path, 'Imagem otimizada'));
-        setStatus('Imagem inserida no corpo');
-      });
-
-      document.querySelector('[data-use-cover]')?.addEventListener('click', () => {
-        const path = document.querySelector('[data-optimized-path]')?.value.trim();
-        if (!path) return;
-        const cover = document.querySelector('[data-cover-url]');
-        const alt = document.querySelector('[data-cover-alt]');
-        if (cover) cover.value = path;
-        if (alt && !alt.value) alt.value = 'Imagem de capa da materia';
-        setStatus('Capa definida com imagem otimizada');
-      });
-
-      document.querySelector('[data-add-carousel]')?.addEventListener('click', () => {
-        const path = document.querySelector('[data-optimized-path]')?.value.trim();
-        if (!path) return;
-        const target = Array.from(document.querySelectorAll('[data-carousel-image]')).find((input) => !input.value.trim());
-        if (target) {
-          target.value = path;
-          setStatus('Imagem adicionada ao carrossel');
+        if (coverButton) {
+          const item = mediaItems[Number(coverButton.dataset.coverMedia)];
+          const coverUrl = document.querySelector('[data-cover-url]');
+          const coverAlt = document.querySelector('[data-cover-alt]');
+          const preview = document.querySelector('[data-cover-preview]');
+          const empty = document.querySelector('[data-cover-empty]');
+          if (item && coverUrl) coverUrl.value = item.url;
+          if (item && coverAlt) coverAlt.value = item.alt;
+          if (item && preview) {
+            preview.src = item.url;
+            preview.classList.remove('hidden');
+          }
+          empty?.classList.add('hidden');
         }
       });
 
-      document.querySelector('[data-save-draft]')?.addEventListener('click', () => {
-        setStatus('Rascunho pronto para salvar');
+      document.querySelector('[data-insert-carousel]')?.addEventListener('click', () => {
+        const carousel = createCarouselBlock();
+        if (!carousel) {
+          setStatus('Adicione pelo menos 2 imagens');
+          return;
+        }
+        insertHtml(carousel);
+        setStatus('Carrossel inserido');
       });
 
+      document.querySelector('[data-focus-mode]')?.addEventListener('click', () => {
+        document.documentElement.classList.toggle('admin-focus-mode');
+      });
+
+      document.querySelector('[data-save-draft]')?.addEventListener('click', () => setStatus('Rascunho salvo'));
+      document.querySelector('[data-publish-now]')?.addEventListener('click', () => setStatus('Pronta para publicar'));
       document.querySelector('[data-schedule-post]')?.addEventListener('click', () => {
         const scheduledAt = document.querySelector('[data-schedule-at]')?.value;
-        setStatus(scheduledAt ? `Agendada para ${scheduledAt}` : 'Informe data e hora para agendar');
+        setStatus(scheduledAt ? 'Agendada' : 'Informe data e hora');
       });
 
-      document.querySelector('[data-publish-now]')?.addEventListener('click', () => {
-        setStatus('Pronta para publicacao imediata');
-      });
-
-      document.querySelectorAll('[data-media-move]').forEach((button) => {
-        button.addEventListener('click', () => {
-          if (!selectedMedia) return;
-          const direction = button.dataset.mediaMove;
-          const sibling = direction === 'up' ? selectedMedia.previousElementSibling : selectedMedia.nextElementSibling;
-          if (!sibling) return;
-          if (direction === 'up') {
-            editor.insertBefore(selectedMedia, sibling);
-          } else {
-            editor.insertBefore(sibling, selectedMedia);
-          }
-          updateStats();
-          setStatus('Midia reposicionada');
-        });
-      });
-
-      document.querySelector('[data-media-remove]')?.addEventListener('click', () => {
-        if (!selectedMedia) return;
-        selectedMedia.remove();
-        setSelectedMedia(null);
-        updateStats();
-        setStatus('Midia removida');
+      document.querySelector('[data-add-tag]')?.addEventListener('click', () => {
+        const input = document.querySelector('[data-tag-input]');
+        const value = input?.value.trim();
+        if (!value) return;
+        tags.push(value);
+        input.value = '';
+        tagList.innerHTML = tags.map((tag) => `<span class="rounded-full bg-zinc-950 px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-white dark:bg-white dark:text-zinc-950">${escapeHtml(tag)}</span>`).join('');
+        updateEditorState();
       });
 
       const renderSources = () => {
-        if (!sourceList) return;
         sourceList.innerHTML = sources
           .map(
             (source, index) => `
-              <div class="flex items-center justify-between gap-3 rounded-2xl bg-zinc-50 p-3 text-xs dark:bg-zinc-950">
-                <div class="min-w-0">
-                  <strong class="block truncate text-zinc-900 dark:text-zinc-50">${escapeHtml(source.name)}</strong>
-                  ${source.url ? `<span class="block truncate text-zinc-400">${escapeHtml(source.url)}</span>` : ''}
+              <div class="rounded-2xl bg-white p-3 text-xs shadow-sm dark:bg-zinc-950">
+                <div class="flex items-center justify-between gap-3">
+                  <strong class="truncate">${escapeHtml(source.name)}</strong>
+                  <button type="button" data-remove-source="${index}" class="text-[8px] font-black uppercase tracking-widest text-red-600">Remover</button>
                 </div>
-                <button type="button" data-remove-source="${index}" class="text-[8px] font-black uppercase tracking-widest text-red-600">Remover</button>
+                ${source.url ? `<span class="mt-1 block truncate text-zinc-400">${escapeHtml(source.url)}</span>` : ''}
+                ${source.note ? `<p class="mt-2 leading-5 text-zinc-500">${escapeHtml(source.note)}</p>` : ''}
               </div>
             `
           )
           .join('');
-        syncOutput();
+        updateEditorState();
       };
 
       document.querySelector('[data-add-source]')?.addEventListener('click', () => {
         const nameInput = document.querySelector('[data-source-name]');
         const urlInput = document.querySelector('[data-source-url]');
+        const noteInput = document.querySelector('[data-source-note]');
         const name = nameInput?.value.trim();
-        const url = urlInput?.value.trim();
         if (!name) return;
-        sources.push({ name, url });
-        if (nameInput) nameInput.value = '';
-        if (urlInput) urlInput.value = '';
+        sources.push({ name, url: urlInput?.value.trim() || '', note: noteInput?.value.trim() || '' });
+        nameInput.value = '';
+        urlInput.value = '';
+        noteInput.value = '';
         renderSources();
-        setStatus('Fonte adicionada');
       });
-
       sourceList?.addEventListener('click', (event) => {
         const button = event.target.closest('[data-remove-source]');
         if (!button) return;
@@ -538,16 +791,14 @@ const toolbarGroups = [
         renderSources();
       });
 
-      editor.addEventListener('input', updateStats);
-      editor.addEventListener('keyup', saveSelection);
-      editor.addEventListener('mouseup', saveSelection);
-      editor.addEventListener('focus', saveSelection);
-      editor.addEventListener('paste', () => window.setTimeout(updateStats, 0));
-      editor.addEventListener('click', (event) => {
-        const media = event.target.closest('[data-editor-media]');
-        setSelectedMedia(media && editor.contains(media) ? media : null);
+      document.querySelectorAll('[data-ai-action]').forEach((button) => {
+        button.addEventListener('click', () => {
+          setStatus(`${button.dataset.aiAction}: preparado`);
+        });
       });
-      updateStats();
+
+      document.querySelector('[data-current-date]').textContent = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date());
+      updateEditorState();
     })();
   </script>
 </AdminLayout>
