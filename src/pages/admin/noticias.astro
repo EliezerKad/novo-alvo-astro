@@ -1,0 +1,52 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getCollection } from 'astro:content';
+import { sortNewsByDate } from '../../lib/news';
+import { formatEditorialDate } from '../../lib/utils';
+
+const newsEntries = sortNewsByDate(await getCollection('news'));
+---
+
+<AdminLayout title="Noticias | Admin Novo Alvo" active="news">
+  <section class="space-y-6">
+    <header class="rounded-[2rem] bg-white p-6 shadow-sm dark:bg-zinc-900">
+      <span class="text-[10px] font-black uppercase tracking-[0.35em] text-red-600">Conteudo</span>
+      <div class="mt-3 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 class="font-serif text-4xl font-black italic tracking-tighter md:text-5xl">Noticias</h1>
+          <p class="mt-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">Inventario editorial vindo de src/content/news.</p>
+        </div>
+        <a href="/admin/nova/" class="rounded-2xl bg-red-600 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-white">Nova materia</a>
+      </div>
+    </header>
+
+    <section class="overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div class="grid grid-cols-[1fr_auto] gap-4 border-b border-zinc-100 p-4 text-[9px] font-black uppercase tracking-widest text-zinc-400 dark:border-zinc-800 md:grid-cols-[1.3fr_0.5fr_0.5fr_0.4fr_auto]">
+        <span>Materia</span>
+        <span class="hidden md:block">Categoria</span>
+        <span class="hidden md:block">Data</span>
+        <span class="hidden md:block">Status</span>
+        <span>Acoes</span>
+      </div>
+      <div class="divide-y divide-zinc-100 dark:divide-zinc-800">
+        {newsEntries.map((entry) => (
+          <article class="grid grid-cols-[1fr_auto] gap-4 p-4 md:grid-cols-[1.3fr_0.5fr_0.5fr_0.4fr_auto] md:items-center">
+            <div class="flex min-w-0 gap-4">
+              <img src={entry.data.cover.src} alt="" class="h-16 w-20 rounded-xl object-cover" loading="lazy" />
+              <div class="min-w-0">
+                <h2 class="line-clamp-2 font-serif text-lg font-black italic leading-tight tracking-tighter">{entry.data.title}</h2>
+                <p class="mt-1 truncate text-[10px] font-bold text-zinc-400">{entry.data.slug}</p>
+              </div>
+            </div>
+            <span class="hidden text-[10px] font-black uppercase tracking-widest text-red-600 md:block">{entry.data.category}</span>
+            <span class="hidden text-[10px] font-bold text-zinc-500 md:block">{formatEditorialDate(entry.data.publishedAt.toISOString())}</span>
+            <span class="hidden rounded-full bg-emerald-50 px-3 py-2 text-center text-[8px] font-black uppercase tracking-widest text-emerald-600 dark:bg-emerald-950/40 md:block">Publicado</span>
+            <div class="flex items-center gap-2">
+              <a href={`/noticia/${entry.data.slug}/`} class="rounded-xl border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:border-red-600 hover:text-red-600 dark:border-zinc-800">Ver</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  </section>
+</AdminLayout>

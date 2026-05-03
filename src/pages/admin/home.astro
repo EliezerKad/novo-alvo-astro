@@ -1,0 +1,64 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getCollection } from 'astro:content';
+import { featuredNews, urgentNews, sortNewsByDate } from '../../lib/news';
+
+const entries = sortNewsByDate(await getCollection('news'));
+const featured = featuredNews(entries);
+const urgent = urgentNews(entries);
+const categories = [...new Set(entries.map((entry) => entry.data.category))];
+---
+
+<AdminLayout title="Home editorial | Admin Novo Alvo" active="home">
+  <section class="space-y-6">
+    <header class="rounded-[2rem] bg-white p-6 shadow-sm dark:bg-zinc-900">
+      <span class="text-[10px] font-black uppercase tracking-[0.35em] text-red-600">Vitrine</span>
+      <h1 class="mt-3 font-serif text-4xl font-black italic tracking-tighter md:text-5xl">Home editorial</h1>
+      <p class="mt-2 max-w-2xl text-sm font-medium leading-7 text-zinc-500 dark:text-zinc-400">
+        Controle visual planejado para destaque principal, urgentes, ordem de categorias e posicoes de anuncios.
+      </p>
+    </header>
+
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <section class="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <h2 class="mb-5 text-xs font-black uppercase tracking-[0.24em]">Carrossel principal</h2>
+        <div class="space-y-4">
+          {featured.map((entry, index) => (
+            <div class="flex items-center gap-4 rounded-2xl border border-zinc-100 p-3 dark:border-zinc-800">
+              <span class="font-serif text-3xl font-black italic text-red-600">{index + 1}</span>
+              <img src={entry.data.cover.src} alt="" class="h-16 w-20 rounded-xl object-cover" />
+              <p class="line-clamp-2 text-sm font-black">{entry.data.title}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <h2 class="mb-5 text-xs font-black uppercase tracking-[0.24em]">Urgentes do topo</h2>
+        <div class="space-y-4">
+          {urgent.map((entry) => (
+            <div class="rounded-2xl border border-red-100 bg-red-50 p-4 dark:border-red-950 dark:bg-red-950/20">
+              <span class="text-[8px] font-black uppercase tracking-widest text-red-600">Urgente</span>
+              <p class="mt-1 text-sm font-black">{entry.data.breakingSummary || entry.data.title}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+
+    <section class="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div class="mb-5 flex items-center justify-between">
+        <h2 class="text-xs font-black uppercase tracking-[0.24em]">Ordem da terceira sessao</h2>
+        <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">3 visiveis + Mostrar mais</span>
+      </div>
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+        {categories.map((category, index) => (
+          <div class="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800">
+            <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">#{index + 1}</span>
+            <p class="mt-2 font-serif text-2xl font-black italic tracking-tighter">{category}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  </section>
+</AdminLayout>
