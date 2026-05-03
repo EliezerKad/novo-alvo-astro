@@ -107,6 +107,20 @@ const aiActions = [
         </div>
 
         <div
+          data-media-toolbar
+          class="pointer-events-auto fixed z-50 hidden -translate-x-1/2 items-center gap-1 rounded-full border border-zinc-200 bg-white/95 p-1 text-zinc-700 shadow-2xl shadow-zinc-950/15 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-950/95 dark:text-zinc-200"
+        >
+          <button type="button" data-media-align="left" class="rounded-full px-3 py-2 text-[9px] font-black uppercase tracking-widest transition hover:bg-zinc-950 hover:text-white dark:hover:bg-white dark:hover:text-zinc-950">Esq.</button>
+          <button type="button" data-media-align="center" class="rounded-full px-3 py-2 text-[9px] font-black uppercase tracking-widest transition hover:bg-zinc-950 hover:text-white dark:hover:bg-white dark:hover:text-zinc-950">Centro</button>
+          <button type="button" data-media-align="right" class="rounded-full px-3 py-2 text-[9px] font-black uppercase tracking-widest transition hover:bg-zinc-950 hover:text-white dark:hover:bg-white dark:hover:text-zinc-950">Dir.</button>
+          <span class="mx-1 h-6 w-px bg-zinc-200 dark:bg-zinc-800"></span>
+          <button type="button" data-media-size="small" class="rounded-full px-3 py-2 text-[9px] font-black uppercase tracking-widest transition hover:bg-red-600 hover:text-white">P</button>
+          <button type="button" data-media-size="medium" class="rounded-full px-3 py-2 text-[9px] font-black uppercase tracking-widest transition hover:bg-red-600 hover:text-white">M</button>
+          <button type="button" data-media-size="large" class="rounded-full px-3 py-2 text-[9px] font-black uppercase tracking-widest transition hover:bg-red-600 hover:text-white">G</button>
+          <span class="mx-1 hidden text-[9px] font-bold text-zinc-400 md:inline">arraste a borda</span>
+        </div>
+
+        <div
           data-slash-palette
           class="absolute left-8 top-24 z-30 hidden w-[min(420px,calc(100%-4rem))] overflow-hidden rounded-3xl border border-zinc-200 bg-white p-2 shadow-2xl shadow-zinc-950/10 dark:border-zinc-800 dark:bg-zinc-950"
         >
@@ -334,8 +348,14 @@ const aiActions = [
       background: white;
       cursor: pointer;
       margin: 2.5rem 0;
+      max-width: 100%;
+      min-width: min(260px, 100%);
+      overflow: auto;
       padding: 1rem;
+      position: relative;
+      resize: horizontal;
       box-shadow: 0 18px 55px rgba(15, 23, 42, 0.08);
+      width: 100%;
     }
 
     .dark .editor-canvas [data-editor-media] {
@@ -346,6 +366,52 @@ const aiActions = [
     .editor-canvas [data-editor-media].is-selected {
       border-color: rgb(220 38 38);
       box-shadow: 0 0 0 5px rgba(220, 38, 38, 0.12);
+    }
+
+    .editor-canvas [data-editor-media].is-selected::after {
+      align-items: center;
+      background: rgb(220 38 38);
+      border-radius: 999px;
+      bottom: 0.6rem;
+      color: white;
+      content: "arraste";
+      display: flex;
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.55rem;
+      font-weight: 900;
+      letter-spacing: 0.16em;
+      padding: 0.35rem 0.55rem;
+      pointer-events: none;
+      position: absolute;
+      right: 0.6rem;
+      text-transform: uppercase;
+    }
+
+    .editor-canvas [data-align="left"] {
+      margin-left: 0;
+      margin-right: auto;
+    }
+
+    .editor-canvas [data-align="center"] {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .editor-canvas [data-align="right"] {
+      margin-left: auto;
+      margin-right: 0;
+    }
+
+    .editor-canvas [data-media-size="small"] {
+      width: min(42rem, 52%);
+    }
+
+    .editor-canvas [data-media-size="medium"] {
+      width: min(52rem, 72%);
+    }
+
+    .editor-canvas [data-media-size="large"] {
+      width: 100%;
     }
 
     .editor-canvas img {
@@ -398,6 +464,7 @@ const aiActions = [
       const stats = document.querySelector('[data-editor-stats]');
       const status = document.querySelector('[data-editor-status]');
       const floatingToolbar = document.querySelector('[data-floating-toolbar]');
+      const mediaToolbar = document.querySelector('[data-media-toolbar]');
       const slashPalette = document.querySelector('[data-slash-palette]');
       const autosave = document.querySelector('[data-autosave-status]');
       const autosaveDetail = document.querySelector('[data-autosave-detail]');
@@ -505,19 +572,34 @@ const aiActions = [
         }, 700);
       };
 
+      const positionMediaToolbar = () => {
+        if (!mediaToolbar) return;
+        if (!selectedMedia) {
+          mediaToolbar.classList.add('hidden');
+          mediaToolbar.classList.remove('flex');
+          return;
+        }
+        const rect = selectedMedia.getBoundingClientRect();
+        mediaToolbar.style.left = `${rect.left + rect.width / 2}px`;
+        mediaToolbar.style.top = `${Math.max(12, rect.top - 54)}px`;
+        mediaToolbar.classList.remove('hidden');
+        mediaToolbar.classList.add('flex');
+      };
+
       const setSelectedMedia = (media) => {
         selectedMedia?.classList.remove('is-selected');
         selectedMedia = media;
         selectedMedia?.classList.add('is-selected');
+        positionMediaToolbar();
       };
 
       const createImageBlock = (url, alt) =>
-        `<figure data-editor-media="image" contenteditable="false"><img src="${escapeHtml(url)}" alt="${escapeHtml(alt)}" /><figcaption>${escapeHtml(alt)}</figcaption></figure><p><br></p>`;
+        `<figure data-editor-media="image" data-align="center" data-media-size="large" contenteditable="false"><img src="${escapeHtml(url)}" alt="${escapeHtml(alt)}" /><figcaption>${escapeHtml(alt)}</figcaption></figure><p><br></p>`;
 
       const createCarouselBlock = () => {
         const items = mediaItems.slice(0, 8);
         if (items.length < 2) return '';
-        return `<section data-editor-media="carousel" contenteditable="false"><div class="grid gap-3 md:grid-cols-2">${items
+        return `<section data-editor-media="carousel" data-align="center" data-media-size="large" contenteditable="false"><div class="grid gap-3 md:grid-cols-2">${items
           .map((item) => `<figure><img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.alt)}" /><figcaption>${escapeHtml(item.alt)}</figcaption></figure>`)
           .join('')}</div></section><p><br></p>`;
       };
@@ -531,12 +613,12 @@ const aiActions = [
         const value = rawUrl.trim();
         const youtube = getYoutubeEmbed(value);
         if (youtube) {
-          return `<div data-editor-media="embed" contenteditable="false"><iframe src="${youtube}" title="${escapeHtml(label)}" loading="lazy" allowfullscreen class="aspect-video w-full rounded-2xl"></iframe></div><p><br></p>`;
+          return `<div data-editor-media="embed" data-align="center" data-media-size="large" contenteditable="false"><iframe src="${youtube}" title="${escapeHtml(label)}" loading="lazy" allowfullscreen class="aspect-video w-full rounded-2xl"></iframe></div><p><br></p>`;
         }
         if (value.startsWith('<iframe')) {
-          return `<div data-editor-media="embed" contenteditable="false">${value}</div><p><br></p>`;
+          return `<div data-editor-media="embed" data-align="center" data-media-size="large" contenteditable="false">${value}</div><p><br></p>`;
         }
-        return `<div data-editor-media="embed" contenteditable="false"><a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer" class="embed-card">${escapeHtml(label)} • abrir publicação</a></div><p><br></p>`;
+        return `<div data-editor-media="embed" data-align="center" data-media-size="large" contenteditable="false"><a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer" class="embed-card">${escapeHtml(label)} • abrir publicação</a></div><p><br></p>`;
       };
 
       const renderMediaList = () => {
@@ -619,6 +701,27 @@ const aiActions = [
         button.addEventListener('click', () => runSlashAction(button.dataset.slashAction));
       });
 
+      document.querySelectorAll('[data-media-align]').forEach((button) => {
+        button.addEventListener('click', () => {
+          if (!selectedMedia) return;
+          selectedMedia.dataset.align = button.dataset.mediaAlign;
+          setStatus(`Mídia alinhada: ${button.dataset.mediaAlign}`);
+          updateEditorState();
+          positionMediaToolbar();
+        });
+      });
+
+      document.querySelectorAll('[data-media-size]').forEach((button) => {
+        button.addEventListener('click', () => {
+          if (!selectedMedia) return;
+          selectedMedia.dataset.mediaSize = button.dataset.mediaSize;
+          selectedMedia.style.width = '';
+          setStatus(`Tamanho da mídia: ${button.dataset.mediaSize}`);
+          updateEditorState();
+          positionMediaToolbar();
+        });
+      });
+
       editor.addEventListener('input', () => {
         const text = editor.innerText.trimEnd();
         slashPalette?.classList.toggle('hidden', !text.endsWith('/'));
@@ -630,6 +733,14 @@ const aiActions = [
       editor.addEventListener('click', (event) => {
         const media = event.target.closest('[data-editor-media]');
         setSelectedMedia(media && editor.contains(media) ? media : null);
+      });
+      editor.addEventListener('pointerup', () => {
+        if (!selectedMedia) return;
+        selectedMedia.dataset.mediaSize = 'custom';
+        window.setTimeout(() => {
+          updateEditorState();
+          positionMediaToolbar();
+        }, 0);
       });
       editor.addEventListener('paste', (event) => {
         const text = event.clipboardData?.getData('text/plain') || '';
@@ -654,6 +765,8 @@ const aiActions = [
         floatingToolbar?.classList.remove('hidden');
         saveSelection();
       });
+      window.addEventListener('scroll', positionMediaToolbar, { passive: true });
+      window.addEventListener('resize', positionMediaToolbar);
 
       titleInput?.addEventListener('input', () => {
         titleInput.style.height = 'auto';
