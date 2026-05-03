@@ -189,6 +189,9 @@ const aiActions = [
 
       <section class="editor-panel">
         <h2>SEO</h2>
+        <div class="rounded-2xl bg-emerald-50 p-3 text-xs font-bold leading-5 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-300" data-seo-autofill-note>
+          Sugestões automáticas ativas. Edite manualmente quando quiser.
+        </div>
         <textarea data-seo-description class="input-soft min-h-28" placeholder="Descrição SEO"></textarea>
         <input data-keywords-input class="input-soft" placeholder="Palavras-chave separadas por vírgula" />
         <div class="rounded-2xl bg-white p-4 shadow-sm dark:bg-zinc-950">
@@ -612,14 +615,44 @@ const aiActions = [
       const previewSources = document.querySelector('[data-preview-sources]');
       const previewReading = document.querySelector('[data-preview-reading]');
       const categoryInput = document.querySelector('[data-category-input]');
+      const seoDescriptionInput = document.querySelector('[data-seo-description]');
+      const keywordsInput = document.querySelector('[data-keywords-input]');
+      const seoAutofillNote = document.querySelector('[data-seo-autofill-note]');
 
       let savedRange = null;
       let slashRange = null;
       let selectedMedia = null;
       let autosaveTimer = null;
+      let seoTouched = false;
+      let keywordsTouched = false;
       const mediaItems = [];
       const sources = [];
       const tags = [];
+      const categoryKeywordMap = {
+        Política: ['política brasileira', 'governo', 'congresso', 'poder público', 'Portal Novo Alvo'],
+        Economia: ['economia', 'mercado', 'negócios', 'finanças', 'Portal Novo Alvo'],
+        Brasil: ['Brasil', 'notícias do Brasil', 'sociedade', 'atualidade', 'Portal Novo Alvo'],
+        Mundo: ['mundo', 'internacional', 'geopolítica', 'notícias internacionais', 'Portal Novo Alvo'],
+        Saúde: ['saúde', 'bem-estar', 'hospitais', 'medicina', 'Portal Novo Alvo'],
+        Tecnologia: ['tecnologia', 'inovação', 'inteligência artificial', 'internet', 'Portal Novo Alvo'],
+        Esportes: ['esportes', 'futebol', 'clubes', 'competição', 'Portal Novo Alvo'],
+        Famosos: ['famosos', 'celebridades', 'entretenimento', 'cultura pop', 'Portal Novo Alvo'],
+        Entretenimento: ['entretenimento', 'cultura', 'streaming', 'agenda cultural', 'Portal Novo Alvo'],
+        Ciência: ['ciência', 'pesquisa', 'descobertas', 'inovação científica', 'Portal Novo Alvo'],
+        Educação: ['educação', 'ensino', 'estudantes', 'aprendizagem', 'Portal Novo Alvo'],
+        Cultura: ['cultura', 'arte', 'comportamento', 'produção cultural', 'Portal Novo Alvo'],
+        Lifestyle: ['lifestyle', 'comportamento', 'tendências', 'vida cotidiana', 'Portal Novo Alvo'],
+        Games: ['games', 'jogos', 'eSports', 'tecnologia gamer', 'Portal Novo Alvo'],
+        Moda: ['moda', 'estilo', 'tendências', 'comportamento', 'Portal Novo Alvo'],
+        Música: ['música', 'artistas', 'shows', 'indústria musical', 'Portal Novo Alvo'],
+        Futebol: ['futebol', 'clubes brasileiros', 'campeonatos', 'esporte nacional', 'Portal Novo Alvo'],
+        Entrevistas: ['entrevistas', 'personagens', 'bastidores', 'declarações', 'Portal Novo Alvo'],
+      };
+      const stopWords = new Set([
+        'para', 'como', 'com', 'uma', 'umas', 'uns', 'dos', 'das', 'que', 'por', 'sobre', 'entre', 'mais', 'menos',
+        'esta', 'este', 'essa', 'esse', 'isso', 'ainda', 'também', 'pela', 'pelo', 'nas', 'nos', 'aos', 'aqui',
+        'portal', 'novo', 'alvo', 'notícia', 'noticias', 'matéria', 'materia', 'ser', 'foi', 'são', 'sao', 'tem',
+      ]);
 
       const escapeHtml = (value) =>
         String(value || '')
@@ -694,6 +727,88 @@ const aiActions = [
         return Math.min(100, score);
       };
 
+      const normalizeText = (value) =>
+        String(value || '')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+      const clampSentence = (value, max = 158) => {
+        const clean = normalizeText(value);
+        if (clean.length <= max) return clean;
+        const cut = clean.slice(0, max - 1);
+        const lastSpace = cut.lastIndexOf(' ');
+        return `${cut.slice(0, lastSpace > 90 ? lastSpace : max - 1).replace(/[,.!?;:]$/, '')}…`;
+      };
+
+      const getPlainText = () => normalizeText(editor.innerText.replace(/\s*\/\s*$/, ''));
+
+      const extractTopTerms = () => {
+        const text = `${titleInput?.value || ''} ${summaryInput?.value || ''} ${getPlainText()}`;
+        const counts = new Map();
+        text
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9\s-]/g, ' ')
+          .split(/\s+/)
+          .filter((word) => word.length > 3 && !stopWords.has(word))
+          .forEach((word) => counts.set(word, (counts.get(word) || 0) + 1));
+        return [...counts.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 8)
+          .map(([word]) => word);
+      };
+
+      const buildSeoDescription = () => {
+        const category = categoryInput?.value || '';
+        const title = normalizeText(titleInput?.value);
+        const summary = normalizeText(summaryInput?.value);
+        const body = getPlainText();
+        const firstSentence = body.split(/(?<=[.!?])\s+/).find((sentence) => sentence.length > 45) || body;
+        const base = summary || firstSentence || title;
+        if (!base) return '';
+        const categoryPrefix = category ? `${category}: ` : '';
+        const description = `${categoryPrefix}${base}`;
+        return clampSentence(description, 158);
+      };
+
+      const buildKeywords = () => {
+        const category = categoryInput?.value || '';
+        const titleWords = normalizeText(titleInput?.value)
+          .split(/\s+/)
+          .filter((word) => word.length > 3)
+          .slice(0, 4)
+          .join(' ');
+        return [
+          category,
+          titleWords,
+          ...(categoryKeywordMap[category] || []),
+          ...extractTopTerms(),
+          ...tags,
+        ]
+          .map((keyword) => normalizeText(keyword))
+          .filter(Boolean)
+          .filter((keyword, index, list) => list.findIndex((item) => item.toLowerCase() === keyword.toLowerCase()) === index)
+          .slice(0, 12)
+          .join(', ');
+      };
+
+      const autofillSeo = () => {
+        if (!seoTouched && seoDescriptionInput) {
+          const description = buildSeoDescription();
+          if (description) seoDescriptionInput.value = description;
+        }
+        if (!keywordsTouched && keywordsInput) {
+          const keywords = buildKeywords();
+          if (keywords) keywordsInput.value = keywords;
+        }
+        if (seoAutofillNote) {
+          seoAutofillNote.textContent = seoTouched || keywordsTouched
+            ? 'Sugestões automáticas pausadas nos campos editados manualmente.'
+            : 'Sugestões automáticas ativas com base no título, categoria e texto.';
+        }
+      };
+
       const updateEditorState = () => {
         const words = editor.innerText.trim().split(/\s+/).filter(Boolean).length;
         const reading = Math.max(0, Math.ceil(words / 220));
@@ -704,8 +819,9 @@ const aiActions = [
           seoBar.style.width = `${seo}%`;
           seoBar.className = `h-full rounded-full transition-all ${seo >= 75 ? 'bg-emerald-500' : seo >= 50 ? 'bg-amber-400' : 'bg-red-500'}`;
         }
+        autofillSeo();
         if (googleTitle) googleTitle.textContent = titleInput?.value ? `Portal Novo Alvo - ${titleInput.value}` : 'Portal Novo Alvo - título da matéria';
-        if (googleDescription) googleDescription.textContent = document.querySelector('[data-seo-description]')?.value || summaryInput?.value || 'Prévia Google será montada com título e descrição.';
+        if (googleDescription) googleDescription.textContent = seoDescriptionInput?.value || summaryInput?.value || 'Prévia Google será montada com título e descrição.';
         syncOutput();
         scheduleAutosave();
       };
@@ -1026,7 +1142,15 @@ const aiActions = [
         slugInput.dataset.edited = 'true';
       });
       summaryInput?.addEventListener('input', updateEditorState);
-      document.querySelector('[data-seo-description]')?.addEventListener('input', updateEditorState);
+      categoryInput?.addEventListener('change', updateEditorState);
+      seoDescriptionInput?.addEventListener('input', () => {
+        seoTouched = true;
+        updateEditorState();
+      });
+      keywordsInput?.addEventListener('input', () => {
+        keywordsTouched = true;
+        updateEditorState();
+      });
 
       document.querySelector('[data-local-image]')?.addEventListener('change', async (event) => {
         const files = Array.from(event.target.files || []);
