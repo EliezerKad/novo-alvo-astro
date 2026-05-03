@@ -144,7 +144,7 @@ const aiActions = [
           +
         </button>
 
-        <div data-block-menu class="absolute left-8 top-84 z-30 hidden w-[min(320px,calc(100%-4rem))] overflow-hidden rounded-3xl border border-zinc-200 bg-white/95 p-2 shadow-2xl shadow-zinc-950/12 backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/95">
+        <div data-block-menu class="absolute left-8 top-84 z-30 hidden max-h-[min(420px,70vh)] w-[min(320px,calc(100%-4rem))] overflow-y-auto rounded-3xl border border-zinc-200 bg-white/95 p-2 shadow-2xl shadow-zinc-950/12 backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/95">
           {[
             ['image', 'Imagem', 'Upload inline com compressão WebP'],
             ['carousel', 'Carrossel', 'Sequência visual narrativa'],
@@ -1135,6 +1135,14 @@ const aiActions = [
         blockMenu?.classList.add('hidden');
       };
 
+      const getCurrentTextBlock = () => {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0 || !editor.contains(selection.anchorNode)) return null;
+        let node = selection.anchorNode.nodeType === Node.ELEMENT_NODE ? selection.anchorNode : selection.anchorNode.parentElement;
+        while (node && node !== editor && !/^(P|DIV|H2|H3|BLOCKQUOTE)$/.test(node.nodeName)) node = node.parentElement;
+        return node === editor ? null : node;
+      };
+
       const positionBlockInserter = () => {
         if (!blockInserter) return;
         const selection = window.getSelection();
@@ -1145,23 +1153,29 @@ const aiActions = [
         }
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
-        const editorRect = editor.getBoundingClientRect();
-        const currentBlock = range.startContainer.nodeType === Node.ELEMENT_NODE
-          ? range.startContainer
-          : range.startContainer.parentElement;
+        const sectionRect = editor.closest('section').getBoundingClientRect();
+        const currentBlock = getCurrentTextBlock();
         const isEmptyBlock = !currentBlock?.textContent?.trim();
-        const top = rect.top ? rect.top - editorRect.top - 4 : Math.max(24, editor.scrollHeight - 40);
-        blockInserter.style.left = '1rem';
+        const top = rect.top ? rect.top - sectionRect.top - 6 : editor.offsetTop + 20;
+        blockInserter.style.left = `${Math.max(14, editor.offsetLeft - 28)}px`;
         blockInserter.style.top = `${Math.max(22, top)}px`;
         blockInserter.classList.toggle('hidden', !isEmptyBlock);
         blockInserter.classList.toggle('flex', isEmptyBlock);
       };
 
-      const positionBlockMenu = () => {
+      const positionBlockMenu = (forceOpen = false) => {
         if (!blockMenu || !blockInserter) return;
-        blockMenu.style.left = '4rem';
+        blockMenu.style.left = `${Math.max(56, editor.offsetLeft + 18)}px`;
         blockMenu.style.top = blockInserter.style.top || '18rem';
-        blockMenu.classList.toggle('hidden');
+        if (forceOpen) blockMenu.classList.remove('hidden');
+        else blockMenu.classList.toggle('hidden');
+      };
+
+      const openBlockMenuFromCursor = () => {
+        positionBlockInserter();
+        blockInserter?.classList.remove('hidden');
+        blockInserter?.classList.add('flex');
+        positionBlockMenu(true);
       };
 
       const moveSelectionToPoint = (x, y) => {
@@ -1321,7 +1335,7 @@ const aiActions = [
 
       blockInserter?.addEventListener('click', () => {
         saveSelection();
-        positionBlockMenu();
+        positionBlockMenu(true);
       });
 
       blockMenu?.addEventListener('click', (event) => {
@@ -1374,13 +1388,24 @@ const aiActions = [
       editor.addEventListener('input', () => {
         updateSlashPalette();
         positionBlockInserter();
+        if (getCurrentTextBlock()?.textContent?.trim()) hideBlockMenu();
         updateEditorState();
+      });
+      editor.addEventListener('keydown', (event) => {
+        const isPlusShortcut = event.key === '+' || (event.key === '=' && event.shiftKey);
+        if (!isPlusShortcut) return;
+        const currentBlock = getCurrentTextBlock();
+        const isEmptyBlock = !currentBlock?.textContent?.trim();
+        if (!isEmptyBlock) return;
+        event.preventDefault();
+        saveSelection();
+        openBlockMenuFromCursor();
       });
       editor.addEventListener('keyup', (event) => {
         saveSelection();
         if (event.key === 'Escape') hideSlashPalette();
         if (event.key === '/') updateSlashPalette();
-        if (event.key === 'Enter' || event.key === 'ArrowUp' || event.key === 'ArrowDown') positionBlockInserter();
+        if (event.key === 'Enter' || event.key === 'ArrowUp' || event.key === 'ArrowDown') window.setTimeout(positionBlockInserter, 0);
       });
       editor.addEventListener('mouseup', () => {
         saveSelection();
