@@ -166,9 +166,9 @@ const aiActions = [
         <input type="file" accept="image/jpeg,image/png,image/webp" multiple class="sr-only" data-inline-image-input />
 
         <div data-carousel-modal class="fixed inset-0 z-[120] hidden items-center justify-center bg-zinc-950/45 p-4 backdrop-blur-md">
-          <section class="relative grid max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-zinc-950/25 dark:bg-zinc-950 md:grid-cols-[minmax(0,1fr)_320px]">
-            <div class="min-h-0 overflow-y-auto p-5 md:p-7">
-              <div class="flex items-start justify-between gap-4">
+          <section class="relative grid h-[92vh] max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-zinc-950/25 dark:bg-zinc-950 md:grid-cols-[minmax(0,1fr)_320px]">
+            <div class="flex min-h-0 flex-col overflow-hidden p-5 md:p-7">
+              <div class="shrink-0 flex items-start justify-between gap-4">
                 <div>
                   <p class="text-[10px] font-black uppercase tracking-[0.28em] text-red-600">Bloco narrativo</p>
                   <h2 class="mt-2 font-serif text-4xl font-black italic tracking-tighter text-zinc-950 dark:text-white">Carrossel editorial</h2>
@@ -177,18 +177,18 @@ const aiActions = [
                 <button type="button" data-close-carousel class="rounded-full bg-zinc-100 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:bg-zinc-950 hover:text-white dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-white dark:hover:text-zinc-950">Fechar</button>
               </div>
 
-              <label data-carousel-drop class="group mt-6 flex min-h-56 cursor-pointer flex-col items-center justify-center rounded-[2rem] border border-dashed border-zinc-300 bg-gradient-to-br from-zinc-50 to-white p-6 text-center transition hover:border-red-600 hover:shadow-[0_24px_80px_rgba(220,38,38,0.10)] dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950">
+              <label data-carousel-drop class="group mt-6 flex min-h-56 shrink-0 cursor-pointer flex-col items-center justify-center rounded-[2rem] border border-dashed border-zinc-300 bg-gradient-to-br from-zinc-50 to-white p-6 text-center transition hover:border-red-600 hover:shadow-[0_24px_80px_rgba(220,38,38,0.10)] dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950">
                 <span class="rounded-full bg-red-600 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-white shadow-lg shadow-red-600/20">Adicionar imagens</span>
                 <span class="mt-4 text-sm font-bold text-zinc-500 dark:text-zinc-400">Arraste múltiplas imagens ou clique para selecionar</span>
                 <span class="mt-1 text-xs font-medium text-zinc-400">Compressão WebP automática e invisível</span>
                 <input type="file" accept="image/jpeg,image/png,image/webp" multiple class="sr-only" data-carousel-file />
               </label>
 
-              <div data-carousel-empty class="mt-5 rounded-[1.5rem] bg-zinc-50 p-5 text-sm font-medium text-zinc-400 dark:bg-zinc-900">Nenhuma imagem ainda. Escolha pelo menos 2 para criar um carrossel.</div>
-              <div data-carousel-list class="mt-5 grid gap-4"></div>
+              <div data-carousel-empty class="mt-5 shrink-0 rounded-[1.5rem] bg-zinc-50 p-5 text-sm font-medium text-zinc-400 dark:bg-zinc-900">Nenhuma imagem ainda. Escolha pelo menos 2 para criar um carrossel.</div>
+              <div data-carousel-list class="mt-5 grid min-h-0 flex-1 gap-4 overflow-y-auto pr-2"></div>
             </div>
 
-            <aside class="border-t border-zinc-100 bg-zinc-50/80 p-5 dark:border-zinc-800 dark:bg-zinc-900/70 md:border-l md:border-t-0">
+            <aside class="min-h-0 overflow-y-auto border-t border-zinc-100 bg-zinc-50/80 p-5 dark:border-zinc-800 dark:bg-zinc-900/70 md:border-l md:border-t-0">
               <h3 class="text-xs font-black uppercase tracking-[0.24em] text-zinc-950 dark:text-white">Estilo</h3>
               <div class="mt-4 grid gap-2" data-carousel-layouts>
                 {[
