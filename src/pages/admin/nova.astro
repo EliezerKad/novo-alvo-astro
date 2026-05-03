@@ -39,7 +39,7 @@ const aiActions = [
             <button type="button" data-focus-mode class="rounded-full border border-zinc-200 bg-white px-4 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 shadow-sm transition hover:border-zinc-950 hover:text-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-white dark:hover:text-white">
               Modo foco
             </button>
-            <button type="button" class="rounded-full bg-zinc-950 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950">
+            <button type="button" data-open-preview class="rounded-full bg-zinc-950 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950">
               Preview
             </button>
           </div>
@@ -244,6 +244,40 @@ const aiActions = [
     </aside>
   </form>
 
+  <section data-preview-modal class="fixed inset-0 z-[80] hidden bg-zinc-950/70 p-3 backdrop-blur-xl md:p-6">
+    <div class="mx-auto flex h-full max-w-6xl flex-col overflow-hidden rounded-[2rem] bg-white shadow-2xl dark:bg-zinc-950">
+      <div class="flex items-center justify-between gap-4 border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
+        <div>
+          <span class="text-[9px] font-black uppercase tracking-[0.28em] text-red-600">Preview real</span>
+          <p class="mt-1 text-xs font-bold text-zinc-400">Simula a página pública da matéria com o conteúdo atual do editor.</p>
+        </div>
+        <button type="button" data-close-preview class="rounded-full bg-zinc-950 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950">
+          Fechar
+        </button>
+      </div>
+
+      <article class="overflow-y-auto bg-white px-4 py-8 dark:bg-zinc-950 md:px-10">
+        <header class="mx-auto max-w-5xl">
+          <span data-preview-category class="inline-flex rounded-lg bg-red-600 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-white">Categoria</span>
+          <h1 data-preview-title class="mt-8 font-serif text-4xl font-black leading-none tracking-tighter text-zinc-950 dark:text-zinc-50 md:text-6xl lg:text-7xl">Título da matéria</h1>
+          <p data-preview-summary class="mt-8 max-w-4xl text-2xl font-medium italic leading-tight text-zinc-500 dark:text-zinc-400">Resumo editorial da matéria.</p>
+          <div class="mt-6 flex flex-wrap gap-4 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+            <span>Por Redação Novo Alvo</span>
+            <span data-preview-date>Hoje</span>
+            <span data-preview-reading>0 min de leitura</span>
+          </div>
+          <figure data-preview-cover-wrap class="mt-10 hidden overflow-hidden rounded-[2.5rem] shadow-2xl">
+            <img data-preview-cover alt="" class="aspect-[21/9] w-full object-cover" />
+          </figure>
+        </header>
+
+        <div data-preview-content class="article-preview prose prose-xl prose-zinc mx-auto mt-12 max-w-4xl dark:prose-invert"></div>
+
+        <footer class="mx-auto mt-10 flex max-w-4xl flex-wrap gap-2 border-t border-zinc-100 pt-6 dark:border-zinc-800" data-preview-sources></footer>
+      </article>
+    </div>
+  </section>
+
   <style is:inline>
     .field-clean {
       scrollbar-width: none;
@@ -343,28 +377,21 @@ const aiActions = [
     }
 
     .editor-canvas [data-editor-media] {
-      border: 1px solid rgb(228 228 231);
       border-radius: 1.75rem;
-      background: white;
       cursor: pointer;
       margin: 2.5rem 0;
       max-width: 100%;
       min-width: min(260px, 100%);
       overflow: auto;
-      padding: 1rem;
       position: relative;
       resize: horizontal;
-      box-shadow: 0 18px 55px rgba(15, 23, 42, 0.08);
       width: 100%;
     }
 
     .dark .editor-canvas [data-editor-media] {
-      border-color: rgb(39 39 42);
-      background: rgb(9 9 11);
     }
 
     .editor-canvas [data-editor-media].is-selected {
-      border-color: rgb(220 38 38);
       box-shadow: 0 0 0 5px rgba(220, 38, 38, 0.12);
     }
 
@@ -388,26 +415,28 @@ const aiActions = [
     }
 
     .editor-canvas [data-align="left"] {
-      margin-left: 0;
-      margin-right: auto;
+      float: left;
+      margin: 0.55rem 2rem 1.25rem 0;
     }
 
     .editor-canvas [data-align="center"] {
+      clear: both;
+      float: none;
       margin-left: auto;
       margin-right: auto;
     }
 
     .editor-canvas [data-align="right"] {
-      margin-left: auto;
-      margin-right: 0;
+      float: right;
+      margin: 0.55rem 0 1.25rem 2rem;
     }
 
     .editor-canvas [data-media-size="small"] {
-      width: min(42rem, 52%);
+      width: min(22rem, 48%);
     }
 
     .editor-canvas [data-media-size="medium"] {
-      width: min(52rem, 72%);
+      width: min(34rem, 64%);
     }
 
     .editor-canvas [data-media-size="large"] {
@@ -450,6 +479,104 @@ const aiActions = [
       padding: 1.1rem;
       text-transform: uppercase;
     }
+
+    .article-preview {
+      color: rgb(39 39 42);
+      font-family: Georgia, 'Times New Roman', serif;
+      overflow: visible;
+    }
+
+    .article-preview::after {
+      clear: both;
+      content: "";
+      display: table;
+    }
+
+    .article-preview h2 {
+      border-left: 4px solid rgb(220 38 38);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-style: italic;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-top: 5rem;
+      padding-left: 1.5rem;
+    }
+
+    .article-preview p {
+      line-height: 1.85;
+      margin-bottom: 2rem;
+    }
+
+    .article-preview [data-editor-media] {
+      border: 0 !important;
+      box-shadow: none !important;
+      max-width: 100%;
+      min-width: min(220px, 100%);
+      overflow: visible;
+      padding: 0 !important;
+      resize: none;
+    }
+
+    .article-preview [data-editor-media]::after {
+      content: none !important;
+    }
+
+    .article-preview [data-align="left"] {
+      float: left;
+      margin: 0.45rem 2rem 1.25rem 0;
+    }
+
+    .article-preview [data-align="center"] {
+      clear: both;
+      float: none;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .article-preview [data-align="right"] {
+      float: right;
+      margin: 0.45rem 0 1.25rem 2rem;
+    }
+
+    .article-preview [data-media-size="small"] {
+      width: min(22rem, 48%);
+    }
+
+    .article-preview [data-media-size="medium"] {
+      width: min(34rem, 64%);
+    }
+
+    .article-preview [data-media-size="large"] {
+      width: 100%;
+    }
+
+    .article-preview img {
+      border-radius: 1.5rem;
+      display: block;
+      width: 100%;
+    }
+
+    .article-preview figcaption {
+      color: rgb(113 113 122);
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.75rem;
+      font-style: italic;
+      margin-top: 0.65rem;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .editor-canvas [data-align],
+      .article-preview [data-align] {
+        clear: both;
+        float: none;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100% !important;
+      }
+    }
   </style>
 
   <script is:inline>
@@ -475,6 +602,16 @@ const aiActions = [
       const googleTitle = document.querySelector('[data-google-title]');
       const googleDescription = document.querySelector('[data-google-description]');
       const seoBar = document.querySelector('[data-seo-bar]');
+      const previewModal = document.querySelector('[data-preview-modal]');
+      const previewContent = document.querySelector('[data-preview-content]');
+      const previewTitle = document.querySelector('[data-preview-title]');
+      const previewSummary = document.querySelector('[data-preview-summary]');
+      const previewCategory = document.querySelector('[data-preview-category]');
+      const previewCover = document.querySelector('[data-preview-cover]');
+      const previewCoverWrap = document.querySelector('[data-preview-cover-wrap]');
+      const previewSources = document.querySelector('[data-preview-sources]');
+      const previewReading = document.querySelector('[data-preview-reading]');
+      const categoryInput = document.querySelector('[data-category-input]');
 
       let savedRange = null;
       let selectedMedia = null;
@@ -561,6 +698,47 @@ const aiActions = [
         if (googleDescription) googleDescription.textContent = document.querySelector('[data-seo-description]')?.value || summaryInput?.value || 'Prévia Google será montada com título e descrição.';
         syncOutput();
         scheduleAutosave();
+      };
+
+      const getReadingTime = () => {
+        const words = editor.innerText.trim().split(/\s+/).filter(Boolean).length;
+        return Math.max(0, Math.ceil(words / 220));
+      };
+
+      const openPreview = () => {
+        const clone = editor.cloneNode(true);
+        clone.querySelectorAll('.is-selected').forEach((node) => node.classList.remove('is-selected'));
+        clone.querySelectorAll('[contenteditable]').forEach((node) => node.removeAttribute('contenteditable'));
+
+        if (previewTitle) previewTitle.textContent = titleInput?.value || 'Título da matéria';
+        if (previewSummary) previewSummary.textContent = summaryInput?.value || 'Resumo editorial da matéria.';
+        if (previewCategory) previewCategory.textContent = categoryInput?.value || 'Categoria';
+        if (previewReading) previewReading.textContent = `${getReadingTime()} min de leitura`;
+        if (previewContent) previewContent.innerHTML = clone.innerHTML || '<p>O conteúdo da matéria aparecerá aqui.</p>';
+
+        const coverUrl = document.querySelector('[data-cover-url]')?.value.trim();
+        const coverAlt = document.querySelector('[data-cover-alt]')?.value.trim() || titleInput?.value || 'Imagem de capa';
+        if (previewCover && previewCoverWrap) {
+          previewCover.src = coverUrl || '';
+          previewCover.alt = coverAlt;
+          previewCoverWrap.classList.toggle('hidden', !coverUrl);
+        }
+
+        if (previewSources) {
+          previewSources.innerHTML = sources.length
+            ? `<span class="mr-2 text-[9px] font-black uppercase tracking-widest text-zinc-300">Fontes:</span>${sources
+                .map((source) => `<span class="rounded-md border border-zinc-100 bg-zinc-50 px-2 py-1 text-[9px] font-bold uppercase tracking-widest text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900">${escapeHtml(source.name)}</span>`)
+                .join('')}`
+            : '';
+        }
+
+        previewModal?.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      };
+
+      const closePreview = () => {
+        previewModal?.classList.add('hidden');
+        document.body.style.overflow = '';
       };
 
       const scheduleAutosave = () => {
@@ -848,6 +1026,14 @@ const aiActions = [
 
       document.querySelector('[data-focus-mode]')?.addEventListener('click', () => {
         document.documentElement.classList.toggle('admin-focus-mode');
+      });
+      document.querySelector('[data-open-preview]')?.addEventListener('click', openPreview);
+      document.querySelector('[data-close-preview]')?.addEventListener('click', closePreview);
+      previewModal?.addEventListener('click', (event) => {
+        if (event.target === previewModal) closePreview();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !previewModal?.classList.contains('hidden')) closePreview();
       });
 
       document.querySelector('[data-save-draft]')?.addEventListener('click', () => setStatus('Rascunho salvo'));
