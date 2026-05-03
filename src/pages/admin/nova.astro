@@ -614,6 +614,7 @@ const aiActions = [
       const categoryInput = document.querySelector('[data-category-input]');
 
       let savedRange = null;
+      let slashRange = null;
       let selectedMedia = null;
       let autosaveTimer = null;
       const mediaItems = [];
@@ -665,6 +666,15 @@ const aiActions = [
       const insertHtml = (html) => {
         restoreSelection();
         runCommand('insertHTML', html);
+        updateEditorState();
+      };
+
+      const insertHtmlAtSlash = (html) => {
+        if (slashRange) savedRange = slashRange.cloneRange();
+        restoreSelection();
+        runCommand('insertHTML', html);
+        slashRange = null;
+        slashPalette?.classList.add('hidden');
         updateEditorState();
       };
 
@@ -771,6 +781,56 @@ const aiActions = [
         positionMediaToolbar();
       };
 
+      const hideSlashPalette = () => {
+        slashPalette?.classList.add('hidden');
+        slashRange = null;
+      };
+
+      const getSlashRangeAtCursor = () => {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0 || !selection.isCollapsed) return null;
+        const range = selection.getRangeAt(0);
+        if (!editor.contains(range.commonAncestorContainer)) return null;
+
+        if (range.startContainer.nodeType === Node.TEXT_NODE) {
+          const text = range.startContainer.textContent || '';
+          if (text.slice(0, range.startOffset).endsWith('/')) {
+            const slash = range.cloneRange();
+            slash.setStart(range.startContainer, range.startOffset - 1);
+            slash.setEnd(range.startContainer, range.startOffset);
+            return slash;
+          }
+          return null;
+        }
+
+        const before = range.startContainer.childNodes[range.startOffset - 1];
+        if (before?.nodeType === Node.TEXT_NODE && before.textContent?.endsWith('/')) {
+          const slash = document.createRange();
+          slash.setStart(before, before.textContent.length - 1);
+          slash.setEnd(before, before.textContent.length);
+          return slash;
+        }
+        return null;
+      };
+
+      const positionSlashPalette = () => {
+        if (!slashPalette || !slashRange) return;
+        const rect = slashRange.getBoundingClientRect();
+        const editorRect = editor.getBoundingClientRect();
+        slashPalette.style.left = `${Math.max(20, rect.left - editorRect.left + 24)}px`;
+        slashPalette.style.top = `${Math.max(24, rect.bottom - editorRect.top + 20)}px`;
+        slashPalette.classList.remove('hidden');
+      };
+
+      const updateSlashPalette = () => {
+        slashRange = getSlashRangeAtCursor();
+        if (!slashRange) {
+          slashPalette?.classList.add('hidden');
+          return;
+        }
+        positionSlashPalette();
+      };
+
       const createImageBlock = (url, alt) =>
         `<figure data-editor-media="image" data-align="center" data-media-size="large" contenteditable="false"><img src="${escapeHtml(url)}" alt="${escapeHtml(alt)}" /><figcaption>${escapeHtml(alt)}</figcaption></figure><p><br></p>`;
 
@@ -854,20 +914,20 @@ const aiActions = [
 
       const runSlashAction = (action) => {
         slashPalette?.classList.add('hidden');
-        if (action === 'h2') insertHtml('<h2>Novo subtítulo</h2>');
-        if (action === 'h3') insertHtml('<h3>Novo intertítulo</h3>');
-        if (action === 'quote') insertHtml('<blockquote>Citação ou dado relevante</blockquote>');
+        if (action === 'h2') insertHtmlAtSlash('<h2>Novo subtítulo</h2>');
+        if (action === 'h3') insertHtmlAtSlash('<h3>Novo intertítulo</h3>');
+        if (action === 'quote') insertHtmlAtSlash('<blockquote>Citação ou dado relevante</blockquote>');
         if (action === 'image') {
           const item = mediaItems.at(-1);
-          if (item) insertHtml(createImageBlock(item.url, item.alt));
+          if (item) insertHtmlAtSlash(createImageBlock(item.url, item.alt));
         }
         if (action === 'youtube' || action === 'tweet' || action === 'embed') {
           const url = window.prompt('Cole a URL');
-          if (url) insertHtml(createEmbedBlock(url, action === 'youtube' ? 'YouTube' : action === 'tweet' ? 'Post no X' : 'Embed editorial'));
+          if (url) insertHtmlAtSlash(createEmbedBlock(url, action === 'youtube' ? 'YouTube' : action === 'tweet' ? 'Post no X' : 'Embed editorial'));
         }
         if (action === 'carousel') {
           const carousel = createCarouselBlock();
-          if (carousel) insertHtml(carousel);
+          if (carousel) insertHtmlAtSlash(carousel);
         }
       };
 
@@ -901,16 +961,23 @@ const aiActions = [
       });
 
       editor.addEventListener('input', () => {
-        const text = editor.innerText.trimEnd();
-        slashPalette?.classList.toggle('hidden', !text.endsWith('/'));
+        updateSlashPalette();
         updateEditorState();
       });
-      editor.addEventListener('keyup', saveSelection);
-      editor.addEventListener('mouseup', saveSelection);
+      editor.addEventListener('keyup', (event) => {
+        saveSelection();
+        if (event.key === 'Escape') hideSlashPalette();
+        if (event.key === '/') updateSlashPalette();
+      });
+      editor.addEventListener('mouseup', () => {
+        saveSelection();
+        updateSlashPalette();
+      });
       editor.addEventListener('focus', saveSelection);
       editor.addEventListener('click', (event) => {
         const media = event.target.closest('[data-editor-media]');
         setSelectedMedia(media && editor.contains(media) ? media : null);
+        updateSlashPalette();
       });
       editor.addEventListener('pointerup', () => {
         if (!selectedMedia) return;
@@ -944,7 +1011,10 @@ const aiActions = [
         saveSelection();
       });
       window.addEventListener('scroll', positionMediaToolbar, { passive: true });
-      window.addEventListener('resize', positionMediaToolbar);
+      window.addEventListener('resize', () => {
+        positionMediaToolbar();
+        positionSlashPalette();
+      });
 
       titleInput?.addEventListener('input', () => {
         titleInput.style.height = 'auto';
