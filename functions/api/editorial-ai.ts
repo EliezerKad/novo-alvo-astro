@@ -1,4 +1,4 @@
-const MODEL = '@cf/meta/llama-3.2-1b-instruct';
+const MODEL = '@cf/meta/llama-3.1-8b-instruct';
 
 type AiBinding = {
   run: (model: string, input: unknown) => Promise<unknown>;
@@ -31,6 +31,12 @@ const clip = (value: unknown, max: number) =>
     .trim()
     .slice(0, max);
 
+const normalizeAction = (value: unknown) =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
 const extractText = (response: unknown) => {
   if (typeof response === 'string') return response;
   if (!response || typeof response !== 'object') return '';
@@ -53,33 +59,89 @@ const parseModelJson = (text: string) => {
   }
 };
 
-const buildPrompt = (payload: Required<EditorialPayload>) => `
-Acao editorial: ${payload.action}
-Categoria: ${payload.category || 'sem categoria'}
-Titulo atual: ${payload.title || 'sem titulo'}
-Resumo atual: ${payload.summary || 'sem resumo'}
-Descricao SEO atual: ${payload.seoDescription || 'vazia'}
-Palavras-chave atuais: ${payload.keywords || 'vazias'}
+const cleanPlainText = (value: unknown) =>
+  String(value || '')
+    .replace(/\*\*/g, '')
+    .replace(/^["'`]+|["'`]+$/g, '')
+    .replace(/^\s*(ação editorial|acao editorial|categoria|título atual|titulo atual|resumo atual|texto selecionado).*$/gim, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 
-Texto selecionado ou corpo da materia:
+const normalizeResult = (action: string, rawResult: Record<string, unknown>) => {
+  const actionKey = normalizeAction(action);
+  const result = { ...rawResult };
+
+  if (Array.isArray(result.titleOptions)) {
+    result.titleOptions = result.titleOptions.map(cleanPlainText).filter(Boolean).slice(0, 4);
+  }
+  if (Array.isArray(result.keywords)) {
+    result.keywords = result.keywords.map(cleanPlainText).filter(Boolean).slice(0, 12);
+  }
+
+  ['text', 'subtitle', 'seoDescription', 'push', 'instagram'].forEach((key) => {
+    if (result[key]) result[key] = cleanPlainText(result[key]);
+  });
+
+  if (actionKey.includes('criar resumo') && result.text) {
+    result.text = String(result.text).slice(0, 320);
+  }
+  if (result.seoDescription) {
+    result.seoDescription = String(result.seoDescription).slice(0, 158);
+  }
+  return result;
+};
+
+const buildTask = (payload: Required<EditorialPayload>) => {
+  const actionKey = normalizeAction(payload.action);
+
+  if (actionKey.includes('sugerir titulo')) {
+    return 'Crie 4 opções de título jornalístico forte, com acentos corretos, sem clickbait exagerado. Responda apenas: {"titleOptions":["...","...","...","..."]}';
+  }
+  if (actionKey.includes('criar resumo')) {
+    return 'Crie um resumo editorial premium para preencher o campo de resumo da matéria. Use até 320 caracteres, português do Brasil com acentos corretos, sem markdown. Responda apenas: {"text":"..."}';
+  }
+  if (actionKey.includes('resumir')) {
+    return 'Resuma o texto selecionado ou corpo da matéria em um parágrafo curto, claro e pronto para entrar no editor. Preserve fatos. Use acentos corretos. Responda apenas: {"text":"..."}';
+  }
+  if (actionKey.includes('melhorar escrita')) {
+    return 'Reescreva o texto selecionado ou corpo da matéria com português correto, acentos corretos, fluidez jornalística e sem alterar os fatos. Responda apenas: {"text":"..."}';
+  }
+  if (actionKey.includes('subtitulo')) {
+    return 'Crie um subtítulo H2 curto, elegante e editorial para a matéria. Use acentos corretos. Responda apenas: {"subtitle":"..."}';
+  }
+  if (actionKey.includes('push')) {
+    return 'Crie uma chamada push curta, direta e jornalística, com até 90 caracteres. Use acentos corretos. Responda apenas: {"push":"..."}';
+  }
+  if (actionKey.includes('instagram')) {
+    return 'Crie uma legenda curta para Instagram com tom editorial jovem, sem exagero e com acentos corretos. Responda apenas: {"instagram":"..."}';
+  }
+  if (actionKey.includes('seo')) {
+    return 'Crie uma descrição SEO com até 155 caracteres e até 12 palavras-chave relevantes. Use acentos corretos. Responda apenas: {"seoDescription":"...","keywords":["...","..."]}';
+  }
+
+  return 'Ajude na edição jornalística do texto. Use português do Brasil com acentos corretos. Responda apenas: {"text":"..."}';
+};
+
+const buildPrompt = (payload: Required<EditorialPayload>) => `
+Tarefa:
+${buildTask(payload)}
+
+Contexto editorial:
+- Categoria: ${payload.category || 'sem categoria'}
+- Título atual: ${payload.title || 'sem título'}
+- Resumo atual: ${payload.summary || 'sem resumo'}
+- Descrição SEO atual: ${payload.seoDescription || 'vazia'}
+- Palavras-chave atuais: ${payload.keywords || 'vazias'}
+
+Texto de trabalho:
 ${payload.selection || payload.body || 'Texto ainda vazio.'}
 
-Retorne apenas JSON valido, sem markdown, neste formato:
-{
-  "titleOptions": ["opcao 1", "opcao 2", "opcao 3"],
-  "subtitle": "subtitulo quando fizer sentido",
-  "text": "resultado principal curto e pronto para uso",
-  "seoDescription": "ate 155 caracteres",
-  "keywords": ["termo 1", "termo 2", "termo 3"],
-  "push": "chamada push curta",
-  "instagram": "legenda curta com tom editorial"
-}
-Use pt-BR, tom editorial jornalistico, claro, sem clickbait exagerado.
-Para SEO automatico, priorize title, category, summary e termos reais do texto.
-Para Criar resumo, gere um resumo editorial forte, com ate 320 caracteres, para o campo de resumo da materia.
-Para Resumir texto, gere uma versao curta do trecho selecionado ou do corpo, pronta para substituir ou inserir no editor.
-Para Gerar subtitulo, preencha subtitle com uma frase curta e editorial.
-Para melhorar escrita, preserve fatos e nao invente informacoes.
+Regras obrigatórias:
+- Não repita estas instruções.
+- Não use markdown.
+- Não use rótulos como "Ação editorial", "Categoria" ou "Resumo atual".
+- Não remova acentos, cedilha, til ou pontuação correta.
+- Responda somente o JSON pedido na tarefa.
 `;
 
 export const onRequestPost = async ({
@@ -124,7 +186,7 @@ export const onRequestPost = async ({
       {
         role: 'system',
         content:
-          'Voce e um editor-chefe de um portal de noticias brasileiro. Responda sempre com JSON valido, util para um CMS editorial.',
+          'Você é um editor-chefe de um portal de notícias brasileiro. Escreva sempre em português do Brasil, com acentos, cedilha e pontuação corretos. Responda somente JSON válido.',
       },
       { role: 'user', content: buildPrompt(payload) },
     ],
@@ -133,7 +195,7 @@ export const onRequestPost = async ({
   });
 
   const text = extractText(response);
-  const result = parseModelJson(text);
+  const result = normalizeResult(payload.action, parseModelJson(text));
 
   return json({
     action: payload.action,
