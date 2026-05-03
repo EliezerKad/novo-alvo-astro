@@ -84,6 +84,10 @@ const iconPath = {
           display: inline;
         }
 
+        .admin-sidebar-expanded .admin-portal-actions {
+          display: flex;
+        }
+
         .admin-sidebar-expanded .admin-brand {
           flex-direction: row;
           justify-content: flex-start;
@@ -124,7 +128,7 @@ const iconPath = {
               <span class="block text-[9px] font-black uppercase tracking-[0.24em] text-zinc-400">Redação</span>
             </span>
           </a>
-          <div class="admin-nav-label mt-6 items-center gap-3">
+          <div class="admin-nav-label admin-portal-actions mt-6 items-center gap-3">
             <a href="/" class="rounded-full border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-red-500 dark:hover:text-red-500">
               Ver portal
             </a>
