@@ -1347,14 +1347,20 @@ const aiActions = [
           }
 
           currentArticleId = result.article?.id || currentArticleId || payload.id || '';
-          setStatus(statusValue === 'published' ? 'Publicada no banco' : statusValue === 'scheduled' ? 'Agendada no banco' : 'Rascunho salvo no banco');
+          const staticPublish = result.staticPublish;
+          const staticPublishOk = staticPublish?.ok;
+          setStatus(statusValue === 'published' ? (staticPublishOk ? 'Publicada no template Astro' : 'Salva no banco') : statusValue === 'scheduled' ? 'Agendada no banco' : 'Rascunho salvo no banco');
           if (slugInput) slugInput.value = result.article?.slug || payload.slug;
           const savedSlug = result.article?.slug || payload.slug;
           const publicUrl = savedSlug ? `/noticia/${encodeURIComponent(savedSlug)}/` : '';
 
           if (statusValue === 'published' && publicUrl) {
+            const publishNote = staticPublishOk
+              ? 'Arquivo editorial enviado ao GitHub. O Cloudflare vai recriar a página usando o modelo oficial Astro.'
+              : (staticPublish?.reason || 'Sem GITHUB_TOKEN: a matéria ficou salva no banco, mas ainda não foi transformada em página Astro estática.');
             showPublishFeedback(`
-              <span class="block text-[9px] font-black uppercase tracking-widest text-emerald-300 dark:text-emerald-600">Publicada agora</span>
+              <span class="block text-[9px] font-black uppercase tracking-widest ${staticPublishOk ? 'text-emerald-300 dark:text-emerald-600' : 'text-amber-300 dark:text-amber-600'}">${staticPublishOk ? 'Publicação enviada ao Astro' : 'Publicação aguardando GitHub'}</span>
+              <span class="mt-1 block">${publishNote}</span>
               <span class="mt-1 block break-all">${publicUrl}</span>
               <a href="${publicUrl}" class="mt-3 inline-flex rounded-xl bg-white px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-950 transition hover:bg-red-600 hover:text-white dark:bg-zinc-950 dark:text-white" target="_blank" rel="noopener noreferrer">Abrir notícia</a>
               <a href="/admin/noticias/?status=publicada" class="mt-3 ml-2 inline-flex rounded-xl border border-white/15 px-3 py-2 text-[9px] font-black uppercase tracking-widest transition hover:border-white/50 dark:border-zinc-300">Ver publicadas</a>

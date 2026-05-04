@@ -69,6 +69,9 @@ const formatPublished = (value: string) =>
   }).format(new Date(value));
 
 export const onRequestGet = async ({ request, env, params }: { request: Request; env: Env; params: { slug: string } }) => {
+  const staticPage = await fallbackToAssets(request, env);
+  if (staticPage.status !== 404) return staticPage;
+
   const db = env.EDITORIAL_DB;
   if (!db) return fallbackToAssets(request, env);
 
@@ -88,6 +91,15 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
     .first<CmsArticle>();
 
   if (!article) return fallbackToAssets(request, env);
+  if (request.headers.get('x-render-d1-fallback') !== '1') {
+    return new Response('Publicação registrada. A página final será exibida após o próximo deploy do Astro.', {
+      status: 503,
+      headers: {
+        'content-type': 'text/plain; charset=utf-8',
+        'cache-control': 'no-store',
+      },
+    });
+  }
 
   const relatedResult = await db
     .prepare(
