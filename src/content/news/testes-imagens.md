@@ -13,11 +13,11 @@ isFeatured: false
 urgent: false
 views: 0
 cover:
-  src: "/uploads/news/testes-imagens-cover.webp"
+  src: "https://portalnovoalvo.com.br/uploads/news/testes-imagens-cover.webp"
   alt: "her movie cover"
   caption: "her movie cover"
   layout: "full"
-ogImage: "/uploads/news/testes-imagens-cover.webp"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/testes-imagens-cover.webp"
 tags: []
 ---
 

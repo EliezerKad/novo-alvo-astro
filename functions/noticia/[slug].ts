@@ -58,8 +58,26 @@ const parseSources = (value: string): Array<{ name?: string; url?: string; note?
   }
 };
 
-const fallbackToAssets = (request: Request, env: Env) =>
-  env.ASSETS?.fetch(request) || new Response('Not found', { status: 404 });
+const fallbackToAssets = async (request: Request, env: Env) => {
+  if (!env.ASSETS) return new Response('Not found', { status: 404 });
+
+  const response = await env.ASSETS.fetch(request);
+  if (response.status !== 404) return response;
+
+  const url = new URL(request.url);
+  const candidates = new Set<string>();
+  candidates.add(url.pathname.endsWith('/') ? `${url.pathname}index.html` : `${url.pathname}/index.html`);
+  candidates.add(url.pathname.endsWith('/') ? url.pathname.slice(0, -1) : `${url.pathname}/`);
+
+  for (const pathname of candidates) {
+    const candidateUrl = new URL(url.href);
+    candidateUrl.pathname = pathname;
+    const candidate = await env.ASSETS.fetch(new Request(candidateUrl, request));
+    if (candidate.status !== 404) return candidate;
+  }
+
+  return response;
+};
 
 const formatPublished = (value: string) =>
   new Intl.DateTimeFormat('pt-BR', {

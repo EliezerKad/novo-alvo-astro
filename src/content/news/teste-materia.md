@@ -13,11 +13,11 @@ isFeatured: false
 urgent: false
 views: 0
 cover:
-  src: "blob:https://portalnovoalvo.com.br/44328dd6-1f3e-4b62-8f09-2be18b7dea01"
+  src: "https://portalnovoalvo.com.br/og-default.svg"
   alt: "Teste Matéria"
   caption: "Teste Matéria"
-  layout: "full"
-ogImage: "blob:https://portalnovoalvo.com.br/44328dd6-1f3e-4b62-8f09-2be18b7dea01"
+  layout: "none"
+ogImage: "https://portalnovoalvo.com.br/og-default.svg"
 tags: []
 ---
 

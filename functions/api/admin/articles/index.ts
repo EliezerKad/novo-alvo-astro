@@ -94,6 +94,15 @@ const yamlStringArray = (value: string) => {
   return `[${items.map(yamlString).join(', ')}]`;
 };
 
+const publicUrl = (value: string) => {
+  const cleanValue = clean(value, 8000000);
+  if (!cleanValue) return '';
+  if (/^blob:/i.test(cleanValue)) return '';
+  if (/^https?:\/\//i.test(cleanValue)) return cleanValue;
+  if (cleanValue.startsWith('/')) return `https://portalnovoalvo.com.br${cleanValue}`;
+  return cleanValue;
+};
+
 const toBase64 = (value: string) => {
   const bytes = new TextEncoder().encode(value);
   let binary = '';
@@ -165,6 +174,7 @@ const createMarkdownFile = (article: ReturnType<typeof normalizePayload>, id: st
   const tags = yamlStringArray(article.tags || article.keywords);
   const sources = yamlStringArray(article.sources);
   const body = article.bodyHtml || `<p>${article.summary}</p>`;
+  const coverUrl = publicUrl(article.coverUrl) || `https://picsum.photos/seed/${id}/1600/900`;
 
   return `---
 title: ${yamlString(article.title)}
@@ -181,11 +191,11 @@ isFeatured: false
 urgent: false
 views: 0
 cover:
-  src: ${yamlString(article.coverUrl || `https://picsum.photos/seed/${id}/1600/900`)}
+  src: ${yamlString(coverUrl)}
   alt: ${yamlString(article.coverAlt || article.title)}
   caption: ${yamlString(article.coverAlt || '')}
   layout: ${yamlString(article.coverUrl ? 'full' : 'none')}
-ogImage: ${yamlString(article.coverUrl || `https://picsum.photos/seed/${id}/1600/900`)}
+ogImage: ${yamlString(coverUrl)}
 tags: ${tags}
 ---
 
@@ -354,19 +364,45 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
     return json({ article });
   }
 
-  const result = status
-    ? await db
-        .prepare(
-          'SELECT id, slug, title, summary, category, author, status, cover_url, scheduled_at, published_at, created_at, updated_at FROM articles WHERE status = ? ORDER BY updated_at DESC LIMIT ?',
-        )
-        .bind(status, limit)
-        .all()
-    : await db
-        .prepare(
-          'SELECT id, slug, title, summary, category, author, status, cover_url, scheduled_at, published_at, created_at, updated_at FROM articles ORDER BY updated_at DESC LIMIT ?',
-        )
-        .bind(limit)
-        .all();
+  let result;
+  if (status === 'published') {
+    result = await db
+      .prepare(
+        `SELECT id, slug, title, summary, category, author, status, cover_url, scheduled_at, published_at, created_at, updated_at
+         FROM articles
+         WHERE status = 'published' OR COALESCE(NULLIF(published_at, ''), '') != ''
+         ORDER BY COALESCE(NULLIF(published_at, ''), updated_at) DESC
+         LIMIT ?`,
+      )
+      .bind(limit)
+      .all();
+  } else if (status === 'scheduled') {
+    result = await db
+      .prepare(
+        `SELECT id, slug, title, summary, category, author, status, cover_url, scheduled_at, published_at, created_at, updated_at
+         FROM articles
+         WHERE status = 'scheduled'
+            OR (COALESCE(NULLIF(scheduled_at, ''), '') != '' AND COALESCE(NULLIF(published_at, ''), '') = '' AND status != 'published')
+         ORDER BY scheduled_at DESC, updated_at DESC
+         LIMIT ?`,
+      )
+      .bind(limit)
+      .all();
+  } else if (status) {
+    result = await db
+      .prepare(
+        'SELECT id, slug, title, summary, category, author, status, cover_url, scheduled_at, published_at, created_at, updated_at FROM articles WHERE status = ? ORDER BY updated_at DESC LIMIT ?',
+      )
+      .bind(status, limit)
+      .all();
+  } else {
+    result = await db
+      .prepare(
+        'SELECT id, slug, title, summary, category, author, status, cover_url, scheduled_at, published_at, created_at, updated_at FROM articles ORDER BY updated_at DESC LIMIT ?',
+      )
+      .bind(limit)
+      .all();
+  }
 
   return json({ articles: result.results || [] });
 };
