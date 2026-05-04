@@ -40,9 +40,9 @@ const active = viewParam === 'midia' ? 'media' : current.active;
     <header class="overflow-hidden rounded-[2rem] border border-white/70 bg-white/78 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/78">
       <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div>
-          <span class="text-[10px] font-black uppercase tracking-[0.35em] text-red-600">{current.eyebrow}</span>
-          <h1 class="mt-3 font-serif text-4xl font-black italic tracking-tighter md:text-6xl">{current.title}</h1>
-          <p class="mt-3 max-w-2xl text-sm font-medium leading-6 text-zinc-500 dark:text-zinc-400">{current.description}</p>
+          <span class="text-[10px] font-black uppercase tracking-[0.35em] text-red-600" data-list-eyebrow>{current.eyebrow}</span>
+          <h1 class="mt-3 font-serif text-4xl font-black italic tracking-tighter md:text-6xl" data-list-title>{current.title}</h1>
+          <p class="mt-3 max-w-2xl text-sm font-medium leading-6 text-zinc-500 dark:text-zinc-400" data-list-description>{current.description}</p>
         </div>
         <div class="flex flex-wrap gap-2">
           <button type="button" data-refresh-articles class="rounded-2xl border border-zinc-200 bg-white px-5 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-900">
@@ -55,9 +55,9 @@ const active = viewParam === 'midia' ? 'media' : current.active;
       </div>
 
       <div class="mt-6 grid gap-3 md:grid-cols-3">
-        <a href="/admin/noticias/?status=rascunho" class={`rounded-3xl px-5 py-4 text-sm font-black transition ${current.api === 'draft' ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950' : 'bg-zinc-50 text-zinc-500 hover:text-red-600 dark:bg-zinc-900 dark:text-zinc-400'}`}>Rascunhos</a>
-        <a href="/admin/noticias/?status=agendada" class={`rounded-3xl px-5 py-4 text-sm font-black transition ${current.api === 'scheduled' ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950' : 'bg-zinc-50 text-zinc-500 hover:text-red-600 dark:bg-zinc-900 dark:text-zinc-400'}`}>Agendadas</a>
-        <a href="/admin/noticias/?status=publicada" class={`rounded-3xl px-5 py-4 text-sm font-black transition ${current.api === 'published' ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950' : 'bg-zinc-50 text-zinc-500 hover:text-red-600 dark:bg-zinc-900 dark:text-zinc-400'}`}>Publicadas</a>
+        <a href="/admin/noticias/?status=rascunho" data-status-tab data-status-key="rascunho" class={`rounded-3xl px-5 py-4 text-sm font-black transition ${current.api === 'draft' ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950' : 'bg-zinc-50 text-zinc-500 hover:text-red-600 dark:bg-zinc-900 dark:text-zinc-400'}`}>Rascunhos</a>
+        <a href="/admin/noticias/?status=agendada" data-status-tab data-status-key="agendada" class={`rounded-3xl px-5 py-4 text-sm font-black transition ${current.api === 'scheduled' ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950' : 'bg-zinc-50 text-zinc-500 hover:text-red-600 dark:bg-zinc-900 dark:text-zinc-400'}`}>Agendadas</a>
+        <a href="/admin/noticias/?status=publicada" data-status-tab data-status-key="publicada" class={`rounded-3xl px-5 py-4 text-sm font-black transition ${current.api === 'published' ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950' : 'bg-zinc-50 text-zinc-500 hover:text-red-600 dark:bg-zinc-900 dark:text-zinc-400'}`}>Publicadas</a>
       </div>
     </header>
 
@@ -93,13 +93,58 @@ const active = viewParam === 'midia' ? 'media' : current.active;
       const root = document.querySelector('[data-cms-list]');
       if (!root) return;
 
-      const status = root.dataset.status || 'draft';
+      const statusConfig = {
+        rascunho: {
+          api: 'draft',
+          eyebrow: 'Rascunhos',
+          title: 'Rascunhos editoriais',
+          description: 'Matérias salvas no D1 e prontas para continuar a edição.',
+        },
+        agendada: {
+          api: 'scheduled',
+          eyebrow: 'Agenda',
+          title: 'Matérias agendadas',
+          description: 'Publicações preparadas para entrar no ar no horário definido.',
+        },
+        publicada: {
+          api: 'published',
+          eyebrow: 'Arquivo',
+          title: 'Matérias publicadas',
+          description: 'Conteúdo publicado pelo CMS editorial.',
+        },
+      };
+
+      const activeTabClass = 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950';
+      const inactiveTabClass = 'bg-zinc-50 text-zinc-500 hover:text-red-600 dark:bg-zinc-900 dark:text-zinc-400';
+      const statusFromUrl = () => new URLSearchParams(window.location.search).get('status') || 'rascunho';
+      let statusKey = statusConfig[statusFromUrl()] ? statusFromUrl() : 'rascunho';
+      let status = statusConfig[statusKey].api;
       const list = document.querySelector('[data-article-list]');
       const listStatus = document.querySelector('[data-list-status]');
       const emptyState = document.querySelector('[data-empty-state]');
       const filterInput = document.querySelector('[data-filter-articles]');
       const refreshButton = document.querySelector('[data-refresh-articles]');
+      const eyebrow = document.querySelector('[data-list-eyebrow]');
+      const title = document.querySelector('[data-list-title]');
+      const description = document.querySelector('[data-list-description]');
+      const tabs = [...document.querySelectorAll('[data-status-tab]')];
       let articles = [];
+
+      const applyStatusView = () => {
+        const config = statusConfig[statusKey] || statusConfig.rascunho;
+        status = config.api;
+        root.dataset.status = status;
+        if (eyebrow) eyebrow.textContent = config.eyebrow;
+        if (title) title.textContent = config.title;
+        if (description) description.textContent = config.description;
+        document.title = `${config.title} | Admin Novo Alvo`;
+
+        tabs.forEach((tab) => {
+          const isActive = tab.dataset.statusKey === statusKey;
+          tab.className = `rounded-3xl px-5 py-4 text-sm font-black transition ${isActive ? activeTabClass : inactiveTabClass}`;
+          tab.setAttribute('aria-current', isActive ? 'page' : 'false');
+        });
+      };
 
       const escapeHtml = (value) =>
         String(value || '')
@@ -217,6 +262,27 @@ const active = viewParam === 'midia' ? 'media' : current.active;
 
       filterInput?.addEventListener('input', render);
       refreshButton?.addEventListener('click', loadArticles);
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', (event) => {
+          event.preventDefault();
+          const nextStatus = tab.dataset.statusKey || 'rascunho';
+          if (!statusConfig[nextStatus]) return;
+          statusKey = nextStatus;
+          const nextUrl = new URL(window.location.href);
+          nextUrl.searchParams.set('status', statusKey);
+          history.pushState({}, '', nextUrl);
+          articles = [];
+          if (filterInput) filterInput.value = '';
+          applyStatusView();
+          loadArticles();
+        });
+      });
+      window.addEventListener('popstate', () => {
+        statusKey = statusConfig[statusFromUrl()] ? statusFromUrl() : 'rascunho';
+        applyStatusView();
+        loadArticles();
+      });
+      applyStatusView();
       loadArticles();
     })();
   </script>
