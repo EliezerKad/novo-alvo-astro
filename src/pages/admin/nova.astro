@@ -1079,8 +1079,27 @@ const aiActions = [
           .replace(/^-+|-+$/g, '')
           .slice(0, 90);
 
-      const setStatus = (value) => {
-        if (status) status.textContent = value;
+      const statusLabels = {
+        draft: 'Rascunho',
+        scheduled: 'Agendada',
+        published: 'Publicada',
+        saving: 'Salvando...',
+        publishing: 'Publicando...',
+        scheduling: 'Agendando...',
+        saved: 'Salvo no D1',
+        tokenRequired: 'Token necessário',
+        tokenInvalid: 'Token inválido',
+        cmsError: 'Erro no CMS',
+      };
+
+      const setStatus = (value, detail = '') => {
+        const text = String(value || '');
+        const isLongRuntimeMessage = text.length > 28 || text.includes('ADMIN_TOKEN') || text.includes('EDITORIAL_DB');
+        const label = isLongRuntimeMessage ? statusLabels.cmsError : statusLabels[value] || value;
+        const message = detail || (isLongRuntimeMessage ? text : '');
+        if (status) status.textContent = label;
+        if (autosave && message) autosave.textContent = message;
+        if (autosaveDetail && message) autosaveDetail.textContent = message;
       };
 
       const saveSelection = () => {
