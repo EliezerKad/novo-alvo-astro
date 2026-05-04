@@ -83,6 +83,16 @@ const isCategoryView = !!category && category !== 'Início';
               <>
                 <FeaturedCarousel articles={featuredArticles.length > 0 ? featuredArticles : [featured]} />
 
+                <section class="hidden space-y-7 md:space-y-8" data-cms-latest-section>
+                  <div class="flex items-center gap-3 border-b-2 border-red-600 pb-3">
+                    <Icon name="trending" class="w-5 h-5 text-red-600" />
+                    <h3 class="uppercase text-xs font-black tracking-[0.2em] italic text-zinc-900 dark:text-zinc-50">
+                      AGORA NO PORTAL
+                    </h3>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10" data-cms-latest-grid></div>
+                </section>
+
                 <section class="space-y-7 md:space-y-8">
                   <div class="flex items-center gap-3 border-b-2 border-red-600 pb-3">
                     <Icon name="trending" class="w-5 h-5 text-red-600" />
@@ -152,15 +162,69 @@ const isCategoryView = !!category && category !== 'Início';
                 <script is:inline>
                   (() => {
                     const button = document.querySelector('[data-show-more-categories]');
-                    if (!button) return;
-
-                    button.addEventListener('click', () => {
-                      document.querySelectorAll('[data-category-hidden="true"]').forEach((section) => {
-                        section.classList.remove('hidden');
-                        section.dataset.categoryHidden = 'false';
+                    if (button) {
+                      button.addEventListener('click', () => {
+                        document.querySelectorAll('[data-category-hidden="true"]').forEach((section) => {
+                          section.classList.remove('hidden');
+                          section.dataset.categoryHidden = 'false';
+                        });
+                        button.closest('div')?.remove();
                       });
-                      button.closest('div')?.remove();
-                    });
+                    }
+
+                    const section = document.querySelector('[data-cms-latest-section]');
+                    const grid = document.querySelector('[data-cms-latest-grid]');
+                    if (!section || !grid) return;
+
+                    const escapeHtml = (value) =>
+                      String(value || '')
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#039;');
+
+                    const formatDate = (value) => {
+                      const date = new Date(value || Date.now());
+                      const diff = Date.now() - date.getTime();
+                      const minutes = Math.max(1, Math.floor(diff / 60000));
+                      if (minutes < 60) return `há ${minutes} min`;
+                      const hours = Math.floor(minutes / 60);
+                      if (hours < 24) return `há ${hours}h`;
+                      return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(date);
+                    };
+
+                    fetch('/api/public/articles?limit=4')
+                      .then((response) => (response.ok ? response.json() : { articles: [] }))
+                      .then((data) => {
+                        const articles = Array.isArray(data.articles) ? data.articles : [];
+                        if (!articles.length) return;
+                        grid.innerHTML = articles
+                          .map((article) => {
+                            const image = article.cover_url || '/og-default.svg';
+                            const url = `/noticia/${encodeURIComponent(article.slug)}/`;
+                            return `
+                              <article class="group overflow-hidden rounded-[2rem] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.06)] ring-1 ring-zinc-100 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_28px_90px_rgba(220,38,38,0.12)] dark:bg-zinc-950 dark:ring-zinc-800">
+                                <a href="${url}" class="block">
+                                  <div class="aspect-[16/10] overflow-hidden bg-zinc-100 dark:bg-zinc-900">
+                                    <img src="${escapeHtml(image)}" alt="${escapeHtml(article.cover_alt || article.title)}" class="h-full w-full object-cover transition duration-700 group-hover:scale-105" loading="lazy" />
+                                  </div>
+                                  <div class="space-y-3 p-5">
+                                    <div class="flex items-center gap-3 text-[9px] font-black uppercase tracking-widest text-zinc-400">
+                                      <span class="text-red-600">${escapeHtml(article.category || 'Editorial')}</span>
+                                      <span>${formatDate(article.published_at || article.scheduled_at || article.updated_at)}</span>
+                                    </div>
+                                    <h4 class="font-serif text-2xl font-black italic leading-none tracking-tighter text-zinc-900 dark:text-zinc-50">${escapeHtml(article.title)}</h4>
+                                    <p class="line-clamp-2 text-sm font-medium leading-6 text-zinc-500 dark:text-zinc-400">${escapeHtml(article.summary || '')}</p>
+                                  </div>
+                                </a>
+                              </article>
+                            `;
+                          })
+                          .join('');
+                        section.classList.remove('hidden');
+                      })
+                      .catch(() => {});
                   })();
                 </script>
 
