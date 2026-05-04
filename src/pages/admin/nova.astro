@@ -265,6 +265,7 @@ const aiActions = [
           </label>
           <button type="button" data-schedule-post class="rounded-2xl border border-white/15 px-4 py-3 text-[10px] font-black uppercase tracking-widest transition hover:border-white/50 dark:border-zinc-200">Confirmar agendamento</button>
         </div>
+        <div class="mt-4 hidden rounded-2xl border border-white/10 bg-white/10 p-3 text-xs font-bold leading-5 text-white/70 dark:border-zinc-200 dark:bg-zinc-100 dark:text-zinc-600" data-publish-feedback></div>
         </div>
       </section>
 
@@ -1024,6 +1025,7 @@ const aiActions = [
       const keywordsInput = document.querySelector('[data-keywords-input]');
       const seoAutofillNote = document.querySelector('[data-seo-autofill-note]');
       const aiOutput = document.querySelector('[data-ai-output]');
+      const publishFeedback = document.querySelector('[data-publish-feedback]');
 
       let savedRange = null;
       let slashRange = null;
@@ -1070,6 +1072,12 @@ const aiActions = [
           .replace(/>/g, '&gt;')
           .replace(/"/g, '&quot;')
           .replace(/'/g, '&#039;');
+
+      const showPublishFeedback = (html = '') => {
+        if (!publishFeedback) return;
+        publishFeedback.innerHTML = html;
+        publishFeedback.classList.toggle('hidden', !html);
+      };
 
       const slugify = (value) =>
         String(value || '')
@@ -1311,6 +1319,7 @@ const aiActions = [
         }
 
         const payload = collectArticlePayload(statusValue, scheduledAt);
+        showPublishFeedback('');
         setStatus(statusValue === 'published' ? 'Publicando...' : statusValue === 'scheduled' ? 'Agendando...' : 'Salvando...');
 
         try {
@@ -1340,6 +1349,36 @@ const aiActions = [
           currentArticleId = result.article?.id || currentArticleId || payload.id || '';
           setStatus(statusValue === 'published' ? 'Publicada no banco' : statusValue === 'scheduled' ? 'Agendada no banco' : 'Rascunho salvo no banco');
           if (slugInput) slugInput.value = result.article?.slug || payload.slug;
+          const savedSlug = result.article?.slug || payload.slug;
+          const publicUrl = savedSlug ? `/noticia/${encodeURIComponent(savedSlug)}/` : '';
+
+          if (statusValue === 'published' && publicUrl) {
+            showPublishFeedback(`
+              <span class="block text-[9px] font-black uppercase tracking-widest text-emerald-300 dark:text-emerald-600">Publicada agora</span>
+              <span class="mt-1 block break-all">${publicUrl}</span>
+              <a href="${publicUrl}" class="mt-3 inline-flex rounded-xl bg-white px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-950 transition hover:bg-red-600 hover:text-white dark:bg-zinc-950 dark:text-white" target="_blank" rel="noopener noreferrer">Abrir notícia</a>
+              <a href="/admin/noticias/?status=publicada" class="mt-3 ml-2 inline-flex rounded-xl border border-white/15 px-3 py-2 text-[9px] font-black uppercase tracking-widest transition hover:border-white/50 dark:border-zinc-300">Ver publicadas</a>
+            `);
+          }
+
+          if (statusValue === 'scheduled') {
+            const dateLabel = scheduledAt ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(scheduledAt)) : 'data definida';
+            showPublishFeedback(`
+              <span class="block text-[9px] font-black uppercase tracking-widest text-sky-300 dark:text-sky-600">Agendada</span>
+              <span class="mt-1 block">Esta matéria entra na aba Agendadas e será pública em ${dateLabel}.</span>
+              <a href="/admin/noticias/?status=agendada" class="mt-3 inline-flex rounded-xl bg-white px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-950 transition hover:bg-red-600 hover:text-white dark:bg-zinc-950 dark:text-white">Ver agendadas</a>
+            `);
+            window.setTimeout(() => {
+              window.location.href = '/admin/noticias/?status=agendada';
+            }, 1200);
+          }
+
+          if (statusValue === 'draft') {
+            showPublishFeedback(`
+              <span class="block text-[9px] font-black uppercase tracking-widest text-zinc-300 dark:text-zinc-500">Rascunho salvo</span>
+              <a href="/admin/noticias/?status=rascunho" class="mt-3 inline-flex rounded-xl bg-white px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-950 transition hover:bg-red-600 hover:text-white dark:bg-zinc-950 dark:text-white">Ver rascunhos</a>
+            `);
+          }
         } catch {
           setStatus('Falha de conexão com CMS');
         }
