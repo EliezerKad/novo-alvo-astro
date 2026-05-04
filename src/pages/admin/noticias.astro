@@ -96,18 +96,21 @@ const active = viewParam === 'midia' ? 'media' : current.active;
       const statusConfig = {
         rascunho: {
           api: 'draft',
+          nav: 'drafts',
           eyebrow: 'Rascunhos',
           title: 'Rascunhos editoriais',
           description: 'Matérias salvas no D1 e prontas para continuar a edição.',
         },
         agendada: {
           api: 'scheduled',
+          nav: 'scheduled',
           eyebrow: 'Agenda',
           title: 'Matérias agendadas',
           description: 'Publicações preparadas para entrar no ar no horário definido.',
         },
         publicada: {
           api: 'published',
+          nav: 'published',
           eyebrow: 'Arquivo',
           title: 'Matérias publicadas',
           description: 'Conteúdo publicado pelo CMS editorial.',
@@ -116,6 +119,8 @@ const active = viewParam === 'midia' ? 'media' : current.active;
 
       const activeTabClass = 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950';
       const inactiveTabClass = 'bg-zinc-50 text-zinc-500 hover:text-red-600 dark:bg-zinc-900 dark:text-zinc-400';
+      const activeNavClass = 'bg-zinc-950 text-white shadow-[0_18px_45px_rgba(15,23,42,0.16)] dark:bg-white dark:text-zinc-950';
+      const inactiveNavClass = 'bg-white/55 text-zinc-500 hover:-translate-y-0.5 hover:bg-white hover:text-zinc-950 hover:shadow-[0_16px_38px_rgba(15,23,42,0.08)] dark:bg-zinc-900/55 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-50';
       const statusFromUrl = () => new URLSearchParams(window.location.search).get('status') || 'rascunho';
       let statusKey = statusConfig[statusFromUrl()] ? statusFromUrl() : 'rascunho';
       let status = statusConfig[statusKey].api;
@@ -128,6 +133,7 @@ const active = viewParam === 'midia' ? 'media' : current.active;
       const title = document.querySelector('[data-list-title]');
       const description = document.querySelector('[data-list-description]');
       const tabs = [...document.querySelectorAll('[data-status-tab]')];
+      const navLinks = [...document.querySelectorAll('[data-admin-nav-id]')];
       let articles = [];
 
       const applyStatusView = () => {
@@ -143,6 +149,12 @@ const active = viewParam === 'midia' ? 'media' : current.active;
           const isActive = tab.dataset.statusKey === statusKey;
           tab.className = `rounded-3xl px-5 py-4 text-sm font-black transition ${isActive ? activeTabClass : inactiveTabClass}`;
           tab.setAttribute('aria-current', isActive ? 'page' : 'false');
+        });
+
+        navLinks.forEach((link) => {
+          const isActive = link.dataset.adminNavId === config.nav;
+          link.className = `admin-nav-link group whitespace-nowrap rounded-3xl px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-all duration-300 lg:flex lg:w-full lg:items-center lg:justify-center lg:gap-3 ${isActive ? activeNavClass : inactiveNavClass}`;
+          link.setAttribute('aria-current', isActive ? 'page' : 'false');
         });
       };
 

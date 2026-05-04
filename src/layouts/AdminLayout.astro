@@ -162,6 +162,7 @@ const iconPath = {
             <a
               href={item.href}
               title={item.label}
+              data-admin-nav-id={item.id}
               class={`admin-nav-link group whitespace-nowrap rounded-3xl px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-all duration-300 lg:flex lg:w-full lg:items-center lg:justify-center lg:gap-3 ${
                 active === item.id
                   ? 'bg-zinc-950 text-white shadow-[0_18px_45px_rgba(15,23,42,0.16)] dark:bg-white dark:text-zinc-950'
