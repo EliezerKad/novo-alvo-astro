@@ -104,14 +104,20 @@ const toBase64 = (value: string) => {
 };
 
 const dataImageToUpload = (value: string) => {
-  const match = String(value || '').match(/^data:(image\/(?:png|jpe?g|webp));base64,([a-z0-9+/=]+)$/i);
+  const match = String(value || '').match(/^data:(image\/(?:png|jpe?g|webp));base64,([\s\S]+)$/i);
   if (!match) return null;
   const mime = match[1].toLowerCase();
   const extension = mime.includes('png') ? 'png' : mime.includes('jpeg') || mime.includes('jpg') ? 'jpg' : 'webp';
+  const content = match[2].replace(/\s/g, '');
+  try {
+    atob(content);
+  } catch {
+    return null;
+  }
   return {
     mime,
     extension,
-    content: match[2],
+    content,
   };
 };
 
@@ -305,7 +311,7 @@ const normalizePayload = (payload: ArticlePayload) => {
     category: clean(payload.category, 80) || 'Política',
     author: clean(payload.author, 120) || 'Redação Novo Alvo',
     status,
-    coverUrl: clean(payload.coverUrl, 1200),
+    coverUrl: clean(payload.coverUrl, 8000000),
     coverAlt: clean(payload.coverAlt, 240),
     seoDescription: clean(payload.seoDescription, 220),
     keywords: clean(payload.keywords, 700),
