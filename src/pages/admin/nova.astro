@@ -1032,6 +1032,7 @@ const aiActions = [
       let pendingInlineAction = 'image';
       let seoTouched = false;
       let keywordsTouched = false;
+      let currentArticleId = '';
       const mediaItems = [];
       const carouselDraft = [];
       const sources = [];
@@ -1281,7 +1282,7 @@ const aiActions = [
         const coverUrl = document.querySelector('[data-cover-url]')?.value.trim() || '';
         const coverAlt = document.querySelector('[data-cover-alt]')?.value.trim() || title;
         return {
-          id: slug ? `article:${slug}` : undefined,
+          id: currentArticleId || (slug ? `article:${slug}` : undefined),
           slug,
           title,
           summary: summaryInput?.value.trim() || '',
@@ -1336,6 +1337,7 @@ const aiActions = [
             return;
           }
 
+          currentArticleId = result.article?.id || currentArticleId || payload.id || '';
           setStatus(statusValue === 'published' ? 'Publicada no banco' : statusValue === 'scheduled' ? 'Agendada no banco' : 'Rascunho salvo no banco');
           if (slugInput) slugInput.value = result.article?.slug || payload.slug;
         } catch {
@@ -2158,7 +2160,7 @@ const aiActions = [
         if (!value) return;
         tags.push(value);
         input.value = '';
-        tagList.innerHTML = tags.map((tag) => `<span class="rounded-full bg-zinc-950 px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-white dark:bg-white dark:text-zinc-950">${escapeHtml(tag)}</span>`).join('');
+        renderTags();
         updateEditorState();
       });
 
@@ -2178,6 +2180,87 @@ const aiActions = [
           )
           .join('');
         updateEditorState();
+      };
+
+      const renderTags = () => {
+        if (!tagList) return;
+        tagList.innerHTML = tags
+          .map((tag) => `<span class="rounded-full bg-zinc-950 px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-white dark:bg-white dark:text-zinc-950">${escapeHtml(tag)}</span>`)
+          .join('');
+      };
+
+      const parseStoredJson = (value) => {
+        if (!value) return [];
+        if (Array.isArray(value)) return value;
+        try {
+          const parsed = JSON.parse(value);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return [];
+        }
+      };
+
+      const loadArticleFromUrl = async () => {
+        const articleId = new URLSearchParams(window.location.search).get('id');
+        if (!articleId) return;
+
+        const token = getAdminToken();
+        if (!token) {
+          setStatus('Token obrigatório');
+          return;
+        }
+
+        setStatus('Carregando...');
+        try {
+          const response = await fetch(`/api/admin/articles?id=${encodeURIComponent(articleId)}`, {
+            headers: { authorization: `Bearer ${token}` },
+          });
+          const data = await response.json().catch(() => ({}));
+          if (response.status === 401) {
+            try {
+              localStorage.removeItem('admin-token');
+            } catch {}
+            setStatus('Token inválido');
+            return;
+          }
+          if (!response.ok || !data.article) throw new Error(data.error || 'Rascunho não encontrado.');
+
+          const article = data.article;
+          currentArticleId = article.id || articleId;
+          if (titleInput) {
+            titleInput.value = article.title || '';
+            titleInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          if (slugInput) slugInput.value = article.slug || '';
+          if (summaryInput) summaryInput.value = article.summary || '';
+          if (categoryInput && article.category) categoryInput.value = article.category;
+          if (editor) editor.innerHTML = article.body_html || '';
+          if (seoDescriptionInput) seoDescriptionInput.value = article.seo_description || '';
+          if (keywordsInput) keywordsInput.value = article.keywords || '';
+
+          const coverUrl = document.querySelector('[data-cover-url]');
+          const coverAlt = document.querySelector('[data-cover-alt]');
+          const coverPreview = document.querySelector('[data-cover-preview]');
+          const coverEmpty = document.querySelector('[data-cover-empty]');
+          if (coverUrl) coverUrl.value = article.cover_url || '';
+          if (coverAlt) coverAlt.value = article.cover_alt || article.title || '';
+          if (coverPreview && article.cover_url) {
+            coverPreview.src = article.cover_url;
+            coverPreview.classList.remove('hidden');
+            coverEmpty?.classList.add('hidden');
+          }
+
+          tags.splice(0, tags.length, ...parseStoredJson(article.tags).map(String));
+          sources.splice(0, sources.length, ...parseStoredJson(article.sources));
+          mediaItems.splice(0, mediaItems.length, ...parseStoredJson(article.media));
+          renderTags();
+          renderSources();
+          renderMediaList();
+          setStatus(article.status === 'published' ? 'Publicada' : article.status === 'scheduled' ? 'Agendada' : 'Rascunho');
+          updateEditorState();
+        } catch (error) {
+          setStatus(error.message || 'Erro ao carregar');
+        }
       };
 
       document.querySelector('[data-add-source]')?.addEventListener('click', () => {
@@ -2338,6 +2421,7 @@ const aiActions = [
 
       document.querySelector('[data-current-date]').textContent = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date());
       updateEditorState();
+      loadArticleFromUrl();
     })();
   </script>
 </AdminLayout>

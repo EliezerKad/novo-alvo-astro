@@ -1,52 +1,223 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { getCollection } from 'astro:content';
-import { sortNewsByDate } from '../../lib/news';
-import { formatEditorialDate } from '../../lib/utils';
 
-const newsEntries = sortNewsByDate(await getCollection('news'));
+const statusParam = Astro.url.searchParams.get('status') || 'rascunho';
+const viewParam = Astro.url.searchParams.get('view') || '';
+
+const statusConfig = {
+  rascunho: {
+    api: 'draft',
+    active: 'drafts',
+    eyebrow: 'Rascunhos',
+    title: 'Rascunhos editoriais',
+    description: 'Matérias salvas no D1 e prontas para continuar a edição.',
+    badge: 'Em edição',
+  },
+  agendada: {
+    api: 'scheduled',
+    active: 'scheduled',
+    eyebrow: 'Agenda',
+    title: 'Matérias agendadas',
+    description: 'Publicações preparadas para entrar no ar no horário definido.',
+    badge: 'Agendada',
+  },
+  publicada: {
+    api: 'published',
+    active: 'published',
+    eyebrow: 'Arquivo',
+    title: 'Matérias publicadas',
+    description: 'Conteúdo publicado pelo CMS editorial.',
+    badge: 'Publicada',
+  },
+};
+
+const current = statusConfig[statusParam as keyof typeof statusConfig] || statusConfig.rascunho;
+const active = viewParam === 'midia' ? 'media' : current.active;
 ---
 
-<AdminLayout title="Noticias | Admin Novo Alvo" active="news">
-  <section class="space-y-6">
-    <header class="rounded-[2rem] bg-white p-6 shadow-sm dark:bg-zinc-900">
-      <span class="text-[10px] font-black uppercase tracking-[0.35em] text-red-600">Conteudo</span>
-      <div class="mt-3 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+<AdminLayout title={`${current.title} | Admin Novo Alvo`} active={active as any}>
+  <section class="space-y-6" data-cms-list data-status={current.api}>
+    <header class="overflow-hidden rounded-[2rem] border border-white/70 bg-white/78 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/78">
+      <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 class="font-serif text-4xl font-black italic tracking-tighter md:text-5xl">Noticias</h1>
-          <p class="mt-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">Inventario editorial vindo de src/content/news.</p>
+          <span class="text-[10px] font-black uppercase tracking-[0.35em] text-red-600">{current.eyebrow}</span>
+          <h1 class="mt-3 font-serif text-4xl font-black italic tracking-tighter md:text-6xl">{current.title}</h1>
+          <p class="mt-3 max-w-2xl text-sm font-medium leading-6 text-zinc-500 dark:text-zinc-400">{current.description}</p>
         </div>
-        <a href="/admin/nova/" class="rounded-2xl bg-red-600 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-white">Nova materia</a>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" data-refresh-articles class="rounded-2xl border border-zinc-200 bg-white px-5 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-900">
+            Atualizar
+          </button>
+          <a href="/admin/nova/" class="rounded-2xl bg-red-600 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-red-600/20 transition hover:-translate-y-0.5 hover:bg-red-500">
+            Nova matéria
+          </a>
+        </div>
+      </div>
+
+      <div class="mt-6 grid gap-3 md:grid-cols-3">
+        <a href="/admin/noticias/?status=rascunho" class={`rounded-3xl px-5 py-4 text-sm font-black transition ${current.api === 'draft' ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950' : 'bg-zinc-50 text-zinc-500 hover:text-red-600 dark:bg-zinc-900 dark:text-zinc-400'}`}>Rascunhos</a>
+        <a href="/admin/noticias/?status=agendada" class={`rounded-3xl px-5 py-4 text-sm font-black transition ${current.api === 'scheduled' ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950' : 'bg-zinc-50 text-zinc-500 hover:text-red-600 dark:bg-zinc-900 dark:text-zinc-400'}`}>Agendadas</a>
+        <a href="/admin/noticias/?status=publicada" class={`rounded-3xl px-5 py-4 text-sm font-black transition ${current.api === 'published' ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950' : 'bg-zinc-50 text-zinc-500 hover:text-red-600 dark:bg-zinc-900 dark:text-zinc-400'}`}>Publicadas</a>
       </div>
     </header>
 
-    <section class="overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <div class="grid grid-cols-[1fr_auto] gap-4 border-b border-zinc-100 p-4 text-[9px] font-black uppercase tracking-widest text-zinc-400 dark:border-zinc-800 md:grid-cols-[1.3fr_0.5fr_0.5fr_0.4fr_auto]">
-        <span>Materia</span>
-        <span class="hidden md:block">Categoria</span>
-        <span class="hidden md:block">Data</span>
-        <span class="hidden md:block">Status</span>
-        <span>Acoes</span>
+    <section class="overflow-hidden rounded-[2rem] border border-white/70 bg-white/82 shadow-[0_24px_80px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/82">
+      <div class="flex flex-col gap-3 border-b border-zinc-100 p-5 dark:border-zinc-800 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p class="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-400">Banco editorial D1</p>
+          <strong class="mt-1 block text-sm text-zinc-700 dark:text-zinc-200" data-list-status>Carregando matérias...</strong>
+        </div>
+        <label class="relative block md:w-80">
+          <span class="sr-only">Filtrar matérias</span>
+          <input data-filter-articles class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-bold outline-none transition focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-900" placeholder="Filtrar por título, categoria..." />
+        </label>
       </div>
-      <div class="divide-y divide-zinc-100 dark:divide-zinc-800">
-        {newsEntries.map((entry) => (
-          <article class="grid grid-cols-[1fr_auto] gap-4 p-4 md:grid-cols-[1.3fr_0.5fr_0.5fr_0.4fr_auto] md:items-center">
-            <div class="flex min-w-0 gap-4">
-              <img src={entry.data.cover.src} alt="" class="h-16 w-20 rounded-xl object-cover" loading="lazy" />
-              <div class="min-w-0">
-                <h2 class="line-clamp-2 font-serif text-lg font-black italic leading-tight tracking-tighter">{entry.data.title}</h2>
-                <p class="mt-1 truncate text-[10px] font-bold text-zinc-400">{entry.data.slug}</p>
-              </div>
-            </div>
-            <span class="hidden text-[10px] font-black uppercase tracking-widest text-red-600 md:block">{entry.data.category}</span>
-            <span class="hidden text-[10px] font-bold text-zinc-500 md:block">{formatEditorialDate(entry.data.publishedAt.toISOString())}</span>
-            <span class="hidden rounded-full bg-emerald-50 px-3 py-2 text-center text-[8px] font-black uppercase tracking-widest text-emerald-600 dark:bg-emerald-950/40 md:block">Publicado</span>
-            <div class="flex items-center gap-2">
-              <a href={`/noticia/${entry.data.slug}/`} class="rounded-xl border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:border-red-600 hover:text-red-600 dark:border-zinc-800">Ver</a>
-            </div>
-          </article>
-        ))}
+
+      <div data-empty-state class="hidden p-10 text-center">
+        <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-zinc-100 text-2xl dark:bg-zinc-900">+</span>
+        <h2 class="mt-4 font-serif text-3xl font-black italic tracking-tighter">Nenhuma matéria aqui ainda</h2>
+        <p class="mx-auto mt-2 max-w-md text-sm font-medium leading-6 text-zinc-500">Quando uma matéria for salva com este status, ela aparece automaticamente nesta lista.</p>
+        <a href="/admin/nova/" class="mt-5 inline-flex rounded-2xl bg-red-600 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-white">Criar matéria</a>
+      </div>
+
+      <div data-article-list class="divide-y divide-zinc-100 dark:divide-zinc-800">
+        <div class="p-5">
+          <div class="h-24 animate-pulse rounded-3xl bg-zinc-100 dark:bg-zinc-900"></div>
+        </div>
       </div>
     </section>
   </section>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-cms-list]');
+      if (!root) return;
+
+      const status = root.dataset.status || 'draft';
+      const list = document.querySelector('[data-article-list]');
+      const listStatus = document.querySelector('[data-list-status]');
+      const emptyState = document.querySelector('[data-empty-state]');
+      const filterInput = document.querySelector('[data-filter-articles]');
+      const refreshButton = document.querySelector('[data-refresh-articles]');
+      let articles = [];
+
+      const escapeHtml = (value) =>
+        String(value || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+
+      const getToken = () => {
+        let token = '';
+        try {
+          token = localStorage.getItem('admin-token') || '';
+        } catch {}
+        if (!token) {
+          token = window.prompt('Token editorial do admin') || '';
+          if (token) {
+            try {
+              localStorage.setItem('admin-token', token);
+            } catch {}
+          }
+        }
+        return token;
+      };
+
+      const formatDate = (value) => {
+        if (!value) return 'Sem data';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return 'Sem data';
+        return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(date);
+      };
+
+      const statusLabel = (value) =>
+        ({
+          draft: 'Rascunho',
+          scheduled: 'Agendada',
+          published: 'Publicada',
+        })[value] || value || 'Rascunho';
+
+      const render = () => {
+        const term = String(filterInput?.value || '').trim().toLowerCase();
+        const filtered = articles.filter((article) =>
+          `${article.title || ''} ${article.category || ''} ${article.summary || ''}`.toLowerCase().includes(term),
+        );
+
+        if (listStatus) {
+          listStatus.textContent = `${filtered.length} de ${articles.length} matéria${articles.length === 1 ? '' : 's'} encontrada${articles.length === 1 ? '' : 's'}`;
+        }
+
+        emptyState?.classList.toggle('hidden', filtered.length > 0);
+        if (!list) return;
+        list.classList.toggle('hidden', filtered.length === 0);
+        list.innerHTML = filtered
+          .map((article) => {
+            const cover = article.cover_url || '';
+            const editHref = `/admin/nova/?id=${encodeURIComponent(article.id || article.slug || '')}`;
+            const viewHref = article.status === 'published' && article.slug ? `/noticia/${article.slug}/` : '';
+            return `
+              <article class="group grid gap-4 p-5 transition hover:bg-zinc-50/80 dark:hover:bg-zinc-900/50 md:grid-cols-[minmax(0,1fr)_150px_120px_120px_auto] md:items-center">
+                <div class="flex min-w-0 gap-4">
+                  <div class="h-20 w-24 shrink-0 overflow-hidden rounded-3xl bg-zinc-100 dark:bg-zinc-900">
+                    ${
+                      cover
+                        ? `<img src="${escapeHtml(cover)}" alt="" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />`
+                        : `<div class="flex h-full w-full items-center justify-center text-[10px] font-black uppercase tracking-widest text-zinc-300">Sem capa</div>`
+                    }
+                  </div>
+                  <div class="min-w-0">
+                    <h2 class="line-clamp-2 font-serif text-2xl font-black italic leading-tight tracking-tighter">${escapeHtml(article.title || 'Matéria sem título')}</h2>
+                    <p class="mt-1 line-clamp-2 text-sm font-medium leading-5 text-zinc-500">${escapeHtml(article.summary || 'Sem resumo editorial.')}</p>
+                    <p class="mt-2 truncate text-[10px] font-black uppercase tracking-widest text-zinc-400">${escapeHtml(article.slug || '')}</p>
+                  </div>
+                </div>
+                <span class="text-[10px] font-black uppercase tracking-widest text-red-600">${escapeHtml(article.category || 'Editorial')}</span>
+                <span class="text-[10px] font-bold text-zinc-500">${formatDate(article.updated_at || article.created_at)}</span>
+                <span class="rounded-full bg-zinc-100 px-3 py-2 text-center text-[8px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900 dark:text-zinc-300">${escapeHtml(statusLabel(article.status))}</span>
+                <div class="flex items-center gap-2">
+                  ${viewHref ? `<a href="${viewHref}" class="rounded-xl border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:border-red-600 hover:text-red-600 dark:border-zinc-800">Ver</a>` : ''}
+                  <a href="${editHref}" class="rounded-xl bg-zinc-950 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-red-600 dark:hover:text-white">Editar</a>
+                </div>
+              </article>
+            `;
+          })
+          .join('');
+      };
+
+      const loadArticles = async () => {
+        const token = getToken();
+        if (!token) {
+          if (listStatus) listStatus.textContent = 'Token necessário para carregar o CMS.';
+          return;
+        }
+
+        if (listStatus) listStatus.textContent = 'Buscando no D1...';
+        try {
+          const response = await fetch(`/api/admin/articles?status=${encodeURIComponent(status)}&limit=100`, {
+            headers: { authorization: `Bearer ${token}` },
+          });
+          const data = await response.json().catch(() => ({}));
+          if (response.status === 401) {
+            try {
+              localStorage.removeItem('admin-token');
+            } catch {}
+            if (listStatus) listStatus.textContent = 'Token inválido. Atualize e tente novamente.';
+            return;
+          }
+          if (!response.ok) throw new Error(data.error || 'Erro ao buscar matérias.');
+          articles = Array.isArray(data.articles) ? data.articles : [];
+          render();
+        } catch (error) {
+          if (listStatus) listStatus.textContent = error.message || 'Falha ao conectar com o CMS.';
+          if (list) list.innerHTML = '';
+        }
+      };
+
+      filterInput?.addEventListener('input', render);
+      refreshButton?.addEventListener('click', loadArticles);
+      loadArticles();
+    })();
+  </script>
 </AdminLayout>

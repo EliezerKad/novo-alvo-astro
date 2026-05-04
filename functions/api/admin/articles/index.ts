@@ -118,8 +118,26 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
   if (!db) return json({ error: 'Binding EDITORIAL_DB não configurado.' }, { status: 503 });
 
   const url = new URL(request.url);
+  const id = clean(url.searchParams.get('id'), 120);
   const status = clean(url.searchParams.get('status'), 24);
   const limit = Math.max(1, Math.min(100, Number(url.searchParams.get('limit') || 50)));
+
+  if (id) {
+    const article = await db
+      .prepare(
+        `SELECT
+          id, slug, title, summary, body_html, category, author, status, cover_url, cover_alt,
+          seo_description, keywords, tags, sources, media, reading_minutes, scheduled_at, published_at, created_at, updated_at
+        FROM articles
+        WHERE id = ? OR slug = ?
+        LIMIT 1`,
+      )
+      .bind(id, id)
+      .first();
+
+    if (!article) return json({ error: 'Matéria não encontrada.' }, { status: 404 });
+    return json({ article });
+  }
 
   const result = status
     ? await db
