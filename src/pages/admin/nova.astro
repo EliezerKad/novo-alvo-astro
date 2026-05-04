@@ -1664,7 +1664,11 @@ const aiActions = [
         canvas.height = height;
         canvas.getContext('2d')?.drawImage(image, 0, 0, width, height);
         const blob = await new Promise((resolve) => canvas.toBlob((result) => resolve(result), 'image/webp', 0.86));
-        const url = blob ? URL.createObjectURL(blob) : URL.createObjectURL(file);
+        const url = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.addEventListener('load', () => resolve(String(reader.result || '')));
+          reader.readAsDataURL(blob || file);
+        });
         const item = addMedia(url, file.name.replace(/\.[^.]+$/, ''));
         if (options.insert) insertHtml(createImageBlock(item.url, item.alt));
         setStatus('Imagem otimizada em WebP');
@@ -2117,16 +2121,19 @@ const aiActions = [
       document.querySelector('[data-cover-file]')?.addEventListener('change', async (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
-        const url = URL.createObjectURL(file);
+        const item = await compressImage(file);
+        const url = item.url;
         const preview = document.querySelector('[data-cover-preview]');
         const empty = document.querySelector('[data-cover-empty]');
         const coverUrl = document.querySelector('[data-cover-url]');
+        const coverAlt = document.querySelector('[data-cover-alt]');
         if (preview) {
           preview.src = url;
           preview.classList.remove('hidden');
         }
         empty?.classList.add('hidden');
         if (coverUrl) coverUrl.value = url;
+        if (coverAlt && !coverAlt.value) coverAlt.value = item.alt || file.name.replace(/\.[^.]+$/, '');
       });
 
       document.querySelectorAll('[data-drop-zone], [data-cover-drop]').forEach((zone) => {

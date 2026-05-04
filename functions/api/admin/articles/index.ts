@@ -103,6 +103,58 @@ const toBase64 = (value: string) => {
   return btoa(binary);
 };
 
+const dataImageToUpload = (value: string) => {
+  const match = String(value || '').match(/^data:(image\/(?:png|jpe?g|webp));base64,([a-z0-9+/=]+)$/i);
+  if (!match) return null;
+  const mime = match[1].toLowerCase();
+  const extension = mime.includes('png') ? 'png' : mime.includes('jpeg') || mime.includes('jpg') ? 'jpg' : 'webp';
+  return {
+    mime,
+    extension,
+    content: match[2],
+  };
+};
+
+const githubApiUrl = (repository: string, path: string) =>
+  `https://api.github.com/repos/${repository}/contents/${encodeURIComponent(path).replace(/%2F/g, '/')}`;
+
+const putGitHubFile = async ({
+  repository,
+  branch,
+  path,
+  content,
+  message,
+  headers,
+}: {
+  repository: string;
+  branch: string;
+  path: string;
+  content: string;
+  message: string;
+  headers: Record<string, string>;
+}) => {
+  const apiUrl = githubApiUrl(repository, path);
+  const existingResponse = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, { headers });
+  const existing = existingResponse.ok ? ((await existingResponse.json()) as { sha?: string }) : null;
+  const response = await fetch(apiUrl, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify({
+      branch,
+      message,
+      content,
+      sha: existing?.sha,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`GitHub recusou ${path}: ${errorText.slice(0, 500)}`);
+  }
+
+  return (await response.json()) as { commit?: { html_url?: string }; content?: { html_url?: string } };
+};
+
 const createMarkdownFile = (article: ReturnType<typeof normalizePayload>, id: string, publishedAt: string) => {
   const tags = yamlStringArray(article.tags || article.keywords);
   const sources = yamlStringArray(article.sources);
@@ -152,8 +204,6 @@ const publishMarkdownToGitHub = async (
 
   const repository = clean(env.GITHUB_REPOSITORY, 160) || 'EliezerKad/novo-alvo-astro';
   const branch = clean(env.GITHUB_BRANCH, 80) || 'main';
-  const path = `src/content/news/${article.slug}.md`;
-  const apiUrl = `https://api.github.com/repos/${repository}/contents/${encodeURIComponent(path).replace(/%2F/g, '/')}`;
   const headers = {
     accept: 'application/vnd.github+json',
     authorization: `Bearer ${env.GITHUB_TOKEN}`,
@@ -162,34 +212,62 @@ const publishMarkdownToGitHub = async (
     'x-github-api-version': '2022-11-28',
   };
 
-  const existingResponse = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, { headers });
-  const existing = existingResponse.ok ? ((await existingResponse.json()) as { sha?: string }) : null;
-  const markdown = createMarkdownFile(article, id, publishedAt);
-  const commitResponse = await fetch(apiUrl, {
-    method: 'PUT',
-    headers,
-    body: JSON.stringify({
+  const articleForMarkdown = { ...article };
+  const uploadedAssets: string[] = [];
+  const coverUpload = dataImageToUpload(articleForMarkdown.coverUrl);
+  if (coverUpload) {
+    const assetPath = `public/uploads/news/${article.slug}-cover.${coverUpload.extension}`;
+    await putGitHubFile({
+      repository,
       branch,
-      message: `publish article: ${article.title}`,
-      content: toBase64(markdown),
-      sha: existing?.sha,
-    }),
-  });
-
-  if (!commitResponse.ok) {
-    const errorText = await commitResponse.text();
-    return {
-      ok: false,
-      skipped: false,
-      reason: `GitHub recusou a publicação: ${errorText.slice(0, 500)}`,
-    };
+      path: assetPath,
+      content: coverUpload.content,
+      message: `upload article cover: ${article.title}`,
+      headers,
+    });
+    articleForMarkdown.coverUrl = `/uploads/news/${article.slug}-cover.${coverUpload.extension}`;
+    uploadedAssets.push(assetPath);
   }
 
-  const result = (await commitResponse.json()) as { commit?: { html_url?: string }; content?: { html_url?: string } };
+  let inlineIndex = 0;
+  const inlineUploads: Array<{ path: string; content: string }> = [];
+  articleForMarkdown.bodyHtml = articleForMarkdown.bodyHtml.replace(/data:image\/(?:png|jpe?g|webp);base64,[a-z0-9+/=]+/gi, (dataUrl) => {
+    const upload = dataImageToUpload(dataUrl);
+    if (!upload) return dataUrl;
+    inlineIndex += 1;
+    const assetPath = `public/uploads/news/${article.slug}-${inlineIndex}.${upload.extension}`;
+    uploadedAssets.push(assetPath);
+    inlineUploads.push({ path: assetPath, content: upload.content });
+    return `/uploads/news/${article.slug}-${inlineIndex}.${upload.extension}`;
+  });
+
+  for (const upload of inlineUploads) {
+    await putGitHubFile({
+      repository,
+      branch,
+      path: upload.path,
+      content: upload.content,
+      message: `upload article media: ${article.title}`,
+      headers,
+    });
+  }
+
+  const path = `src/content/news/${article.slug}.md`;
+  const markdown = createMarkdownFile(articleForMarkdown, id, publishedAt);
+  const result = await putGitHubFile({
+    repository,
+    branch,
+    path,
+    content: toBase64(markdown),
+    message: `publish article: ${article.title}`,
+    headers,
+  });
+
   return {
     ok: true,
     skipped: false,
     path,
+    uploadedAssets,
     commitUrl: result.commit?.html_url,
     fileUrl: result.content?.html_url,
   };
