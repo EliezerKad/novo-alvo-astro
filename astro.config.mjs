@@ -10,7 +10,7 @@ export default defineConfig({
     react(),
     sitemap({
       filter(page) {
-        return !page.includes('/admin/');
+        return !page.includes('/admin/') && !page.includes('/redacao/');
       },
       serialize(item) {
         if (item.url.endsWith('/')) {

@@ -53,6 +53,11 @@ const iconPath = {
     <script is:inline>
       (() => {
         try {
+          if (window.location.pathname.startsWith('/admin') && !localStorage.getItem('admin-token')) {
+            const next = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+            window.location.replace(`/redacao/?next=${encodeURIComponent(next)}`);
+            return;
+          }
           const theme = localStorage.getItem('theme');
           const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
           if (theme === 'dark' || (!theme && prefersDark)) document.documentElement.classList.add('dark');
@@ -151,6 +156,13 @@ const iconPath = {
             </a>
             <button
               type="button"
+              class="rounded-full border border-black/10 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-[#8A1F2D] hover:text-[#8A1F2D] dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-red-500 dark:hover:text-red-500"
+              data-admin-logout
+            >
+              Sair
+            </button>
+            <button
+              type="button"
               class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white text-zinc-500 shadow-sm transition hover:border-[#8A1F2D] hover:bg-[#8A1F2D] hover:text-white dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-red-500 dark:hover:bg-red-600 dark:hover:text-white"
               title="Alternar tema"
               aria-label="Alternar modo claro e escuro"
@@ -215,6 +227,7 @@ const iconPath = {
       (() => {
         const button = document.querySelector('[data-admin-sidebar-toggle]');
         const themeButton = document.querySelector('[data-admin-theme-toggle]');
+        const logoutButton = document.querySelector('[data-admin-logout]');
         const text = button?.querySelector('[data-admin-sidebar-toggle-text]');
         const icon = button?.querySelector('[data-admin-sidebar-toggle-icon]');
 
@@ -235,6 +248,15 @@ const iconPath = {
         });
 
         applyTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+
+        logoutButton?.addEventListener('click', () => {
+          try {
+            localStorage.removeItem('admin-token');
+            localStorage.removeItem('admin-authenticated-at');
+          } catch {}
+          fetch('/api/admin/session', { method: 'DELETE' }).catch(() => {});
+          window.location.href = '/redacao/';
+        });
 
         if (!button) return;
 

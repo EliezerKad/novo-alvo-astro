@@ -25,6 +25,13 @@ const json = (body: unknown, init: ResponseInit = {}) =>
     },
   });
 
+const isAuthorized = (request: Request, token?: string) => {
+  if (!token) return false;
+  const header = request.headers.get('authorization') || request.headers.get('x-admin-token') || '';
+  const value = header.toLowerCase().startsWith('bearer ') ? header.slice(7) : header;
+  return value.trim() === token;
+};
+
 const clip = (value: unknown, max: number) =>
   String(value || '')
     .replace(/\s+/g, ' ')
@@ -149,8 +156,16 @@ export const onRequestPost = async ({
   env,
 }: {
   request: Request;
-  env: { AI?: AiBinding };
+  env: { AI?: AiBinding; ADMIN_TOKEN?: string };
 }) => {
+  if (!env.ADMIN_TOKEN) {
+    return json({ error: 'ADMIN_TOKEN nao configurado.' }, { status: 503 });
+  }
+
+  if (!isAuthorized(request, env.ADMIN_TOKEN)) {
+    return json({ error: 'Token editorial invalido.' }, { status: 401 });
+  }
+
   if (!env.AI) {
     return json(
       {

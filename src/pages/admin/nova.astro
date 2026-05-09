@@ -1334,20 +1334,18 @@ const aiActions = [
         return Math.max(0, Math.ceil(words / 220));
       };
 
+      const redirectToLogin = () => {
+        const next = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+        window.location.href = `/redacao/?next=${encodeURIComponent(next)}`;
+      };
+
       const getAdminToken = () => {
-        let token = '';
         try {
-          token = localStorage.getItem('admin-token') || '';
+          const token = localStorage.getItem('admin-token') || '';
+          if (token) return token;
         } catch {}
-        if (!token) {
-          token = window.prompt('Token editorial do admin') || '';
-          if (token) {
-            try {
-              localStorage.setItem('admin-token', token);
-            } catch {}
-          }
-        }
-        return token;
+        redirectToLogin();
+        return '';
       };
 
       const collectArticlePayload = (statusValue, scheduledAt = '') => {
@@ -1405,6 +1403,7 @@ const aiActions = [
               localStorage.removeItem('admin-token');
             } catch {}
             setStatus('Token inválido');
+            redirectToLogin();
             return;
           }
 
@@ -2340,6 +2339,7 @@ const aiActions = [
               localStorage.removeItem('admin-token');
             } catch {}
             setStatus('Token inválido');
+            redirectToLogin();
             return;
           }
           if (!response.ok || !data.article) throw new Error(data.error || 'Rascunho não encontrado.');
@@ -2498,10 +2498,15 @@ const aiActions = [
           button.disabled = true;
           button.classList.add('opacity-60');
           try {
+            const token = getAdminToken();
+            if (!token) return;
             const selectedText = getSelectedEditorText() || getSavedEditorText();
             const response = await fetch('/api/editorial-ai', {
               method: 'POST',
-              headers: { 'content-type': 'application/json' },
+              headers: {
+                'content-type': 'application/json',
+                authorization: `Bearer ${token}`,
+              },
               body: JSON.stringify({
                 action,
                 title: titleInput?.value || '',

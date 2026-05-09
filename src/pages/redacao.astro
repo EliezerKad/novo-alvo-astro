@@ -1,0 +1,150 @@
+---
+const next = Astro.url.searchParams.get('next') || '/admin/';
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Redação | Portal Novo Alvo</title>
+    <meta name="description" content="Acesso reservado à redação do Portal Novo Alvo." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;700;800;900&display=swap" />
+    <script is:inline>
+      (() => {
+        try {
+          const theme = localStorage.getItem('theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (theme === 'dark' || (!theme && prefersDark)) document.documentElement.classList.add('dark');
+        } catch {}
+      })();
+    </script>
+  </head>
+  <body class="min-h-screen bg-[#f5f3ee] font-['Inter'] text-[#101010] antialiased dark:bg-[#080809] dark:text-zinc-50">
+    <main class="relative grid min-h-screen place-items-center overflow-hidden px-4 py-10">
+      <div class="pointer-events-none absolute inset-0 opacity-[0.045] [background-image:radial-gradient(#101010_0.7px,transparent_0.7px)] [background-size:18px_18px] dark:opacity-[0.035]"></div>
+      <div class="pointer-events-none absolute -right-24 top-12 h-80 w-80 rounded-full bg-[#8A1F2D]/12 blur-3xl"></div>
+      <div class="pointer-events-none absolute -bottom-28 left-10 h-96 w-96 rounded-full bg-white/70 blur-3xl dark:bg-zinc-900/70"></div>
+
+      <section class="relative z-10 w-full max-w-[960px] overflow-hidden rounded-[2rem] border border-black/10 bg-[#fffdf8]/86 shadow-[0_28px_90px_rgba(16,16,16,0.10)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/86 md:grid md:grid-cols-[1fr_390px]">
+        <div class="relative min-h-[420px] p-7 md:p-10">
+          <div class="flex items-center gap-3">
+            <span class="grid h-12 w-12 place-items-center rounded-3xl bg-[#8A1F2D] shadow-[0_18px_38px_rgba(138,31,45,0.25)]">
+              <img src="/favicon.svg" alt="" class="h-6 w-6" />
+            </span>
+            <div>
+              <p class="text-[10px] font-black uppercase tracking-[0.28em] text-[#8A1F2D]">Portal Novo Alvo</p>
+              <p class="mt-1 text-[9px] font-black uppercase tracking-[0.24em] text-zinc-400">Redação</p>
+            </div>
+          </div>
+
+          <div class="mt-16 max-w-xl">
+            <p class="text-[10px] font-black uppercase tracking-[0.34em] text-zinc-400">Acesso editorial</p>
+            <h1 class="mt-4 font-['Archivo_Black'] text-5xl leading-[0.9] tracking-[-0.07em] text-[#101010] dark:text-white md:text-7xl">
+              Chave da redação.
+            </h1>
+            <p class="mt-5 max-w-md text-sm font-medium leading-7 text-zinc-500 dark:text-zinc-400">
+              Área reservada para criar, revisar, agendar e publicar matérias do Portal Novo Alvo.
+            </p>
+          </div>
+
+          <a href="/" class="absolute bottom-7 left-7 inline-flex rounded-full border border-black/10 bg-white/60 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-[#8A1F2D] hover:text-[#8A1F2D] dark:border-zinc-800 dark:bg-zinc-900/70">
+            Voltar ao portal
+          </a>
+        </div>
+
+        <form data-login-form class="relative border-t border-black/10 bg-white/70 p-7 dark:border-zinc-800 dark:bg-zinc-900/70 md:border-l md:border-t-0 md:p-8">
+          <input type="hidden" data-next-url value={next} />
+          <div class="rounded-[1.65rem] bg-[#101010] p-5 text-white shadow-[0_20px_58px_rgba(16,16,16,0.18)] dark:bg-white dark:text-zinc-950">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-sm font-black uppercase tracking-[0.24em]">Entrar</h2>
+                <p class="mt-2 text-xs font-medium leading-5 text-white/52 dark:text-zinc-500">
+                  Use a chave editorial configurada no Cloudflare.
+                </p>
+              </div>
+              <span class="rounded-full bg-emerald-400/15 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-emerald-300 dark:text-emerald-600">Seguro</span>
+            </div>
+
+            <label class="mt-6 block">
+              <span class="text-[9px] font-black uppercase tracking-[0.22em] text-white/38 dark:text-zinc-500">Chave</span>
+              <input
+                data-token-input
+                type="password"
+                autocomplete="current-password"
+                class="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-white/10 px-4 text-sm font-bold text-white outline-none transition placeholder:text-white/30 focus:border-[#f4c8cf]/60 focus:ring-2 focus:ring-[#8A1F2D]/45 dark:border-zinc-200 dark:bg-zinc-100 dark:text-zinc-950"
+                placeholder="Cole sua chave de acesso"
+                required
+              />
+            </label>
+
+            <button type="submit" class="mt-4 h-12 w-full rounded-2xl bg-[#8A1F2D] text-[10px] font-black uppercase tracking-widest text-white transition hover:bg-[#a7273b]" data-login-button>
+              Acessar admin
+            </button>
+
+            <p class="mt-4 hidden rounded-2xl border border-white/10 bg-white/10 p-3 text-xs font-bold leading-5 text-white/70 dark:border-zinc-200 dark:bg-zinc-100 dark:text-zinc-600" data-login-message></p>
+          </div>
+
+          <p class="mt-5 text-center text-[10px] font-bold leading-5 text-zinc-400">
+            A chave fica salva apenas neste navegador. Saia do admin para remover a sessão local.
+          </p>
+        </form>
+      </section>
+    </main>
+
+    <script is:inline>
+      (() => {
+        const form = document.querySelector('[data-login-form]');
+        const input = document.querySelector('[data-token-input]');
+        const button = document.querySelector('[data-login-button]');
+        const message = document.querySelector('[data-login-message]');
+        const nextInput = document.querySelector('[data-next-url]');
+
+        const showMessage = (text, tone = 'default') => {
+          if (!message) return;
+          message.textContent = text;
+          message.classList.remove('hidden');
+          message.dataset.tone = tone;
+        };
+
+        const safeNext = () => {
+          const next = String(nextInput?.value || '/admin/');
+          return next.startsWith('/admin') ? next : '/admin/';
+        };
+
+        form?.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const token = String(input?.value || '').trim();
+          if (!token) return showMessage('Informe a chave editorial.');
+
+          button.disabled = true;
+          button.textContent = 'Verificando...';
+          showMessage('Validando chave e abrindo sessão editorial.');
+
+          try {
+            const response = await fetch('/api/admin/session', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ token }),
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+              throw new Error(data.error || 'Chave inválida ou CMS indisponível.');
+            }
+            localStorage.setItem('admin-token', token);
+            localStorage.setItem('admin-authenticated-at', new Date().toISOString());
+            window.location.href = safeNext();
+          } catch (error) {
+            showMessage(error.message || 'Não foi possível validar a chave.', 'error');
+            button.disabled = false;
+            button.textContent = 'Acessar admin';
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
