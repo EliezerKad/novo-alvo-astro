@@ -49,7 +49,7 @@ const iconPath = {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Playfair+Display:ital,wght@0,900;1,900&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;700;800;900&display=swap" />
     <script is:inline>
       (() => {
         try {
@@ -61,6 +61,22 @@ const iconPath = {
       })();
     </script>
     <style is:inline>
+      :root {
+        --admin-display: "Archivo Black", "Inter", ui-sans-serif, system-ui, sans-serif;
+        --admin-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+      }
+
+      body {
+        font-family: var(--admin-sans);
+      }
+
+      .admin-display {
+        font-family: var(--admin-display);
+        font-weight: 400;
+        letter-spacing: -0.065em;
+        line-height: 0.92;
+      }
+
       @media (min-width: 1024px) {
         .admin-shell {
           grid-template-columns: 108px minmax(0, 1fr);
@@ -114,13 +130,14 @@ const iconPath = {
       }
     </style>
   </head>
-  <body class="min-h-screen bg-[radial-gradient(circle_at_20%_0%,rgba(239,68,68,0.08),transparent_28%),radial-gradient(circle_at_86%_12%,rgba(59,130,246,0.07),transparent_26%),linear-gradient(180deg,#fbfbf8_0%,#f4f4f2_46%,#fbfbf8_100%)] text-zinc-950 antialiased dark:bg-[radial-gradient(circle_at_20%_0%,rgba(239,68,68,0.13),transparent_30%),radial-gradient(circle_at_86%_12%,rgba(59,130,246,0.10),transparent_26%),linear-gradient(180deg,#09090b_0%,#18181b_48%,#09090b_100%)] dark:text-zinc-50">
-    <div class="pointer-events-none fixed inset-x-0 top-0 h-40 bg-gradient-to-b from-white/70 to-transparent dark:from-white/5"></div>
+  <body class="min-h-screen bg-[#f5f3ee] text-zinc-950 antialiased dark:bg-[linear-gradient(180deg,#080809_0%,#141416_48%,#080809_100%)] dark:text-zinc-50">
+    <div class="pointer-events-none fixed inset-x-0 top-0 h-32 bg-gradient-to-b from-white/65 to-transparent dark:from-white/5"></div>
+    <div class="pointer-events-none fixed inset-0 opacity-[0.045] [background-image:radial-gradient(#101010_0.7px,transparent_0.7px)] [background-size:18px_18px] dark:opacity-[0.035]"></div>
     <div class="admin-shell relative min-h-screen lg:grid">
-      <aside class="admin-sidebar border-b border-white/70 bg-white/72 px-4 py-4 shadow-[10px_0_60px_rgba(15,23,42,0.04)] backdrop-blur-2xl dark:border-zinc-800/80 dark:bg-zinc-950/72 lg:sticky lg:top-0 lg:h-screen lg:overflow-hidden lg:border-b-0 lg:border-r lg:px-4 lg:py-5">
+      <aside class="admin-sidebar border-b border-black/10 bg-[#fffdf8]/88 px-4 py-4 shadow-[10px_0_46px_rgba(16,16,16,0.045)] backdrop-blur-2xl dark:border-zinc-800/80 dark:bg-zinc-950/82 lg:sticky lg:top-0 lg:h-screen lg:overflow-hidden lg:border-b-0 lg:border-r lg:px-4 lg:py-5">
         <div class="flex items-center justify-between gap-4 lg:block">
           <a href="/admin/" class="admin-brand flex items-center justify-center gap-3 lg:flex-col">
-            <span class="flex h-12 w-12 items-center justify-center rounded-3xl bg-red-600 text-white shadow-[0_18px_42px_rgba(220,38,38,0.28)] ring-1 ring-red-500/40 transition-transform duration-500 hover:scale-105">
+            <span class="flex h-12 w-12 items-center justify-center rounded-3xl bg-[#8A1F2D] text-white shadow-[0_18px_38px_rgba(138,31,45,0.25)] ring-1 ring-[#8A1F2D]/30 transition-transform duration-500 hover:scale-105">
               <img src="/favicon.svg" alt="" class="h-6 w-6" />
             </span>
             <span class="admin-nav-label text-center">
@@ -129,12 +146,12 @@ const iconPath = {
             </span>
           </a>
           <div class="admin-nav-label admin-portal-actions mt-6 items-center gap-3">
-            <a href="/" class="rounded-full border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-red-500 dark:hover:text-red-500">
+            <a href="/" class="rounded-full border border-black/10 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-[#8A1F2D] hover:text-[#8A1F2D] dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-red-500 dark:hover:text-red-500">
               Ver portal
             </a>
             <button
               type="button"
-              class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 shadow-sm transition hover:border-red-600 hover:bg-red-600 hover:text-white dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-red-500 dark:hover:bg-red-600 dark:hover:text-white"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white text-zinc-500 shadow-sm transition hover:border-[#8A1F2D] hover:bg-[#8A1F2D] hover:text-white dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-red-500 dark:hover:bg-red-600 dark:hover:text-white"
               title="Alternar tema"
               aria-label="Alternar modo claro e escuro"
               data-admin-theme-toggle
@@ -165,8 +182,8 @@ const iconPath = {
               data-admin-nav-id={item.id}
               class={`admin-nav-link group whitespace-nowrap rounded-3xl px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-all duration-300 lg:flex lg:w-full lg:items-center lg:justify-center lg:gap-3 ${
                 active === item.id
-                  ? 'bg-zinc-950 text-white shadow-[0_18px_45px_rgba(15,23,42,0.16)] dark:bg-white dark:text-zinc-950'
-                  : 'bg-white/55 text-zinc-500 hover:-translate-y-0.5 hover:bg-white hover:text-zinc-950 hover:shadow-[0_16px_38px_rgba(15,23,42,0.08)] dark:bg-zinc-900/55 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-50'
+                  ? 'bg-[#101010] text-white shadow-[0_18px_45px_rgba(16,16,16,0.14)] dark:bg-white dark:text-zinc-950'
+                  : 'bg-white/50 text-zinc-500 hover:-translate-y-0.5 hover:bg-white hover:text-[#8A1F2D] hover:shadow-[0_16px_38px_rgba(16,16,16,0.07)] dark:bg-zinc-900/55 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-50'
               }`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" set:html={iconPath[item.icon]} />
@@ -175,7 +192,7 @@ const iconPath = {
           ))}
         </nav>
 
-        <div class="admin-nav-label mt-8 hidden rounded-3xl border border-white/80 bg-white/55 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/55 lg:block">
+        <div class="admin-nav-label mt-8 hidden rounded-3xl border border-black/10 bg-white/48 p-5 shadow-[0_18px_45px_rgba(16,16,16,0.045)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/55 lg:block">
           <p class="text-[9px] font-black uppercase tracking-[0.24em] text-zinc-400">Modo atual</p>
           <p class="mt-2 text-sm font-bold text-zinc-700 dark:text-zinc-300">Redação visual em evolução, pronta para conectar CMS e publicação em tempo real.</p>
         </div>
@@ -184,7 +201,7 @@ const iconPath = {
       <main class="admin-main relative px-4 py-6 md:px-8 lg:px-8 lg:py-7">
         <button
           type="button"
-          class="mb-5 hidden items-center gap-2 rounded-full border border-white/80 bg-white/75 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 shadow-[0_14px_40px_rgba(15,23,42,0.07)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-900/75 lg:inline-flex"
+          class="mb-5 hidden items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 shadow-[0_14px_34px_rgba(16,16,16,0.055)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-[#8A1F2D] hover:text-[#8A1F2D] dark:border-zinc-800 dark:bg-zinc-900/75 lg:inline-flex"
           aria-label="Alternar menu lateral"
           data-admin-sidebar-toggle
         >

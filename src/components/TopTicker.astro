@@ -6,36 +6,101 @@ interface Props {
 }
 
 const { articles } = Astro.props;
+const tickerPayload = articles.map((article) => ({
+  title: article.breakingSummary || article.title,
+  slug: article.slug,
+  imageUrl: article.imageUrl,
+}));
 ---
 
 {
   articles.length > 0 && (
-    <div class="live-newsroom-ticker relative overflow-hidden whitespace-nowrap border-y border-red-500/70 bg-red-600 py-1.5 text-white shadow-[0_12px_34px_rgba(220,38,38,0.22)] md:py-2">
-      <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_50%,rgba(255,255,255,0.22),transparent_24%),linear-gradient(90deg,rgba(255,255,255,0.08),transparent_18%,transparent_82%,rgba(255,255,255,0.08))]"></div>
-      <div class="relative flex w-max hover:[animation-play-state:paused]" style="animation: ticker 38s linear infinite">
-        {[...articles, ...articles].map((article) => (
-          <a href={`/noticia/${article.slug}/`} class="inline-flex items-center gap-3 mx-5 md:mx-10">
-            <span class="relative inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[8px] font-black uppercase tracking-widest text-red-600 shadow-[0_0_18px_rgba(255,255,255,0.28)] md:text-[9px]">
-              <span class="h-1.5 w-1.5 rounded-full bg-red-600 animate-live-pulse"></span>
-              URGENTE
-            </span>
-            {article.imageUrl && (
-              <img
-                src={article.imageUrl}
-                alt=""
-                class="h-7 w-7 rounded-lg object-cover shadow-md ring-1 ring-white/20 md:h-8 md:w-8"
-                loading="lazy"
-                decoding="async"
-                referrerpolicy="no-referrer"
-              />
-            )}
-            <span class="max-w-[74vw] overflow-hidden text-ellipsis text-[11px] font-black uppercase tracking-tight hover:underline md:max-w-none md:text-sm">
-              {article.breakingSummary || article.title.substring(0, 70)}
-            </span>
-            <div class="h-1.5 w-1.5 rounded-full bg-white/35 md:ml-4"></div>
-          </a>
-        ))}
+    <div class="relative overflow-hidden border-b border-black/10 bg-[#101010] text-white shadow-[0_10px_30px_rgba(16,16,16,0.12)] dark:border-zinc-800">
+      <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_50%,rgba(138,31,45,0.34),transparent_26%),linear-gradient(90deg,rgba(255,255,255,0.08),transparent_20%,transparent_82%,rgba(255,255,255,0.06))]"></div>
+      <div class="relative mx-auto flex min-h-[32px] max-w-[1240px] items-center gap-2 px-3 md:min-h-[38px] md:gap-5 md:px-6">
+        <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white px-2 py-1 text-[7px] font-black uppercase tracking-widest text-[#8A1F2D] shadow-[0_0_18px_rgba(255,255,255,0.18)] md:gap-2 md:px-2.5 md:text-[9px]">
+          <span class="h-1.5 w-1.5 rounded-full bg-[#8A1F2D] animate-live-pulse"></span>
+          Urgente
+        </span>
+
+        <a
+          href={`/noticia/${articles[0].slug}/`}
+          class="group flex min-w-0 flex-1 items-center gap-2 text-[10px] font-black uppercase tracking-tight md:text-xs"
+          data-live-ticker-link
+        >
+          {articles[0].imageUrl && (
+            <img
+              src={articles[0].imageUrl}
+              alt=""
+              class="h-5 w-5 rounded-md object-cover ring-1 ring-white/15 md:h-7 md:w-7 md:rounded-lg"
+              loading="lazy"
+              decoding="async"
+              referrerpolicy="no-referrer"
+              data-live-ticker-image
+            />
+          )}
+          <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-white/92 group-hover:text-white group-hover:underline" data-live-ticker-title>
+            {articles[0].breakingSummary || articles[0].title}
+          </span>
+        </a>
+
+        <div class="hidden shrink-0 items-center gap-3 border-l border-white/15 pl-4 text-[10px] font-black uppercase tracking-widest text-white/62 md:flex">
+          <span data-live-clock>--:--</span>
+          <span class="h-1 w-1 rounded-full bg-white/35"></span>
+          <span data-live-weather>Tempo --°C</span>
+        </div>
       </div>
     </div>
   )
 }
+
+<script is:inline define:vars={{ tickerPayload }}>
+  (() => {
+    const items = Array.isArray(tickerPayload) ? tickerPayload : [];
+    const link = document.querySelector('[data-live-ticker-link]');
+    const title = document.querySelector('[data-live-ticker-title]');
+    const image = document.querySelector('[data-live-ticker-image]');
+    const clock = document.querySelector('[data-live-clock]');
+    const weather = document.querySelector('[data-live-weather]');
+
+    let index = 0;
+
+    const updateTicker = () => {
+      if (!link || !title || items.length < 2) return;
+      index = (index + 1) % items.length;
+      const item = items[index];
+      link.setAttribute('href', `/noticia/${encodeURIComponent(item.slug)}/`);
+      title.textContent = item.title || '';
+      if (image && item.imageUrl) image.setAttribute('src', item.imageUrl);
+    };
+
+    const updateClock = () => {
+      if (!clock) return;
+      clock.textContent = new Intl.DateTimeFormat('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'America/Sao_Paulo',
+      }).format(new Date());
+    };
+
+    const updateWeather = async () => {
+      if (!weather) return;
+      try {
+        const response = await fetch(
+          'https://api.open-meteo.com/v1/forecast?latitude=-23.55&longitude=-46.63&current=temperature_2m&timezone=America%2FSao_Paulo',
+          { cache: 'no-store' }
+        );
+        const data = await response.json();
+        const temp = Math.round(Number(data?.current?.temperature_2m));
+        if (Number.isFinite(temp)) weather.textContent = `São Paulo ${temp}°C`;
+      } catch {
+        weather.textContent = 'Tempo ao vivo';
+      }
+    };
+
+    updateClock();
+    updateWeather();
+    window.setInterval(updateClock, 30000);
+    window.setInterval(updateTicker, 7000);
+  })();
+</script>

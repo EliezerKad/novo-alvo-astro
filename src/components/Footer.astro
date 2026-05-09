@@ -6,83 +6,69 @@ import { categoryUrl } from '../lib/news';
 const categories = [
   'Brasil',
   'Esportes',
-  'Musica',
+  'Música',
   'Moda',
   'Famosos',
   'Games',
   'Tecnologia',
-  'Educacao',
-  'Politica',
+  'Educação',
+  'Política',
   'Economia',
   'Geral',
 ];
 const year = new Date().getFullYear();
 ---
 
-<footer class="bg-zinc-950 text-white pt-8 pb-6 border-t border-zinc-900 mt-12">
-  <div class="container mx-auto px-4">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-      <div class="col-span-1 md:col-span-2 space-y-3">
-        <a href="/" class="flex items-center gap-2 group w-fit">
-          <LogoSymbol class="w-6 h-6 md:w-7 md:h-7 text-red-600 group-hover:text-red-700 transition-colors" />
-          <h2 class="text-2xl font-serif font-black tracking-tighter leading-none group-hover:text-red-700 transition-all duration-500 relative text-zinc-900 dark:text-zinc-50">
+<footer class="mt-8 bg-[#080809] px-4 py-3 text-white md:mt-10">
+  <div class="mx-auto max-w-[1240px]">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-[1.15fr_.85fr] md:gap-6">
+      <div class="space-y-2">
+        <a href="/" class="group flex w-fit items-center gap-2">
+          <LogoSymbol class="h-6 w-6 text-[#8A1F2D] transition-colors group-hover:text-[#e0b8bf] md:h-7 md:w-7" />
+          <h2 class="relative text-xl font-serif font-black leading-none tracking-tighter text-white transition-all duration-500 group-hover:text-[#e0b8bf] md:text-2xl">
             NOVO ALVO
           </h2>
         </a>
         <VisitorCounter />
-        <p class="text-zinc-500 text-[11px] max-w-sm leading-relaxed font-medium uppercase tracking-wider">
+        <p class="max-w-2xl text-sm font-medium leading-5 text-white/60">
           Sua fonte primária para notícias de impacto. Cobertura profunda e analítica dos fatos que moldam o mundo, 24 horas por dia.
         </p>
       </div>
 
-      <div class="space-y-3">
-        <h4 class="text-[9px] font-black uppercase tracking-[0.3em] text-red-600 mb-1">
-          Categorias
-        </h4>
-        <nav class="grid grid-cols-2 gap-x-4 gap-y-1.5">
-          {categories.slice(0, 8).map((category) => (
-            <a
-              href={categoryUrl(category)}
-              class="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-widest"
-            >
-              {category}
-            </a>
-          ))}
-        </nav>
-      </div>
+      <div class="grid grid-cols-2 gap-5">
+        <div>
+          <h4 class="mb-2 text-[9px] font-black uppercase tracking-[0.12em] text-white">
+            Categorias
+          </h4>
+          <nav class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px] font-bold text-white/58">
+            {categories.slice(0, 8).map((category) => (
+              <a href={categoryUrl(category)} class="transition-colors hover:text-white">
+                {category}
+              </a>
+            ))}
+          </nav>
+        </div>
 
-      <div class="space-y-3">
-        <h4 class="text-[9px] font-black uppercase tracking-[0.3em] text-red-600 mb-1">
-          Institucional
-        </h4>
-        <nav class="flex flex-col gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-          <a href="/sobre" class="hover:text-white transition-colors">
-            Sobre Nós
-          </a>
-          <a href="/privacidade" class="hover:text-white transition-colors">
-            Privacidade
-          </a>
-          <a href="/contato" class="hover:text-white transition-colors">
-            Contato
-          </a>
-        </nav>
+        <div>
+          <h4 class="mb-2 text-[9px] font-black uppercase tracking-[0.12em] text-white">
+            Institucional
+          </h4>
+          <nav class="grid gap-1.5 text-[11px] font-bold text-white/58">
+            <a href="/sobre" class="transition-colors hover:text-white">Sobre Nós</a>
+            <a href="/privacidade" class="transition-colors hover:text-white">Privacidade</a>
+            <a href="/contato" class="transition-colors hover:text-white">Contato</a>
+            <a href="/admin" class="transition-colors hover:text-white">Redação</a>
+          </nav>
+        </div>
       </div>
     </div>
 
-    <div class="pt-4 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-3">
-      <p class="text-zinc-600 text-[8px] font-bold uppercase tracking-[0.2em]">
-        © {year} Redação Novo Alvo • Fatos e Impacto
-      </p>
-      <div class="flex gap-6 text-zinc-600 text-[8px] font-bold uppercase tracking-[0.2em]">
-        <a href="/admin" class="hover:text-zinc-400 transition-colors">
-          Redação
-        </a>
-        <a href="/sobre" class="hover:text-zinc-400 transition-colors">
-          Sobre Nós
-        </a>
-        <a href="/privacidade" class="hover:text-zinc-400 transition-colors">
-          Privacidade
-        </a>
+    <div class="mt-3 flex flex-col justify-between gap-2 border-t border-white/10 pt-3 text-[10px] font-bold text-white/42 md:flex-row md:items-end">
+      <p>© {year} Redação Novo Alvo • Fatos e Impacto</p>
+      <div class="flex items-baseline text-white" aria-label="NEXA">
+        <span class="font-['Syncopate'] text-[10px] font-bold uppercase tracking-[0.18em] [transform:skew(-12deg)_scaleX(1.08)] md:text-xs">
+          NEXA
+        </span>
       </div>
     </div>
   </div>

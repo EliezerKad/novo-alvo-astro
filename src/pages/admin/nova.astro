@@ -28,22 +28,22 @@ const aiActions = [
 ---
 
 <AdminLayout title="Nova matéria | Admin Novo Alvo" active="new">
-  <form class="editor-studio grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_390px]">
+  <form class="editor-studio grid gap-6 xl:grid-cols-[minmax(0,1fr)_348px] 2xl:grid-cols-[minmax(0,1fr)_372px]">
     <section class="min-w-0 space-y-6">
-      <header class="relative overflow-hidden rounded-[2.25rem] border border-white/80 bg-white/78 p-5 shadow-[0_28px_90px_rgba(15,23,42,0.09)] backdrop-blur-2xl dark:border-zinc-800/90 dark:bg-zinc-900/74">
-        <div class="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-red-500/10 blur-3xl"></div>
-        <div class="pointer-events-none absolute -bottom-32 left-1/4 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl"></div>
+      <header class="relative overflow-hidden rounded-[1.85rem] border border-black/10 bg-[#fffdf8]/86 p-5 shadow-[0_22px_64px_rgba(16,16,16,0.075)] backdrop-blur-2xl dark:border-zinc-800/90 dark:bg-zinc-900/78 md:rounded-[2.25rem] md:p-6">
+        <div class="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-[#8A1F2D]/10 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-32 left-1/4 h-72 w-72 rounded-full bg-[#ebe8df]/80 blur-3xl dark:bg-zinc-800/40"></div>
         <div class="relative">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-3">
-            <span class="rounded-full bg-red-600 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.24em] text-white">Redação</span>
+            <span class="rounded-full bg-[#8A1F2D] px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.24em] text-white shadow-lg shadow-[#8A1F2D]/20">Redação</span>
             <span class="text-[11px] font-bold text-zinc-400" data-autosave-status>salvo agora</span>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <button type="button" data-focus-mode class="rounded-full border border-zinc-200 bg-white px-4 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 shadow-sm transition hover:border-zinc-950 hover:text-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-white dark:hover:text-white">
+            <button type="button" data-focus-mode class="rounded-full border border-black/10 bg-white/78 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 shadow-sm transition hover:border-[#8A1F2D] hover:text-[#8A1F2D] dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-white dark:hover:text-white">
               Modo foco
             </button>
-            <button type="button" data-open-preview class="rounded-full bg-zinc-950 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950">
+            <button type="button" data-open-preview class="rounded-full bg-[#101010] px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-[#8A1F2D] dark:bg-white dark:text-zinc-950">
               Preview
             </button>
           </div>
@@ -54,31 +54,31 @@ const aiActions = [
           <textarea
             data-title-input
             rows="1"
-            class="field-clean w-full resize-none bg-transparent font-serif text-5xl font-black italic leading-[0.95] tracking-tighter outline-none placeholder:text-zinc-300 md:text-7xl dark:placeholder:text-zinc-700"
+            class="admin-display field-clean w-full resize-none bg-transparent text-5xl outline-none placeholder:text-zinc-300 md:text-7xl dark:placeholder:text-zinc-700"
             placeholder="Título da matéria"
           ></textarea>
         </label>
 
         <div class="mt-5 grid gap-3 text-[11px] font-black uppercase tracking-widest text-zinc-400 md:grid-cols-5">
-          <label class="rounded-2xl bg-zinc-50 px-4 py-3 dark:bg-zinc-950/70">
+          <label class="rounded-2xl border border-black/5 bg-white/62 px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950/70">
             <span class="block text-[8px] text-zinc-300">Slug</span>
             <input data-slug-input class="mt-1 w-full bg-transparent lowercase text-zinc-700 outline-none dark:text-zinc-200" placeholder="slug-automatico" />
           </label>
-          <label class="rounded-2xl bg-zinc-50 px-4 py-3 dark:bg-zinc-950/70">
+          <label class="rounded-2xl border border-black/5 bg-white/62 px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950/70">
             <span class="block text-[8px] text-zinc-300">Categoria</span>
             <select data-category-input class="mt-1 w-full bg-transparent text-zinc-700 outline-none dark:text-zinc-200">
               {categories.map((category) => <option>{category}</option>)}
             </select>
           </label>
-          <label class="rounded-2xl bg-zinc-50 px-4 py-3 dark:bg-zinc-950/70">
+          <label class="rounded-2xl border border-black/5 bg-white/62 px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950/70">
             <span class="block text-[8px] text-zinc-300">Autor</span>
             <input class="mt-1 w-full bg-transparent text-zinc-700 outline-none dark:text-zinc-200" value="Redação Novo Alvo" />
           </label>
-          <div class="rounded-2xl bg-zinc-50 px-4 py-3 dark:bg-zinc-950/70">
+          <div class="rounded-2xl border border-black/5 bg-white/62 px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950/70">
             <span class="block text-[8px] text-zinc-300">Status</span>
             <strong class="mt-1 block text-zinc-700 dark:text-zinc-200" data-editor-status>Rascunho</strong>
           </div>
-          <div class="rounded-2xl bg-zinc-50 px-4 py-3 dark:bg-zinc-950/70">
+          <div class="rounded-2xl border border-black/5 bg-white/62 px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950/70">
             <span class="block text-[8px] text-zinc-300">Data</span>
             <strong class="mt-1 block text-zinc-700 dark:text-zinc-200" data-current-date>Hoje</strong>
           </div>
@@ -86,11 +86,11 @@ const aiActions = [
         </div>
       </header>
 
-      <section class="relative overflow-hidden rounded-[2.25rem] border border-white/80 bg-white/86 shadow-[0_28px_90px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-zinc-800/90 dark:bg-zinc-900/78">
-        <div class="flex flex-wrap items-center gap-3 border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
-          <div class="flex items-center gap-2 rounded-full bg-white/75 p-1 shadow-inner shadow-zinc-950/5 backdrop-blur dark:bg-zinc-950/75">
+      <section class="relative overflow-hidden rounded-[1.85rem] border border-black/10 bg-[#fffdf8]/90 shadow-[0_22px_64px_rgba(16,16,16,0.07)] backdrop-blur-2xl dark:border-zinc-800/90 dark:bg-zinc-900/82 md:rounded-[2.25rem]">
+        <div class="flex flex-wrap items-center gap-3 border-b border-black/10 px-5 py-4 dark:border-zinc-800">
+          <div class="flex items-center gap-2 rounded-full bg-[#f5f3ee]/82 p-1 shadow-inner shadow-zinc-950/5 backdrop-blur dark:bg-zinc-950/75">
             {['bold', 'italic', 'link', 'quote', 'highlight', 'comment'].map((action) => (
-              <button type="button" data-format={action} class="rounded-full px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:bg-white hover:text-red-600 hover:shadow-sm dark:hover:bg-zinc-900">
+              <button type="button" data-format={action} class="rounded-full px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:bg-white hover:text-[#8A1F2D] hover:shadow-sm dark:hover:bg-zinc-900">
                 {action === 'bold' ? 'B' : action === 'italic' ? 'I' : action === 'link' ? 'Link' : action === 'quote' ? 'Quote' : action === 'highlight' ? 'Destaque' : 'Comentário'}
               </button>
             ))}
@@ -171,7 +171,7 @@ const aiActions = [
               <div class="shrink-0 flex items-start justify-between gap-4">
                 <div>
                   <p class="text-[10px] font-black uppercase tracking-[0.28em] text-red-600">Bloco narrativo</p>
-                  <h2 class="mt-2 font-serif text-4xl font-black italic tracking-tighter text-zinc-950 dark:text-white">Carrossel editorial</h2>
+                  <h2 class="admin-display mt-2 text-4xl text-zinc-950 dark:text-white">Carrossel editorial</h2>
                   <p class="mt-2 max-w-xl text-sm font-medium leading-6 text-zinc-500 dark:text-zinc-400">Monte uma sequência visual fluida, com legenda, crédito e ritmo de leitura antes de inserir no texto.</p>
                 </div>
                 <button type="button" data-close-carousel class="rounded-full bg-zinc-100 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:bg-zinc-950 hover:text-white dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-white dark:hover:text-zinc-950">Fechar</button>
@@ -215,14 +215,14 @@ const aiActions = [
 
         <label class="block">
           <span class="sr-only">Resumo editorial</span>
-          <textarea data-summary-input class="field-clean w-full resize-none bg-transparent px-8 pt-8 text-xl font-medium leading-8 text-zinc-500 outline-none placeholder:text-zinc-300 dark:text-zinc-400 dark:placeholder:text-zinc-700" rows="2" placeholder="Escreva um resumo forte para cards, SEO e redes sociais"></textarea>
+          <textarea data-summary-input class="field-clean w-full resize-none bg-transparent px-6 pt-7 text-lg font-medium leading-8 text-zinc-500 outline-none placeholder:text-zinc-300 dark:text-zinc-400 dark:placeholder:text-zinc-700 md:px-8 md:text-xl" rows="2" placeholder="Escreva um resumo forte para cards, SEO e redes sociais"></textarea>
         </label>
 
         <div
           data-editor-body
           contenteditable="true"
           data-placeholder='Digite "/" para inserir blocos, imagens, carrossel ou embeds...'
-          class="editor-canvas min-h-[760px] px-8 pb-14 pt-5 text-xl leading-9 outline-none"
+          class="editor-canvas min-h-[700px] px-6 pb-14 pt-5 text-xl leading-9 outline-none md:min-h-[760px] md:px-8"
         ></div>
         <textarea data-editor-output class="hidden" aria-hidden="true"></textarea>
       </section>
@@ -246,7 +246,7 @@ const aiActions = [
     </section>
 
     <aside data-editor-aside class="space-y-4 xl:sticky xl:top-7 xl:h-[calc(100vh-3.5rem)] xl:overflow-y-auto xl:pr-1">
-      <section class="relative overflow-hidden rounded-[2rem] bg-zinc-950 p-5 text-white shadow-2xl shadow-zinc-950/20 dark:bg-white dark:text-zinc-950">
+      <section class="relative overflow-hidden rounded-[1.65rem] bg-[#101010] p-5 text-white shadow-[0_20px_58px_rgba(16,16,16,0.18)] dark:bg-white dark:text-zinc-950">
         <div class="pointer-events-none absolute -right-16 -top-16 h-36 w-36 rounded-full bg-red-500/30 blur-3xl"></div>
         <div class="relative">
         <div class="flex items-center justify-between gap-3">
@@ -258,7 +258,7 @@ const aiActions = [
         </div>
         <div class="mt-5 grid gap-2">
           <button type="button" data-save-draft class="rounded-2xl bg-white/10 px-4 py-3 text-[10px] font-black uppercase tracking-widest transition hover:bg-white hover:text-zinc-950 dark:bg-zinc-100 dark:hover:bg-zinc-950 dark:hover:text-white">Salvar rascunho</button>
-          <button type="button" data-publish-now class="rounded-2xl bg-red-600 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white transition hover:bg-red-500">Publicar agora</button>
+          <button type="button" data-publish-now class="rounded-2xl bg-[#8A1F2D] px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white transition hover:bg-[#a7273b]">Publicar agora</button>
           <label class="rounded-2xl bg-white/10 p-3 dark:bg-zinc-100">
             <span class="text-[8px] font-black uppercase tracking-widest text-white/40 dark:text-zinc-400">Agendar</span>
             <input type="datetime-local" data-schedule-at class="mt-2 w-full bg-transparent text-xs font-bold outline-none" />
@@ -345,8 +345,8 @@ const aiActions = [
       <article class="overflow-y-auto bg-white px-4 py-8 dark:bg-zinc-950 md:px-10">
         <header class="mx-auto max-w-5xl">
           <span data-preview-category class="inline-flex rounded-lg bg-red-600 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-white">Categoria</span>
-          <h1 data-preview-title class="mt-8 font-serif text-4xl font-black leading-none tracking-tighter text-zinc-950 dark:text-zinc-50 md:text-6xl lg:text-7xl">Título da matéria</h1>
-          <p data-preview-summary class="mt-8 max-w-4xl text-2xl font-medium italic leading-tight text-zinc-500 dark:text-zinc-400">Resumo editorial da matéria.</p>
+          <h1 data-preview-title class="admin-display mt-8 text-4xl text-zinc-950 dark:text-zinc-50 md:text-6xl lg:text-7xl">Título da matéria</h1>
+          <p data-preview-summary class="mt-8 max-w-4xl text-2xl font-medium leading-tight text-zinc-500 dark:text-zinc-400">Resumo editorial da matéria.</p>
           <div class="mt-6 flex flex-wrap gap-4 text-[10px] font-black uppercase tracking-widest text-zinc-400">
             <span>Por Redação Novo Alvo</span>
             <span data-preview-date>Hoje</span>
@@ -438,7 +438,7 @@ const aiActions = [
 
     .editor-canvas {
       color: rgb(39 39 42);
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: var(--admin-sans);
       background-image: linear-gradient(90deg, rgba(220, 38, 38, 0.05), transparent 18%, transparent 82%, rgba(59, 130, 246, 0.04));
       background-size: 100% 1px;
     }
@@ -452,17 +452,16 @@ const aiActions = [
     }
 
     .editor-canvas h2 {
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: var(--admin-display);
       font-size: clamp(2.3rem, 4vw, 3.6rem);
-      font-style: italic;
-      font-weight: 900;
-      letter-spacing: -0.04em;
-      line-height: 1;
+      font-weight: 400;
+      letter-spacing: -0.065em;
+      line-height: 0.94;
       margin: 4rem 0 1.5rem;
     }
 
     .editor-canvas h3 {
-      font-family: Inter, system-ui, sans-serif;
+      font-family: var(--admin-sans);
       font-size: 1.55rem;
       font-weight: 900;
       margin: 3rem 0 1rem;
@@ -472,7 +471,7 @@ const aiActions = [
       border-left: 4px solid rgb(220 38 38);
       color: rgb(82 82 91);
       font-size: 1.45rem;
-      font-style: italic;
+      font-style: normal;
       margin: 2.5rem 0;
       padding-left: 1.5rem;
     }
@@ -568,7 +567,7 @@ const aiActions = [
       color: rgb(113 113 122);
       font-family: Inter, system-ui, sans-serif;
       font-size: 0.8rem;
-      font-style: italic;
+      font-style: normal;
       margin-top: 0.65rem;
       text-align: center;
     }
@@ -820,7 +819,7 @@ const aiActions = [
 
     .article-preview {
       color: rgb(39 39 42);
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: var(--admin-sans);
       overflow: visible;
     }
 
@@ -832,12 +831,11 @@ const aiActions = [
 
     .article-preview h2 {
       border-left: 4px solid rgb(220 38 38);
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: var(--admin-display);
       font-size: clamp(2.4rem, 5vw, 4rem);
-      font-style: italic;
-      font-weight: 900;
-      letter-spacing: -0.04em;
-      line-height: 1;
+      font-weight: 400;
+      letter-spacing: -0.065em;
+      line-height: 0.94;
       margin-top: 5rem;
       padding-left: 1.5rem;
     }
@@ -935,7 +933,7 @@ const aiActions = [
       color: rgb(113 113 122);
       font-family: Inter, system-ui, sans-serif;
       font-size: 0.75rem;
-      font-style: italic;
+      font-style: normal;
       margin-top: 0.65rem;
       text-align: center;
     }
@@ -977,6 +975,75 @@ const aiActions = [
 
     .admin-focus-mode [data-title-input] {
       font-size: clamp(4rem, 8vw, 7.5rem);
+    }
+
+    .editor-studio {
+      isolation: isolate;
+    }
+
+    .editor-studio [data-title-input] {
+      color: #101010;
+      max-height: none;
+    }
+
+    .dark .editor-studio [data-title-input] {
+      color: #fafafa;
+    }
+
+    .editor-canvas {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(245, 243, 238, 0.22));
+      color: #292927;
+      letter-spacing: -0.01em;
+    }
+
+    .dark .editor-canvas {
+      background: linear-gradient(180deg, rgba(24, 24, 27, 0.42), rgba(9, 9, 11, 0.08));
+      color: rgb(228 228 231);
+    }
+
+    .editor-canvas:focus {
+      box-shadow: inset 0 1px 0 rgba(16, 16, 16, 0.04);
+    }
+
+    .editor-canvas::before {
+      color: rgba(113, 113, 122, 0.36);
+      font-family: Inter, system-ui, sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .editor-canvas p {
+      line-height: 1.82;
+    }
+
+    .editor-canvas [data-editor-media] {
+      border-color: rgba(16, 16, 16, 0.08);
+      box-shadow: 0 18px 52px rgba(16, 16, 16, 0.08);
+    }
+
+    .editor-canvas [data-editor-media]:hover {
+      box-shadow: 0 24px 70px rgba(16, 16, 16, 0.12);
+    }
+
+    .input-soft {
+      border-color: rgba(16, 16, 16, 0.08);
+      background: rgba(255, 255, 255, 0.68);
+    }
+
+    .dark .input-soft {
+      border-color: rgb(39 39 42);
+      background: rgba(9, 9, 11, 0.72);
+    }
+
+    @media (max-width: 760px) {
+      .editor-studio {
+        gap: 1rem;
+      }
+
+      .editor-studio [data-title-input] {
+        font-size: clamp(3rem, 18vw, 4.8rem);
+      }
     }
   </style>
 

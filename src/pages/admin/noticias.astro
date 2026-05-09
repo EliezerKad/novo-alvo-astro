@@ -41,7 +41,7 @@ const active = viewParam === 'midia' ? 'media' : current.active;
       <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div>
           <span class="text-[10px] font-black uppercase tracking-[0.35em] text-red-600" data-list-eyebrow>{current.eyebrow}</span>
-          <h1 class="mt-3 font-serif text-4xl font-black italic tracking-tighter md:text-6xl" data-list-title>{current.title}</h1>
+          <h1 class="admin-display mt-3 text-4xl md:text-6xl" data-list-title>{current.title}</h1>
           <p class="mt-3 max-w-2xl text-sm font-medium leading-6 text-zinc-500 dark:text-zinc-400" data-list-description>{current.description}</p>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -75,7 +75,7 @@ const active = viewParam === 'midia' ? 'media' : current.active;
 
       <div data-empty-state class="hidden p-10 text-center">
         <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-zinc-100 text-2xl dark:bg-zinc-900">+</span>
-        <h2 class="mt-4 font-serif text-3xl font-black italic tracking-tighter">Nenhuma matéria aqui ainda</h2>
+        <h2 class="admin-display mt-4 text-3xl">Nenhuma matéria aqui ainda</h2>
         <p class="mx-auto mt-2 max-w-md text-sm font-medium leading-6 text-zinc-500">Quando uma matéria for salva com este status, ela aparece automaticamente nesta lista.</p>
         <a href="/admin/nova/" class="mt-5 inline-flex rounded-2xl bg-red-600 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-white">Criar matéria</a>
       </div>
@@ -225,7 +225,7 @@ const active = viewParam === 'midia' ? 'media' : current.active;
                     }
                   </div>
                   <div class="min-w-0">
-                    <h2 class="line-clamp-2 font-serif text-2xl font-black italic leading-tight tracking-tighter">${escapeHtml(article.title || 'Matéria sem título')}</h2>
+                    <h2 class="admin-display line-clamp-2 text-2xl leading-tight">${escapeHtml(article.title || 'Matéria sem título')}</h2>
                     <p class="mt-1 line-clamp-2 text-sm font-medium leading-5 text-zinc-500">${escapeHtml(article.summary || 'Sem resumo editorial.')}</p>
                     <p class="mt-2 truncate text-[10px] font-black uppercase tracking-widest text-zinc-400">${escapeHtml(article.slug || '')}</p>
                   </div>

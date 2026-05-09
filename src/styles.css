@@ -4,7 +4,7 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", serif;
-  --color-brand-red: #dc2626;
+  --color-brand-red: #8a1f2d;
   --color-zinc-50: #fafafa;
   --color-zinc-100: #f4f4f5;
   --color-zinc-200: #e4e4e7;
@@ -17,7 +17,9 @@
 
 @layer base {
   body {
-    @apply antialiased bg-zinc-50 text-zinc-900 font-sans selection:bg-red-600 selection:text-white dark:bg-zinc-950 dark:text-zinc-50;
+    @apply antialiased font-sans selection:bg-[#8A1F2D] selection:text-white dark:bg-[#080809] dark:text-zinc-50;
+    background: #f5f3ee;
+    color: #101010;
   }
 
   html {

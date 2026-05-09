@@ -13,11 +13,11 @@ const feeds = [
 ];
 ---
 
-<AdminLayout title="SEO e distribuicao | Admin Novo Alvo" active="seo">
+<AdminLayout title="SEO e distribuição | Admin Novo Alvo" active="seo">
   <section class="space-y-6">
     <header class="rounded-[2rem] bg-white p-6 shadow-sm dark:bg-zinc-900">
       <span class="text-[10px] font-black uppercase tracking-[0.35em] text-red-600">SEO tecnico</span>
-      <h1 class="mt-3 font-serif text-4xl font-black italic tracking-tighter md:text-5xl">SEO e distribuicao</h1>
+      <h1 class="mt-3 admin-display text-4xl md:text-5xl">SEO e distribuição</h1>
       <p class="mt-2 max-w-2xl text-sm font-medium leading-7 text-zinc-500 dark:text-zinc-400">
         Monitor editorial para indexacao, Discover readiness, RSS, sitemap e compartilhamento social.
       </p>
@@ -25,21 +25,21 @@ const feeds = [
 
     <section class="grid grid-cols-1 gap-4 md:grid-cols-3">
       <div class="rounded-[1.5rem] border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-        <strong class="font-serif text-4xl font-black italic text-emerald-600">{entries.length}</strong>
+        <strong class="admin-display text-4xl text-emerald-600">{entries.length}</strong>
         <p class="mt-2 text-[9px] font-black uppercase tracking-widest text-zinc-400">Articles com JSON-LD</p>
       </div>
       <div class="rounded-[1.5rem] border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-        <strong class="font-serif text-4xl font-black italic text-amber-500">{missingOg}</strong>
+        <strong class="admin-display text-4xl text-amber-500">{missingOg}</strong>
         <p class="mt-2 text-[9px] font-black uppercase tracking-widest text-zinc-400">Sem OG proprio</p>
       </div>
       <div class="rounded-[1.5rem] border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-        <strong class="font-serif text-4xl font-black italic text-red-600">{missingAlt}</strong>
+        <strong class="admin-display text-4xl text-[#8A1F2D]">{missingAlt}</strong>
         <p class="mt-2 text-[9px] font-black uppercase tracking-widest text-zinc-400">Sem alt de capa</p>
       </div>
     </section>
 
     <section class="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <h2 class="mb-5 text-xs font-black uppercase tracking-[0.24em]">Arquivos de distribuicao</h2>
+      <h2 class="mb-5 text-xs font-black uppercase tracking-[0.24em]">Arquivos de distribuição</h2>
       <div class="grid grid-cols-1 gap-3 md:grid-cols-4">
         {feeds.map((feed) => (
           <a href={feed.href} class="rounded-2xl border border-zinc-200 p-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">

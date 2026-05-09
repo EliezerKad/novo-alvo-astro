@@ -38,7 +38,7 @@ const {
 const siteName = 'Portal Novo Alvo';
 const fallbackImage = new URL('/og-default.svg', Astro.site ?? Astro.url.origin).href;
 const socialImage = image || fallbackImage;
-const fontStylesheet = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:ital,wght@0,900;1,900&display=swap';
+const fontStylesheet = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@300;700&family=Playfair+Display:ital,wght@0,900;1,900&family=Syncopate:wght@700&display=swap';
 const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'NewsMediaOrganization',
@@ -69,7 +69,7 @@ const breadcrumbSchema = breadcrumbs.length > 0
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" content="#dc2626" />
+    <meta name="theme-color" content="#8A1F2D" />
     <link rel="canonical" href={canonical} />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="alternate" type="application/rss+xml" title="Portal Novo Alvo RSS" href="/rss.xml" />
