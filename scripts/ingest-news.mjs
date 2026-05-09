@@ -119,6 +119,16 @@ const overlapScore = (left, right) => {
   return shared / Math.min(a.size, b.size);
 };
 
+const distinctBySource = (items) => {
+  const seen = new Set();
+  return items.filter((item) => {
+    const key = String(item.source || item.link || item.title).toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
 const clusterItems = (items) => {
   const clusters = [];
   const sorted = [...items].sort((a, b) => a.category.localeCompare(b.category) || a.title.localeCompare(b.title));
@@ -126,7 +136,7 @@ const clusterItems = (items) => {
   for (const item of sorted) {
     const match = clusters.find((cluster) => {
       if (cluster[0]?.category !== item.category) return false;
-      return cluster.some((candidate) => overlapScore(candidate, item) >= 0.55);
+      return cluster.some((candidate) => overlapScore(candidate, item) >= 0.3);
     });
 
     if (match) {
@@ -136,6 +146,30 @@ const clusterItems = (items) => {
     }
   }
 
+  return clusters;
+};
+
+const buildCategoryRadarClusters = (items) => {
+  const byCategory = new Map();
+  for (const item of items) {
+    const bucket = byCategory.get(item.category) || [];
+    bucket.push(item);
+    byCategory.set(item.category, bucket);
+  }
+
+  const clusters = [];
+  for (const [category, categoryItems] of byCategory.entries()) {
+    const distinct = distinctBySource(categoryItems).slice(0, Math.max(MIN_SOURCES, 12));
+    if (distinct.length >= MIN_SOURCES) {
+      clusters.push(
+        distinct.map((item, index) => ({
+          ...item,
+          title: index === 0 ? `Radar ${category}: ${item.title}` : item.title,
+          radarCluster: true,
+        })),
+      );
+    }
+  }
   return clusters;
 };
 
@@ -251,10 +285,16 @@ const main = async () => {
   if (!ADMIN_TOKEN) throw new Error('ADMIN_TOKEN ausente.');
 
   const allItems = (await Promise.all(Object.entries(FEEDS).map(fetchFeed))).flat();
-  const pitches = clusterItems(allItems)
+  const topicClusters = clusterItems(allItems);
+  const topicPitches = topicClusters
     .map(buildPitch)
     .filter((pitch) => pitch.sourceCount >= MIN_SOURCES)
-    .sort((a, b) => b.score - a.score)
+    .sort((a, b) => b.score - a.score);
+  const radarPitches = buildCategoryRadarClusters(allItems)
+    .map(buildPitch)
+    .filter((pitch) => pitch.sourceCount >= MIN_SOURCES && !topicPitches.some((existing) => existing.category === pitch.category))
+    .sort((a, b) => b.score - a.score);
+  const pitches = [...topicPitches, ...radarPitches]
     .slice(0, Number(process.env.MAX_PITCHES || 80));
 
   let saved = 0;
@@ -270,7 +310,9 @@ const main = async () => {
   );
 
   await runHousekeeping();
-  console.log(`Ingestao concluida: ${saved}/${pitches.length} pautas salvas.`);
+  console.log(
+    `Ingestao concluida: ${saved}/${pitches.length} pautas salvas. Itens: ${allItems.length}. Clusters por assunto: ${topicPitches.length}. Radares por categoria: ${radarPitches.length}.`,
+  );
 };
 
 main().catch((error) => {
