@@ -9,9 +9,16 @@ type D1Database = {
   };
 };
 
+export const MODEL = '@cf/meta/llama-3.1-8b-instruct';
+
+type AiBinding = {
+  run: (model: string, input: unknown) => Promise<unknown>;
+};
+
 type Env = {
   EDITORIAL_DB?: D1Database;
   ADMIN_TOKEN?: string;
+  AI?: AiBinding;
 };
 
 type QueueRow = {
@@ -69,6 +76,43 @@ const escapeHtml = (value: unknown) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 
+const plain = (value: unknown, max: number) =>
+  String(value || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, max);
+
+const extractText = (response: unknown) => {
+  if (typeof response === 'string') return response;
+  if (!response || typeof response !== 'object') return '';
+  const record = response as Record<string, unknown>;
+  return String(record.response || record.result || record.text || '');
+};
+
+const parseModelJson = (text: string) => {
+  const cleanText = text.trim().replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim();
+  try {
+    return JSON.parse(cleanText) as Record<string, unknown>;
+  } catch {
+    const match = cleanText.match(/\{[\s\S]*\}/);
+    if (!match) return {};
+    try {
+      return JSON.parse(match[0]) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  }
+};
+
+const safeHtml = (value: unknown) =>
+  String(value || '')
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+    .replace(/\son\w+="[^"]*"/gi, '')
+    .replace(/\son\w+='[^']*'/gi, '')
+    .replace(/<(?!\/?(p|h2|h3|strong|em|ul|ol|li|blockquote)(\s|>|\/))/gi, '&lt;')
+    .trim();
+
 const requireAdmin = (request: Request, env: Env) => {
   if (!env.ADMIN_TOKEN) return json({ error: 'ADMIN_TOKEN nao configurado.' }, { status: 503 });
   const auth = request.headers.get('authorization') || '';
@@ -77,7 +121,78 @@ const requireAdmin = (request: Request, env: Env) => {
   return null;
 };
 
-const buildArticlePayload = (row: QueueRow) => {
+const generateArticleWithAi = async (
+  row: QueueRow,
+  fallback: { title: string; summary: string; bodyHtml: string; seoDescription: string; keywords: string },
+  env: Env,
+) => {
+  if (!env.AI) return fallback;
+
+  const sources = parseArray(row.sources);
+  const sourceLines = sources
+    .slice(0, 8)
+    .map((source) => {
+      if (!source || typeof source !== 'object') return '';
+      const record = source as Record<string, unknown>;
+      return `- ${plain(record.publisher, 80)}: ${plain(record.title, 180)} (${plain(record.url, 400)})`;
+    })
+    .filter(Boolean)
+    .join('\n');
+
+  try {
+    const response = await env.AI.run(MODEL, {
+      messages: [
+        {
+          role: 'system',
+          content:
+            'Você é editor-chefe de um portal brasileiro. Escreva em português do Brasil, com acentos corretos, tom seco, direto e pragmático. Não invente fatos. Responda somente JSON válido.',
+        },
+        {
+          role: 'user',
+          content: `
+Crie uma matéria jornalística original a partir deste cluster de fontes.
+
+Categoria: ${row.category}
+Pauta: ${row.title}
+Resumo da pauta: ${row.summary}
+Palavras-chave: ${row.keywords}
+
+Fontes:
+${sourceLines || 'Fontes não listadas.'}
+
+Regras:
+- Use pirâmide invertida.
+- O primeiro parágrafo deve trazer o dado mais importante.
+- Não cite Google News como fonte editorial.
+- Não use clichês de IA.
+- Não crie links.
+- Produza texto pronto para publicação.
+- bodyHtml deve usar apenas <p>, <h2>, <h3>, <strong>, <em>, <ul>, <li>.
+- Inclua 5 a 8 parágrafos e 2 subtítulos.
+
+Responda exatamente neste formato:
+{"title":"...","summary":"...","seoDescription":"...","keywords":"...","bodyHtml":"..."}
+`,
+        },
+      ],
+      max_tokens: 1400,
+      temperature: 0.35,
+    });
+
+    const result = parseModelJson(extractText(response));
+    return {
+      title: plain(result.title, 220) || fallback.title,
+      summary: plain(result.summary, 700) || fallback.summary,
+      seoDescription: plain(result.seoDescription, 155) || fallback.seoDescription,
+      keywords: plain(result.keywords, 700) || fallback.keywords,
+      bodyHtml: safeHtml(result.bodyHtml) || fallback.bodyHtml,
+    };
+  } catch {
+    return fallback;
+  }
+};
+
+export const buildArticlePayload = async (row: QueueRow, env: Env) => {
   const sources = parseArray(row.sources);
   const tags = parseArray(row.tags).map(String).filter(Boolean);
   const imageCandidates = parseArray(row.image_candidates).map(String).filter(Boolean);
@@ -108,23 +223,35 @@ const buildArticlePayload = (row: QueueRow) => {
     }
   `;
 
+  const aiArticle = await generateArticleWithAi(
+    row,
+    {
+      title,
+      summary,
+      bodyHtml,
+      seoDescription: summary.slice(0, 155),
+      keywords: clean(row.keywords, 700),
+    },
+    env,
+  );
+
   return {
     id: `article:${slug}`,
     slug,
-    title,
-    summary,
-    bodyHtml,
+    title: aiArticle.title,
+    summary: aiArticle.summary,
+    bodyHtml: aiArticle.bodyHtml,
     category: row.category || 'Brasil',
     author: 'Redação Novo Alvo',
     status: 'published',
     coverUrl: imageCandidates[0] || '',
-    coverAlt: title,
-    seoDescription: summary.slice(0, 155),
-    keywords: clean(row.keywords, 700),
+    coverAlt: aiArticle.title,
+    seoDescription: aiArticle.seoDescription,
+    keywords: aiArticle.keywords,
     tags,
     sources: sourceNames,
     media: imageCandidates.map((src) => ({ src, type: 'image' })),
-    readingMinutes: Math.max(1, Math.ceil(bodyHtml.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length / 220)),
+    readingMinutes: Math.max(1, Math.ceil(aiArticle.bodyHtml.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length / 220)),
     publishedAt,
   };
 };
@@ -174,7 +301,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   const origin = new URL(request.url).origin;
 
   for (const item of due.results || []) {
-    const article = buildArticlePayload(item);
+    const article = await buildArticlePayload(item, env);
     try {
       const response = await fetch(`${origin}/api/admin/articles`, {
         method: 'POST',
