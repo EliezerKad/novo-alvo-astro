@@ -4,7 +4,7 @@ import '../styles.css';
 interface Props {
   title: string;
   description?: string;
-  active?: 'dashboard' | 'news' | 'new' | 'drafts' | 'scheduled' | 'published' | 'media' | 'categories' | 'seo' | 'settings' | 'home';
+  active?: 'dashboard' | 'news' | 'new' | 'pitches' | 'drafts' | 'scheduled' | 'published' | 'media' | 'categories' | 'seo' | 'settings' | 'home';
 }
 
 const {
@@ -16,6 +16,7 @@ const {
 const navItems = [
   { href: '/admin/', label: 'Dashboard', id: 'dashboard', icon: 'grid' },
   { href: '/admin/nova/', label: 'Nova matéria', id: 'new', icon: 'pen' },
+  { href: '/admin/pautas/', label: 'Pautas', id: 'pitches', icon: 'spark' },
   { href: '/admin/noticias/?status=rascunho', label: 'Rascunhos', id: 'drafts', icon: 'file' },
   { href: '/admin/noticias/?status=agendada', label: 'Agendadas', id: 'scheduled', icon: 'clock' },
   { href: '/admin/noticias/?status=publicada', label: 'Publicadas', id: 'published', icon: 'check' },
