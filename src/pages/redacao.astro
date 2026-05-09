@@ -47,7 +47,7 @@ const next = Astro.url.searchParams.get('next') || '/admin/';
           <div class="mt-16 max-w-xl">
             <p class="text-[10px] font-black uppercase tracking-[0.34em] text-zinc-400">Acesso editorial</p>
             <h1 class="mt-4 font-['Archivo_Black'] text-5xl leading-[0.9] tracking-[-0.07em] text-[#101010] dark:text-white md:text-7xl">
-              Chave da redação.
+              Acesso reservado.
             </h1>
             <p class="mt-5 max-w-md text-sm font-medium leading-7 text-zinc-500 dark:text-zinc-400">
               Área reservada para criar, revisar, agendar e publicar matérias do Portal Novo Alvo.
@@ -66,20 +66,20 @@ const next = Astro.url.searchParams.get('next') || '/admin/';
               <div>
                 <h2 class="text-sm font-black uppercase tracking-[0.24em]">Entrar</h2>
                 <p class="mt-2 text-xs font-medium leading-5 text-white/52 dark:text-zinc-500">
-                  Use a chave editorial configurada no Cloudflare.
+                  Informe sua credencial editorial para acessar o painel.
                 </p>
               </div>
               <span class="rounded-full bg-emerald-400/15 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-emerald-300 dark:text-emerald-600">Seguro</span>
             </div>
 
             <label class="mt-6 block">
-              <span class="text-[9px] font-black uppercase tracking-[0.22em] text-white/38 dark:text-zinc-500">Chave</span>
+              <span class="text-[9px] font-black uppercase tracking-[0.22em] text-white/38 dark:text-zinc-500">Credencial</span>
               <input
                 data-token-input
                 type="password"
                 autocomplete="current-password"
                 class="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-white/10 px-4 text-sm font-bold text-white outline-none transition placeholder:text-white/30 focus:border-[#f4c8cf]/60 focus:ring-2 focus:ring-[#8A1F2D]/45 dark:border-zinc-200 dark:bg-zinc-100 dark:text-zinc-950"
-                placeholder="Cole sua chave de acesso"
+                placeholder="Digite sua credencial de acesso"
                 required
               />
             </label>
@@ -92,7 +92,7 @@ const next = Astro.url.searchParams.get('next') || '/admin/';
           </div>
 
           <p class="mt-5 text-center text-[10px] font-bold leading-5 text-zinc-400">
-            A chave fica salva apenas neste navegador. Saia do admin para remover a sessão local.
+            A sessão permanece ativa apenas neste navegador. Saia do painel para encerrar o acesso local.
           </p>
         </form>
       </section>
@@ -121,11 +121,11 @@ const next = Astro.url.searchParams.get('next') || '/admin/';
         form?.addEventListener('submit', async (event) => {
           event.preventDefault();
           const token = String(input?.value || '').trim();
-          if (!token) return showMessage('Informe a chave editorial.');
+          if (!token) return showMessage('Informe sua credencial editorial.');
 
           button.disabled = true;
           button.textContent = 'Verificando...';
-          showMessage('Validando chave e abrindo sessão editorial.');
+          showMessage('Validando acesso e abrindo sessão editorial.');
 
           try {
             const response = await fetch('/api/admin/session', {
@@ -135,13 +135,13 @@ const next = Astro.url.searchParams.get('next') || '/admin/';
             });
             const data = await response.json().catch(() => ({}));
             if (!response.ok) {
-              throw new Error(data.error || 'Chave inválida ou CMS indisponível.');
+              throw new Error(data.error || 'Credencial inválida ou serviço indisponível.');
             }
             localStorage.setItem('admin-token', token);
             localStorage.setItem('admin-authenticated-at', new Date().toISOString());
             window.location.href = safeNext();
           } catch (error) {
-            showMessage(error.message || 'Não foi possível validar a chave.', 'error');
+            showMessage(error.message || 'Não foi possível validar o acesso.', 'error');
             button.disabled = false;
             button.textContent = 'Acessar admin';
           }
