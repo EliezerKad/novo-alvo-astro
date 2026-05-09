@@ -12,6 +12,7 @@ export const categoriesList = [
   'Tecnologia',
   'Esportes',
   'Famosos',
+  'Cinema',
 ];
 
 export const categoryLabels: Record<string, string> = {
@@ -23,6 +24,7 @@ export const categoryLabels: Record<string, string> = {
   Tecnologia: 'Tecnologia',
   Esportes: 'Esportes',
   Famosos: 'Famosos',
+  Cinema: 'Cinema',
   Entretenimento: 'Entretenimento',
   Ciencia: 'Ciencia',
   Educacao: 'Educacao',
