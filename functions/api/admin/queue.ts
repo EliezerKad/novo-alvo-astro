@@ -145,32 +145,41 @@ const generateArticleWithAi = async (
     .join('\n');
 
   const system =
-    'Você é editor-chefe de um portal brasileiro. Escreva em português do Brasil, com acentos corretos, tom seco, direto e pragmático. Não invente fatos. Responda somente JSON válido.';
+    'Você é um Analista de Elite e Editor-Chefe do Portal Novo Alvo. Sua missão é transformar clusters de dados brutos em análise jornalística de alta densidade. Escreva em português do Brasil, com acentos corretos. Responda somente JSON válido.';
   const prompt = `
-Crie uma matéria jornalística original a partir deste cluster de fontes.
+Transforme este cluster de dados brutos em uma análise jornalística de alta densidade.
 
-Categoria: ${row.category}
-Pauta: ${row.title}
-Resumo da pauta: ${row.summary}
-Palavras-chave: ${row.keywords}
+DIRETRIZES DE ESTILO INVIOLÁVEIS:
+- Tom brutalista: escreva de forma seca, pragmática e factual. Elimine adjetivos e advérbios desnecessários.
+- Anti-IA: é proibido usar termos como "no vasto cenário", "importante ressaltar", "desvendar", "além disso" ou "em suma".
+- Information Gain: foque no que as fontes trazem de único. Se fontes diferentes repetem o mesmo fato, cite uma vez. Se uma fonte traz dado técnico ou divergente, priorize.
+- Abertura de impacto: o primeiro parágrafo deve conter o dado mais frio, duro e relevante. Sem introduções poéticas.
 
-Fontes:
+REGRAS TÉCNICAS:
+- Analise apenas as fontes fornecidas abaixo.
+- Estrutura: 5 a 8 parágrafos curtos.
+- Use <h2> para dois subtítulos analíticos. Evite subtítulos óbvios como "Conclusão".
+- Não crie links externos.
+- Onde houver placeholder de link interno, mantenha a estrutura.
+- Use as fontes do cluster como base de apuração. O padrão editorial esperado é síntese de 8 fontes distintas.
+- Não cite Google News como fonte editorial.
+- Não cite Reddit como fonte, a menos que Reddit esteja literalmente listado no cluster abaixo.
+- Produza texto pronto para publicação.
+- content_html deve usar apenas <p>, <h2>, <h3>, <strong>, <em>, <ul>, <li>.
+
+DADOS DO CLUSTER:
+[CATEGORIA]: ${row.category}
+[PAUTA]: ${row.title}
+[RESUMO]: ${row.summary}
+[PALAVRAS-CHAVE]: ${row.keywords}
+[FONTES]:
 ${sourceLines || 'Fontes não listadas.'}
 
-Regras:
-- Use as fontes do cluster como base de apuração. O padrão editorial esperado é síntese de 8 fontes distintas.
-- Use pirâmide invertida.
-- O primeiro parágrafo deve trazer o dado mais importante.
-- Não cite Google News como fonte editorial.
-- Não cite Reddit como fonte, a menos que Reddit esteja literalmente listado no cluster acima.
-- Não use clichês de IA.
-- Não crie links.
-- Produza texto pronto para publicação.
-- bodyHtml deve usar apenas <p>, <h2>, <h3>, <strong>, <em>, <ul>, <li>.
-- Inclua 5 a 8 parágrafos e 2 subtítulos.
+OBJETIVO FINAL:
+O leitor deve sentir que está lendo um relatório de inteligência técnica, não uma postagem de blog comum.
 
 Responda exatamente neste formato:
-{"title":"...","summary":"...","seoDescription":"...","keywords":"...","bodyHtml":"..."}
+{"title":"...","slug":"...","meta_description":"...","summary":"...","keywords":"...","content_html":"..."}
 `;
 
   try {
@@ -201,9 +210,9 @@ Responda exatamente neste formato:
     return {
       title: plain(result.title, 220) || fallback.title,
       summary: plain(result.summary, 700) || fallback.summary,
-      seoDescription: plain(result.seoDescription, 155) || fallback.seoDescription,
+      seoDescription: plain(result.meta_description || result.seoDescription, 155) || fallback.seoDescription,
       keywords: plain(result.keywords, 700) || fallback.keywords,
-      bodyHtml: safeHtml(result.bodyHtml) || fallback.bodyHtml,
+      bodyHtml: safeHtml(result.content_html || result.bodyHtml) || fallback.bodyHtml,
     };
   } catch {
     return fallback;
