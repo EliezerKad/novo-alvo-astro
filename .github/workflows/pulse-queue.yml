@@ -1,0 +1,30 @@
+name: Pulse editorial queue
+
+on:
+  schedule:
+    - cron: '*/20 * * * *'
+  workflow_dispatch:
+
+jobs:
+  pulse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --progress=false
+
+      - name: Publish due queued articles
+        run: npm run pulse:queue
+        env:
+          PORTAL_ORIGIN: https://portalnovoalvo.com.br
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          PULSE_LIMIT: 2

@@ -9,6 +9,7 @@
     "preview": "astro preview",
     "deploy:pages": "wrangler pages deploy dist --project-name=novo-alvo-astro",
     "ingest:news": "node scripts/ingest-news.mjs",
+    "pulse:queue": "node scripts/pulse-queue.mjs",
     "astro": "astro"
   },
   "dependencies": {

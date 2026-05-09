@@ -29,8 +29,8 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
         <div class="grid gap-3 md:grid-cols-4">
           <button type="button" data-status-filter="new" class="rounded-3xl bg-zinc-950 px-5 py-4 text-left text-sm font-black text-white dark:bg-white dark:text-zinc-950">Novas</button>
           <button type="button" data-status-filter="reviewed" class="rounded-3xl bg-zinc-50 px-5 py-4 text-left text-sm font-black text-zinc-500 transition hover:text-red-600 dark:bg-zinc-900 dark:text-zinc-400">Revisadas</button>
+          <button type="button" data-status-filter="queued" class="rounded-3xl bg-zinc-50 px-5 py-4 text-left text-sm font-black text-zinc-500 transition hover:text-red-600 dark:bg-zinc-900 dark:text-zinc-400">Fila</button>
           <button type="button" data-status-filter="converted" class="rounded-3xl bg-zinc-50 px-5 py-4 text-left text-sm font-black text-zinc-500 transition hover:text-red-600 dark:bg-zinc-900 dark:text-zinc-400">Convertidas</button>
-          <button type="button" data-status-filter="dismissed" class="rounded-3xl bg-zinc-50 px-5 py-4 text-left text-sm font-black text-zinc-500 transition hover:text-red-600 dark:bg-zinc-900 dark:text-zinc-400">Descartadas</button>
         </div>
         <label>
           <span class="sr-only">Filtrar categoria</span>
@@ -160,7 +160,11 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
                 </div>
                 <div class="flex flex-wrap gap-2 md:justify-end">
                   ${pitch.primary_url ? `<a href="${escapeHtml(pitch.primary_url)}" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:border-red-600 hover:text-red-600 dark:border-zinc-800">Fonte</a>` : ''}
-                  <button type="button" data-pitch-action="reviewed" data-pitch-id="${escapeHtml(pitch.id)}" class="rounded-xl bg-zinc-950 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-red-600 dark:hover:text-white">Revisar</button>
+                  ${
+                    pitch.status === 'queued'
+                      ? `<span class="rounded-xl bg-emerald-50 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">Na fila</span>`
+                      : `<button type="button" data-pitch-action="${pitch.status === 'reviewed' ? 'queued' : 'reviewed'}" data-pitch-id="${escapeHtml(pitch.id)}" class="rounded-xl bg-zinc-950 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-red-600 dark:hover:text-white">${pitch.status === 'reviewed' ? 'Aprovar para Fila' : 'Revisar'}</button>`
+                  }
                   <button type="button" data-pitch-action="dismissed" data-pitch-id="${escapeHtml(pitch.id)}" class="rounded-xl border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:border-red-600 hover:text-red-600 dark:border-zinc-800">Descartar</button>
                 </div>
               </article>
@@ -221,7 +225,7 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
           button.textContent = 'Movendo...';
           button.classList.add('opacity-60');
         }
-        if (statusNode) statusNode.textContent = nextStatus === 'reviewed' ? 'Movendo pauta para Revisadas...' : 'Atualizando pauta...';
+        if (statusNode) statusNode.textContent = nextStatus === 'reviewed' ? 'Movendo pauta para Revisadas...' : nextStatus === 'queued' ? 'Aprovando pauta para a Fila Nexa...' : 'Atualizando pauta...';
 
         try {
           const response = await fetch('/api/admin/pitches', {
@@ -242,7 +246,7 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
           }
           if (!response.ok) throw new Error(data.error || 'Nao foi possivel atualizar a pauta.');
 
-          if (nextStatus === 'reviewed' || nextStatus === 'dismissed' || nextStatus === 'converted') {
+          if (nextStatus === 'reviewed' || nextStatus === 'queued' || nextStatus === 'dismissed' || nextStatus === 'converted') {
             status = nextStatus;
             setActiveStatus();
           }

@@ -31,6 +31,11 @@ type PitchPayload = {
   expiresAt?: string;
 };
 
+type PitchRecord = {
+  id: string;
+  category: string;
+};
+
 const json = (body: unknown, init: ResponseInit = {}) =>
   new Response(JSON.stringify(body), {
     ...init,
@@ -72,7 +77,7 @@ const normalizePitch = (payload: PitchPayload) => {
   const title = clean(payload.title, 240);
   const clusterKey = clean(payload.clusterKey, 180) || slugify(title);
   const now = new Date().toISOString();
-  const status = ['new', 'reviewed', 'dismissed', 'converted'].includes(clean(payload.status, 24))
+  const status = ['new', 'reviewed', 'queued', 'dismissed', 'converted'].includes(clean(payload.status, 24))
     ? clean(payload.status, 24)
     : 'new';
 
@@ -219,16 +224,69 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
   const id = clean(payload.id, 120);
   const status = clean(payload.status, 24);
   if (!id) return json({ error: 'ID ausente.' }, { status: 400 });
-  if (!['new', 'reviewed', 'dismissed', 'converted'].includes(status)) {
+  if (!['new', 'reviewed', 'queued', 'dismissed', 'converted'].includes(status)) {
     return json({ error: 'Status invalido.' }, { status: 400 });
   }
+
+  const existing = await db
+    .prepare('SELECT id, category FROM editorial_pitches WHERE id = ? OR cluster_key = ? LIMIT 1')
+    .bind(id, id)
+    .first<PitchRecord>();
+
+  if (!existing) return json({ error: 'Pauta nao encontrada.' }, { status: 404 });
 
   await db
     .prepare('UPDATE editorial_pitches SET status = ?, updated_at = ? WHERE id = ? OR cluster_key = ?')
     .bind(status, new Date().toISOString(), id, id)
     .run();
 
-  return json({ ok: true });
+  let queue = null;
+  if (status === 'queued') {
+    const queueId = `queue:${existing.id}`;
+    const gapMinutes = 40 + Math.floor(Math.random() * 51);
+    const category = existing.category || 'Brasil';
+    const lastQueued = await db
+      .prepare(
+        `SELECT publish_after FROM editorial_queue
+         WHERE category = ? AND status = 'queued'
+         ORDER BY publish_after DESC
+         LIMIT 1`,
+      )
+      .bind(category)
+      .first<{ publish_after?: string }>();
+    const lastArticle = await db
+      .prepare(
+        `SELECT published_at FROM articles
+         WHERE category = ? AND COALESCE(NULLIF(published_at, ''), '') != ''
+         ORDER BY published_at DESC
+         LIMIT 1`,
+      )
+      .bind(category)
+      .first<{ published_at?: string }>();
+    const baseTime = Math.max(
+      Date.now(),
+      lastQueued?.publish_after ? Date.parse(lastQueued.publish_after) || 0 : 0,
+      lastArticle?.published_at ? Date.parse(lastArticle.published_at) || 0 : 0,
+    );
+    const publishAfter = new Date(baseTime + gapMinutes * 60 * 1000).toISOString();
+
+    await db
+      .prepare(
+        `INSERT INTO editorial_queue (id, pitch_id, category, status, publish_after, updated_at)
+         VALUES (?, ?, ?, 'queued', ?, ?)
+         ON CONFLICT(pitch_id) DO UPDATE SET
+           category = excluded.category,
+           status = 'queued',
+           publish_after = excluded.publish_after,
+           error = '',
+           updated_at = excluded.updated_at`,
+      )
+      .bind(queueId, existing.id, category, publishAfter, new Date().toISOString())
+      .run();
+    queue = { id: queueId, publishAfter, gapMinutes };
+  }
+
+  return json({ ok: true, queue });
 };
 
 export const onRequestDelete = async ({ request, env }: { request: Request; env: Env }) => {
