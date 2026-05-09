@@ -26,7 +26,7 @@ const FEEDS = {
 
 const PORTAL_ORIGIN = process.env.PORTAL_ORIGIN || 'https://portalnovoalvo.com.br';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
-const MAX_ITEMS_PER_FEED = Number(process.env.MAX_ITEMS_PER_FEED || 12);
+const MAX_ITEMS_PER_FEED = Number(process.env.MAX_ITEMS_PER_FEED || 40);
 const MIN_SOURCES = Number(process.env.MIN_SOURCES || 8);
 const HOUSEKEEPING_DAYS = Number(process.env.HOUSEKEEPING_DAYS || 30);
 
