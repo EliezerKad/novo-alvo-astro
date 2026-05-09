@@ -27,8 +27,26 @@ const FEEDS = {
 const PORTAL_ORIGIN = process.env.PORTAL_ORIGIN || 'https://portalnovoalvo.com.br';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
 const MAX_ITEMS_PER_FEED = Number(process.env.MAX_ITEMS_PER_FEED || 12);
-const MIN_SOURCES = Number(process.env.MIN_SOURCES || 3);
+const MIN_SOURCES = Number(process.env.MIN_SOURCES || 8);
 const HOUSEKEEPING_DAYS = Number(process.env.HOUSEKEEPING_DAYS || 30);
+
+const FALLBACK_IMAGE_TERMS = {
+  Brasil: 'brasil,news,city',
+  Mundo: 'world,news,geopolitics',
+  Economia: 'economy,business,finance',
+  Tecnologia: 'technology,artificial-intelligence,devices',
+  Entretenimento: 'entertainment,culture,event',
+  Esportes: 'sports,stadium,football',
+  Ciencia: 'science,laboratory,research',
+  Saude: 'health,hospital,medicine',
+  Famosos: 'celebrity,red-carpet,entertainment',
+  Futebol: 'football,stadium,soccer',
+  Games: 'gaming,console,technology',
+  Lifestyle: 'lifestyle,people,city',
+  Educacao: 'education,students,school',
+  Moda: 'fashion,style,runway',
+  Cinema: 'cinema,movie,theater',
+};
 
 const decodeEntities = (value) =>
   String(value || '')
@@ -47,6 +65,12 @@ const textBetween = (xml, tag) => {
 
 const attrBetween = (xml, tag, attr) => {
   const match = String(xml).match(new RegExp(`<${tag}[^>]*\\s${attr}="([^"]+)"[^>]*>`, 'i'));
+  return decodeEntities(match?.[1] || '');
+};
+
+const imageFromDescription = (xml) => {
+  const description = textBetween(xml, 'description');
+  const match = description.match(/<img[^>]+src=["']([^"']+)["']/i);
   return decodeEntities(match?.[1] || '');
 };
 
@@ -74,6 +98,12 @@ const extractKeywords = (title, category) => {
     .split(/[^a-z0-9]+/)
     .filter((word) => word.length > 3 && !blocked.has(word));
   return [...new Set(words)].slice(0, 10);
+};
+
+const fallbackImageFor = (category, keywords) => {
+  const terms = FALLBACK_IMAGE_TERMS[category] || `${category},news`;
+  const search = encodeURIComponent([terms, ...keywords.slice(0, 2)].filter(Boolean).join(','));
+  return `https://source.unsplash.com/1600x900/?${search}`;
 };
 
 const keywordSet = (item) => new Set(extractKeywords(item.title, item.category).slice(0, 8));
@@ -121,7 +151,8 @@ const parseRssItems = (xml, category) => {
     const imageUrl =
       attrBetween(itemXml, 'media:content', 'url') ||
       attrBetween(itemXml, 'media:thumbnail', 'url') ||
-      attrBetween(itemXml, 'enclosure', 'url');
+      attrBetween(itemXml, 'enclosure', 'url') ||
+      imageFromDescription(itemXml);
 
     return {
       title,
@@ -152,16 +183,26 @@ const fetchFeed = async ([category, url]) => {
 
 const buildPitch = (items) => {
   const first = items[0];
-  const sources = items.map((item) => ({
-    publisher: item.source,
-    title: item.title,
-    url: item.link,
-    publishedAt: item.publishedAt,
-  }));
+  const seenPublishers = new Set();
+  const sources = items
+    .map((item) => ({
+      publisher: item.source,
+      title: item.title,
+      url: item.link,
+      publishedAt: item.publishedAt,
+    }))
+    .filter((source) => {
+      const key = String(source.publisher || source.url || source.title).toLowerCase();
+      if (!key || seenPublishers.has(key)) return false;
+      seenPublishers.add(key);
+      return true;
+    });
   const uniquePublishers = [...new Set(sources.map((source) => source.publisher).filter(Boolean))];
   const keywords = extractKeywords(first.title, first.category);
   const sourceCount = uniquePublishers.length || sources.length;
   const sourceQuality = Math.min(8, sourceCount);
+  const rssImages = items.map((item) => item.imageUrl).filter(Boolean);
+  const imageCandidates = [...new Set([...rssImages, fallbackImageFor(first.category, keywords)])].slice(0, 6);
 
   return {
     clusterKey: `${slugify(first.category)}:${slugify(first.title)}`,
@@ -175,7 +216,7 @@ const buildPitch = (items) => {
     tags: keywords,
     keywords: keywords.join(', '),
     internalLinks: [],
-    imageCandidates: items.map((item) => item.imageUrl).filter(Boolean).slice(0, 6),
+    imageCandidates,
     score: Math.min(1000, sourceQuality * 110 + keywords.length * 5 + Math.max(0, sourceCount - 8) * 12),
     expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
   };

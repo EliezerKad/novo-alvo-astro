@@ -158,9 +158,11 @@ Fontes:
 ${sourceLines || 'Fontes não listadas.'}
 
 Regras:
+- Use as fontes do cluster como base de apuração. O padrão editorial esperado é síntese de 8 fontes distintas.
 - Use pirâmide invertida.
 - O primeiro parágrafo deve trazer o dado mais importante.
 - Não cite Google News como fonte editorial.
+- Não cite Reddit como fonte, a menos que Reddit esteja literalmente listado no cluster acima.
 - Não use clichês de IA.
 - Não crie links.
 - Produza texto pronto para publicação.

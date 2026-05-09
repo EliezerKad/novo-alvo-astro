@@ -112,36 +112,38 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
   const status = clean(url.searchParams.get('status'), 24);
   const category = clean(url.searchParams.get('category'), 80);
   const limit = Math.max(1, Math.min(100, Number(url.searchParams.get('limit') || 50)));
+  const minSources = Math.max(1, Math.min(20, Number(url.searchParams.get('minSources') || 8)));
 
   let result;
   if (status && category) {
     result = await db
       .prepare(
         `SELECT * FROM editorial_pitches
-         WHERE status = ? AND category = ?
+         WHERE status = ? AND category = ? AND source_count >= ?
          ORDER BY score DESC, updated_at DESC
          LIMIT ?`,
       )
-      .bind(status, category, limit)
+      .bind(status, category, minSources, limit)
       .all();
   } else if (status) {
     result = await db
       .prepare(
         `SELECT * FROM editorial_pitches
-         WHERE status = ?
+         WHERE status = ? AND source_count >= ?
          ORDER BY score DESC, updated_at DESC
          LIMIT ?`,
       )
-      .bind(status, limit)
+      .bind(status, minSources, limit)
       .all();
   } else {
     result = await db
       .prepare(
         `SELECT * FROM editorial_pitches
+         WHERE source_count >= ?
          ORDER BY score DESC, updated_at DESC
          LIMIT ?`,
       )
-      .bind(limit)
+      .bind(minSources, limit)
       .all();
   }
 
