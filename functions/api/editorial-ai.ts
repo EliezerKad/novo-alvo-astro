@@ -1,4 +1,6 @@
-const MODEL = '@cf/meta/llama-3.1-8b-instruct';
+import { DEFAULT_GEMINI_MODEL, runGeminiJson } from '../lib/gemini';
+
+const WORKERS_AI_MODEL = '@cf/meta/llama-3.1-8b-instruct';
 
 type AiBinding = {
   run: (model: string, input: unknown) => Promise<unknown>;
@@ -54,12 +56,12 @@ const extractText = (response: unknown) => {
 const parseModelJson = (text: string) => {
   const clean = text.trim().replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim();
   try {
-    return JSON.parse(clean);
+    return JSON.parse(clean) as Record<string, unknown>;
   } catch {
     const match = clean.match(/\{[\s\S]*\}/);
     if (!match) return { text: clean };
     try {
-      return JSON.parse(match[0]);
+      return JSON.parse(match[0]) as Record<string, unknown>;
     } catch {
       return { text: clean };
     }
@@ -156,7 +158,7 @@ export const onRequestPost = async ({
   env,
 }: {
   request: Request;
-  env: { AI?: AiBinding; ADMIN_TOKEN?: string };
+  env: { AI?: AiBinding; ADMIN_TOKEN?: string; GEMINI_API_KEY?: string; GEMINI_MODEL?: string };
 }) => {
   if (!env.ADMIN_TOKEN) {
     return json({ error: 'ADMIN_TOKEN nao configurado.' }, { status: 503 });
@@ -166,11 +168,11 @@ export const onRequestPost = async ({
     return json({ error: 'Token editorial invalido.' }, { status: 401 });
   }
 
-  if (!env.AI) {
+  if (!env.GEMINI_API_KEY && !env.AI) {
     return json(
       {
         error:
-          'Binding AI nao configurado. Adicione Workers AI com o nome AI nas configuracoes do Cloudflare Pages e faca um novo deploy.',
+          'IA editorial nao configurada. Adicione GEMINI_API_KEY nos segredos do Cloudflare Pages ou mantenha o binding Workers AI.',
       },
       { status: 503 },
     );
@@ -196,25 +198,41 @@ export const onRequestPost = async ({
 
   if (!payload.action) return json({ error: 'Acao editorial ausente.' }, { status: 400 });
 
-  const response = await env.AI.run(MODEL, {
-    messages: [
-      {
-        role: 'system',
-        content:
-          'Você é um editor-chefe de um portal de notícias brasileiro. Escreva sempre em português do Brasil, com acentos, cedilha e pontuação corretos. Responda somente JSON válido.',
-      },
-      { role: 'user', content: buildPrompt(payload) },
-    ],
-    max_tokens: 650,
-    temperature: 0.45,
-  });
+  let model = env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
+  let rawResult: Record<string, unknown>;
 
-  const text = extractText(response);
-  const result = normalizeResult(payload.action, parseModelJson(text));
+  if (env.GEMINI_API_KEY) {
+    const gemini = await runGeminiJson({
+      apiKey: env.GEMINI_API_KEY,
+      model,
+      system:
+        'Você é um editor-chefe de um portal de notícias brasileiro. Escreva sempre em português do Brasil, com acentos, cedilha e pontuação corretos. Responda somente JSON válido.',
+      prompt: buildPrompt(payload),
+      maxOutputTokens: 800,
+      temperature: 0.45,
+    });
+    model = gemini.model;
+    rawResult = gemini.result;
+  } else {
+    const response = await env.AI!.run(WORKERS_AI_MODEL, {
+      messages: [
+        {
+          role: 'system',
+          content:
+            'Você é um editor-chefe de um portal de notícias brasileiro. Escreva sempre em português do Brasil, com acentos, cedilha e pontuação corretos. Responda somente JSON válido.',
+        },
+        { role: 'user', content: buildPrompt(payload) },
+      ],
+      max_tokens: 650,
+      temperature: 0.45,
+    });
+    model = WORKERS_AI_MODEL;
+    rawResult = parseModelJson(extractText(response));
+  }
 
   return json({
     action: payload.action,
-    model: MODEL,
-    result,
+    model,
+    result: normalizeResult(payload.action, rawResult),
   });
 };

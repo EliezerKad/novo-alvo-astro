@@ -19,6 +19,8 @@ type Env = {
   EDITORIAL_DB?: D1Database;
   ADMIN_TOKEN?: string;
   AI?: AiBinding;
+  GEMINI_API_KEY?: string;
+  GEMINI_MODEL?: string;
 };
 
 type PitchRow = {
@@ -98,8 +100,8 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
 
   return json({
     ok: true,
-    model: env.AI ? MODEL : 'fallback-editorial-template',
-    aiEnabled: Boolean(env.AI),
+    model: env.GEMINI_API_KEY ? env.GEMINI_MODEL || MODEL : env.AI ? 'workers-ai-fallback' : 'fallback-editorial-template',
+    aiEnabled: Boolean(env.GEMINI_API_KEY || env.AI),
     article,
   });
 };

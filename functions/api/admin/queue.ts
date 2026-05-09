@@ -1,3 +1,5 @@
+import { DEFAULT_GEMINI_MODEL, runGeminiJson } from '../../lib/gemini';
+
 type D1Database = {
   prepare: (query: string) => {
     bind: (...values: unknown[]) => {
@@ -9,7 +11,8 @@ type D1Database = {
   };
 };
 
-export const MODEL = '@cf/meta/llama-3.1-8b-instruct';
+export const MODEL = DEFAULT_GEMINI_MODEL;
+const WORKERS_AI_MODEL = '@cf/meta/llama-3.1-8b-instruct';
 
 type AiBinding = {
   run: (model: string, input: unknown) => Promise<unknown>;
@@ -19,6 +22,8 @@ type Env = {
   EDITORIAL_DB?: D1Database;
   ADMIN_TOKEN?: string;
   AI?: AiBinding;
+  GEMINI_API_KEY?: string;
+  GEMINI_MODEL?: string;
 };
 
 type QueueRow = {
@@ -126,7 +131,7 @@ const generateArticleWithAi = async (
   fallback: { title: string; summary: string; bodyHtml: string; seoDescription: string; keywords: string },
   env: Env,
 ) => {
-  if (!env.AI) return fallback;
+  if (!env.GEMINI_API_KEY && !env.AI) return fallback;
 
   const sources = parseArray(row.sources);
   const sourceLines = sources
@@ -139,17 +144,9 @@ const generateArticleWithAi = async (
     .filter(Boolean)
     .join('\n');
 
-  try {
-    const response = await env.AI.run(MODEL, {
-      messages: [
-        {
-          role: 'system',
-          content:
-            'Você é editor-chefe de um portal brasileiro. Escreva em português do Brasil, com acentos corretos, tom seco, direto e pragmático. Não invente fatos. Responda somente JSON válido.',
-        },
-        {
-          role: 'user',
-          content: `
+  const system =
+    'Você é editor-chefe de um portal brasileiro. Escreva em português do Brasil, com acentos corretos, tom seco, direto e pragmático. Não invente fatos. Responda somente JSON válido.';
+  const prompt = `
 Crie uma matéria jornalística original a partir deste cluster de fontes.
 
 Categoria: ${row.category}
@@ -172,14 +169,33 @@ Regras:
 
 Responda exatamente neste formato:
 {"title":"...","summary":"...","seoDescription":"...","keywords":"...","bodyHtml":"..."}
-`,
-        },
-      ],
-      max_tokens: 1400,
-      temperature: 0.35,
-    });
+`;
 
-    const result = parseModelJson(extractText(response));
+  try {
+    const result = env.GEMINI_API_KEY
+      ? (
+          await runGeminiJson({
+            apiKey: env.GEMINI_API_KEY,
+            model: env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
+            system,
+            prompt,
+            maxOutputTokens: 1600,
+            temperature: 0.35,
+          })
+        ).result
+      : parseModelJson(
+          extractText(
+            await env.AI!.run(WORKERS_AI_MODEL, {
+              messages: [
+                { role: 'system', content: system },
+                { role: 'user', content: prompt },
+              ],
+              max_tokens: 1400,
+              temperature: 0.35,
+            }),
+          ),
+        );
+
     return {
       title: plain(result.title, 220) || fallback.title,
       summary: plain(result.summary, 700) || fallback.summary,
@@ -222,7 +238,6 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
         : ''
     }
   `;
-
   const aiArticle = await generateArticleWithAi(
     row,
     {
