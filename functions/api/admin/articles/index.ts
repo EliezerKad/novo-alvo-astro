@@ -151,6 +151,15 @@ const dataImageToUpload = (value: string) => {
   };
 };
 
+const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let index = 0; index < bytes.length; index += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(index, index + 0x8000));
+  }
+  return btoa(binary);
+};
+
 const isRemoteImageUrl = (value: string) => /^https?:\/\//i.test(value) && !/\/media\/news\//i.test(value);
 
 const imageExtensionFromType = (contentType: string) => {
@@ -198,6 +207,41 @@ const uploadRemoteImageToR2 = async (env: Env, url: string, keyBase: string) => 
     return {
       key,
       publicPath: `/media/${key}`,
+    };
+  } catch {
+    return null;
+  }
+};
+
+const remoteImageToUpload = async (value: string) => {
+  const url = clean(value, 2000);
+  if (!isRemoteImageUrl(url)) return null;
+  if (/^https:\/\/portalnovoalvo\.com\.br\/uploads\//i.test(url)) return null;
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        accept: 'image/avif,image/webp,image/png,image/jpeg,image/*',
+        'user-agent': 'PortalNovoAlvoMediaIngest/1.0',
+      },
+    });
+
+    if (!response.ok) return null;
+
+    const mime = (response.headers.get('content-type') || '').split(';')[0].toLowerCase();
+    if (!/^image\/(jpeg|jpg|png|webp|avif)$/.test(mime)) return null;
+
+    const contentLength = Number(response.headers.get('content-length') || 0);
+    if (contentLength > 8_000_000) return null;
+
+    const buffer = await response.arrayBuffer();
+    if (!buffer.byteLength || buffer.byteLength > 8_000_000) return null;
+
+    return {
+      mime,
+      extension: imageExtensionFromType(mime),
+      content: arrayBufferToBase64(buffer),
+      source: url,
     };
   } catch {
     return null;
@@ -345,6 +389,21 @@ const publishMarkdownToGitHub = async (
     });
     articleForMarkdown.coverUrl = `/uploads/news/${article.slug}-cover.${coverUpload.extension}`;
     uploadedAssets.push(assetPath);
+  } else {
+    const remoteCoverUpload = await remoteImageToUpload(articleForMarkdown.coverUrl);
+    if (remoteCoverUpload) {
+      const assetPath = `public/uploads/news/${article.slug}-cover.${remoteCoverUpload.extension}`;
+      await putGitHubFile({
+        repository,
+        branch,
+        path: assetPath,
+        content: remoteCoverUpload.content,
+        message: `mirror article cover: ${article.title}`,
+        headers,
+      });
+      articleForMarkdown.coverUrl = `/uploads/news/${article.slug}-cover.${remoteCoverUpload.extension}`;
+      uploadedAssets.push(assetPath);
+    }
   }
 
   let inlineIndex = 0;
