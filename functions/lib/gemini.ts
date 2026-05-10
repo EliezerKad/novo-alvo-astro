@@ -1,4 +1,4 @@
-export const DEFAULT_GEMINI_MODEL = 'gemini-1.5-flash';
+export const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
 
 type GeminiPart = {
   text?: string;
@@ -52,7 +52,7 @@ export async function runGeminiJson({
   if (!key) throw new Error('GEMINI_API_KEY nao configurada.');
 
   const preferredModel = String(model || DEFAULT_GEMINI_MODEL).trim();
-  const models = [...new Set([preferredModel, 'gemini-1.5-flash-latest'])];
+  const models = [...new Set([preferredModel, DEFAULT_GEMINI_MODEL, 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-flash-latest'])];
 
   let lastError = '';
   for (const modelName of models) {
