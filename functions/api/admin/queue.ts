@@ -163,6 +163,17 @@ const generateArticleWithAi = async (
   const score = Number(row.score || 0);
   const sourceCount = Number(row.source_count || sources.length || 0);
   const premiumDraft = score > 800;
+  const categoryPersona = ['Esportes', 'Entretenimento', 'Famosos'].includes(clean(row.category, 80))
+    ? `
+PERSONA DE CATEGORIA:
+- Para ${row.category}, mantenha o Brutalismo, mas escreva como um analista de Substack/Twitter assistindo ao evento em tempo real.
+- Linguagem direta, veloz e com punch. Menos palavras abstratas, mais impacto.
+- Foque no sentimento técnico: pressão, ruptura, domínio, queda, virada, desgaste, controle, palco, fatura, ruído, pancada, resposta.
+- Evite frases acadêmicas como "obteve êxito", "apresentou desempenho satisfatório" ou "configura um movimento relevante".
+- Prefira formulações vivas e factuais: "liquidou a fatura", "travou o jogo", "dominou a janela", "perdeu tração", "virou ativo de atenção".
+- O público é Gen Z e Millennial: verdade nua e crua, com velocidade e pegada, sem meme barato e sem exagero vazio.
+`
+    : '';
   const sourceLines = sources
     .slice(0, 8)
     .map((source) => {
@@ -191,6 +202,7 @@ ARQUITETURA DO CONTEÚDO:
 - Encerramento: termine com uma projeção ou fechamento seco. Nunca termine com chamada de serviço como "Aproveite e assista".
 - Soberania do dado: use a informação das fontes para construir afirmação técnica própria.
 - Information Gain: cada parágrafo precisa trazer um dado novo.
+${categoryPersona}
 
 REGRAS TÉCNICAS:
 - Analise apenas as fontes fornecidas abaixo como material invisível de apuração.
