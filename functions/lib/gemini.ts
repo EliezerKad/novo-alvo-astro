@@ -1,5 +1,11 @@
 export const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
 
+const normalizeGeminiModel = (model: string) => {
+  const clean = model.trim();
+  if (clean === 'gemini-1.5-flash-latest') return 'gemini-1.5-flash';
+  return clean;
+};
+
 type GeminiPart = {
   text?: string;
 };
@@ -51,8 +57,8 @@ export async function runGeminiJson({
   const key = String(apiKey || '').trim();
   if (!key) throw new Error('GEMINI_API_KEY nao configurada.');
 
-  const preferredModel = String(model || DEFAULT_GEMINI_MODEL).trim();
-  const models = [...new Set([preferredModel, DEFAULT_GEMINI_MODEL, 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-flash-latest'])];
+  const preferredModel = normalizeGeminiModel(String(model || DEFAULT_GEMINI_MODEL));
+  const models = [...new Set([preferredModel, DEFAULT_GEMINI_MODEL, 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest'])];
 
   let lastError = '';
   for (const modelName of models) {

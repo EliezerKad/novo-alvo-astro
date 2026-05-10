@@ -109,7 +109,7 @@ const isCategoryView = !!category && category !== 'Início';
                           <a href={`/noticia/${article.slug}`} class="group -mx-2 grid grid-cols-[58px_1fr] gap-3 rounded-2xl border-b border-black/10 px-2 py-3.5 transition-all duration-300 last:border-b-0 hover:-translate-y-0.5 hover:bg-[#f5f3ee] hover:shadow-[0_16px_38px_rgba(16,16,16,0.07)] dark:border-zinc-800 dark:hover:bg-zinc-800/60 md:grid-cols-[64px_1fr] md:py-4">
                             <div class="h-14 w-[58px] overflow-hidden rounded-xl bg-[#ebe8df] shadow-sm transition-all duration-300 group-hover:shadow-md dark:bg-zinc-800 md:w-16 md:rounded-2xl">
                               {article.imageUrl ? (
-                                <img src={article.imageUrl} alt={article.title} class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" />
+                                <img src={article.imageUrl} alt={article.title} class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
                               ) : (
                                 <div class="grid h-full place-items-center text-zinc-300">
                                   <Icon name="image" class="h-5 w-5 opacity-30" />
@@ -150,7 +150,7 @@ const isCategoryView = !!category && category !== 'Início';
                   <div class="grid grid-cols-1 gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:gap-7">
                     <a href={`/noticia/${nowLead.slug}`} class="group relative flex min-h-[340px] items-end overflow-hidden rounded-[1.55rem] bg-zinc-200 p-5 text-white shadow-[0_24px_70px_rgba(16,16,16,0.10)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_32px_88px_rgba(16,16,16,0.16)] dark:bg-zinc-800 md:min-h-[420px] md:rounded-[2.125rem] md:p-8">
                       {nowLead.imageUrl && (
-                        <img src={nowLead.imageUrl} alt={nowLead.title} class="absolute inset-0 h-full w-full object-cover transition-transform duration-[2s] group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" />
+                        <img src={nowLead.imageUrl} alt={nowLead.title} class="absolute inset-0 h-full w-full object-cover transition-transform duration-[2s] group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
                       )}
                       <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/80"></div>
                       <div class="relative z-10">
@@ -166,7 +166,7 @@ const isCategoryView = !!category && category !== 'Início';
                         <a href={`/noticia/${article.slug}`} class="group grid grid-cols-[84px_1fr] items-center gap-3 border-b border-black/10 p-3.5 transition-all duration-300 last:border-b-0 hover:bg-[#f5f3ee] hover:shadow-[inset_4px_0_0_#8A1F2D] dark:border-zinc-800 dark:hover:bg-zinc-800/60 sm:grid-cols-[112px_1fr] md:grid-cols-[128px_1fr] md:gap-5 md:p-5">
                           <div class="h-[68px] w-[84px] overflow-hidden rounded-[1rem] bg-[#ebe8df] shadow-sm transition-all duration-300 group-hover:shadow-md sm:h-[78px] sm:w-[112px] md:h-[88px] md:w-32 md:rounded-[1.25rem]">
                             {article.imageUrl ? (
-                              <img src={article.imageUrl} alt={article.title} class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" />
+                              <img src={article.imageUrl} alt={article.title} class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
                             ) : (
                               <div class="grid h-full place-items-center text-zinc-300">
                                 <Icon name="image" class="h-5 w-5 opacity-30" />
@@ -308,7 +308,7 @@ const isCategoryView = !!category && category !== 'Início';
                             return `
                               <a href="${url}" class="group -mx-2 grid grid-cols-[64px_1fr] gap-3 rounded-2xl border-b border-black/10 px-2 py-4 transition-all duration-300 last:border-b-0 hover:-translate-y-0.5 hover:bg-[#f5f3ee] hover:shadow-[0_16px_38px_rgba(16,16,16,0.07)] dark:border-zinc-800 dark:hover:bg-zinc-800/60">
                                 <div class="h-14 w-16 overflow-hidden rounded-2xl bg-[#ebe8df] shadow-sm transition-all duration-300 group-hover:shadow-md dark:bg-zinc-800">
-                                  ${article.cover_url ? `<img src="${escapeHtml(article.cover_url)}" alt="${escapeHtml(article.cover_alt || article.title)}" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" />` : ''}
+                                  ${article.cover_url ? `<img src="${escapeHtml(article.cover_url)}" alt="${escapeHtml(article.cover_alt || article.title)}" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />` : ''}
                                 </div>
                                 <div>
                                   <h3 class="text-[15px] font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50">${escapeHtml(article.title)}</h3>

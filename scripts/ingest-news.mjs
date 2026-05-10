@@ -31,22 +31,22 @@ const MIN_SOURCES = Number(process.env.MIN_SOURCES || 8);
 const RADAR_BATCHES_PER_CATEGORY = Number(process.env.RADAR_BATCHES_PER_CATEGORY || 3);
 const HOUSEKEEPING_DAYS = Number(process.env.HOUSEKEEPING_DAYS || 30);
 
-const FALLBACK_IMAGE_TERMS = {
-  Brasil: 'brasil,news,city',
-  Mundo: 'world,news,geopolitics',
-  Economia: 'economy,business,finance',
-  Tecnologia: 'technology,artificial-intelligence,devices',
-  Entretenimento: 'entertainment,culture,event',
-  Esportes: 'sports,stadium,football',
-  Ciencia: 'science,laboratory,research',
-  Saude: 'health,hospital,medicine',
-  Famosos: 'celebrity,red-carpet,entertainment',
-  Futebol: 'football,stadium,soccer',
-  Games: 'gaming,console,technology',
-  Lifestyle: 'lifestyle,people,city',
-  Educacao: 'education,students,school',
-  Moda: 'fashion,style,runway',
-  Cinema: 'cinema,movie,theater',
+const CATEGORY_IMAGES = {
+  Brasil: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=1600&q=80',
+  Mundo: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80',
+  Economia: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80',
+  Tecnologia: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80',
+  Entretenimento: 'https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?auto=format&fit=crop&w=1600&q=80',
+  Esportes: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1600&q=80',
+  Ciencia: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=1600&q=80',
+  Saude: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1600&q=80',
+  Famosos: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1600&q=80',
+  Futebol: 'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?auto=format&fit=crop&w=1600&q=80',
+  Games: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1600&q=80',
+  Lifestyle: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80',
+  Educacao: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1600&q=80',
+  Moda: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1600&q=80',
+  Cinema: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80',
 };
 
 const decodeEntities = (value) =>
@@ -101,11 +101,9 @@ const extractKeywords = (title, category) => {
   return [...new Set(words)].slice(0, 10);
 };
 
-const fallbackImageFor = (category, keywords) => {
-  const terms = FALLBACK_IMAGE_TERMS[category] || `${category},news`;
-  const search = encodeURIComponent([terms, ...keywords.slice(0, 2)].filter(Boolean).join(','));
-  return `https://source.unsplash.com/1600x900/?${search}`;
-};
+const isUsableImage = (value) => /^https:\/\//i.test(String(value || '')) && !/source\.unsplash\.com/i.test(String(value || '')) && !/\.(svg|gif)(\?|$)/i.test(String(value || ''));
+
+const fallbackImageFor = (category) => CATEGORY_IMAGES[category] || CATEGORY_IMAGES.Brasil;
 
 const keywordSet = (item) => new Set(extractKeywords(item.title, item.category).slice(0, 8));
 
@@ -242,14 +240,17 @@ const buildPitch = (items) => {
   const sourceCount = uniquePublishers.length || sources.length;
   const sourceQuality = Math.min(8, sourceCount);
   const rssImages = items.map((item) => item.imageUrl).filter(Boolean);
-  const imageCandidates = [...new Set([...rssImages, fallbackImageFor(first.category, keywords)])].slice(0, 6);
+  const imageCandidates = [...new Set([...rssImages.filter(isUsableImage), fallbackImageFor(first.category)])].slice(0, 6);
 
   const isRadar = items.some((item) => item.radarCluster);
+  const newestTime = Math.max(...items.map((item) => Date.parse(item.publishedAt) || 0), Date.now());
+  const newest = new Date(newestTime);
+  const sixHourBucket = `${newest.getUTCFullYear()}${String(newest.getUTCMonth() + 1).padStart(2, '0')}${String(newest.getUTCDate()).padStart(2, '0')}-${Math.floor(newest.getUTCHours() / 6)}`;
   const signature = isRadar
-    ? items
+    ? [sixHourBucket, ...items
         .slice(0, 4)
         .map((item) => slugify(item.title).slice(0, 42))
-        .join('-')
+      ].join('-')
     : slugify(first.title);
 
   return {

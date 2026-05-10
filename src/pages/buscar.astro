@@ -186,7 +186,7 @@ const canonical = new URL('/buscar', Astro.site ?? Astro.url.origin).href;
                 <a href="/noticia/${encodeURIComponent(article.slug)}" class="group space-y-6">
                   <div class="aspect-[16/10] rounded-[2rem] overflow-hidden bg-zinc-100 dark:bg-zinc-800 relative shadow-md group-hover:shadow-xl transition-all">
                     ${article.imageUrl ? `
-                      <img src="${escapeHtml(article.imageUrl)}" class="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105" alt="${escapeHtml(article.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+                      <img src="${escapeHtml(article.imageUrl)}" class="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105" alt="${escapeHtml(article.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
                     ` : '<div class="w-full h-full bg-zinc-100 dark:bg-zinc-800"></div>'}
                   </div>
                   <div class="space-y-3">

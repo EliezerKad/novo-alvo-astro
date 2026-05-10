@@ -71,6 +71,7 @@ const carouselArticles = articles.length > 1 ? [...articles, ...articles] : arti
                     loading="lazy"
                     decoding="async"
                     sizes="(max-width: 640px) 78vw, 300px"
+                    onerror="this.onerror=null;this.src='/og-default.svg';"
                   />
                 ) : (
                   <div class="w-full h-full flex items-center justify-center text-zinc-300 dark:text-zinc-700">

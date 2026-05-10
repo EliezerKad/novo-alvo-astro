@@ -22,6 +22,7 @@ const href = article.slug === '#' ? '#' : `/noticia/${article.slug}`;
           alt={article.title}
           class="absolute inset-0 w-full h-full object-cover transition-transform duration-[3s] ease-out group-hover:scale-105"
           referrerpolicy="no-referrer"
+          onerror="this.onerror=null;this.src='/og-default.svg';"
         />
         <div class="absolute inset-0 flex flex-col justify-end bg-[linear-gradient(180deg,rgba(9,9,11,0.02)_0%,rgba(9,9,11,0.16)_28%,rgba(9,9,11,0.90)_100%),linear-gradient(90deg,rgba(9,9,11,0.58),rgba(9,9,11,0.18)_72%,transparent)] p-5 md:p-10 lg:p-12">
           <div class="mb-4 flex flex-wrap gap-2 md:mb-6 md:gap-3">
@@ -67,6 +68,7 @@ const href = article.slug === '#' ? '#' : `/noticia/${article.slug}`;
             class="w-full h-full object-cover transition-transform duration-[2s] ease-out group-hover:scale-105"
             alt={article.title}
             referrerpolicy="no-referrer"
+            onerror="this.onerror=null;this.src='/og-default.svg';"
           />
         ) : (
           <div class="w-full h-full flex items-center justify-center text-zinc-300 dark:text-zinc-700">
@@ -101,7 +103,7 @@ const href = article.slug === '#' ? '#' : `/noticia/${article.slug}`;
     <a href={href} class="group/side -mx-3 flex items-start gap-4 rounded-2xl border-b border-black/10 p-3 pb-7 transition-all duration-300 hover:bg-white/70 hover:shadow-lg dark:border-zinc-800 dark:hover:bg-zinc-900/70 last:border-0 last:pb-3">
       <div class="w-24 h-20 md:w-20 md:h-16 rounded-2xl overflow-hidden bg-[#ebe8df] dark:bg-zinc-800 flex-shrink-0 shadow-sm">
         {article.imageUrl ? (
-          <img src={article.imageUrl} class="w-full h-full object-cover transition-transform duration-700 group-hover/side:scale-105" alt={article.title} referrerpolicy="no-referrer" />
+          <img src={article.imageUrl} class="w-full h-full object-cover transition-transform duration-700 group-hover/side:scale-105" alt={article.title} referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
         ) : (
           <div class="w-full h-full flex items-center justify-center text-zinc-300 dark:text-zinc-700">
             <Icon name="image" class="w-5 h-5 opacity-20" />
@@ -136,6 +138,7 @@ const href = article.slug === '#' ? '#' : `/noticia/${article.slug}`;
             loading="lazy"
             decoding="async"
             referrerpolicy="no-referrer"
+            onerror="this.onerror=null;this.src='/og-default.svg';"
           />
         ) : (
           <div class="w-full h-full flex items-center justify-center text-zinc-300 dark:text-zinc-700">

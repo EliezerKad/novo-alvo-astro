@@ -174,7 +174,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
               const itemUrl = `/noticia/${encodeURIComponent(item.slug || '')}/`;
               const itemImage = item.cover_url || `${url.origin}/og-default.svg`;
               return `<a class="related-card" href="${itemUrl}">
-                <img src="${escapeHtml(itemImage)}" alt="${escapeHtml(item.cover_alt || item.title)}" loading="lazy" />
+                <img src="${escapeHtml(itemImage)}" alt="${escapeHtml(item.cover_alt || item.title)}" loading="lazy" onerror="this.onerror=null;this.src='/og-default.svg';" />
                 <div>
                   <span>${escapeHtml(item.category || article.category)}</span>
                   <h3>${escapeHtml(item.title)}</h3>
@@ -202,7 +202,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
   const coverHtml = article.cover_url
     ? `<figure class="hero-figure">
         <div>
-          <img src="${escapeHtml(article.cover_url)}" alt="${escapeHtml(article.cover_alt || article.title)}" loading="eager" decoding="async" />
+          <img src="${escapeHtml(article.cover_url)}" alt="${escapeHtml(article.cover_alt || article.title)}" loading="eager" decoding="async" onerror="this.onerror=null;this.src='/og-default.svg';" />
         </div>
         <figcaption>${escapeHtml(article.cover_alt || article.title)}</figcaption>
       </figure>`

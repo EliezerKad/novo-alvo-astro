@@ -27,7 +27,8 @@ jobs:
         env:
           PORTAL_ORIGIN: https://portalnovoalvo.com.br
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
-          MAX_ITEMS_PER_FEED: 40
+          MAX_ITEMS_PER_FEED: 80
           MAX_PITCHES: 80
           MIN_SOURCES: 8
+          RADAR_BATCHES_PER_CATEGORY: 3
           HOUSEKEEPING_DAYS: 30

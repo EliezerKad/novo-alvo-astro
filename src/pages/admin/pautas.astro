@@ -86,6 +86,47 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
     </div>
   </section>
 
+  <style is:global>
+    .generated-article-body {
+      color: inherit;
+      font-size: 1.02rem;
+      line-height: 1.9;
+    }
+
+    .generated-article-body h2,
+    .generated-article-body h3 {
+      margin: 2.1rem 0 0.85rem;
+      color: inherit;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      font-weight: 950;
+      letter-spacing: -0.055em;
+      line-height: 0.98;
+    }
+
+    .generated-article-body h2 {
+      font-size: clamp(1.9rem, 4vw, 3.2rem);
+    }
+
+    .generated-article-body h3 {
+      font-size: clamp(1.35rem, 3vw, 2.1rem);
+    }
+
+    .generated-article-body p {
+      margin: 0 0 1.25rem;
+      max-width: 70ch;
+      color: rgb(63 63 70);
+    }
+
+    .dark .generated-article-body p {
+      color: rgb(212 212 216);
+    }
+
+    .generated-article-body strong {
+      color: inherit;
+      font-weight: 900;
+    }
+  </style>
+
   <script is:inline>
     (() => {
       const root = document.querySelector('[data-pitches-admin]');
@@ -324,13 +365,13 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
             ${fallbackWarning}
             ${
               article.coverUrl
-                ? `<img src="${escapeHtml(article.coverUrl)}" alt="${escapeHtml(article.coverAlt || article.title || '')}" class="mt-5 aspect-[16/9] w-full rounded-[1.5rem] object-cover" loading="lazy" referrerpolicy="no-referrer" />`
+                ? `<img src="${escapeHtml(article.coverUrl)}" alt="${escapeHtml(article.coverAlt || article.title || '')}" class="mt-5 aspect-[16/9] w-full rounded-[1.5rem] object-cover" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />`
                 : ''
             }
             <h3 class="admin-display mt-4 text-3xl leading-none">${escapeHtml(article.title || 'Sem título')}</h3>
             <article class="mt-6 rounded-[1.5rem] bg-[#f7f3ea] p-5 text-zinc-950 dark:bg-zinc-900 dark:text-zinc-50 md:p-7">
               <p class="text-lg font-medium leading-8 text-zinc-600 dark:text-zinc-300">${escapeHtml(article.summary || '')}</p>
-              <div class="prose prose-zinc mt-8 max-w-none dark:prose-invert">${article.bodyHtml || ''}</div>
+              <div class="generated-article-body mt-8">${article.bodyHtml || ''}</div>
             </article>
           `;
         } catch (error) {

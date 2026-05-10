@@ -41,6 +41,34 @@ type QueueRow = {
   source_count?: number;
 };
 
+const CATEGORY_IMAGES: Record<string, string> = {
+  Brasil: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=1600&q=80',
+  Mundo: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80',
+  Economia: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80',
+  Tecnologia: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80',
+  Entretenimento: 'https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?auto=format&fit=crop&w=1600&q=80',
+  Esportes: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1600&q=80',
+  Ciencia: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=1600&q=80',
+  Saude: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1600&q=80',
+  Famosos: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1600&q=80',
+  Futebol: 'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?auto=format&fit=crop&w=1600&q=80',
+  Games: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1600&q=80',
+  Lifestyle: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80',
+  Educacao: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1600&q=80',
+  Moda: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1600&q=80',
+  Cinema: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80',
+};
+
+const fallbackImageForCategory = (category: unknown) => CATEGORY_IMAGES[clean(category, 80)] || '/og-default.svg';
+
+const isUsableImage = (value: unknown) => {
+  const url = clean(value, 1000);
+  if (!/^https:\/\//i.test(url)) return false;
+  if (/source\.unsplash\.com/i.test(url)) return false;
+  if (/\.(svg|gif)(\?|$)/i.test(url)) return false;
+  return true;
+};
+
 const json = (body: unknown, init: ResponseInit = {}) =>
   new Response(JSON.stringify(body), {
     ...init,
@@ -125,7 +153,7 @@ const safeHtml = (value: unknown) =>
 const splitLongText = (text: string) => {
   const cleanText = text.replace(/\s+/g, ' ').trim();
   if (!cleanText) return [];
-  const sentences = cleanText.match(/[^.!?。！？]+[.!?。！？]+|[^.!?。！？]+$/g) || [cleanText];
+  const sentences = cleanText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [cleanText];
   const chunks: string[] = [];
   let current = '';
 
@@ -143,6 +171,20 @@ const splitLongText = (text: string) => {
   return chunks;
 };
 
+const buildStructuredArticleHtml = (html: string) => {
+  const chunks = splitLongText(plain(html, 12000)).slice(0, 12);
+  if (chunks.length < 4) return html;
+
+  const splitAt = Math.max(3, Math.ceil(chunks.length / 2));
+  return [
+    `<p>${escapeHtml(chunks[0])}</p>`,
+    '<h2>O ponto de press\u00e3o</h2>',
+    ...chunks.slice(1, splitAt).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`),
+    '<h3>O efeito imediato</h3>',
+    ...chunks.slice(splitAt).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`),
+  ].join('');
+};
+
 const normalizeArticleHtml = (html: string) => {
   const normalized = safeHtml(html)
     .replace(/<\/(h2|h3|p|blockquote|li)>\s*/gi, '</$1>\n')
@@ -158,6 +200,7 @@ const normalizeArticleHtml = (html: string) => {
   const hasHeading = /<h[23]>/i.test(normalized);
   const paragraphs = (normalized.match(/<p>/gi) || []).length;
   if (paragraphs >= 5 && hasHeading) return normalized;
+  if (paragraphs >= 4) return buildStructuredArticleHtml(normalized);
 
   const text = plain(normalized, 9000);
   const chunks = splitLongText(text).slice(0, 10);
@@ -165,7 +208,7 @@ const normalizeArticleHtml = (html: string) => {
   const midpoint = Math.max(2, Math.floor(chunks.length / 2));
   return chunks
     .map((paragraph, index) => {
-      if (index === midpoint) return `<h2>O ponto de pressão</h2><p>${escapeHtml(paragraph)}</p>`;
+      if (index === midpoint) return `<h2>O ponto de press\u00e3o</h2><p>${escapeHtml(paragraph)}</p>`;
       if (index === chunks.length - 2 && chunks.length > 5) return `<h3>O efeito imediato</h3><p>${escapeHtml(paragraph)}</p>`;
       return `<p>${escapeHtml(paragraph)}</p>`;
     })
@@ -333,6 +376,7 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
   const sources = parseArray(row.sources);
   const tags = parseArray(row.tags).map(String).filter(Boolean);
   const imageCandidates = parseArray(row.image_candidates).map(String).filter(Boolean);
+  const coverUrl = imageCandidates.find(isUsableImage) || fallbackImageForCategory(row.category);
   const sourceNames = [
     ...new Set(
       sources
@@ -380,13 +424,13 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
     category: row.category || 'Brasil',
     author: 'Redação Novo Alvo',
     status: 'published',
-    coverUrl: imageCandidates[0] || '',
+    coverUrl,
     coverAlt: aiArticle.title,
     seoDescription: aiArticle.seoDescription,
     keywords: aiArticle.keywords,
     tags,
     sources: sourceNames,
-    media: imageCandidates.map((src) => ({ src, type: 'image' })),
+    media: [coverUrl, ...imageCandidates.filter((src) => src !== coverUrl && isUsableImage(src))].map((src) => ({ src, type: 'image' })),
     readingMinutes: Math.max(1, Math.ceil(aiArticle.bodyHtml.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length / 220)),
     publishedAt,
     generatedWithAi: aiArticle.generatedWithAi,
