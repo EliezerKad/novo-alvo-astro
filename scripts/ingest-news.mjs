@@ -70,12 +70,6 @@ const attrBetween = (xml, tag, attr) => {
   return decodeEntities(match?.[1] || '');
 };
 
-const imageFromDescription = (xml) => {
-  const description = textBetween(xml, 'description');
-  const match = description.match(/<img[^>]+src=["']([^"']+)["']/i);
-  return decodeEntities(match?.[1] || '');
-};
-
 const cleanTitle = (title) =>
   decodeEntities(title)
     .replace(/\s+-\s+[^-]{2,80}$/g, '')
@@ -106,6 +100,7 @@ const isBlockedImageUrl = (value) => {
   const url = String(value || '').toLowerCase();
   return (
     /(logo|avatar|icon|sprite|profile|pixel|tracking|blank|placeholder|favicon|author|badge|watermark)/i.test(url) ||
+    /(^|\/\/|\.)(google|gstatic|googleusercontent)\./i.test(url) ||
     /google(?:logo|news)|google\.com\/images\/branding|gstatic\.com\/images\/branding|www\.gstatic\.com\/images\/branding/i.test(url)
   );
 };
@@ -174,6 +169,7 @@ const imagesFromArticleHtml = (html, baseUrl) => {
 
 const fetchArticleImages = async (url) => {
   try {
+    if (/^https?:\/\/([^/]+\.)?(news\.google|google|gstatic|googleusercontent)\./i.test(String(url || ''))) return [];
     const response = await fetch(url, {
       headers: {
         accept: 'text/html,application/xhtml+xml',
@@ -271,21 +267,19 @@ const parseRssItems = (xml, category) => {
     const rawTitle = textBetween(itemXml, 'title');
     const title = cleanTitle(rawTitle);
     const source = textBetween(itemXml, 'source') || rawTitle.split(' - ').pop() || 'Google News';
-    const link = textBetween(itemXml, 'link');
+    const googleLink = textBetween(itemXml, 'link');
+    const sourceUrl = attrBetween(itemXml, 'source', 'url');
+    const link = sourceUrl || googleLink;
     const publishedAt = textBetween(itemXml, 'pubDate');
-    const imageUrl =
-      attrBetween(itemXml, 'media:content', 'url') ||
-      attrBetween(itemXml, 'media:thumbnail', 'url') ||
-      attrBetween(itemXml, 'enclosure', 'url') ||
-      imageFromDescription(itemXml);
 
     return {
       title,
       category,
       link,
+      googleLink,
+      sourceUrl,
       source,
       publishedAt,
-      imageUrl,
     };
   }).filter((item) => item.title && item.link);
 };
@@ -326,8 +320,7 @@ const buildPitch = (items) => {
   const keywords = extractKeywords(first.title, first.category);
   const sourceCount = uniquePublishers.length || sources.length;
   const sourceQuality = Math.min(8, sourceCount);
-  const rssImages = items.map((item) => item.imageUrl).filter(Boolean);
-  const imageCandidates = uniqueImages([...rssImages, fallbackImageFor(first.category)], 6);
+  const imageCandidates = uniqueImages([fallbackImageFor(first.category)], 6);
 
   const isRadar = items.some((item) => item.radarCluster);
   const newestTime = Math.max(...items.map((item) => Date.parse(item.publishedAt) || 0), Date.now());
