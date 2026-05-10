@@ -9,12 +9,33 @@ type D1Database = {
   };
 };
 
+type R2ObjectBody = {
+  body: ReadableStream;
+  writeHttpMetadata?: (headers: Headers) => void;
+};
+
+type R2Bucket = {
+  get: (key: string) => Promise<R2ObjectBody | null>;
+  put: (
+    key: string,
+    value: ArrayBuffer,
+    options?: {
+      httpMetadata?: {
+        contentType?: string;
+        cacheControl?: string;
+      };
+      customMetadata?: Record<string, string>;
+    },
+  ) => Promise<unknown>;
+};
+
 type Env = {
   EDITORIAL_DB?: D1Database;
   ADMIN_TOKEN?: string;
   GITHUB_TOKEN?: string;
   GITHUB_REPOSITORY?: string;
   GITHUB_BRANCH?: string;
+  MEDIA_BUCKET?: R2Bucket;
 };
 
 type ArticlePayload = {
@@ -127,6 +148,87 @@ const dataImageToUpload = (value: string) => {
     mime,
     extension,
     content,
+  };
+};
+
+const isRemoteImageUrl = (value: string) => /^https?:\/\//i.test(value) && !/\/media\/news\//i.test(value);
+
+const imageExtensionFromType = (contentType: string) => {
+  const type = contentType.toLowerCase();
+  if (type.includes('png')) return 'png';
+  if (type.includes('webp')) return 'webp';
+  if (type.includes('avif')) return 'avif';
+  return 'jpg';
+};
+
+const uploadRemoteImageToR2 = async (env: Env, url: string, keyBase: string) => {
+  if (!env.MEDIA_BUCKET || !isRemoteImageUrl(url)) return null;
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        accept: 'image/avif,image/webp,image/png,image/jpeg,image/*',
+        'user-agent': 'PortalNovoAlvoMediaIngest/1.0',
+      },
+    });
+
+    if (!response.ok) return null;
+
+    const contentType = response.headers.get('content-type') || '';
+    if (!/^image\/(jpeg|jpg|png|webp|avif)/i.test(contentType)) return null;
+
+    const contentLength = Number(response.headers.get('content-length') || 0);
+    if (contentLength > 8_000_000) return null;
+
+    const buffer = await response.arrayBuffer();
+    if (!buffer.byteLength || buffer.byteLength > 8_000_000) return null;
+
+    const extension = imageExtensionFromType(contentType);
+    const key = `${keyBase}.${extension}`;
+    await env.MEDIA_BUCKET.put(key, buffer, {
+      httpMetadata: {
+        contentType: contentType.split(';')[0],
+        cacheControl: 'public, max-age=31536000, immutable',
+      },
+      customMetadata: {
+        source: url.slice(0, 500),
+      },
+    });
+
+    return {
+      key,
+      publicPath: `/media/${key}`,
+    };
+  } catch {
+    return null;
+  }
+};
+
+const prepareArticleMedia = async (env: Env, article: ReturnType<typeof normalizePayload>, origin: string) => {
+  if (!env.MEDIA_BUCKET) return article;
+
+  const coverUpload = dataImageToUpload(article.coverUrl);
+  if (coverUpload || !isRemoteImageUrl(article.coverUrl)) return article;
+
+  const uploadedCover = await uploadRemoteImageToR2(env, article.coverUrl, `news/${article.slug}-cover`);
+  if (!uploadedCover) return article;
+
+  const publicCoverUrl = `${origin}${uploadedCover.publicPath}`;
+  const media = fromJsonArray(article.media).map((item) => {
+    if (!item || typeof item !== 'object') return item;
+    const record = item as Record<string, unknown>;
+    if (String(record.src || '') !== article.coverUrl) return item;
+    return {
+      ...record,
+      src: publicCoverUrl,
+      stored: 'r2',
+    };
+  });
+
+  return {
+    ...article,
+    coverUrl: publicCoverUrl,
+    media: JSON.stringify(media.length ? media : [{ src: publicCoverUrl, type: 'image', alt: article.coverAlt }]),
   };
 };
 
@@ -421,7 +523,8 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     return json({ error: 'JSON inválido.' }, { status: 400 });
   }
 
-  const article = normalizePayload(rawPayload);
+  const origin = new URL(request.url).origin;
+  const article = await prepareArticleMedia(env, normalizePayload(rawPayload), origin);
   const existing = await db.prepare('SELECT id FROM articles WHERE id = ? OR slug = ? LIMIT 1').bind(article.id, article.slug).first<{ id: string }>();
   const id = existing?.id || article.id;
   const publishedAt = article.status === 'published' ? article.publishedAt || article.updatedAt : article.publishedAt || '';

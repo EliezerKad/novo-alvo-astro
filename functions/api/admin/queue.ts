@@ -69,6 +69,31 @@ const isUsableImage = (value: unknown) => {
   return true;
 };
 
+const scoreImageCandidate = (url: string, title: string, category: string) => {
+  const lowerUrl = url.toLowerCase();
+  const terms = `${title} ${category}`
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((term) => term.length > 3);
+  let score = 0;
+  if (/images\.unsplash\.com/.test(lowerUrl)) score += 15;
+  if (/\.(jpe?g|png|webp)(\?|$)/i.test(url)) score += 12;
+  if (/(1200|1600|1920|large|xl|original|og|share|cover)/i.test(url)) score += 18;
+  if (/(logo|avatar|icon|sprite|thumb_small|profile)/i.test(url)) score -= 45;
+  for (const term of new Set(terms)) {
+    if (lowerUrl.includes(term)) score += 5;
+  }
+  return score;
+};
+
+const chooseBestImage = (candidates: string[], title: string, category: string) =>
+  candidates
+    .filter(isUsableImage)
+    .map((url, index) => ({ url, index, score: scoreImageCandidate(url, title, category) - index }))
+    .sort((a, b) => b.score - a.score)[0]?.url || fallbackImageForCategory(category);
+
 const json = (body: unknown, init: ResponseInit = {}) =>
   new Response(JSON.stringify(body), {
     ...init,
@@ -250,11 +275,26 @@ const requireAdmin = (request: Request, env: Env) => {
 
 const generateArticleWithAi = async (
   row: QueueRow,
-  fallback: { title: string; summary: string; bodyHtml: string; seoDescription: string; keywords: string },
+  fallback: {
+    title: string;
+    summary: string;
+    bodyHtml: string;
+    seoDescription: string;
+    keywords: string;
+    imageAlt?: string;
+    imageCaption?: string;
+  },
   env: Env,
 ) => {
   if (!env.GEMINI_API_KEY && !env.AI) {
-    return { ...fallback, generatedWithAi: false, generationModel: 'fallback-editorial-template', generationError: 'IA editorial nao configurada.' };
+    return {
+      ...fallback,
+      imageAlt: fallback.imageAlt || fallback.title,
+      imageCaption: fallback.imageCaption || '',
+      generatedWithAi: false,
+      generationModel: 'fallback-editorial-template',
+      generationError: 'IA editorial nao configurada.',
+    };
   }
 
   const sources = parseArray(row.sources);
@@ -273,6 +313,8 @@ const generateArticleWithAi = async (
 
   const system =
     'PROMPT: NEXA ENGINE v9.5 - MULTIGENERATIONAL AUDIENCE. Voce e um jornalista redator profissional do Portal Novo Alvo, uma voz independente que opera na fronteira entre analise tecnica profunda e cultura pop viral. As geracoes citadas nas diretrizes sao apenas parametros internos de estilo. Nunca cite Geracao X, Millennials, Gen Z, publico-alvo ou diretrizes editoriais dentro da materia. Escreva em portugues do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e valido.';
+  const imageCandidates = parseArray(row.image_candidates).map(String).filter(isUsableImage).slice(0, 8);
+  const selectedImage = chooseBestImage(imageCandidates, row.title, row.category);
   const prompt = `
 PROMPT: NEXA ENGINE v9.5 - MULTIGENERATIONAL AUDIENCE
 
@@ -317,11 +359,13 @@ DADOS DO CLUSTER:
 [PALAVRAS-CHAVE]: ${row.keywords}
 [SCORE EDITORIAL]: ${score}
 [FONTES CONSOLIDADAS]: ${sourceCount}
+[IMAGEM ESCOLHIDA]: ${selectedImage}
+[IMAGENS CANDIDATAS]: ${imageCandidates.join('\n')}
 [FONTES]:
 ${sourceLines || 'Fontes nao listadas.'}
 
 Responda exatamente neste formato, com JSON valido e sem markdown:
-{"title":"...","slug":"...","meta_description":"...","content_html":"..."}
+{"title":"...","slug":"...","meta_description":"...","image_alt":"...","image_caption":"...","content_html":"..."}
 `;
 
   try {
@@ -364,6 +408,8 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       summary: plain(result.summary || result.meta_description, 700) || fallback.summary,
       seoDescription: plain(result.meta_description || result.seoDescription, 155) || fallback.seoDescription,
       keywords: plain(result.keywords, 700) || fallback.keywords,
+      imageAlt: plain(result.image_alt || result.imageAlt, 180) || fallback.title,
+      imageCaption: plain(result.image_caption || result.imageCaption, 220) || '',
       bodyHtml: generatedBody,
       generatedWithAi: true,
       generationModel,
@@ -372,6 +418,8 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
   } catch (error) {
     return {
       ...fallback,
+      imageAlt: fallback.imageAlt || fallback.title,
+      imageCaption: fallback.imageCaption || '',
       generatedWithAi: false,
       generationModel: env.GEMINI_API_KEY ? env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL : WORKERS_AI_MODEL,
       generationError: error instanceof Error ? error.message : 'Falha desconhecida na geracao por IA.',
@@ -383,7 +431,7 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
   const sources = parseArray(row.sources);
   const tags = parseArray(row.tags).map(String).filter(Boolean);
   const imageCandidates = parseArray(row.image_candidates).map(String).filter(Boolean);
-  const coverUrl = imageCandidates.find(isUsableImage) || fallbackImageForCategory(row.category);
+  const coverUrl = chooseBestImage(imageCandidates, row.title, row.category);
   const sourceNames = [
     ...new Set(
       sources
@@ -418,6 +466,8 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
       bodyHtml,
       seoDescription: summary.slice(0, 155),
       keywords: clean(row.keywords, 700),
+      imageAlt: title,
+      imageCaption: '',
     },
     env,
   );
@@ -432,12 +482,17 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
     author: 'Redação Novo Alvo',
     status: 'published',
     coverUrl,
-    coverAlt: aiArticle.title,
+    coverAlt: aiArticle.imageAlt || aiArticle.title,
     seoDescription: aiArticle.seoDescription,
     keywords: aiArticle.keywords,
     tags,
     sources: sourceNames,
-    media: [coverUrl, ...imageCandidates.filter((src) => src !== coverUrl && isUsableImage(src))].map((src) => ({ src, type: 'image' })),
+    media: [coverUrl, ...imageCandidates.filter((src) => src !== coverUrl && isUsableImage(src))].map((src) => ({
+      src,
+      type: 'image',
+      alt: src === coverUrl ? aiArticle.imageAlt || aiArticle.title : '',
+      caption: src === coverUrl ? aiArticle.imageCaption || '' : '',
+    })),
     readingMinutes: Math.max(1, Math.ceil(aiArticle.bodyHtml.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length / 220)),
     publishedAt,
     generatedWithAi: aiArticle.generatedWithAi,
