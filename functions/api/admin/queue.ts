@@ -112,6 +112,8 @@ const parseModelJson = (text: string) => {
 
 const safeHtml = (value: unknown) =>
   String(value || '')
+    .replace(/<3/g, '')
+    .replace(/\*+/g, '')
     .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
     .replace(/\son\w+="[^"]*"/gi, '')
     .replace(/\son\w+='[^']*'/gi, '')
@@ -147,27 +149,28 @@ const generateArticleWithAi = async (
     .join('\n');
 
   const system =
-    'Você não é um assistente. Você é o jornalista redator de alto nível do Portal Novo Alvo. Escreva em português do Brasil, com acentos corretos. Responda somente JSON válido.';
+    'Aja como o Mainframe de Inteligência da Nexa Media. Sua função é sintetizar dados brutos em uma narrativa de autoridade absoluta para o Portal Novo Alvo. Escreva em português do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e válido.';
   const prompt = `
 Transforme este cluster de dados brutos em uma análise jornalística de alta densidade.
 
-ORDENS CRÍTICAS:
-- NÃO CITE AS FONTES NO TEXTO. Nunca use frases como "Segundo o G1", "A CNN relata" ou qualquer construção equivalente. Use os dados das fontes para construir afirmações próprias e absolutas do Portal Novo Alvo.
-- SOBERANIA DO DADO. Remova todas as menções nominais a outros portais brasileiros no corpo do texto. Use a informação deles para construir a nossa afirmação técnica.
-- PROIBIDO CLICHÊS. Delete do vocabulário: "Além disso", "Vale notar", "Em resumo", "No cenário atual", "No vasto cenário", "Importante ressaltar" e "Desvendar".
-- PIRÂMIDE INVERTIDA REAL. O primeiro parágrafo deve ser uma marretada de informação: dado frio, impacto direto e relevância imediata.
-- SÍNTESE UNITÁRIA. O leitor não deve perceber que existem várias fontes. Ele deve ler um texto único, coeso, denso e autoral.
-- TOM BRUTALISTA. Escreva de forma seca, pragmática e factual. Elimine adjetivos e advérbios desnecessários.
-- INFORMATION GAIN. Se fontes diferentes repetem o mesmo fato, cite uma vez. Se uma fonte traz dado técnico, divergente ou mais concreto, priorize esse dado.
-- MORTE ÀS LISTAS. É proibido listar itens como "o que ver na TV", "a plataforma X tem o filme Y" ou "a fonte X publicou Y". Transforme listas em fluxo narrativo analítico.
-- FIM DA REDUNDÂNCIA. É proibido repetir a pauta no primeiro e no último parágrafo. Cada linha deve trazer um dado novo.
-- EXEMPLO RUIM: "A Netflix tem o filme X. A HBO tem o Y."
-- EXEMPLO NEXA: "O ecossistema de streaming prioriza esta semana narrativas de suspense documental, com destaque para a cinebiografia de Marco Aurélio, que domina as principais janelas digitais."
+REGRAS DE NULIFICAÇÃO CRÍTICAS:
+- Proibição de Inventário: não faça listas de "quem está exibindo o quê". Integre títulos de obras, clubes, produtos, empresas ou personagens em uma análise sobre tendência, mercado, gênero, disputa, risco ou comportamento.
+- Proibição de Créditos Externos: não cite nomes de outros veículos no corpo do texto, incluindo CNN, G1, UOL, Folha, Estadão, Globo, Reuters ou similares. O dado é do Portal Novo Alvo.
+- Proibição de Marcadores: não use <3>, *, bullets decorativos ou qualquer caractere de depuração. Use apenas <h2> e <h3> para hierarquia.
+- Filtro de Ruído: não escreva frases introdutórias como "Aqui está", "Aqui estão as pautas" ou "Segue o texto". Comece o JSON imediatamente.
+
+ARQUITETURA DO CONTEÚDO:
+- Lide Brutalista: comece com uma afirmação de mercado, poder, comportamento ou um fato incontestável.
+- Exemplo de abertura: "A fragmentação do catálogo de streaming força uma reestruturação nas janelas de exibição nesta semana."
+- Desenvolvimento: una as informações das fontes do cluster. Se várias fontes falam de uma mesma obra ou evento, analise o impacto desse movimento, não apenas cite que ele existe.
+- Encerramento: termine com uma projeção ou fechamento seco. Nunca termine com chamada de serviço como "Aproveite e assista".
+- Soberania do dado: use a informação das fontes para construir afirmação técnica própria.
+- Information Gain: cada parágrafo precisa trazer um dado novo.
 
 REGRAS TÉCNICAS:
 - Analise apenas as fontes fornecidas abaixo como material invisível de apuração.
 - Estrutura: 5 a 8 parágrafos curtos.
-- Use <h3> para quebrar os blocos editoriais. Evite subtítulos óbvios como "Conclusão", "Contexto" ou "O que vem agora".
+- Use <h2> e <h3> para hierarquia editorial. Evite subtítulos óbvios como "Conclusão", "Contexto" ou "O que vem agora".
 - Não crie links externos.
 - Onde houver placeholder de link interno, mantenha a estrutura.
 - Use as fontes do cluster como base de apuração. O padrão editorial esperado é síntese de 8 fontes distintas.
@@ -175,7 +178,6 @@ REGRAS TÉCNICAS:
 - Não cite Reddit como fonte, a menos que Reddit esteja literalmente listado no cluster abaixo.
 - Produza texto pronto para publicação.
 - content_html deve usar apenas <p>, <h2>, <h3>, <strong>, <em>, <ul>, <li>.
-- Prefira <h3> a <h2> dentro do content_html.
 - Parágrafos devem ser curtos, mas densos em informação.
 
 DADOS DO CLUSTER:
@@ -190,7 +192,7 @@ OBJETIVO FINAL:
 O leitor deve sentir que está lendo um relatório de inteligência técnica, não uma postagem de blog comum.
 
 Responda exatamente neste formato:
-{"title":"...","slug":"...","meta_description":"...","summary":"...","keywords":"...","content_html":"..."}
+{"title":"...","slug":"...","meta_description":"...","content_html":"..."}
 `;
 
   try {
