@@ -30,6 +30,7 @@ const MAX_ITEMS_PER_FEED = Number(process.env.MAX_ITEMS_PER_FEED || 80);
 const MIN_SOURCES = Number(process.env.MIN_SOURCES || 8);
 const RADAR_BATCHES_PER_CATEGORY = Number(process.env.RADAR_BATCHES_PER_CATEGORY || 3);
 const HOUSEKEEPING_DAYS = Number(process.env.HOUSEKEEPING_DAYS || 30);
+const MAX_IMAGE_SOURCE_FETCHES_PER_PITCH = Number(process.env.MAX_IMAGE_SOURCE_FETCHES_PER_PITCH || 5);
 
 const CATEGORY_IMAGES = {
   Brasil: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=1600&q=80',
@@ -102,6 +103,53 @@ const extractKeywords = (title, category) => {
 };
 
 const isUsableImage = (value) => /^https:\/\//i.test(String(value || '')) && !/source\.unsplash\.com/i.test(String(value || '')) && !/\.(svg|gif)(\?|$)/i.test(String(value || ''));
+
+const absoluteUrl = (value, base) => {
+  try {
+    return new URL(decodeEntities(value), base).toString();
+  } catch {
+    return '';
+  }
+};
+
+const imagesFromArticleHtml = (html, baseUrl) => {
+  const output = [];
+  const push = (value) => {
+    const url = absoluteUrl(value, baseUrl);
+    if (isUsableImage(url)) output.push(url);
+  };
+
+  for (const attr of ['property="og:image"', 'name="twitter:image"', 'property="twitter:image"']) {
+    const match = String(html).match(new RegExp(`<meta[^>]+${attr}[^>]+content=["']([^"']+)["'][^>]*>`, 'i'));
+    if (match?.[1]) push(match[1]);
+  }
+
+  for (const match of String(html).matchAll(/<img[^>]+(?:src|data-src|data-original)=["']([^"']+)["'][^>]*>/gi)) {
+    const candidate = match[1] || '';
+    if (/(logo|avatar|icon|sprite|profile|pixel|tracking|blank)/i.test(candidate)) continue;
+    push(candidate);
+  }
+
+  return [...new Set(output)].slice(0, 10);
+};
+
+const fetchArticleImages = async (url) => {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        accept: 'text/html,application/xhtml+xml',
+        'user-agent': 'PortalNovoAlvoImageScout/1.0',
+      },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!response.ok) return [];
+    const contentType = response.headers.get('content-type') || '';
+    if (!/text\/html|application\/xhtml/i.test(contentType)) return [];
+    return imagesFromArticleHtml(await response.text(), response.url || url);
+  } catch {
+    return [];
+  }
+};
 
 const fallbackImageFor = (category) => CATEGORY_IMAGES[category] || CATEGORY_IMAGES.Brasil;
 
@@ -271,6 +319,23 @@ const buildPitch = (items) => {
   };
 };
 
+const enrichPitchImages = async (pitch) => {
+  const current = Array.isArray(pitch.imageCandidates) ? pitch.imageCandidates : [];
+  const sources = Array.isArray(pitch.sources) ? pitch.sources : [];
+  const sourceImages = (
+    await Promise.all(
+      sources
+        .slice(0, MAX_IMAGE_SOURCE_FETCHES_PER_PITCH)
+        .map((source) => fetchArticleImages(source.url)),
+    )
+  ).flat();
+
+  return {
+    ...pitch,
+    imageCandidates: [...new Set([...current, ...sourceImages].filter(isUsableImage))].slice(0, 16),
+  };
+};
+
 const postPitch = async (pitch) => {
   const response = await fetch(`${PORTAL_ORIGIN}/api/admin/pitches`, {
     method: 'POST',
@@ -317,8 +382,10 @@ const main = async () => {
     .slice(0, Number(process.env.MAX_PITCHES || 80));
 
   let saved = 0;
+  const enrichedPitches = await Promise.all(pitches.map(enrichPitchImages));
+
   await Promise.all(
-    pitches.map(async (pitch) => {
+    enrichedPitches.map(async (pitch) => {
       try {
         await postPitch(pitch);
         saved += 1;

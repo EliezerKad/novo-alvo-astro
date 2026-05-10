@@ -125,6 +125,32 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
       color: inherit;
       font-weight: 900;
     }
+
+    .generated-article-body .editorial-inline-image {
+      margin: 2rem 0;
+      overflow: hidden;
+      border-radius: 1.6rem;
+      background: rgb(244 241 232);
+    }
+
+    .generated-article-body .editorial-inline-image img {
+      display: block;
+      width: 100%;
+      max-height: 440px;
+      object-fit: cover;
+    }
+
+    .generated-article-body .editorial-inline-image figcaption {
+      padding: 0.75rem 1rem 1rem;
+      color: rgb(113 113 122);
+      font-size: 0.78rem;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .dark .generated-article-body .editorial-inline-image {
+      background: rgb(24 24 27);
+    }
   </style>
 
   <script is:inline>
@@ -460,7 +486,14 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
           }
           if (!response.ok) throw new Error(data.error || 'Nao foi possivel atualizar a pauta.');
 
-          if (nextStatus === 'reviewed' || nextStatus === 'queued' || nextStatus === 'dismissed' || nextStatus === 'converted') {
+          if (nextStatus === 'dismissed') {
+            pitches = pitches.filter((pitch) => String(pitch.id || '') !== String(id));
+            render();
+            if (statusNode) statusNode.textContent = 'Pauta descartada.';
+            return;
+          }
+
+          if (nextStatus === 'reviewed' || nextStatus === 'queued' || nextStatus === 'converted') {
             status = nextStatus;
             setActiveStatus();
           }

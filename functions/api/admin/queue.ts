@@ -94,6 +94,12 @@ const chooseBestImage = (candidates: string[], title: string, category: string) 
     .map((url, index) => ({ url, index, score: scoreImageCandidate(url, title, category) - index }))
     .sort((a, b) => b.score - a.score)[0]?.url || fallbackImageForCategory(category);
 
+const chooseInlineImage = (candidates: string[], coverUrl: string, title: string, category: string) =>
+  candidates
+    .filter((url) => isUsableImage(url) && url !== coverUrl)
+    .map((url, index) => ({ url, index, score: scoreImageCandidate(url, title, category) - index }))
+    .sort((a, b) => b.score - a.score)[0]?.url || '';
+
 const json = (body: unknown, init: ResponseInit = {}) =>
   new Response(JSON.stringify(body), {
     ...init,
@@ -254,6 +260,20 @@ const htmlFromModelField = (value: unknown) => {
     .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
       .join(''),
   );
+};
+
+const insertInlineImage = (html: string, image: { src: string; alt: string; caption: string }, category: string) => {
+  if (!image.src || /<figure[^>]+editorial-inline-image/i.test(html)) return html;
+
+  const layout = ['wide', 'left', 'right'][
+    Math.abs(slugify(`${category}-${image.src}`).split('').reduce((total, char) => total + char.charCodeAt(0), 0)) % 3
+  ];
+  const figure = `<figure class="editorial-inline-image editorial-inline-image--${layout}"><img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" loading="lazy" referrerpolicy="no-referrer" /><figcaption>${escapeHtml(image.caption || image.alt)}</figcaption></figure>`;
+  const paragraphs = [...html.matchAll(/<\/p>/gi)];
+  if (paragraphs.length < 3) return `${html}${figure}`;
+
+  const position = paragraphs[Math.min(2, Math.floor(paragraphs.length / 2))].index || html.length;
+  return `${html.slice(0, position + 4)}${figure}${html.slice(position + 4)}`;
 };
 
 const hasEditorialBody = (html: string) => {
@@ -432,6 +452,7 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
   const tags = parseArray(row.tags).map(String).filter(Boolean);
   const imageCandidates = parseArray(row.image_candidates).map(String).filter(Boolean);
   const coverUrl = chooseBestImage(imageCandidates, row.title, row.category);
+  const inlineImageUrl = chooseInlineImage(imageCandidates, coverUrl, row.title, row.category);
   const sourceNames = [
     ...new Set(
       sources
@@ -477,7 +498,15 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
     slug,
     title: aiArticle.title,
     summary: aiArticle.summary,
-    bodyHtml: aiArticle.bodyHtml,
+    bodyHtml: insertInlineImage(
+      aiArticle.bodyHtml,
+      {
+        src: inlineImageUrl,
+        alt: aiArticle.imageAlt || aiArticle.title,
+        caption: aiArticle.imageCaption || '',
+      },
+      row.category,
+    ),
     category: row.category || 'Brasil',
     author: 'Redação Novo Alvo',
     status: 'published',
@@ -490,8 +519,9 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
     media: [coverUrl, ...imageCandidates.filter((src) => src !== coverUrl && isUsableImage(src))].map((src) => ({
       src,
       type: 'image',
-      alt: src === coverUrl ? aiArticle.imageAlt || aiArticle.title : '',
-      caption: src === coverUrl ? aiArticle.imageCaption || '' : '',
+      role: src === coverUrl ? 'cover' : src === inlineImageUrl ? 'body' : 'candidate',
+      alt: src === coverUrl || src === inlineImageUrl ? aiArticle.imageAlt || aiArticle.title : '',
+      caption: src === coverUrl || src === inlineImageUrl ? aiArticle.imageCaption || '' : '',
     })),
     readingMinutes: Math.max(1, Math.ceil(aiArticle.bodyHtml.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length / 220)),
     publishedAt,

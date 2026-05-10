@@ -270,4 +270,66 @@ const schema = {
       </div>
     </section>
   </article>
+
+  <style is:global>
+    .article-content .editorial-inline-image {
+      clear: both;
+      margin: 2.5rem 0;
+      overflow: hidden;
+      border-radius: 1.75rem;
+      background: #ebe8df;
+      box-shadow: 0 24px 70px rgba(16, 16, 16, 0.08);
+    }
+
+    .article-content .editorial-inline-image img {
+      display: block;
+      width: 100%;
+      max-height: 520px;
+      object-fit: cover;
+    }
+
+    .article-content .editorial-inline-image figcaption {
+      margin: 0;
+      padding: 0.8rem 1rem 1rem;
+      color: rgb(113 113 122);
+      font-size: 0.78rem;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .article-content .editorial-inline-image--left,
+    .article-content .editorial-inline-image--right {
+      max-width: 48%;
+      margin-top: 0.55rem;
+    }
+
+    .article-content .editorial-inline-image--left {
+      float: left;
+      margin-right: 1.5rem;
+    }
+
+    .article-content .editorial-inline-image--right {
+      float: right;
+      margin-left: 1.5rem;
+    }
+
+    .dark .article-content .editorial-inline-image {
+      background: rgb(24 24 27);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.18);
+    }
+
+    @media (max-width: 767px) {
+      .article-content .editorial-inline-image,
+      .article-content .editorial-inline-image--left,
+      .article-content .editorial-inline-image--right {
+        float: none;
+        max-width: none;
+        margin: 2rem 0;
+      }
+
+      .article-content .editorial-inline-image {
+        border-radius: 1.35rem;
+      }
+    }
+  </style>
 </BaseLayout>

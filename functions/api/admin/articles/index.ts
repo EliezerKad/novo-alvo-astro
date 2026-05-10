@@ -418,6 +418,24 @@ const publishMarkdownToGitHub = async (
     return `/uploads/news/${article.slug}-${inlineIndex}.${upload.extension}`;
   });
 
+  const remoteInlineImages = [
+    ...new Set(
+      [...articleForMarkdown.bodyHtml.matchAll(/<img[^>]+src=["'](https?:\/\/[^"']+)["'][^>]*>/gi)]
+        .map((match) => match[1])
+        .filter((src) => !/^https:\/\/portalnovoalvo\.com\.br\/uploads\//i.test(src)),
+    ),
+  ].slice(0, 4);
+
+  for (const remoteImage of remoteInlineImages) {
+    const upload = await remoteImageToUpload(remoteImage);
+    if (!upload) continue;
+    inlineIndex += 1;
+    const assetPath = `public/uploads/news/${article.slug}-${inlineIndex}.${upload.extension}`;
+    uploadedAssets.push(assetPath);
+    inlineUploads.push({ path: assetPath, content: upload.content });
+    articleForMarkdown.bodyHtml = articleForMarkdown.bodyHtml.split(remoteImage).join(`/uploads/news/${article.slug}-${inlineIndex}.${upload.extension}`);
+  }
+
   for (const upload of inlineUploads) {
     await putGitHubFile({
       repository,

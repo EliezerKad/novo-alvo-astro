@@ -235,7 +235,10 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
     .bind(id, id)
     .first<PitchRecord>();
 
-  if (!existing) return json({ error: 'Pauta nao encontrada.' }, { status: 404 });
+  if (!existing) {
+    if (status === 'dismissed') return json({ ok: true, alreadyRemoved: true, queue: null });
+    return json({ error: 'Pauta nao encontrada.' }, { status: 404 });
+  }
 
   await db
     .prepare('UPDATE editorial_pitches SET status = ?, updated_at = ? WHERE id = ? OR cluster_key = ?')
