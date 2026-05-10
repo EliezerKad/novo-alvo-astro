@@ -32,24 +32,6 @@ const RADAR_BATCHES_PER_CATEGORY = Number(process.env.RADAR_BATCHES_PER_CATEGORY
 const HOUSEKEEPING_DAYS = Number(process.env.HOUSEKEEPING_DAYS || 30);
 const MAX_IMAGE_SOURCE_FETCHES_PER_PITCH = Number(process.env.MAX_IMAGE_SOURCE_FETCHES_PER_PITCH || 5);
 
-const CATEGORY_IMAGES = {
-  Brasil: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=1600&q=80',
-  Mundo: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80',
-  Economia: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80',
-  Tecnologia: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80',
-  Entretenimento: 'https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?auto=format&fit=crop&w=1600&q=80',
-  Esportes: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1600&q=80',
-  Ciencia: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=1600&q=80',
-  Saude: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1600&q=80',
-  Famosos: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1600&q=80',
-  Futebol: 'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?auto=format&fit=crop&w=1600&q=80',
-  Games: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1600&q=80',
-  Lifestyle: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80',
-  Educacao: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1600&q=80',
-  Moda: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1600&q=80',
-  Cinema: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80',
-};
-
 const decodeEntities = (value) =>
   String(value || '')
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
@@ -66,7 +48,12 @@ const textBetween = (xml, tag) => {
 };
 
 const attrBetween = (xml, tag, attr) => {
-  const match = String(xml).match(new RegExp(`<${tag}[^>]*\\s${attr}="([^"]+)"[^>]*>`, 'i'));
+  const match = String(xml).match(new RegExp(`<${tag}[^>]*\\s${attr}=["']([^"']+)["'][^>]*>`, 'i'));
+  return decodeEntities(match?.[1] || '');
+};
+
+const attrFromTag = (tag, attr) => {
+  const match = String(tag || '').match(new RegExp(`\\s${attr}=["']([^"']+)["']`, 'i'));
   return decodeEntities(match?.[1] || '');
 };
 
@@ -138,6 +125,41 @@ const uniqueImages = (values, limit = 16) => {
   return output;
 };
 
+const normalizedText = (value) =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+const CATEGORY_SIGNALS = [
+  {
+    category: 'Futebol',
+    pattern:
+      /\b(futebol|brasileirao|serie\s?[abcd]|copa do brasil|libertadores|sul-americana|corinthians|flamengo|fluminense|palmeiras|sao paulo|santos|vasco|botafogo|gremio|internacional|cruzeiro|atletico|bahia|fortaleza|guarani|mirassol|santa cruz|diniz|luxemburgo)\b/i,
+  },
+  {
+    category: 'Games',
+    pattern: /\b(games?|playstation|xbox|nintendo|steam|game pass|gta|fortnite|minecraft|console|ps5)\b/i,
+  },
+  {
+    category: 'Cinema',
+    pattern: /\b(cinema|filme|filmes|serie|series|streaming|festival de cannes|oscar|bilheteria|hbo|max|prime video)\b/i,
+  },
+  {
+    category: 'Moda',
+    pattern: /\b(moda|fashion|look|looks|tendencia|tendencias|passarela|estilista|vestido|grife|colecao)\b/i,
+  },
+];
+
+const classifyCategory = (feedCategory, title, source) => {
+  const text = normalizedText(`${title} ${source}`);
+  const matched = CATEGORY_SIGNALS.find((item) => item.pattern.test(text));
+  if (!matched || matched.category === feedCategory) return feedCategory;
+  const feedSignal = CATEGORY_SIGNALS.find((item) => item.category === feedCategory);
+  if (feedSignal?.pattern.test(text) && feedCategory !== 'Moda') return feedCategory;
+  return matched.category;
+};
+
 const absoluteUrl = (value, base) => {
   try {
     return new URL(decodeEntities(value), base).toString();
@@ -153,15 +175,43 @@ const imagesFromArticleHtml = (html, baseUrl) => {
     if (isUsableImage(url)) output.push(url);
   };
 
-  for (const attr of ['property="og:image"', 'name="twitter:image"', 'property="twitter:image"']) {
-    const match = String(html).match(new RegExp(`<meta[^>]+${attr}[^>]+content=["']([^"']+)["'][^>]*>`, 'i'));
-    if (match?.[1]) push(match[1]);
+  for (const match of String(html).matchAll(/<meta\b[^>]*>/gi)) {
+    const tag = match[0];
+    const name = `${attrFromTag(tag, 'property')} ${attrFromTag(tag, 'name')}`.toLowerCase();
+    if (/(^|\s)(og:image|twitter:image|twitter:image:src)(\s|$)/i.test(name)) push(attrFromTag(tag, 'content'));
   }
 
   for (const match of String(html).matchAll(/<img[^>]+(?:src|data-src|data-original)=["']([^"']+)["'][^>]*>/gi)) {
     const candidate = match[1] || '';
     if (isBlockedImageUrl(candidate) || /alt=["'][^"']*(logo|avatar|marca|perfil|icone|ícone|google)[^"']*["']/i.test(match[0])) continue;
     push(candidate);
+  }
+
+  for (const match of String(html).matchAll(/"image"\s*:\s*(?:"([^"]+)"|\[([\s\S]*?)\]|\{([\s\S]*?)\})/gi)) {
+    const raw = match[1] || match[2] || match[3] || '';
+    for (const urlMatch of raw.matchAll(/https?:\\?\/\\?\/[^"',}\]\s]+/gi)) {
+      push(urlMatch[0].replace(/\\\//g, '/'));
+    }
+  }
+
+  for (const match of String(html).matchAll(/<(?:img|source)\b[^>]*>/gi)) {
+    const tag = match[0];
+    const candidate =
+      attrFromTag(tag, 'src') ||
+      attrFromTag(tag, 'data-src') ||
+      attrFromTag(tag, 'data-original') ||
+      attrFromTag(tag, 'data-lazy-src') ||
+      '';
+    if (isBlockedImageUrl(candidate) || /alt=["'][^"']*(logo|avatar|marca|perfil|icone|google)[^"']*["']/i.test(tag)) continue;
+    push(candidate);
+    const srcset = attrFromTag(tag, 'srcset') || attrFromTag(tag, 'data-srcset');
+    if (srcset) {
+      const urls = srcset
+        .split(',')
+        .map((item) => item.trim().split(/\s+/)[0])
+        .filter(Boolean);
+      push(urls.at(-1) || urls[0]);
+    }
   }
 
   return uniqueImages(output, 10);
@@ -185,8 +235,6 @@ const fetchArticleImages = async (url) => {
     return [];
   }
 };
-
-const fallbackImageFor = (category) => CATEGORY_IMAGES[category] || CATEGORY_IMAGES.Brasil;
 
 const keywordSet = (item) => new Set(extractKeywords(item.title, item.category).slice(0, 8));
 
@@ -267,6 +315,7 @@ const parseRssItems = (xml, category) => {
     const rawTitle = textBetween(itemXml, 'title');
     const title = cleanTitle(rawTitle);
     const source = textBetween(itemXml, 'source') || rawTitle.split(' - ').pop() || 'Google News';
+    const finalCategory = classifyCategory(category, title, source);
     const googleLink = textBetween(itemXml, 'link');
     const sourceUrl = attrBetween(itemXml, 'source', 'url');
     const link = sourceUrl || googleLink;
@@ -274,7 +323,8 @@ const parseRssItems = (xml, category) => {
 
     return {
       title,
-      category,
+      category: finalCategory,
+      feedCategory: category,
       link,
       googleLink,
       sourceUrl,
@@ -320,7 +370,7 @@ const buildPitch = (items) => {
   const keywords = extractKeywords(first.title, first.category);
   const sourceCount = uniquePublishers.length || sources.length;
   const sourceQuality = Math.min(8, sourceCount);
-  const imageCandidates = uniqueImages([fallbackImageFor(first.category)], 6);
+  const imageCandidates = [];
 
   const isRadar = items.some((item) => item.radarCluster);
   const newestTime = Math.max(...items.map((item) => Date.parse(item.publishedAt) || 0), Date.now());

@@ -503,7 +503,7 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
   const sources = parseArray(row.sources);
   const tags = parseArray(row.tags).map(String).filter(Boolean);
   const imageCandidates = uniqueImageCandidates(parseArray(row.image_candidates).map(String));
-  const coverUrl = chooseBestImage(imageCandidates, row.title, row.category);
+  const coverUrl = imageCandidates.length ? chooseBestImage(imageCandidates, row.title, row.category) : '';
   const inlineImageUrl = chooseInlineImage(imageCandidates, coverUrl, row.title, row.category);
   const sourceNames = [
     ...new Set(
@@ -568,7 +568,7 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
     keywords: aiArticle.keywords,
     tags,
     sources: sourceNames,
-    media: [coverUrl, ...imageCandidates.filter((src) => src !== coverUrl && isUsableImage(src))].map((src) => ({
+    media: [coverUrl, ...imageCandidates.filter((src) => src !== coverUrl && isUsableImage(src))].filter(Boolean).map((src) => ({
       src,
       type: 'image',
       role: src === coverUrl ? 'cover' : src === inlineImageUrl ? 'body' : 'candidate',
