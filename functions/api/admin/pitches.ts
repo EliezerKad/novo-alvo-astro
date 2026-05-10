@@ -216,7 +216,7 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
   const db = getDb(env);
   if (!db) return json({ error: 'Binding EDITORIAL_DB nao configurado.' }, { status: 503 });
 
-  let payload: { id?: string; status?: string };
+  let payload: { id?: string; clusterKey?: string; status?: string };
   try {
     payload = await request.json();
   } catch {
@@ -224,15 +224,17 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
   }
 
   const id = clean(payload.id, 120);
+  const clusterKey = clean(payload.clusterKey, 180);
   const status = clean(payload.status, 24);
-  if (!id) return json({ error: 'ID ausente.' }, { status: 400 });
+  if (!id && !clusterKey) return json({ error: 'ID ausente.' }, { status: 400 });
   if (!['new', 'reviewed', 'queued', 'dismissed', 'converted'].includes(status)) {
     return json({ error: 'Status invalido.' }, { status: 400 });
   }
 
+  const lookupKey = clusterKey || id;
   const existing = await db
     .prepare('SELECT id, category FROM editorial_pitches WHERE id = ? OR cluster_key = ? LIMIT 1')
-    .bind(id, id)
+    .bind(id || lookupKey, lookupKey)
     .first<PitchRecord>();
 
   if (!existing) {
@@ -242,7 +244,7 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
 
   await db
     .prepare('UPDATE editorial_pitches SET status = ?, updated_at = ? WHERE id = ? OR cluster_key = ?')
-    .bind(status, new Date().toISOString(), id, id)
+    .bind(status, new Date().toISOString(), existing.id, lookupKey)
     .run();
 
   let queue = null;

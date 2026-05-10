@@ -255,9 +255,9 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
                   ${
                     pitch.status === 'queued'
                       ? `<span class="rounded-xl bg-emerald-50 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">Na fila</span>`
-                      : `<button type="button" data-pitch-action="${pitch.status === 'reviewed' ? 'queued' : 'reviewed'}" data-pitch-id="${escapeHtml(pitch.id)}" class="rounded-xl bg-zinc-950 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-red-600 dark:hover:text-white">${pitch.status === 'reviewed' ? 'Aprovar para Fila' : 'Revisar'}</button>`
+                      : `<button type="button" data-pitch-action="${pitch.status === 'reviewed' ? 'queued' : 'reviewed'}" data-pitch-id="${escapeHtml(pitch.id)}" data-pitch-cluster="${escapeHtml(pitch.cluster_key || pitch.clusterKey || '')}" class="rounded-xl bg-zinc-950 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-red-600 dark:hover:text-white">${pitch.status === 'reviewed' ? 'Aprovar para Fila' : 'Revisar'}</button>`
                   }
-                  <button type="button" data-pitch-action="dismissed" data-pitch-id="${escapeHtml(pitch.id)}" class="rounded-xl border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:border-red-600 hover:text-red-600 dark:border-zinc-800">Descartar</button>
+                  <button type="button" data-pitch-action="dismissed" data-pitch-id="${escapeHtml(pitch.id)}" data-pitch-cluster="${escapeHtml(pitch.cluster_key || pitch.clusterKey || '')}" class="rounded-xl border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:border-red-600 hover:text-red-600 dark:border-zinc-800">Descartar</button>
                 </div>
               </article>
             `;
@@ -451,7 +451,7 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
         }
       };
 
-      const updatePitchStatus = async (button, id, nextStatus) => {
+      const updatePitchStatus = async (button, id, nextStatus, clusterKey = '') => {
         const token = getToken();
         if (!token) return;
         if (!id) {
@@ -474,7 +474,7 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
               'content-type': 'application/json',
               authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ id, status: nextStatus }),
+            body: JSON.stringify({ id, clusterKey, status: nextStatus }),
           });
           const data = await response.json().catch(() => ({}));
           if (response.status === 401) {
@@ -487,7 +487,12 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
           if (!response.ok) throw new Error(data.error || 'Nao foi possivel atualizar a pauta.');
 
           if (nextStatus === 'dismissed') {
-            pitches = pitches.filter((pitch) => String(pitch.id || '') !== String(id));
+            const removedCluster = String(clusterKey || '');
+            pitches = pitches.filter((pitch) => {
+              const pitchId = String(pitch.id || '');
+              const pitchCluster = String(pitch.cluster_key || pitch.clusterKey || '');
+              return pitchId !== String(id) && (!removedCluster || pitchCluster !== removedCluster);
+            });
             render();
             if (statusNode) statusNode.textContent = 'Pauta descartada.';
             return;
@@ -538,7 +543,7 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
 
         const button = event.target.closest('[data-pitch-action]');
         if (!button) return;
-        updatePitchStatus(button, button.dataset.pitchId || '', button.dataset.pitchAction || 'reviewed');
+        updatePitchStatus(button, button.dataset.pitchId || '', button.dataset.pitchAction || 'reviewed', button.dataset.pitchCluster || '');
       });
 
       modalClose?.addEventListener('click', closePitchPreview);

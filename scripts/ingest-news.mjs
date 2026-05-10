@@ -102,7 +102,46 @@ const extractKeywords = (title, category) => {
   return [...new Set(words)].slice(0, 10);
 };
 
-const isUsableImage = (value) => /^https:\/\//i.test(String(value || '')) && !/source\.unsplash\.com/i.test(String(value || '')) && !/\.(svg|gif)(\?|$)/i.test(String(value || ''));
+const isBlockedImageUrl = (value) => {
+  const url = String(value || '').toLowerCase();
+  return (
+    /(logo|avatar|icon|sprite|profile|pixel|tracking|blank|placeholder|favicon|author|badge|watermark)/i.test(url) ||
+    /google(?:logo|news)|google\.com\/images\/branding|gstatic\.com\/images\/branding|www\.gstatic\.com\/images\/branding/i.test(url)
+  );
+};
+
+const isUsableImage = (value) => {
+  const url = String(value || '');
+  if (!/^https:\/\//i.test(url)) return false;
+  if (/source\.unsplash\.com/i.test(url)) return false;
+  if (/\.(svg|gif|ico)(\?|$)/i.test(url)) return false;
+  if (isBlockedImageUrl(url)) return false;
+  return true;
+};
+
+const imageKey = (value) => {
+  try {
+    const url = new URL(String(value || ''));
+    return `${url.hostname}${url.pathname}`.toLowerCase().replace(/\/+/g, '/');
+  } catch {
+    return String(value || '').toLowerCase().split('?')[0];
+  }
+};
+
+const uniqueImages = (values, limit = 16) => {
+  const seen = new Set();
+  const output = [];
+  for (const value of values) {
+    const url = String(value || '');
+    if (!isUsableImage(url)) continue;
+    const key = imageKey(url);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    output.push(url);
+    if (output.length >= limit) break;
+  }
+  return output;
+};
 
 const absoluteUrl = (value, base) => {
   try {
@@ -126,11 +165,11 @@ const imagesFromArticleHtml = (html, baseUrl) => {
 
   for (const match of String(html).matchAll(/<img[^>]+(?:src|data-src|data-original)=["']([^"']+)["'][^>]*>/gi)) {
     const candidate = match[1] || '';
-    if (/(logo|avatar|icon|sprite|profile|pixel|tracking|blank)/i.test(candidate)) continue;
+    if (isBlockedImageUrl(candidate) || /alt=["'][^"']*(logo|avatar|marca|perfil|icone|ícone|google)[^"']*["']/i.test(match[0])) continue;
     push(candidate);
   }
 
-  return [...new Set(output)].slice(0, 10);
+  return uniqueImages(output, 10);
 };
 
 const fetchArticleImages = async (url) => {
@@ -288,7 +327,7 @@ const buildPitch = (items) => {
   const sourceCount = uniquePublishers.length || sources.length;
   const sourceQuality = Math.min(8, sourceCount);
   const rssImages = items.map((item) => item.imageUrl).filter(Boolean);
-  const imageCandidates = [...new Set([...rssImages.filter(isUsableImage), fallbackImageFor(first.category)])].slice(0, 6);
+  const imageCandidates = uniqueImages([...rssImages, fallbackImageFor(first.category)], 6);
 
   const isRadar = items.some((item) => item.radarCluster);
   const newestTime = Math.max(...items.map((item) => Date.parse(item.publishedAt) || 0), Date.now());
@@ -332,7 +371,7 @@ const enrichPitchImages = async (pitch) => {
 
   return {
     ...pitch,
-    imageCandidates: [...new Set([...current, ...sourceImages].filter(isUsableImage))].slice(0, 16),
+    imageCandidates: uniqueImages([...current, ...sourceImages], 16),
   };
 };
 

@@ -61,12 +61,43 @@ const CATEGORY_IMAGES: Record<string, string> = {
 
 const fallbackImageForCategory = (category: unknown) => CATEGORY_IMAGES[clean(category, 80)] || '/og-default.svg';
 
+const isBlockedImageUrl = (value: unknown) => {
+  const url = clean(value, 1000).toLowerCase();
+  return (
+    /(logo|avatar|icon|sprite|profile|pixel|tracking|blank|placeholder|favicon|author|badge|watermark)/i.test(url) ||
+    /google(?:logo|news)|google\.com\/images\/branding|gstatic\.com\/images\/branding|www\.gstatic\.com\/images\/branding/i.test(url)
+  );
+};
+
 const isUsableImage = (value: unknown) => {
   const url = clean(value, 1000);
   if (!/^https:\/\//i.test(url)) return false;
   if (/source\.unsplash\.com/i.test(url)) return false;
-  if (/\.(svg|gif)(\?|$)/i.test(url)) return false;
+  if (/\.(svg|gif|ico)(\?|$)/i.test(url)) return false;
+  if (isBlockedImageUrl(url)) return false;
   return true;
+};
+
+const imageKey = (value: unknown) => {
+  try {
+    const url = new URL(clean(value, 1000));
+    return `${url.hostname}${url.pathname}`.toLowerCase().replace(/\/+/g, '/');
+  } catch {
+    return clean(value, 1000).toLowerCase().split('?')[0];
+  }
+};
+
+const uniqueImageCandidates = (values: string[]) => {
+  const seen = new Set<string>();
+  const output: string[] = [];
+  for (const value of values) {
+    if (!isUsableImage(value)) continue;
+    const key = imageKey(value);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    output.push(value);
+  }
+  return output;
 };
 
 const scoreImageCandidate = (url: string, title: string, category: string) => {
@@ -78,25 +109,30 @@ const scoreImageCandidate = (url: string, title: string, category: string) => {
     .split(/[^a-z0-9]+/)
     .filter((term) => term.length > 3);
   let score = 0;
-  if (/images\.unsplash\.com/.test(lowerUrl)) score += 15;
+  if (/images\.unsplash\.com/.test(lowerUrl)) score -= 25;
   if (/\.(jpe?g|png|webp)(\?|$)/i.test(url)) score += 12;
   if (/(1200|1600|1920|large|xl|original|og|share|cover)/i.test(url)) score += 18;
-  if (/(logo|avatar|icon|sprite|thumb_small|profile)/i.test(url)) score -= 45;
+  if (isBlockedImageUrl(url)) score -= 100;
+  if (/(thumb_small|thumbnail|small|80x80|100x100|150x150)/i.test(url)) score -= 25;
   for (const term of new Set(terms)) {
     if (lowerUrl.includes(term)) score += 5;
   }
   return score;
 };
 
-const chooseBestImage = (candidates: string[], title: string, category: string) =>
-  candidates
-    .filter(isUsableImage)
+const chooseBestImage = (candidates: string[], title: string, category: string) => {
+  const fallback = fallbackImageForCategory(category);
+  const cleanCandidates = uniqueImageCandidates(candidates).filter((url) => imageKey(url) !== imageKey(fallback));
+  return (
+    cleanCandidates
     .map((url, index) => ({ url, index, score: scoreImageCandidate(url, title, category) - index }))
-    .sort((a, b) => b.score - a.score)[0]?.url || fallbackImageForCategory(category);
+      .sort((a, b) => b.score - a.score)[0]?.url || fallback
+  );
+};
 
 const chooseInlineImage = (candidates: string[], coverUrl: string, title: string, category: string) =>
-  candidates
-    .filter((url) => isUsableImage(url) && url !== coverUrl)
+  uniqueImageCandidates(candidates)
+    .filter((url) => imageKey(url) !== imageKey(coverUrl) && !/images\.unsplash\.com/i.test(url))
     .map((url, index) => ({ url, index, score: scoreImageCandidate(url, title, category) - index }))
     .sort((a, b) => b.score - a.score)[0]?.url || '';
 
@@ -268,12 +304,27 @@ const insertInlineImage = (html: string, image: { src: string; alt: string; capt
   const layout = ['wide', 'left', 'right'][
     Math.abs(slugify(`${category}-${image.src}`).split('').reduce((total, char) => total + char.charCodeAt(0), 0)) % 3
   ];
-  const figure = `<figure class="editorial-inline-image editorial-inline-image--${layout}"><img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" loading="lazy" referrerpolicy="no-referrer" /><figcaption>${escapeHtml(image.caption || image.alt)}</figcaption></figure>`;
+  const safeCaption = clean(image.caption, 180);
+  const captionHtml = safeCaption ? `<figcaption>${escapeHtml(safeCaption)}</figcaption>` : '';
+  const figure = `<figure class="editorial-inline-image editorial-inline-image--${layout}"><img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" loading="lazy" referrerpolicy="no-referrer" />${captionHtml}</figure>`;
   const paragraphs = [...html.matchAll(/<\/p>/gi)];
   if (paragraphs.length < 3) return `${html}${figure}`;
 
   const position = paragraphs[Math.min(2, Math.floor(paragraphs.length / 2))].index || html.length;
   return `${html.slice(0, position + 4)}${figure}${html.slice(position + 4)}`;
+};
+
+const stripLeadingDuplicateTitle = (html: string, title: string) => {
+  const titleKey = slugify(title);
+  if (!titleKey) return html;
+  return html
+    .replace(/^(\s*)<h[23][^>]*>\s*([\s\S]*?)\s*<\/h[23]>/i, (match, space, heading) =>
+      slugify(heading) === titleKey ? String(space || '') : match,
+    )
+    .replace(/^(\s*)<p[^>]*>\s*([\s\S]*?)\s*<\/p>/i, (match, space, paragraph) =>
+      slugify(plain(paragraph, 220)) === titleKey ? String(space || '') : match,
+    )
+    .trim();
 };
 
 const hasEditorialBody = (html: string) => {
@@ -333,7 +384,7 @@ const generateArticleWithAi = async (
 
   const system =
     'PROMPT: NEXA ENGINE v9.5 - MULTIGENERATIONAL AUDIENCE. Voce e um jornalista redator profissional do Portal Novo Alvo, uma voz independente que opera na fronteira entre analise tecnica profunda e cultura pop viral. As geracoes citadas nas diretrizes sao apenas parametros internos de estilo. Nunca cite Geracao X, Millennials, Gen Z, publico-alvo ou diretrizes editoriais dentro da materia. Escreva em portugues do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e valido.';
-  const imageCandidates = parseArray(row.image_candidates).map(String).filter(isUsableImage).slice(0, 8);
+  const imageCandidates = uniqueImageCandidates(parseArray(row.image_candidates).map(String)).slice(0, 8);
   const selectedImage = chooseBestImage(imageCandidates, row.title, row.category);
   const prompt = `
 PROMPT: NEXA ENGINE v9.5 - MULTIGENERATIONAL AUDIENCE
@@ -379,13 +430,13 @@ DADOS DO CLUSTER:
 [PALAVRAS-CHAVE]: ${row.keywords}
 [SCORE EDITORIAL]: ${score}
 [FONTES CONSOLIDADAS]: ${sourceCount}
-[IMAGEM ESCOLHIDA]: ${selectedImage}
+[IMAGEM ESCOLHIDA PARA CAPA]: ${selectedImage}
 [IMAGENS CANDIDATAS]: ${imageCandidates.join('\n')}
 [FONTES]:
 ${sourceLines || 'Fontes nao listadas.'}
 
 Responda exatamente neste formato, com JSON valido e sem markdown:
-{"title":"...","slug":"...","meta_description":"...","image_alt":"...","image_caption":"...","content_html":"..."}
+{"title":"...","slug":"...","meta_description":"...","image_alt":"...","content_html":"..."}
 `;
 
   try {
@@ -429,8 +480,8 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       seoDescription: plain(result.meta_description || result.seoDescription, 155) || fallback.seoDescription,
       keywords: plain(result.keywords, 700) || fallback.keywords,
       imageAlt: plain(result.image_alt || result.imageAlt, 180) || fallback.title,
-      imageCaption: plain(result.image_caption || result.imageCaption, 220) || '',
-      bodyHtml: generatedBody,
+      imageCaption: '',
+      bodyHtml: stripLeadingDuplicateTitle(generatedBody, plain(result.title, 180) || fallback.title),
       generatedWithAi: true,
       generationModel,
       generationError: '',
@@ -439,7 +490,7 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
     return {
       ...fallback,
       imageAlt: fallback.imageAlt || fallback.title,
-      imageCaption: fallback.imageCaption || '',
+      imageCaption: '',
       generatedWithAi: false,
       generationModel: env.GEMINI_API_KEY ? env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL : WORKERS_AI_MODEL,
       generationError: error instanceof Error ? error.message : 'Falha desconhecida na geracao por IA.',
@@ -450,7 +501,7 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
 export const buildArticlePayload = async (row: QueueRow, env: Env) => {
   const sources = parseArray(row.sources);
   const tags = parseArray(row.tags).map(String).filter(Boolean);
-  const imageCandidates = parseArray(row.image_candidates).map(String).filter(Boolean);
+  const imageCandidates = uniqueImageCandidates(parseArray(row.image_candidates).map(String));
   const coverUrl = chooseBestImage(imageCandidates, row.title, row.category);
   const inlineImageUrl = chooseInlineImage(imageCandidates, coverUrl, row.title, row.category);
   const sourceNames = [
@@ -503,7 +554,7 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
       {
         src: inlineImageUrl,
         alt: aiArticle.imageAlt || aiArticle.title,
-        caption: aiArticle.imageCaption || '',
+        caption: '',
       },
       row.category,
     ),
@@ -521,7 +572,7 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
       type: 'image',
       role: src === coverUrl ? 'cover' : src === inlineImageUrl ? 'body' : 'candidate',
       alt: src === coverUrl || src === inlineImageUrl ? aiArticle.imageAlt || aiArticle.title : '',
-      caption: src === coverUrl || src === inlineImageUrl ? aiArticle.imageCaption || '' : '',
+      caption: '',
     })),
     readingMinutes: Math.max(1, Math.ceil(aiArticle.bodyHtml.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length / 220)),
     publishedAt,
