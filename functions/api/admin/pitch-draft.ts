@@ -32,6 +32,8 @@ type PitchRow = {
   tags: string;
   keywords: string;
   image_candidates: string;
+  score?: number;
+  source_count?: number;
   updated_at?: string;
 };
 
@@ -72,7 +74,7 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
 
   const pitch = await db
     .prepare(
-      `SELECT id, title, summary, category, sources, tags, keywords, image_candidates, updated_at
+      `SELECT id, title, summary, category, sources, tags, keywords, image_candidates, score, source_count, updated_at
        FROM editorial_pitches
        WHERE id = ? OR cluster_key = ?
        LIMIT 1`,
@@ -94,6 +96,8 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
       tags: pitch.tags || '[]',
       keywords: pitch.keywords || '',
       image_candidates: pitch.image_candidates || '[]',
+      score: pitch.score || 0,
+      source_count: pitch.source_count || 0,
     },
     env,
   );

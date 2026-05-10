@@ -37,6 +37,8 @@ type QueueRow = {
   tags: string;
   keywords: string;
   image_candidates: string;
+  score?: number;
+  source_count?: number;
 };
 
 const json = (body: unknown, init: ResponseInit = {}) =>
@@ -158,6 +160,9 @@ const generateArticleWithAi = async (
   }
 
   const sources = parseArray(row.sources);
+  const score = Number(row.score || 0);
+  const sourceCount = Number(row.source_count || sources.length || 0);
+  const premiumDraft = score > 800;
   const sourceLines = sources
     .slice(0, 8)
     .map((source) => {
@@ -205,6 +210,8 @@ DADOS DO CLUSTER:
 [PAUTA]: ${row.title}
 [RESUMO]: ${row.summary}
 [PALAVRAS-CHAVE]: ${row.keywords}
+[SCORE EDITORIAL]: ${score}
+[FONTES CONSOLIDADAS]: ${sourceCount}
 [FONTES]:
 ${sourceLines || 'Fontes não listadas.'}
 
@@ -220,11 +227,11 @@ Responda exatamente neste formato:
     const result = env.GEMINI_API_KEY
       ? await runGeminiJson({
             apiKey: env.GEMINI_API_KEY,
-            model: env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
+            model: premiumDraft ? DEFAULT_GEMINI_MODEL : env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
             system,
             prompt,
-            maxOutputTokens: 4200,
-            temperature: 0.35,
+            maxOutputTokens: premiumDraft ? 5200 : 4200,
+            temperature: premiumDraft ? 0.28 : 0.35,
           })
           .then((gemini) => {
             generationModel = gemini.model;
@@ -332,6 +339,7 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
     publishedAt,
     generatedWithAi: aiArticle.generatedWithAi,
     generationModel: aiArticle.generationModel,
+    generationTier: Number(row.score || 0) > 800 ? 'nexa-premium' : 'standard',
     generationError: aiArticle.generationError,
   };
 };
@@ -367,7 +375,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   const now = new Date().toISOString();
   const due = await db
     .prepare(
-      `SELECT q.id, q.pitch_id, q.category, q.publish_after, p.title, p.summary, p.sources, p.tags, p.keywords, p.image_candidates
+      `SELECT q.id, q.pitch_id, q.category, q.publish_after, p.title, p.summary, p.sources, p.tags, p.keywords, p.image_candidates, p.score, p.source_count
        FROM editorial_queue q
        JOIN editorial_pitches p ON p.id = q.pitch_id
        WHERE q.status = 'queued' AND q.publish_after <= ?
