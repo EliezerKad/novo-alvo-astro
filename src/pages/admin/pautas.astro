@@ -319,7 +319,7 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 pb-5 dark:border-zinc-800">
               <p class="text-[10px] font-black uppercase tracking-[0.28em] text-red-600">Matéria completa gerada</p>
               <span class="rounded-full bg-zinc-100 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900">${escapeHtml(data.model || (data.aiEnabled ? 'Gemini' : 'Modelo local'))}</span>
-              ${article.generationTier === 'nexa-premium' ? '<span class="rounded-full bg-red-600 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white">Nexa premium</span>' : ''}
+              ${article.generationTier === 'nexa-premium' ? '<span class="rounded-full bg-red-600 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white">Alta pontuação</span>' : ''}
             </div>
             ${fallbackWarning}
             ${
@@ -398,7 +398,7 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
           button.textContent = 'Movendo...';
           button.classList.add('opacity-60');
         }
-        if (statusNode) statusNode.textContent = nextStatus === 'reviewed' ? 'Movendo pauta para Revisadas...' : nextStatus === 'queued' ? 'Aprovando pauta para a Fila Nexa...' : 'Atualizando pauta...';
+        if (statusNode) statusNode.textContent = nextStatus === 'reviewed' ? 'Movendo pauta para Revisadas...' : nextStatus === 'queued' ? 'Aprovando pauta para a fila editorial...' : 'Atualizando pauta...';
 
         try {
           const response = await fetch('/api/admin/pitches', {

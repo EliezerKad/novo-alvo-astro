@@ -122,16 +122,68 @@ const safeHtml = (value: unknown) =>
     .replace(/<(?!\/?(p|h2|h3|strong|em|ul|ol|li|blockquote)(\s|>|\/))/gi, '&lt;')
     .trim();
 
+const splitLongText = (text: string) => {
+  const cleanText = text.replace(/\s+/g, ' ').trim();
+  if (!cleanText) return [];
+  const sentences = cleanText.match(/[^.!?。！？]+[.!?。！？]+|[^.!?。！？]+$/g) || [cleanText];
+  const chunks: string[] = [];
+  let current = '';
+
+  for (const sentence of sentences.map((item) => item.trim()).filter(Boolean)) {
+    const next = current ? `${current} ${sentence}` : sentence;
+    if (next.length > 280 && current) {
+      chunks.push(current);
+      current = sentence;
+    } else {
+      current = next;
+    }
+  }
+
+  if (current) chunks.push(current);
+  return chunks;
+};
+
+const normalizeArticleHtml = (html: string) => {
+  const normalized = safeHtml(html)
+    .replace(/<\/(h2|h3|p|blockquote|li)>\s*/gi, '</$1>\n')
+    .replace(/<(h2|h3)[^>]*>\s*(.*?)\s*<\/\1>/gi, (_match, tag, text) => `<${tag}>${plain(text, 140)}</${tag}>`)
+    .replace(/<p[^>]*>\s*([\s\S]*?)\s*<\/p>/gi, (_match, text) =>
+      splitLongText(String(text).replace(/<[^>]+>/g, ' '))
+        .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+        .join(''),
+    )
+    .replace(/<blockquote[^>]*>\s*([\s\S]*?)\s*<\/blockquote>/gi, (_match, text) => `<blockquote>${escapeHtml(plain(text, 360))}</blockquote>`)
+    .replace(/<li[^>]*>\s*([\s\S]*?)\s*<\/li>/gi, (_match, text) => `<li>${escapeHtml(plain(text, 220))}</li>`);
+
+  const hasHeading = /<h[23]>/i.test(normalized);
+  const paragraphs = (normalized.match(/<p>/gi) || []).length;
+  if (paragraphs >= 5 && hasHeading) return normalized;
+
+  const text = plain(normalized, 9000);
+  const chunks = splitLongText(text).slice(0, 10);
+  if (!chunks.length) return normalized;
+  const midpoint = Math.max(2, Math.floor(chunks.length / 2));
+  return chunks
+    .map((paragraph, index) => {
+      if (index === midpoint) return `<h2>O ponto de pressão</h2><p>${escapeHtml(paragraph)}</p>`;
+      if (index === chunks.length - 2 && chunks.length > 5) return `<h3>O efeito imediato</h3><p>${escapeHtml(paragraph)}</p>`;
+      return `<p>${escapeHtml(paragraph)}</p>`;
+    })
+    .join('');
+};
+
 const htmlFromModelField = (value: unknown) => {
   const raw = String(value || '').trim();
   if (!raw) return '';
-  if (/<(p|h2|h3|strong|em|ul|ol|li|blockquote)\b/i.test(raw)) return safeHtml(raw);
-  return raw
+  if (/<(p|h2|h3|strong|em|ul|ol|li|blockquote)\b/i.test(raw)) return normalizeArticleHtml(raw);
+  return normalizeArticleHtml(
+    raw
     .split(/\n{2,}/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean)
     .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
-    .join('');
+      .join(''),
+  );
 };
 
 const hasEditorialBody = (html: string) => {
@@ -139,6 +191,7 @@ const hasEditorialBody = (html: string) => {
   if (text.length < 450) return false;
   if (/pauta consolidada por \d+ fontes/i.test(text)) return false;
   if (/o rascunho exige angulo proprio|o rascunho exige ângulo próprio/i.test(text)) return false;
+  if (/fontes monitoradas|entrou na fila editorial|resumo editorial|cluster de dados/i.test(text)) return false;
   return true;
 };
 
@@ -167,22 +220,22 @@ const generateArticleWithAi = async (
   const categoryPersona = popCategory
     ? `
 PERSONA DE CATEGORIA:
-- Para ${row.category}, mantenha o Brutalismo, mas escreva como um analista de Substack/Twitter assistindo ao evento em tempo real.
-- Linguagem direta, veloz e com punch. Menos palavras abstratas, mais impacto.
-- Foque no sentimento técnico: pressão, ruptura, domínio, queda, virada, desgaste, controle, palco, fatura, ruído, pancada, resposta.
-- Evite frases acadêmicas como "obteve êxito", "apresentou desempenho satisfatório" ou "configura um movimento relevante".
-- Prefira formulações vivas e factuais: "liquidou a fatura", "travou o jogo", "dominou a janela", "perdeu tração", "virou ativo de atenção".
-- O público é Gen Z e Millennial: verdade nua e crua, com velocidade e pegada, sem meme barato e sem exagero vazio.
-- Nao escreva como editor-chefe resumindo pauta. Escreva como jornalista de arquibancada, bastidor e feed: direto, vivo, com leitura tecnica e pulso de quem esta vendo a cena acontecer.
-- Troque o "relatorio da CIA" por "Brutalismo Pop": suor, atrito, hype, queda, pressao e impacto real.
-- Proibido soar como consultoria. Evite "gestao de imagem publica", "ativo estrategico", "inegociavel", "consolidada" e "estrategico".
-- Substitua esse vocabulario por formulacoes vivas: "virou assunto", "segurou o palco", "tomou pancada", "comprou a pressao", "entregou impacto real".
+- Para ${row.category}, mantenha o brutalismo, mas escreva como um jornalista profissional de alto nivel com leitura de Substack/Twitter: direto, vivo, tecnico e com pulso.
+- Linguagem veloz e com punch. Menos palavras abstratas, mais impacto concreto.
+- Foque no sentimento tecnico: pressao, ruptura, dominio, queda, virada, desgaste, controle, palco, fatura, ruido, pancada, resposta.
+- Evite frases academicas como "obteve exito", "apresentou desempenho satisfatorio" ou "configura um movimento relevante".
+- Prefira formulacoes vivas e factuais: "liquidou a fatura", "travou o jogo", "dominou a janela", "perdeu tracao", "virou assunto".
+- O publico e Gen Z e Millennial: verdade nua e crua, com velocidade e pegada, sem meme barato e sem exagero vazio.
+- Nao escreva como editor-chefe resumindo pauta. Escreva como reporter que viu a pressao acontecer e sabe explicar o impacto.
+- Troque o tom de relatorio corporativo por brutalismo pop: suor, atrito, hype, queda, pressao e impacto real.
+- Proibido soar como consultoria. Evite "gestao de imagem publica", "ativo estrategico", "inegociavel", "consolidada", "estrategico", "organismo vivo" e "multifacetada".
+- Substitua esse vocabulario por formulacoes diretas: "virou assunto", "segurou o palco", "tomou pancada", "comprou a pressao", "entregou impacto real".
 - Para esporte, escreva com energia de jogo: placar emocional, pressao da arquibancada, erro que custa caro, time com corda no pescoco, decisao tomada no detalhe. Nada de tratado militar.
 - Para famosos, games e entretenimento, trate imagem, desejo, exposicao, jogo e repercussao como cultura pop em movimento. Nada de museu de palavras dificeis.
 `
     : '';
   const sourceLines = sources
-    .slice(0, 8)
+    .slice(0, 20)
     .map((source) => {
       if (!source || typeof source !== 'object') return '';
       const record = source as Record<string, unknown>;
@@ -192,39 +245,40 @@ PERSONA DE CATEGORIA:
     .join('\n');
 
   const system = popCategory
-    ? 'Aja como jornalista redator do Portal Novo Alvo, com voz de analista de Substack/Twitter. Sua funcao e transformar dados brutos em texto vivo, direto e factual para publico Gen Z e Millennial. Escreva em portugues do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e valido.'
-    : 'Aja como o Mainframe de Inteligência da Nexa Media. Sua função é sintetizar dados brutos em uma narrativa de autoridade absoluta para o Portal Novo Alvo. Escreva em português do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e válido.';
+    ? 'Voce e um jornalista profissional de alto nivel do Portal Novo Alvo, com voz de analista de Substack/Twitter. Sua funcao e transformar dados brutos em uma materia jornalistica completa, viva, direta e factual para publico Gen Z e Millennial. Escreva em portugues do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e valido.'
+    : 'Voce e um jornalista profissional de alto nivel do Portal Novo Alvo. Sua funcao e transformar dados brutos em uma materia jornalistica completa, autoral, objetiva e densa. Escreva em portugues do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e valido.';
   const prompt = `
-Transforme este cluster de dados brutos em uma análise jornalística de alta densidade.
+Transforme este cluster de dados brutos em uma materia jornalistica completa, formatada e pronta para publicacao.
 
-REGRAS DE NULIFICAÇÃO CRÍTICAS:
-- Proibição de Inventário: não faça listas de "quem está exibindo o quê". Integre títulos de obras, clubes, produtos, empresas ou personagens em uma análise sobre tendência, mercado, gênero, disputa, risco ou comportamento.
-- Proibição de Créditos Externos: não cite nomes de outros veículos no corpo do texto, incluindo CNN, G1, UOL, Folha, Estadão, Globo, Reuters ou similares. O dado é do Portal Novo Alvo.
-- Proibição de Marcadores: não use <3>, *, bullets decorativos ou qualquer caractere de depuração. Use apenas <h2> e <h3> para hierarquia.
-- Filtro de Ruído: não escreva frases introdutórias como "Aqui está", "Aqui estão as pautas" ou "Segue o texto". Comece o JSON imediatamente.
+IDENTIDADE DO REDATOR:
+- Voce nao e assistente, nao e editor-chefe explicando bastidor e nao escreve clipping.
+- Voce e um jornalista profissional de alto nivel escrevendo a materia final do Portal Novo Alvo.
+- Nunca mencione Nexa, IA, modelo, prompt, cluster, fontes consolidadas ou processo interno no texto publicado.
 
-ARQUITETURA DO CONTEÚDO:
-- Lide Brutalista: comece com uma afirmação de mercado, poder, comportamento ou um fato incontestável.
-- Exemplo de abertura: "A fragmentação do catálogo de streaming força uma reestruturação nas janelas de exibição nesta semana."
-- Desenvolvimento: una as informações das fontes do cluster. Se várias fontes falam de uma mesma obra ou evento, analise o impacto desse movimento, não apenas cite que ele existe.
-- Encerramento: termine com uma projeção ou fechamento seco. Nunca termine com chamada de serviço como "Aproveite e assista".
-- Soberania do dado: use a informação das fontes para construir afirmação técnica própria.
-- Information Gain: cada parágrafo precisa trazer um dado novo.
+REGRAS CRITICAS:
+- Proibicao de Inventario: nao faca listas de "quem esta exibindo o que". Integre titulos de obras, clubes, produtos, empresas ou personagens em uma analise sobre tendencia, mercado, genero, disputa, risco ou comportamento.
+- Proibicao de Creditos Externos: nao cite nomes de outros veiculos no corpo do texto, incluindo CNN, G1, UOL, Folha, Estadao, Globo, Reuters ou similares. O dado e do Portal Novo Alvo.
+- Proibicao de Marcadores: nao use <3>, *, bullets decorativos ou qualquer caractere de depuracao. Use apenas <h2> e <h3> para hierarquia.
+- Filtro de Ruido: nao escreva frases introdutorias como "Aqui esta", "Aqui estao as pautas" ou "Segue o texto". Comece o JSON imediatamente.
+- Nunca entregue resumo de pauta. Nunca escreva "pauta consolidada", "rascunho exige", "fontes monitoradas" ou "entrou na fila editorial" dentro de content_html.
+
+ARQUITETURA DO CONTEUDO:
+- Lide: comece com uma afirmacao forte de mercado, poder, comportamento ou um fato incontestavel.
+- Desenvolvimento: una as informacoes das fontes. Se varias fontes falam do mesmo fato, cite uma vez e avance para consequencia, risco, impacto ou disputa.
+- Encerramento: termine com uma projecao ou fechamento seco. Nunca termine com chamada de servico como "Aproveite e assista".
+- Information Gain: cada paragrafo precisa trazer um dado novo.
 ${categoryPersona}
 
-REGRAS TÉCNICAS:
-- Analise apenas as fontes fornecidas abaixo como material invisível de apuração.
-- Estrutura: 5 a 8 parágrafos curtos.
-- Use <h2> e <h3> para hierarquia editorial. Evite subtítulos óbvios como "Conclusão", "Contexto" ou "O que vem agora".
-- Não crie links externos.
-- Onde houver placeholder de link interno, mantenha a estrutura.
-- Use as fontes do cluster como base de apuração. O padrão editorial esperado é síntese de 8 fontes distintas.
-- Não cite Google News como fonte editorial.
-- Não cite Reddit como fonte, a menos que Reddit esteja literalmente listado no cluster abaixo.
-- Produza texto pronto para publicação.
-- content_html deve usar apenas <p>, <h2>, <h3>, <strong>, <em>, <ul>, <li>.
-- Parágrafos devem ser curtos, mas densos em informação.
-- Em Esportes, Futebol, Entretenimento, Famosos e Games, cada parágrafo deve ter no máximo 3 linhas visuais no celular: 1 a 3 frases curtas, sem bloco cansativo.
+FORMATO OBRIGATORIO DO content_html:
+- Primeiro bloco: 1 paragrafo <p> com o dado mais forte. Nada antes dele.
+- Depois, um <h2> analitico.
+- Depois, 2 ou 3 paragrafos <p> curtos.
+- Depois, um <h3> de virada ou consequencia.
+- Depois, mais 2 ou 3 paragrafos <p>.
+- Feche com um paragrafo seco, sem conclusao generica.
+- Total: 6 a 9 paragrafos curtos, cada um com 1 a 3 frases.
+- Use apenas <p>, <h2>, <h3>, <strong>, <em>, <ul>, <li>.
+- Em Esportes, Futebol, Entretenimento, Famosos e Games, cada paragrafo deve ter no maximo 3 linhas visuais no celular.
 
 DADOS DO CLUSTER:
 [CATEGORIA]: ${row.category}
@@ -234,12 +288,9 @@ DADOS DO CLUSTER:
 [SCORE EDITORIAL]: ${score}
 [FONTES CONSOLIDADAS]: ${sourceCount}
 [FONTES]:
-${sourceLines || 'Fontes não listadas.'}
+${sourceLines || 'Fontes nao listadas.'}
 
-OBJETIVO FINAL:
-O leitor deve sentir que está lendo um relatório de inteligência técnica, não uma postagem de blog comum.
-
-Responda exatamente neste formato:
+Responda exatamente neste formato, com JSON valido e sem markdown:
 {"title":"...","slug":"...","meta_description":"...","content_html":"..."}
 `;
 

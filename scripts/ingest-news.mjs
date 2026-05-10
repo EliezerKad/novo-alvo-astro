@@ -26,8 +26,9 @@ const FEEDS = {
 
 const PORTAL_ORIGIN = process.env.PORTAL_ORIGIN || 'https://portalnovoalvo.com.br';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
-const MAX_ITEMS_PER_FEED = Number(process.env.MAX_ITEMS_PER_FEED || 40);
+const MAX_ITEMS_PER_FEED = Number(process.env.MAX_ITEMS_PER_FEED || 80);
 const MIN_SOURCES = Number(process.env.MIN_SOURCES || 8);
+const RADAR_BATCHES_PER_CATEGORY = Number(process.env.RADAR_BATCHES_PER_CATEGORY || 3);
 const HOUSEKEEPING_DAYS = Number(process.env.HOUSEKEEPING_DAYS || 30);
 
 const FALLBACK_IMAGE_TERMS = {
@@ -159,13 +160,18 @@ const buildCategoryRadarClusters = (items) => {
 
   const clusters = [];
   for (const [category, categoryItems] of byCategory.entries()) {
-    const distinct = distinctBySource(categoryItems).slice(0, Math.max(MIN_SOURCES, 12));
-    if (distinct.length >= MIN_SOURCES) {
+    const distinct = distinctBySource(categoryItems);
+    const maxItems = Math.max(MIN_SOURCES, MIN_SOURCES * RADAR_BATCHES_PER_CATEGORY);
+    const usable = distinct.slice(0, maxItems);
+    for (let start = 0; start < usable.length; start += MIN_SOURCES) {
+      const batch = usable.slice(start, start + MIN_SOURCES);
+      if (batch.length < MIN_SOURCES) continue;
       clusters.push(
-        distinct.map((item, index) => ({
+        batch.map((item, index) => ({
           ...item,
           title: index === 0 ? `Radar ${category}: ${item.title}` : item.title,
           radarCluster: true,
+          radarBatch: Math.floor(start / MIN_SOURCES) + 1,
         })),
       );
     }
@@ -238,8 +244,16 @@ const buildPitch = (items) => {
   const rssImages = items.map((item) => item.imageUrl).filter(Boolean);
   const imageCandidates = [...new Set([...rssImages, fallbackImageFor(first.category, keywords)])].slice(0, 6);
 
+  const isRadar = items.some((item) => item.radarCluster);
+  const signature = isRadar
+    ? items
+        .slice(0, 4)
+        .map((item) => slugify(item.title).slice(0, 42))
+        .join('-')
+    : slugify(first.title);
+
   return {
-    clusterKey: `${slugify(first.category)}:${slugify(first.title)}`,
+    clusterKey: `${slugify(first.category)}:${isRadar ? 'radar:' : ''}${signature}`,
     title: first.title,
     summary: `Pauta consolidada por ${sourceCount} fonte${sourceCount === 1 ? '' : 's'} sobre ${first.title}. O rascunho exige ângulo próprio, contexto local e checagem editorial antes da fila.`,
     category: first.category,
@@ -285,6 +299,10 @@ const main = async () => {
   if (!ADMIN_TOKEN) throw new Error('ADMIN_TOKEN ausente.');
 
   const allItems = (await Promise.all(Object.entries(FEEDS).map(fetchFeed))).flat();
+  const feedCounts = allItems.reduce((acc, item) => {
+    acc[item.category] = (acc[item.category] || 0) + 1;
+    return acc;
+  }, {});
   const topicClusters = clusterItems(allItems);
   const topicPitches = topicClusters
     .map(buildPitch)
@@ -292,7 +310,7 @@ const main = async () => {
     .sort((a, b) => b.score - a.score);
   const radarPitches = buildCategoryRadarClusters(allItems)
     .map(buildPitch)
-    .filter((pitch) => pitch.sourceCount >= MIN_SOURCES && !topicPitches.some((existing) => existing.category === pitch.category))
+    .filter((pitch) => pitch.sourceCount >= MIN_SOURCES && !topicPitches.some((existing) => existing.clusterKey === pitch.clusterKey))
     .sort((a, b) => b.score - a.score);
   const pitches = [...topicPitches, ...radarPitches]
     .slice(0, Number(process.env.MAX_PITCHES || 80));
@@ -313,6 +331,7 @@ const main = async () => {
   console.log(
     `Ingestao concluida: ${saved}/${pitches.length} pautas salvas. Itens: ${allItems.length}. Clusters por assunto: ${topicPitches.length}. Radares por categoria: ${radarPitches.length}.`,
   );
+  console.log(`Itens por categoria: ${JSON.stringify(feedCounts)}`);
 };
 
 main().catch((error) => {
