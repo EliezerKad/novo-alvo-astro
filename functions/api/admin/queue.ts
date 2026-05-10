@@ -163,7 +163,8 @@ const generateArticleWithAi = async (
   const score = Number(row.score || 0);
   const sourceCount = Number(row.source_count || sources.length || 0);
   const premiumDraft = score > 800;
-  const categoryPersona = ['Esportes', 'Entretenimento', 'Famosos'].includes(clean(row.category, 80))
+  const popCategory = ['Esportes', 'Futebol', 'Entretenimento', 'Famosos', 'Games'].includes(clean(row.category, 80));
+  const categoryPersona = popCategory
     ? `
 PERSONA DE CATEGORIA:
 - Para ${row.category}, mantenha o Brutalismo, mas escreva como um analista de Substack/Twitter assistindo ao evento em tempo real.
@@ -172,6 +173,12 @@ PERSONA DE CATEGORIA:
 - Evite frases acadêmicas como "obteve êxito", "apresentou desempenho satisfatório" ou "configura um movimento relevante".
 - Prefira formulações vivas e factuais: "liquidou a fatura", "travou o jogo", "dominou a janela", "perdeu tração", "virou ativo de atenção".
 - O público é Gen Z e Millennial: verdade nua e crua, com velocidade e pegada, sem meme barato e sem exagero vazio.
+- Nao escreva como editor-chefe resumindo pauta. Escreva como jornalista de arquibancada, bastidor e feed: direto, vivo, com leitura tecnica e pulso de quem esta vendo a cena acontecer.
+- Troque o "relatorio da CIA" por "Brutalismo Pop": suor, atrito, hype, queda, pressao e impacto real.
+- Proibido soar como consultoria. Evite "gestao de imagem publica", "ativo estrategico", "inegociavel", "consolidada" e "estrategico".
+- Substitua esse vocabulario por formulacoes vivas: "virou assunto", "segurou o palco", "tomou pancada", "comprou a pressao", "entregou impacto real".
+- Para esporte, escreva com energia de jogo: placar emocional, pressao da arquibancada, erro que custa caro, time com corda no pescoco, decisao tomada no detalhe. Nada de tratado militar.
+- Para famosos, games e entretenimento, trate imagem, desejo, exposicao, jogo e repercussao como cultura pop em movimento. Nada de museu de palavras dificeis.
 `
     : '';
   const sourceLines = sources
@@ -184,8 +191,9 @@ PERSONA DE CATEGORIA:
     .filter(Boolean)
     .join('\n');
 
-  const system =
-    'Aja como o Mainframe de Inteligência da Nexa Media. Sua função é sintetizar dados brutos em uma narrativa de autoridade absoluta para o Portal Novo Alvo. Escreva em português do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e válido.';
+  const system = popCategory
+    ? 'Aja como jornalista redator do Portal Novo Alvo, com voz de analista de Substack/Twitter. Sua funcao e transformar dados brutos em texto vivo, direto e factual para publico Gen Z e Millennial. Escreva em portugues do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e valido.'
+    : 'Aja como o Mainframe de Inteligência da Nexa Media. Sua função é sintetizar dados brutos em uma narrativa de autoridade absoluta para o Portal Novo Alvo. Escreva em português do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e válido.';
   const prompt = `
 Transforme este cluster de dados brutos em uma análise jornalística de alta densidade.
 
@@ -216,6 +224,7 @@ REGRAS TÉCNICAS:
 - Produza texto pronto para publicação.
 - content_html deve usar apenas <p>, <h2>, <h3>, <strong>, <em>, <ul>, <li>.
 - Parágrafos devem ser curtos, mas densos em informação.
+- Em Esportes, Futebol, Entretenimento, Famosos e Games, cada parágrafo deve ter no máximo 3 linhas visuais no celular: 1 a 3 frases curtas, sem bloco cansativo.
 
 DADOS DO CLUSTER:
 [CATEGORIA]: ${row.category}
