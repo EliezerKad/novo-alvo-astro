@@ -30,7 +30,7 @@ const MAX_ITEMS_PER_FEED = Number(process.env.MAX_ITEMS_PER_FEED || 80);
 const MIN_SOURCES = Number(process.env.MIN_SOURCES || 8);
 const RADAR_BATCHES_PER_CATEGORY = Number(process.env.RADAR_BATCHES_PER_CATEGORY || 3);
 const HOUSEKEEPING_DAYS = Number(process.env.HOUSEKEEPING_DAYS || 30);
-const MAX_IMAGE_SOURCE_FETCHES_PER_PITCH = Number(process.env.MAX_IMAGE_SOURCE_FETCHES_PER_PITCH || 5);
+const MAX_IMAGE_SOURCE_FETCHES_PER_PITCH = Number(process.env.MAX_IMAGE_SOURCE_FETCHES_PER_PITCH || 8);
 
 const decodeEntities = (value) =>
   String(value || '')
@@ -120,6 +120,23 @@ const uniqueImages = (values, limit = 16) => {
     if (!key || seen.has(key)) continue;
     seen.add(key);
     output.push(url);
+    if (output.length >= limit) break;
+  }
+  return output;
+};
+
+const imageCandidateUrl = (value) => (typeof value === 'object' && value ? value.url : value);
+
+const uniqueImageCandidates = (values, limit = 16) => {
+  const seen = new Set();
+  const output = [];
+  for (const value of values) {
+    const url = String(imageCandidateUrl(value) || '');
+    if (!isUsableImage(url)) continue;
+    const key = imageKey(url);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    output.push(typeof value === 'object' && value ? { ...value, url } : { url });
     if (output.length >= limit) break;
   }
   return output;
@@ -217,10 +234,39 @@ const imagesFromArticleHtml = (html, baseUrl) => {
   return uniqueImages(output, 10);
 };
 
+const isGoogleNewsUrl = (url) => /^https?:\/\/([^/]+\.)?news\.google\./i.test(String(url || ''));
+
+const resolveArticleUrl = async (url) => {
+  try {
+    if (!isGoogleNewsUrl(url)) return url;
+    const response = await fetch(url, {
+      redirect: 'follow',
+      headers: {
+        accept: 'text/html,application/xhtml+xml',
+        'user-agent': 'PortalNovoAlvoImageScout/1.0',
+      },
+      signal: AbortSignal.timeout(8000),
+    });
+    const finalUrl = response.url || url;
+    if (finalUrl && !isGoogleNewsUrl(finalUrl)) return finalUrl;
+    const html = await response.text().catch(() => '');
+    const canonical = attrBetween(html, 'link', 'href');
+    if (canonical && !isGoogleNewsUrl(canonical)) return canonical;
+    const external = [...html.matchAll(/https?:\/\/(?![^"'\s]*?(?:news\.google|google\.com|gstatic\.com|googleusercontent\.com))[^"'\s<>]+/gi)]
+      .map((match) => match[0])
+      .find(Boolean);
+    return external || url;
+  } catch {
+    return url;
+  }
+};
+
 const fetchArticleImages = async (url) => {
   try {
-    if (/^https?:\/\/([^/]+\.)?(news\.google|google|gstatic|googleusercontent)\./i.test(String(url || ''))) return [];
-    const response = await fetch(url, {
+    if (/^https?:\/\/([^/]+\.)?(google|gstatic|googleusercontent)\./i.test(String(url || '')) && !isGoogleNewsUrl(url)) return [];
+    const articleUrl = await resolveArticleUrl(url);
+    if (/^https?:\/\/([^/]+\.)?(google|gstatic|googleusercontent)\./i.test(String(articleUrl || ''))) return [];
+    const response = await fetch(articleUrl, {
       headers: {
         accept: 'text/html,application/xhtml+xml',
         'user-agent': 'PortalNovoAlvoImageScout/1.0',
@@ -230,7 +276,7 @@ const fetchArticleImages = async (url) => {
     if (!response.ok) return [];
     const contentType = response.headers.get('content-type') || '';
     if (!/text\/html|application\/xhtml/i.test(contentType)) return [];
-    return imagesFromArticleHtml(await response.text(), response.url || url);
+    return imagesFromArticleHtml(await response.text(), response.url || articleUrl);
   } catch {
     return [];
   }
@@ -318,7 +364,7 @@ const parseRssItems = (xml, category) => {
     const finalCategory = classifyCategory(category, title, source);
     const googleLink = textBetween(itemXml, 'link');
     const sourceUrl = attrBetween(itemXml, 'source', 'url');
-    const link = sourceUrl || googleLink;
+    const link = googleLink || sourceUrl;
     const publishedAt = textBetween(itemXml, 'pubDate');
 
     return {
@@ -408,13 +454,22 @@ const enrichPitchImages = async (pitch) => {
     await Promise.all(
       sources
         .slice(0, MAX_IMAGE_SOURCE_FETCHES_PER_PITCH)
-        .map((source) => fetchArticleImages(source.url)),
+        .map(async (source) => {
+          const urls = await fetchArticleImages(source.url);
+          return urls.map((url) => ({
+            url,
+            sourceTitle: source.title,
+            sourcePublisher: source.publisher,
+            sourceUrl: source.url,
+            category: pitch.category,
+          }));
+        }),
     )
   ).flat();
 
   return {
     ...pitch,
-    imageCandidates: uniqueImages([...current, ...sourceImages], 16),
+    imageCandidates: uniqueImageCandidates([...current, ...sourceImages], 18),
   };
 };
 

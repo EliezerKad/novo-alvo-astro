@@ -41,6 +41,14 @@ type QueueRow = {
   source_count?: number;
 };
 
+type ImageCandidate = {
+  url: string;
+  sourceTitle?: string;
+  sourcePublisher?: string;
+  sourceUrl?: string;
+  category?: string;
+};
+
 const CATEGORY_IMAGES: Record<string, string> = {
   Brasil: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=1600&q=80',
   Mundo: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80',
@@ -88,54 +96,98 @@ const imageKey = (value: unknown) => {
   }
 };
 
-const uniqueImageCandidates = (values: string[]) => {
+const candidateUrl = (value: unknown) => {
+  if (value && typeof value === 'object') return clean((value as Record<string, unknown>).url, 1000);
+  return clean(value, 1000);
+};
+
+const normalizeImageCandidate = (value: unknown): ImageCandidate | null => {
+  const url = candidateUrl(value);
+  if (!isUsableImage(url)) return null;
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    return {
+      url,
+      sourceTitle: clean(record.sourceTitle, 240),
+      sourcePublisher: clean(record.sourcePublisher, 120),
+      sourceUrl: clean(record.sourceUrl, 900),
+      category: clean(record.category, 80),
+    };
+  }
+  return { url };
+};
+
+const uniqueImageCandidates = (values: unknown[]) => {
   const seen = new Set<string>();
-  const output: string[] = [];
+  const output: ImageCandidate[] = [];
   for (const value of values) {
-    if (!isUsableImage(value)) continue;
-    const key = imageKey(value);
+    const candidate = normalizeImageCandidate(value);
+    if (!candidate) continue;
+    const key = imageKey(candidate.url);
     if (!key || seen.has(key)) continue;
     seen.add(key);
-    output.push(value);
+    output.push(candidate);
   }
   return output;
 };
 
-const scoreImageCandidate = (url: string, title: string, category: string) => {
-  const lowerUrl = url.toLowerCase();
-  const terms = `${title} ${category}`
+const tokenize = (value: unknown) =>
+  clean(value, 1000)
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .split(/[^a-z0-9]+/)
-    .filter((term) => term.length > 3);
+    .filter((term) => term.length > 3 && !['para', 'como', 'sobre', 'mais', 'pela', 'pelo', 'entre', 'esta', 'esse', 'essa'].includes(term));
+
+const semanticOverlap = (left: unknown, right: unknown) => {
+  const a = new Set(tokenize(left));
+  const b = new Set(tokenize(right));
+  if (!a.size || !b.size) return 0;
+  let shared = 0;
+  for (const term of a) {
+    if (b.has(term)) shared += 1;
+  }
+  return shared / Math.min(a.size, b.size);
+};
+
+const scoreImageCandidate = (candidate: ImageCandidate, title: string, category: string) => {
+  const url = candidate.url;
+  const lowerUrl = url.toLowerCase();
+  const context = `${candidate.sourceTitle || ''} ${candidate.sourcePublisher || ''} ${candidate.category || ''}`;
+  const terms = tokenize(`${title} ${category}`);
   let score = 0;
   if (/images\.unsplash\.com/.test(lowerUrl)) score -= 25;
   if (/\.(jpe?g|png|webp)(\?|$)/i.test(url)) score += 12;
   if (/(1200|1600|1920|large|xl|original|og|share|cover)/i.test(url)) score += 18;
   if (isBlockedImageUrl(url)) score -= 100;
   if (/(thumb_small|thumbnail|small|80x80|100x100|150x150)/i.test(url)) score -= 25;
+  if (candidate.sourceTitle) score += Math.round(semanticOverlap(title, candidate.sourceTitle) * 70);
+  if (candidate.category && clean(candidate.category, 80) === clean(category, 80)) score += 16;
   for (const term of new Set(terms)) {
     if (lowerUrl.includes(term)) score += 5;
+    if (context.toLowerCase().includes(term)) score += 8;
   }
+  if (category === 'Cinema' && /(movie|film|cinema|poster|still|serie|stream|cannes|hbo|max)/i.test(`${url} ${context}`)) score += 20;
+  if (category === 'Futebol' && /(futebol|football|soccer|campo|jogo|time|club|stadium|estadio|brasileirao)/i.test(`${url} ${context}`)) score += 20;
+  if (category === 'Moda' && /(fashion|moda|look|runway|dress|vestido|tendencia|passarela)/i.test(`${url} ${context}`)) score += 20;
   return score;
 };
 
-const chooseBestImage = (candidates: string[], title: string, category: string) => {
+const chooseBestImage = (candidates: ImageCandidate[], title: string, category: string) => {
   const fallback = fallbackImageForCategory(category);
-  const cleanCandidates = uniqueImageCandidates(candidates).filter((url) => imageKey(url) !== imageKey(fallback));
+  const cleanCandidates = uniqueImageCandidates(candidates).filter((candidate) => imageKey(candidate.url) !== imageKey(fallback));
   return (
     cleanCandidates
-    .map((url, index) => ({ url, index, score: scoreImageCandidate(url, title, category) - index }))
-      .sort((a, b) => b.score - a.score)[0]?.url || fallback
+      .map((candidate, index) => ({ candidate, index, score: scoreImageCandidate(candidate, title, category) - index }))
+      .sort((a, b) => b.score - a.score)[0]?.candidate.url || fallback
   );
 };
 
-const chooseInlineImage = (candidates: string[], coverUrl: string, title: string, category: string) =>
+const chooseInlineImage = (candidates: ImageCandidate[], coverUrl: string, title: string, category: string) =>
   uniqueImageCandidates(candidates)
-    .filter((url) => imageKey(url) !== imageKey(coverUrl) && !/images\.unsplash\.com/i.test(url))
-    .map((url, index) => ({ url, index, score: scoreImageCandidate(url, title, category) - index }))
-    .sort((a, b) => b.score - a.score)[0]?.url || '';
+    .filter((candidate) => imageKey(candidate.url) !== imageKey(coverUrl) && !/images\.unsplash\.com/i.test(candidate.url))
+    .map((candidate, index) => ({ candidate, index, score: scoreImageCandidate(candidate, title, category) - index }))
+    .sort((a, b) => b.score - a.score)[0]?.candidate.url || '';
 
 const json = (body: unknown, init: ResponseInit = {}) =>
   new Response(JSON.stringify(body), {
@@ -385,8 +437,11 @@ const generateArticleWithAi = async (
 
   const system =
     'PROMPT: NEXA ENGINE v9.5 - MULTIGENERATIONAL AUDIENCE. Voce e um jornalista redator profissional do Portal Novo Alvo, uma voz independente que opera na fronteira entre analise tecnica profunda e cultura pop viral. As geracoes citadas nas diretrizes sao apenas parametros internos de estilo. Nunca cite Geracao X, Millennials, Gen Z, publico-alvo ou diretrizes editoriais dentro da materia. Escreva em portugues do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e valido.';
-  const imageCandidates = uniqueImageCandidates(parseArray(row.image_candidates).map(String)).slice(0, 8);
+  const imageCandidates = uniqueImageCandidates(parseArray(row.image_candidates)).slice(0, 10);
   const selectedImage = chooseBestImage(imageCandidates, row.title, row.category);
+  const imageLines = imageCandidates
+    .map((candidate, index) => `${index + 1}. ${candidate.url} | pauta: ${plain(candidate.sourceTitle, 160)} | origem: ${plain(candidate.sourcePublisher, 80)}`)
+    .join('\n');
   const prompt = `
 PROMPT: NEXA ENGINE v9.5 - MULTIGENERATIONAL AUDIENCE
 
@@ -415,6 +470,11 @@ PROIBIDO: Marcadores de depuracao como <3> ou asteriscos. Use apenas HTML limpo 
 
 PROIBIDO: Citar diretamente as geracoes usadas na calibragem de estilo. Nao escreva frases como "Para a Geracao X", "Millennials" ou "a Gen Z quer". Use a energia dessas diretrizes sem revelar a regra.
 
+REGRA DE PROMESSA DA MANCHETE:
+- Se a pauta prometer quantidade ("10 filmes", "8 jogos", "5 pontos"), a materia deve cumprir essa promessa.
+- Nao transforme em inventario seco, mas cite ou agrupe os itens suficientes para o leitor sentir que a selecao foi realmente coberta.
+- Se os nomes dos itens aparecerem nas fontes, use esses nomes no texto. Se faltarem nomes, explique o eixo editorial da selecao sem fingir informacao inexistente.
+
 FORMATO EDITORIAL OBRIGATORIO:
 - Escreva uma materia completa, nao um resumo de pauta.
 - Nunca mencione IA, modelo, prompt, cluster, fontes consolidadas ou processo interno no texto publicado.
@@ -432,7 +492,8 @@ DADOS DO CLUSTER:
 [SCORE EDITORIAL]: ${score}
 [FONTES CONSOLIDADAS]: ${sourceCount}
 [IMAGEM ESCOLHIDA PARA CAPA]: ${selectedImage}
-[IMAGENS CANDIDATAS]: ${imageCandidates.join('\n')}
+[IMAGENS CANDIDATAS COM CONTEXTO]:
+${imageLines || 'Sem imagens candidatas.'}
 [FONTES]:
 ${sourceLines || 'Fontes nao listadas.'}
 
@@ -502,7 +563,7 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
 export const buildArticlePayload = async (row: QueueRow, env: Env) => {
   const sources = parseArray(row.sources);
   const tags = parseArray(row.tags).map(String).filter(Boolean);
-  const imageCandidates = uniqueImageCandidates(parseArray(row.image_candidates).map(String));
+  const imageCandidates = uniqueImageCandidates(parseArray(row.image_candidates));
   const coverUrl = imageCandidates.length ? chooseBestImage(imageCandidates, row.title, row.category) : '';
   const inlineImageUrl = chooseInlineImage(imageCandidates, coverUrl, row.title, row.category);
   const sourceNames = [
@@ -568,7 +629,7 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
     keywords: aiArticle.keywords,
     tags,
     sources: sourceNames,
-    media: [coverUrl, ...imageCandidates.filter((src) => src !== coverUrl && isUsableImage(src))].filter(Boolean).map((src) => ({
+    media: [coverUrl, ...imageCandidates.map((candidate) => candidate.url).filter((src) => src !== coverUrl && isUsableImage(src))].filter(Boolean).map((src) => ({
       src,
       type: 'image',
       role: src === coverUrl ? 'cover' : src === inlineImageUrl ? 'body' : 'candidate',
