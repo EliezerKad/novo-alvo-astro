@@ -131,7 +131,9 @@ const generateArticleWithAi = async (
   fallback: { title: string; summary: string; bodyHtml: string; seoDescription: string; keywords: string },
   env: Env,
 ) => {
-  if (!env.GEMINI_API_KEY && !env.AI) return fallback;
+  if (!env.GEMINI_API_KEY && !env.AI) {
+    return { ...fallback, generatedWithAi: false, generationModel: 'fallback-editorial-template', generationError: 'IA editorial nao configurada.' };
+  }
 
   const sources = parseArray(row.sources);
   const sourceLines = sources
@@ -183,9 +185,9 @@ Responda exatamente neste formato:
 `;
 
   try {
+    let generationModel = WORKERS_AI_MODEL;
     const result = env.GEMINI_API_KEY
-      ? (
-          await runGeminiJson({
+      ? await runGeminiJson({
             apiKey: env.GEMINI_API_KEY,
             model: env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
             system,
@@ -193,7 +195,10 @@ Responda exatamente neste formato:
             maxOutputTokens: 1600,
             temperature: 0.35,
           })
-        ).result
+          .then((gemini) => {
+            generationModel = gemini.model;
+            return gemini.result;
+          })
       : parseModelJson(
           extractText(
             await env.AI!.run(WORKERS_AI_MODEL, {
@@ -213,9 +218,17 @@ Responda exatamente neste formato:
       seoDescription: plain(result.meta_description || result.seoDescription, 155) || fallback.seoDescription,
       keywords: plain(result.keywords, 700) || fallback.keywords,
       bodyHtml: safeHtml(result.content_html || result.bodyHtml) || fallback.bodyHtml,
+      generatedWithAi: true,
+      generationModel,
+      generationError: '',
     };
-  } catch {
-    return fallback;
+  } catch (error) {
+    return {
+      ...fallback,
+      generatedWithAi: false,
+      generationModel: env.GEMINI_API_KEY ? env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL : WORKERS_AI_MODEL,
+      generationError: error instanceof Error ? error.message : 'Falha desconhecida na geracao por IA.',
+    };
   }
 };
 
@@ -279,6 +292,9 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
     media: imageCandidates.map((src) => ({ src, type: 'image' })),
     readingMinutes: Math.max(1, Math.ceil(aiArticle.bodyHtml.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length / 220)),
     publishedAt,
+    generatedWithAi: aiArticle.generatedWithAi,
+    generationModel: aiArticle.generationModel,
+    generationError: aiArticle.generationError,
   };
 };
 

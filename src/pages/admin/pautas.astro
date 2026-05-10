@@ -183,6 +183,7 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
                 </div>
                 <div class="flex flex-wrap gap-2 md:justify-end">
                   <button type="button" data-pitch-preview="${escapeHtml(pitch.id)}" class="rounded-xl border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:border-zinc-950 hover:text-zinc-950 dark:border-zinc-800 dark:hover:border-white dark:hover:text-white">Ver pauta</button>
+                  <button type="button" data-pitch-article="${escapeHtml(pitch.id)}" class="rounded-xl bg-red-600 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-500">Ver matéria</button>
                   ${pitch.primary_url ? `<a href="${escapeHtml(pitch.primary_url)}" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:border-red-600 hover:text-red-600 dark:border-zinc-800">Fonte</a>` : ''}
                   ${
                     pitch.status === 'queued'
@@ -197,7 +198,7 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
           .join('');
       };
 
-      const openPitchPreview = (id) => {
+      const openPitchPreview = (id, mode = 'pitch') => {
         const pitch = pitches.find((item) => String(item.id || '') === String(id || ''));
         if (!pitch || !modal || !modalBody) return;
 
@@ -221,10 +222,22 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
             <p class="mt-3 text-base font-medium leading-8 text-zinc-700 dark:text-zinc-300">${escapeHtml(pitch.summary || 'Sem resumo ainda.')}</p>
           </section>
 
-          <section class="rounded-[1.5rem] border border-zinc-100 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950" data-generated-article>
-            <p class="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-400">Matéria completa gerada</p>
-            <div class="mt-4 animate-pulse rounded-2xl bg-zinc-100 p-5 text-sm font-bold text-zinc-400 dark:bg-zinc-900">Gerando prévia editorial...</div>
-          </section>
+          ${
+            mode === 'article'
+              ? `<section class="rounded-[1.5rem] border border-zinc-100 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950" data-generated-article>
+                  <p class="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-400">Matéria completa gerada</p>
+                  <div class="mt-4 animate-pulse rounded-2xl bg-zinc-100 p-5 text-sm font-bold text-zinc-400 dark:bg-zinc-900">Gerando a matéria que irá para a fila...</div>
+                </section>`
+              : `<section class="rounded-[1.5rem] border border-zinc-100 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
+                  <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <p class="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-400">Matéria final</p>
+                      <p class="mt-2 text-sm font-medium leading-6 text-zinc-500">Gere uma prévia separada para ver exatamente o texto que será enviado para a fila.</p>
+                    </div>
+                    <button type="button" data-pitch-article-inline="${escapeHtml(id)}" class="rounded-xl bg-red-600 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white transition hover:bg-red-500">Ver matéria gerada</button>
+                  </div>
+                </section>`
+          }
 
           ${
             tags.length || keywords.length
@@ -283,7 +296,7 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
 
         modal.classList.remove('hidden');
         modal.classList.add('flex');
-        loadGeneratedArticle(id);
+        if (mode === 'article') loadGeneratedArticle(id);
       };
 
       const loadGeneratedArticle = async (id) => {
@@ -298,11 +311,16 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
           const data = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(data.error || 'Não foi possível gerar a matéria.');
           const article = data.article || {};
+          const fallbackWarning =
+            data.generatedWithAi === false
+              ? `<p class="mt-4 rounded-2xl bg-amber-50 p-4 text-sm font-bold leading-6 text-amber-800 dark:bg-amber-950/30 dark:text-amber-200">Atenção: esta prévia caiu no modelo de segurança, não na geração final do Gemini. Motivo: ${escapeHtml(data.generationError || 'IA indisponível.')}</p>`
+              : '';
           target.innerHTML = `
             <div class="flex flex-wrap items-center justify-between gap-3">
               <p class="text-[10px] font-black uppercase tracking-[0.28em] text-red-600">Matéria completa gerada</p>
               <span class="rounded-full bg-zinc-100 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900">${escapeHtml(data.model || (data.aiEnabled ? 'Gemini' : 'Modelo local'))}</span>
             </div>
+            ${fallbackWarning}
             ${
               article.coverUrl
                 ? `<img src="${escapeHtml(article.coverUrl)}" alt="${escapeHtml(article.coverAlt || article.title || '')}" class="mt-5 aspect-[16/9] w-full rounded-[1.5rem] object-cover" loading="lazy" referrerpolicy="no-referrer" />`
@@ -426,6 +444,18 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
         const previewButton = event.target.closest('[data-pitch-preview]');
         if (previewButton) {
           openPitchPreview(previewButton.dataset.pitchPreview || '');
+          return;
+        }
+
+        const articleButton = event.target.closest('[data-pitch-article]');
+        if (articleButton) {
+          openPitchPreview(articleButton.dataset.pitchArticle || '', 'article');
+          return;
+        }
+
+        const inlineArticleButton = event.target.closest('[data-pitch-article-inline]');
+        if (inlineArticleButton) {
+          openPitchPreview(inlineArticleButton.dataset.pitchArticleInline || '', 'article');
           return;
         }
 

@@ -100,8 +100,10 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
 
   return json({
     ok: true,
-    model: env.GEMINI_API_KEY ? env.GEMINI_MODEL || MODEL : env.AI ? 'workers-ai-fallback' : 'fallback-editorial-template',
+    model: (article as { generationModel?: string }).generationModel || (env.GEMINI_API_KEY ? env.GEMINI_MODEL || MODEL : env.AI ? 'workers-ai-fallback' : 'fallback-editorial-template'),
     aiEnabled: Boolean(env.GEMINI_API_KEY || env.AI),
+    generatedWithAi: Boolean((article as { generatedWithAi?: boolean }).generatedWithAi),
+    generationError: (article as { generationError?: string }).generationError || '',
     article,
   });
 };
