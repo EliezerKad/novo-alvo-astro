@@ -120,6 +120,26 @@ const safeHtml = (value: unknown) =>
     .replace(/<(?!\/?(p|h2|h3|strong|em|ul|ol|li|blockquote)(\s|>|\/))/gi, '&lt;')
     .trim();
 
+const htmlFromModelField = (value: unknown) => {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  if (/<(p|h2|h3|strong|em|ul|ol|li|blockquote)\b/i.test(raw)) return safeHtml(raw);
+  return raw
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+    .join('');
+};
+
+const hasEditorialBody = (html: string) => {
+  const text = plain(html, 5000);
+  if (text.length < 450) return false;
+  if (/pauta consolidada por \d+ fontes/i.test(text)) return false;
+  if (/o rascunho exige angulo proprio|o rascunho exige ângulo próprio/i.test(text)) return false;
+  return true;
+};
+
 const requireAdmin = (request: Request, env: Env) => {
   if (!env.ADMIN_TOKEN) return json({ error: 'ADMIN_TOKEN nao configurado.' }, { status: 503 });
   const auth = request.headers.get('authorization') || '';
@@ -203,7 +223,7 @@ Responda exatamente neste formato:
             model: env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
             system,
             prompt,
-            maxOutputTokens: 1600,
+            maxOutputTokens: 4200,
             temperature: 0.35,
           })
           .then((gemini) => {
@@ -223,12 +243,19 @@ Responda exatamente neste formato:
           ),
         );
 
+    const generatedBody = htmlFromModelField(
+      result.content_html || result.bodyHtml || result.contentHtml || result.content || result.article || result.text,
+    );
+    if (!hasEditorialBody(generatedBody)) {
+      throw new Error('Gemini respondeu sem uma materia editorial completa em content_html.');
+    }
+
     return {
       title: plain(result.title, 220) || fallback.title,
-      summary: plain(result.summary, 700) || fallback.summary,
+      summary: plain(result.summary || result.meta_description, 700) || fallback.summary,
       seoDescription: plain(result.meta_description || result.seoDescription, 155) || fallback.seoDescription,
       keywords: plain(result.keywords, 700) || fallback.keywords,
-      bodyHtml: safeHtml(result.content_html || result.bodyHtml) || fallback.bodyHtml,
+      bodyHtml: generatedBody,
       generatedWithAi: true,
       generationModel,
       generationError: '',
