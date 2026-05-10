@@ -153,16 +153,21 @@ Transforme este cluster de dados brutos em uma análise jornalística de alta de
 
 ORDENS CRÍTICAS:
 - NÃO CITE AS FONTES NO TEXTO. Nunca use frases como "Segundo o G1", "A CNN relata" ou qualquer construção equivalente. Use os dados das fontes para construir afirmações próprias e absolutas do Portal Novo Alvo.
+- SOBERANIA DO DADO. Remova todas as menções nominais a outros portais brasileiros no corpo do texto. Use a informação deles para construir a nossa afirmação técnica.
 - PROIBIDO CLICHÊS. Delete do vocabulário: "Além disso", "Vale notar", "Em resumo", "No cenário atual", "No vasto cenário", "Importante ressaltar" e "Desvendar".
 - PIRÂMIDE INVERTIDA REAL. O primeiro parágrafo deve ser uma marretada de informação: dado frio, impacto direto e relevância imediata.
 - SÍNTESE UNITÁRIA. O leitor não deve perceber que existem várias fontes. Ele deve ler um texto único, coeso, denso e autoral.
 - TOM BRUTALISTA. Escreva de forma seca, pragmática e factual. Elimine adjetivos e advérbios desnecessários.
 - INFORMATION GAIN. Se fontes diferentes repetem o mesmo fato, cite uma vez. Se uma fonte traz dado técnico, divergente ou mais concreto, priorize esse dado.
+- MORTE ÀS LISTAS. É proibido listar itens como "o que ver na TV", "a plataforma X tem o filme Y" ou "a fonte X publicou Y". Transforme listas em fluxo narrativo analítico.
+- FIM DA REDUNDÂNCIA. É proibido repetir a pauta no primeiro e no último parágrafo. Cada linha deve trazer um dado novo.
+- EXEMPLO RUIM: "A Netflix tem o filme X. A HBO tem o Y."
+- EXEMPLO NEXA: "O ecossistema de streaming prioriza esta semana narrativas de suspense documental, com destaque para a cinebiografia de Marco Aurélio, que domina as principais janelas digitais."
 
 REGRAS TÉCNICAS:
 - Analise apenas as fontes fornecidas abaixo como material invisível de apuração.
 - Estrutura: 5 a 8 parágrafos curtos.
-- Use <h2> para dois subtítulos analíticos. Evite subtítulos óbvios como "Conclusão".
+- Use <h3> para quebrar os blocos editoriais. Evite subtítulos óbvios como "Conclusão", "Contexto" ou "O que vem agora".
 - Não crie links externos.
 - Onde houver placeholder de link interno, mantenha a estrutura.
 - Use as fontes do cluster como base de apuração. O padrão editorial esperado é síntese de 8 fontes distintas.
@@ -170,6 +175,8 @@ REGRAS TÉCNICAS:
 - Não cite Reddit como fonte, a menos que Reddit esteja literalmente listado no cluster abaixo.
 - Produza texto pronto para publicação.
 - content_html deve usar apenas <p>, <h2>, <h3>, <strong>, <em>, <ul>, <li>.
+- Prefira <h3> a <h2> dentro do content_html.
+- Parágrafos devem ser curtos, mas densos em informação.
 
 DADOS DO CLUSTER:
 [CATEGORIA]: ${row.category}
