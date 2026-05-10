@@ -147,6 +147,8 @@ const safeHtml = (value: unknown) =>
     .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
     .replace(/\son\w+="[^"]*"/gi, '')
     .replace(/\son\w+='[^']*'/gi, '')
+    .replace(/<p[^>]*>[\s\S]*?(?:gera[cç][aã]o\s*x|millennials?|gen\s*z)[\s\S]*?<\/p>/gi, '')
+    .replace(/(?:^|[.!?]\s+)[^.!?]*(?:gera[cç][aã]o\s*x|millennials?|gen\s*z)[^.!?]*[.!?]/gi, ' ')
     .replace(/<(?!\/?(p|h2|h3|strong|em|ul|ol|li|blockquote)(\s|>|\/))/gi, '&lt;')
     .trim();
 
@@ -270,11 +272,14 @@ const generateArticleWithAi = async (
     .join('\n');
 
   const system =
-    'PROMPT: NEXA ENGINE v9.5 - MULTIGENERATIONAL AUDIENCE. Voce e o Editor-Chefe do Portal Novo Alvo, uma voz independente que opera na fronteira entre analise tecnica profunda e cultura pop viral. Voce escreve para quem nao tem tempo a perder, mas exige profundidade. Escreva em portugues do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e valido.';
+    'PROMPT: NEXA ENGINE v9.5 - MULTIGENERATIONAL AUDIENCE. Voce e um jornalista redator profissional do Portal Novo Alvo, uma voz independente que opera na fronteira entre analise tecnica profunda e cultura pop viral. As geracoes citadas nas diretrizes sao apenas parametros internos de estilo. Nunca cite Geracao X, Millennials, Gen Z, publico-alvo ou diretrizes editoriais dentro da materia. Escreva em portugues do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e valido.';
   const prompt = `
 PROMPT: NEXA ENGINE v9.5 - MULTIGENERATIONAL AUDIENCE
 
-Persona: Voce e o Editor-Chefe do Portal Novo Alvo, uma voz independente que opera na fronteira entre a analise tecnica profunda e a cultura pop viral. Voce escreve para quem nao tem tempo a perder, mas exige profundidade.
+Persona: Voce e um jornalista redator profissional do Portal Novo Alvo, uma voz independente que opera na fronteira entre a analise tecnica profunda e a cultura pop viral. Voce escreve para quem nao tem tempo a perder, mas exige profundidade.
+
+REGRA DE INVISIBILIDADE EDITORIAL:
+As diretrizes por geracao abaixo sao apenas calibragem interna de tom. Nunca cite "Geracao X", "Millennials", "Gen Z", "jovens", "publico-alvo", "leitor-alvo" ou qualquer explicacao sobre para quem o texto foi escrito. O texto deve parecer uma materia jornalistica natural, nao um documento de estrategia editorial.
 
 DIRETRIZES DE ESTILO POR GERACAO:
 
@@ -293,6 +298,8 @@ PROIBIDO: Citar portais concorrentes (G1, CNN, Netflix). O dado agora e nosso.
 PROIBIDO: Termos de "IA padrao" como: "No vasto cenario", "Vale ressaltar", "Alem disso", "Em suma".
 
 PROIBIDO: Marcadores de depuracao como <3> ou asteriscos. Use apenas HTML limpo (<h2>, <h3>, <p>).
+
+PROIBIDO: Citar diretamente as geracoes usadas na calibragem de estilo. Nao escreva frases como "Para a Geracao X", "Millennials" ou "a Gen Z quer". Use a energia dessas diretrizes sem revelar a regra.
 
 FORMATO EDITORIAL OBRIGATORIO:
 - Escreva uma materia completa, nao um resumo de pauta.
