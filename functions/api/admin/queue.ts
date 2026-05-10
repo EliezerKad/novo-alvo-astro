@@ -147,18 +147,20 @@ const generateArticleWithAi = async (
     .join('\n');
 
   const system =
-    'Você é um Analista de Elite e Editor-Chefe do Portal Novo Alvo. Sua missão é transformar clusters de dados brutos em análise jornalística de alta densidade. Escreva em português do Brasil, com acentos corretos. Responda somente JSON válido.';
+    'Você não é um assistente. Você é o jornalista redator de alto nível do Portal Novo Alvo. Escreva em português do Brasil, com acentos corretos. Responda somente JSON válido.';
   const prompt = `
 Transforme este cluster de dados brutos em uma análise jornalística de alta densidade.
 
-DIRETRIZES DE ESTILO INVIOLÁVEIS:
-- Tom brutalista: escreva de forma seca, pragmática e factual. Elimine adjetivos e advérbios desnecessários.
-- Anti-IA: é proibido usar termos como "no vasto cenário", "importante ressaltar", "desvendar", "além disso" ou "em suma".
-- Information Gain: foque no que as fontes trazem de único. Se fontes diferentes repetem o mesmo fato, cite uma vez. Se uma fonte traz dado técnico ou divergente, priorize.
-- Abertura de impacto: o primeiro parágrafo deve conter o dado mais frio, duro e relevante. Sem introduções poéticas.
+ORDENS CRÍTICAS:
+- NÃO CITE AS FONTES NO TEXTO. Nunca use frases como "Segundo o G1", "A CNN relata" ou qualquer construção equivalente. Use os dados das fontes para construir afirmações próprias e absolutas do Portal Novo Alvo.
+- PROIBIDO CLICHÊS. Delete do vocabulário: "Além disso", "Vale notar", "Em resumo", "No cenário atual", "No vasto cenário", "Importante ressaltar" e "Desvendar".
+- PIRÂMIDE INVERTIDA REAL. O primeiro parágrafo deve ser uma marretada de informação: dado frio, impacto direto e relevância imediata.
+- SÍNTESE UNITÁRIA. O leitor não deve perceber que existem várias fontes. Ele deve ler um texto único, coeso, denso e autoral.
+- TOM BRUTALISTA. Escreva de forma seca, pragmática e factual. Elimine adjetivos e advérbios desnecessários.
+- INFORMATION GAIN. Se fontes diferentes repetem o mesmo fato, cite uma vez. Se uma fonte traz dado técnico, divergente ou mais concreto, priorize esse dado.
 
 REGRAS TÉCNICAS:
-- Analise apenas as fontes fornecidas abaixo.
+- Analise apenas as fontes fornecidas abaixo como material invisível de apuração.
 - Estrutura: 5 a 8 parágrafos curtos.
 - Use <h2> para dois subtítulos analíticos. Evite subtítulos óbvios como "Conclusão".
 - Não crie links externos.
