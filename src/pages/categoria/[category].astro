@@ -15,7 +15,7 @@ import {
   subCategoriesList,
   urgentNews,
 } from '../../lib/news';
-import { getCategoryColor } from '../../lib/utils';
+import { formatRelativeDate } from '../../lib/utils';
 
 export async function getStaticPaths() {
   const allCategories = [...categoriesList, ...subCategoriesList];
@@ -34,7 +34,10 @@ const newsEntries = sortNewsByDate(await getCollection('news'));
 const articles = newsEntries.map(newsEntryToArticle);
 const categoryArticles = articles.filter((article) => article.category === category);
 const visibleArticles = categoryArticles.length > 0 ? categoryArticles : [];
-const mostRead = [...articles].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
+const mostRead = [...categoryArticles]
+  .sort((a, b) => (b.views || 0) - (a.views || 0) || new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+  .slice(0, 5);
+const fallbackMostRead = mostRead.length > 0 ? mostRead : [...articles].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
 const tickerArticles = urgentNews(newsEntries).map(newsEntryToArticle);
 const canonical = new URL(categoryUrl(category), Astro.site ?? Astro.url.origin).href;
 const breadcrumbs = [
@@ -49,55 +52,92 @@ const breadcrumbs = [
   canonical={canonical}
   breadcrumbs={breadcrumbs}
 >
-  <div class="min-h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300">
+  <div class="min-h-screen bg-[#f5f3ee] text-[#101010] transition-colors duration-300 dark:bg-[linear-gradient(180deg,#080809_0%,#141416_50%,#080809_100%)] dark:text-zinc-50">
     <Navbar tickerArticles={tickerArticles} category={category} categories={categoriesList} subCategories={subCategoriesList} />
     <Breadcrumbs items={breadcrumbs} />
 
-    <main class="max-w-7xl mx-auto px-4 mt-8 mb-20 transition-all duration-500">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <div class="lg:col-span-9 space-y-12">
-          <header class="space-y-2">
+    <main class="mx-auto mb-20 mt-8 max-w-[1240px] px-3 transition-all duration-500 sm:px-4 md:mt-10">
+      <div class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-11 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div class="space-y-10 md:space-y-12">
+          <header class="rounded-[1.7rem] border border-black/10 bg-[#fbfaf7]/76 p-5 shadow-[0_24px_70px_rgba(16,16,16,0.055)] backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/50 md:rounded-[2.2rem] md:p-8">
             <div class="flex items-center gap-4">
-              <div class={`w-2 h-10 ${getCategoryColor(category)} rounded-full`}></div>
-              <h1 class="text-5xl font-serif font-black italic tracking-tighter text-zinc-900 dark:text-zinc-50 uppercase">
+              <div class="h-11 w-1.5 rounded-full bg-[#8A1F2D] shadow-[0_0_26px_rgba(138,31,45,0.22)]"></div>
+              <h1 class="font-sans text-[clamp(2.6rem,8vw,5.25rem)] font-black uppercase leading-[0.9] tracking-[-0.082em] text-[#101010] dark:text-zinc-50">
                 {category}
               </h1>
             </div>
-            <p class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 ml-6">
+            <p class="ml-5 mt-4 max-w-2xl text-[10px] font-black uppercase leading-5 tracking-[0.36em] text-zinc-400 md:ml-6">
               Cobertura Completa e Fatos Relevantes
             </p>
           </header>
 
           {visibleArticles.length > 0 ? (
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div class="grid grid-cols-1 gap-7 md:grid-cols-2 md:gap-8 xl:gap-10">
               {visibleArticles.map((article) => <ArticleCard article={article} variant="pulse" />)}
             </div>
           ) : (
-            <div class="py-24 text-center uppercase">
-              <h2 class="text-4xl font-black italic text-zinc-300">Em diligencia editorial...</h2>
-              <p class="text-zinc-400 text-xs font-black tracking-widest mt-4">Novas pautas desta categoria entram em breve.</p>
+            <div class="rounded-[2rem] border border-black/10 bg-[#fbfaf7]/70 py-24 text-center uppercase shadow-[0_24px_70px_rgba(16,16,16,0.05)] dark:border-zinc-800 dark:bg-zinc-950/50">
+              <h2 class="font-sans text-4xl font-black tracking-[-0.06em] text-zinc-300">Em diligência editorial</h2>
+              <p class="mt-4 text-xs font-black tracking-widest text-zinc-400">Novas pautas desta categoria entram em breve.</p>
             </div>
           )}
 
           <NewsletterBlock />
         </div>
 
-        <aside class="lg:col-span-3 lg:pl-10 lg:border-l border-zinc-200 dark:border-zinc-800 transition-colors duration-300 relative h-full">
-          <div class="space-y-12 h-full flex flex-col">
+        <aside class="relative h-full border-black/10 transition-colors duration-300 dark:border-zinc-800 lg:border-l lg:pl-8">
+          <div class="flex h-full flex-col space-y-10">
             <section class="space-y-8 flex-shrink-0">
-              <div class="flex items-center gap-3 mb-4 border-b-2 border-red-600 pb-3">
-                <Icon name="trending" class="w-5 h-5 text-red-600" />
-                <h3 class="uppercase text-xs font-black tracking-[0.2em] italic text-zinc-900 dark:text-zinc-50">
-                  MAIS ACESSADAS
+              <div class="mb-4 flex items-center gap-3 border-b-2 border-[#8A1F2D] pb-3">
+                <Icon name="trending" class="h-5 w-5 text-[#8A1F2D]" />
+                <h3 class="font-sans text-xs font-black uppercase italic tracking-[0.22em] text-zinc-950 dark:text-zinc-50">
+                  Mais acessadas em {category}
                 </h3>
               </div>
-              <div class="space-y-8">
-                {mostRead.map((article, index) => <ArticleCard article={article} variant="side" index={index} />)}
+              <div class="space-y-4">
+                {fallbackMostRead.map((article, index) => (
+                  <a href={`/noticia/${article.slug}`} class="-mx-2 grid grid-cols-[74px_1fr] gap-3 rounded-2xl p-2 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#fbfaf7] hover:shadow-[0_18px_42px_rgba(16,16,16,0.065)] dark:hover:bg-zinc-900/70">
+                    <div class="relative h-[58px] overflow-hidden rounded-2xl bg-[#ebe8df] shadow-sm dark:bg-zinc-800">
+                      {article.imageUrl ? (
+                        <img
+                          src={article.imageUrl}
+                          alt={article.title}
+                          class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          loading="lazy"
+                          decoding="async"
+                          referrerpolicy="no-referrer"
+                          onerror="this.onerror=null;this.src='/og-default.svg';"
+                        />
+                      ) : (
+                        <div class="grid h-full place-items-center text-zinc-300 dark:text-zinc-700">
+                          <Icon name="image" class="h-5 w-5 opacity-20" />
+                        </div>
+                      )}
+                      <span class="absolute left-1.5 top-1.5 rounded-full bg-zinc-950/75 px-1.5 py-0.5 text-[7px] font-black text-white backdrop-blur">
+                        {index + 1}
+                      </span>
+                    </div>
+                    <div class="min-w-0">
+                      <span class="mb-1 block w-fit rounded-md bg-[#8A1F2D]/10 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-widest text-[#8A1F2D]">
+                        {article.category}
+                      </span>
+                      <h4 class="line-clamp-2 font-sans text-sm font-black leading-[1.1] tracking-[-0.045em] text-zinc-950 transition-colors hover:text-[#8A1F2D] dark:text-zinc-100">
+                        {article.title}
+                      </h4>
+                      <div class="mt-1.5 flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-zinc-400">
+                        <Icon name="eye" class="h-2.5 w-2.5" />
+                        {article.views || 0} acessos
+                        <span class="text-zinc-300">/</span>
+                        {formatRelativeDate(article.publishedAt)}
+                      </div>
+                    </div>
+                  </a>
+                ))}
               </div>
             </section>
 
-            <div class="sticky top-28 transition-[top] duration-700 ease-in-out space-y-10 h-fit pb-10 z-10">
-              <div class="h-[500px] w-full shrink-0">
+            <div class="sticky top-28 z-10 h-fit space-y-8 pb-10 transition-[top] duration-700 ease-in-out">
+              <div class="h-[430px] w-full shrink-0">
                 <AdCard label="Publicidade Lateral" class="h-full w-full" />
               </div>
               <NewsletterBlock compact />
