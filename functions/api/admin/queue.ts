@@ -613,7 +613,13 @@ const generateArticleWithAi = async (
     .map((source) => {
       if (!source || typeof source !== 'object') return '';
       const record = source as Record<string, unknown>;
-      return `- ${plain(record.publisher, 80)}: ${plain(record.title, 180)} (${plain(record.url, 400)})`;
+      const excerpt = plain(record.excerpt, 1200);
+      return [
+        `- ${plain(record.publisher, 80)}: ${plain(record.title, 180)} (${plain(record.url, 400)})`,
+        excerpt ? `  Trecho extraido da materia completa: ${excerpt}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n');
     })
     .filter(Boolean)
     .join('\n');
@@ -685,6 +691,8 @@ MICRO-PERSONAS DE ELITE:
   3. Campo Social: comportamento, trabalho, consumo, cultura e vida cotidiana.
 
 CLASSIFICACAO PREVIA OBRIGATORIA:
+- Antes de escrever, leia o conjunto inteiro de fontes e identifique a noticia central mais relevante. Nao assuma que a primeira fonte e a pauta principal.
+- Use as fontes como apuracao consolidada: cruze os trechos, descarte repeticao, priorize o dado exclusivo e construa uma materia inedita do Portal Novo Alvo.
 - Fato Estatico: o que aconteceu. Exemplo: "O preco subiu".
 - Agente Ativo: quem causou, decidiu, moveu, perdeu ou ganhou. De nome aos bois.
 - Causa Latente: por que isso aconteceu agora.

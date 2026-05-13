@@ -1,4 +1,4 @@
-const FEEDS = {
+﻿const FEEDS = {
   Brasil:
     'https://news.google.com/rss/headlines/section/topic/CAAqJQgKIh9DQkFTRVFvSUwyMHZNRzV6Y0hjU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
   Politica:
@@ -36,6 +36,8 @@ const MIN_SOURCES = Number(process.env.MIN_SOURCES || 8);
 const RADAR_BATCHES_PER_CATEGORY = Number(process.env.RADAR_BATCHES_PER_CATEGORY || 3);
 const HOUSEKEEPING_DAYS = Number(process.env.HOUSEKEEPING_DAYS || 30);
 const MAX_IMAGE_SOURCE_FETCHES_PER_PITCH = Number(process.env.MAX_IMAGE_SOURCE_FETCHES_PER_PITCH || 8);
+const SOURCE_EXPANSION_TARGET = Number(process.env.SOURCE_EXPANSION_TARGET || 12);
+const SOURCE_EXPANSION_MIN_OVERLAP = Number(process.env.SOURCE_EXPANSION_MIN_OVERLAP || 0.34);
 
 const decodeEntities = (value) =>
   String(value || '')
@@ -86,6 +88,28 @@ const extractKeywords = (title, category) => {
     .split(/[^a-z0-9]+/)
     .filter((word) => word.length > 3 && !blocked.has(word));
   return [...new Set(words)].slice(0, 10);
+};
+
+const stripHtml = (value) =>
+  decodeEntities(String(value || '').replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' '))
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const extractArticleText = (html) => {
+  const candidates = [];
+  for (const match of String(html).matchAll(/<(?:article|main)\b[^>]*>([\s\S]*?)<\/(?:article|main)>/gi)) {
+    candidates.push(stripHtml(match[1]));
+  }
+  const paragraphText = [...String(html).matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)]
+    .map((match) => stripHtml(match[1]))
+    .filter((text) => text.length > 40)
+    .join(' ');
+  if (paragraphText) candidates.push(paragraphText);
+  candidates.push(stripHtml(html));
+  return candidates
+    .sort((a, b) => b.length - a.length)[0]
+    ?.replace(/\s+/g, ' ')
+    .slice(0, 2600) || '';
 };
 
 const isBlockedImageUrl = (value) => {
@@ -230,7 +254,7 @@ const imagesFromArticleHtml = (html, baseUrl) => {
 
   for (const match of String(html).matchAll(/<img[^>]+(?:src|data-src|data-original)=["']([^"']+)["'][^>]*>/gi)) {
     const candidate = match[1] || '';
-    if (isBlockedImageUrl(candidate) || /alt=["'][^"']*(logo|avatar|marca|perfil|icone|ícone|google)[^"']*["']/i.test(match[0])) continue;
+    if (isBlockedImageUrl(candidate) || /alt=["'][^"']*(logo|avatar|marca|perfil|icone|Ã­cone|google)[^"']*["']/i.test(match[0])) continue;
     push(candidate);
   }
 
@@ -291,11 +315,15 @@ const resolveArticleUrl = async (url) => {
   }
 };
 
-const fetchArticleImages = async (url) => {
+const fetchArticleAssets = async (url) => {
   try {
-    if (/^https?:\/\/([^/]+\.)?(google|gstatic|googleusercontent)\./i.test(String(url || '')) && !isGoogleNewsUrl(url)) return [];
+    if (/^https?:\/\/([^/]+\.)?(google|gstatic|googleusercontent)\./i.test(String(url || '')) && !isGoogleNewsUrl(url)) {
+      return { url, images: [], excerpt: '' };
+    }
     const articleUrl = await resolveArticleUrl(url);
-    if (/^https?:\/\/([^/]+\.)?(google|gstatic|googleusercontent)\./i.test(String(articleUrl || ''))) return [];
+    if (/^https?:\/\/([^/]+\.)?(google|gstatic|googleusercontent)\./i.test(String(articleUrl || ''))) {
+      return { url: articleUrl, images: [], excerpt: '' };
+    }
     const response = await fetch(articleUrl, {
       headers: {
         accept: 'text/html,application/xhtml+xml',
@@ -303,12 +331,18 @@ const fetchArticleImages = async (url) => {
       },
       signal: AbortSignal.timeout(8000),
     });
-    if (!response.ok) return [];
+    if (!response.ok) return { url: articleUrl, images: [], excerpt: '' };
     const contentType = response.headers.get('content-type') || '';
-    if (!/text\/html|application\/xhtml/i.test(contentType)) return [];
-    return imagesFromArticleHtml(await response.text(), response.url || articleUrl);
+    if (!/text\/html|application\/xhtml/i.test(contentType)) return { url: articleUrl, images: [], excerpt: '' };
+    const html = await response.text();
+    const finalUrl = response.url || articleUrl;
+    return {
+      url: finalUrl,
+      images: imagesFromArticleHtml(html, finalUrl),
+      excerpt: extractArticleText(html),
+    };
   } catch {
-    return [];
+    return { url, images: [], excerpt: '' };
   }
 };
 
@@ -323,6 +357,72 @@ const overlapScore = (left, right) => {
     if (b.has(token)) shared += 1;
   }
   return shared / Math.min(a.size, b.size);
+};
+
+const recencyScore = (item) => {
+  const timestamp = Date.parse(item?.publishedAt || '');
+  if (!timestamp) return 0;
+  const hours = Math.max(0, (Date.now() - timestamp) / 36e5);
+  return Math.max(0, 1 - hours / 48);
+};
+
+const itemRelevanceScore = (item, peers = []) => {
+  const related = peers.reduce((total, peer) => (peer === item ? total : total + overlapScore(item, peer)), 0);
+  const title = normalizedText(item?.title || '');
+  const hasNamedSignal = /\b([a-z]{4,}|[0-9]{2,})\b/.test(title) ? 0.15 : 0;
+  const sourceWeight = item?.source && !/google news/i.test(item.source) ? 0.15 : 0;
+  return related + recencyScore(item) * 0.45 + hasNamedSignal + sourceWeight;
+};
+
+const selectLeadItem = (items) =>
+  [...items].sort((a, b) => itemRelevanceScore(b, items) - itemRelevanceScore(a, items))[0] || items[0];
+
+const buildNewsSearchUrl = (seed) => {
+  const keywords = extractKeywords(seed.title, seed.category).slice(0, 7);
+  const compactTitle = cleanTitle(seed.title)
+    .split(/\s+/)
+    .filter((word) => word.length > 2)
+    .slice(0, 9)
+    .join(' ');
+  const query = `${compactTitle || keywords.join(' ')} ${keywords.slice(0, 3).join(' ')} when:48h`;
+  return `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+};
+
+const fetchExpandedItemsForSeed = async (seed) => {
+  try {
+    const response = await fetch(buildNewsSearchUrl(seed), {
+      headers: {
+        accept: 'application/rss+xml, application/xml, text/xml',
+        'user-agent': 'PortalNovoAlvoEditorialIngest/1.0',
+      },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return parseRssItems(await response.text(), seed.category)
+      .map((item) => ({
+        ...item,
+        category: seed.category,
+        expandedFrom: seed.title,
+      }))
+      .filter((item) => overlapScore(seed, item) >= SOURCE_EXPANSION_MIN_OVERLAP || normalizedText(item.title).includes(normalizedText(seed.title).slice(0, 28)));
+  } catch (error) {
+    console.warn(`[expand] ${seed.category}: ${error.message}`);
+    return [];
+  }
+};
+
+const expandClusterSources = async (items) => {
+  const lead = selectLeadItem(items);
+  const expanded = await fetchExpandedItemsForSeed(lead);
+  const merged = distinctBySource([lead, ...items, ...expanded])
+    .map((item) => ({
+      ...item,
+      topicScore: item === lead ? 999 : overlapScore(lead, item) + recencyScore(item) * 0.2,
+    }))
+    .filter((item) => item === lead || item.topicScore >= SOURCE_EXPANSION_MIN_OVERLAP)
+    .sort((a, b) => b.topicScore - a.topicScore);
+  const selected = distinctBySource(merged).slice(0, Math.max(MIN_SOURCES, SOURCE_EXPANSION_TARGET));
+  return selected.length >= Math.min(MIN_SOURCES, items.length) ? selected : items;
 };
 
 const distinctBySource = (items) => {
@@ -355,7 +455,7 @@ const clusterItems = (items) => {
   return clusters;
 };
 
-const buildCategoryRadarClusters = (items) => {
+const buildCategoryRadarClusters = async (items) => {
   const byCategory = new Map();
   for (const item of items) {
     const bucket = byCategory.get(item.category) || [];
@@ -364,21 +464,22 @@ const buildCategoryRadarClusters = (items) => {
   }
 
   const clusters = [];
-  for (const [category, categoryItems] of byCategory.entries()) {
-    const distinct = distinctBySource(categoryItems);
-    const maxItems = Math.max(MIN_SOURCES, MIN_SOURCES * RADAR_BATCHES_PER_CATEGORY);
-    const usable = distinct.slice(0, maxItems);
-    for (let start = 0; start < usable.length; start += MIN_SOURCES) {
-      const batch = usable.slice(start, start + MIN_SOURCES);
-      if (batch.length < MIN_SOURCES) continue;
-      clusters.push(
-        batch.map((item, index) => ({
+  for (const [, categoryItems] of byCategory.entries()) {
+    const seeds = distinctBySource(categoryItems)
+      .sort((a, b) => itemRelevanceScore(b, categoryItems) - itemRelevanceScore(a, categoryItems))
+      .slice(0, RADAR_BATCHES_PER_CATEGORY);
+    for (const seed of seeds) {
+      const expanded = await expandClusterSources([seed]);
+      const batch = expanded
+        .filter((item) => item === seed || overlapScore(seed, item) >= SOURCE_EXPANSION_MIN_OVERLAP)
+        .slice(0, Math.max(MIN_SOURCES, SOURCE_EXPANSION_TARGET))
+        .map((item) => ({
           ...item,
-          title: index === 0 ? `Radar ${category}: ${item.title}` : item.title,
+          title: item.title,
           radarCluster: true,
-          radarBatch: Math.floor(start / MIN_SOURCES) + 1,
-        })),
-      );
+          radarSeed: seed.title,
+        }));
+      if (distinctBySource(batch).length >= MIN_SOURCES) clusters.push(batch);
     }
   }
   return clusters;
@@ -427,9 +528,14 @@ const fetchFeed = async ([category, url]) => {
 };
 
 const buildPitch = (items) => {
-  const first = items[0];
+  const first = selectLeadItem(items);
+  const orderedItems = [first, ...items.filter((item) => item !== first)].sort((a, b) => {
+    if (a === first) return -1;
+    if (b === first) return 1;
+    return itemRelevanceScore(b, items) - itemRelevanceScore(a, items);
+  });
   const seenPublishers = new Set();
-  const sources = items
+  const sources = orderedItems
     .map((item) => ({
       publisher: item.source,
       title: item.title,
@@ -462,7 +568,7 @@ const buildPitch = (items) => {
   return {
     clusterKey: `${slugify(first.category)}:${isRadar ? 'radar:' : ''}${signature}`,
     title: first.title,
-    summary: `Pauta consolidada por ${sourceCount} fonte${sourceCount === 1 ? '' : 's'} sobre ${first.title}. O rascunho exige ângulo próprio, contexto local e checagem editorial antes da fila.`,
+    summary: `Pauta consolidada por ${sourceCount} fonte${sourceCount === 1 ? '' : 's'} sobre ${first.title}. A engine deve escolher angulo proprio, ler o contexto das fontes e gerar uma materia inedita antes da fila.`,
     category: first.category,
     status: 'new',
     sourceCount,
@@ -480,25 +586,38 @@ const buildPitch = (items) => {
 const enrichPitchImages = async (pitch) => {
   const current = Array.isArray(pitch.imageCandidates) ? pitch.imageCandidates : [];
   const sources = Array.isArray(pitch.sources) ? pitch.sources : [];
-  const sourceImages = (
-    await Promise.all(
-      sources
-        .slice(0, MAX_IMAGE_SOURCE_FETCHES_PER_PITCH)
-        .map(async (source) => {
-          const urls = await fetchArticleImages(source.url);
-          return urls.map((url) => ({
-            url,
-            sourceTitle: source.title,
-            sourcePublisher: source.publisher,
-            sourceUrl: source.url,
-            category: pitch.category,
-          }));
-        }),
+  const assets = await Promise.all(
+    sources
+      .slice(0, MAX_IMAGE_SOURCE_FETCHES_PER_PITCH)
+      .map(async (source) => ({
+        source,
+        assets: await fetchArticleAssets(source.url),
+      })),
+  );
+  const sourceImages = assets
+    .map(({ source, assets }) =>
+      assets.images.map((url) => ({
+        url,
+        sourceTitle: source.title,
+        sourcePublisher: source.publisher,
+        sourceUrl: assets.url || source.url,
+        category: pitch.category,
+      })),
     )
-  ).flat();
+    .flat();
+  const enrichedSources = sources.map((source) => {
+    const match = assets.find((item) => item.source === source);
+    if (!match?.assets) return source;
+    return {
+      ...source,
+      url: match.assets.url || source.url,
+      excerpt: match.assets.excerpt || source.excerpt || '',
+    };
+  });
 
   return {
     ...pitch,
+    sources: enrichedSources,
     imageCandidates: uniqueImageCandidates([...current, ...sourceImages], 18),
   };
 };
@@ -584,12 +703,12 @@ const main = async () => {
     acc[item.category] = (acc[item.category] || 0) + 1;
     return acc;
   }, {});
-  const topicClusters = clusterItems(allItems);
+  const topicClusters = await Promise.all(clusterItems(allItems).map(expandClusterSources));
   const topicPitches = topicClusters
     .map(buildPitch)
     .filter((pitch) => pitch.sourceCount >= MIN_SOURCES)
     .sort((a, b) => b.score - a.score);
-  const radarPitches = buildCategoryRadarClusters(allItems)
+  const radarPitches = (await buildCategoryRadarClusters(allItems))
     .map(buildPitch)
     .filter((pitch) => pitch.sourceCount >= MIN_SOURCES && !topicPitches.some((existing) => existing.clusterKey === pitch.clusterKey))
     .sort((a, b) => b.score - a.score);
@@ -635,3 +754,4 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
