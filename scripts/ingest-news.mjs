@@ -517,6 +517,23 @@ const postPitch = async (pitch) => {
   return data;
 };
 
+const postIngestRun = async (run) => {
+  try {
+    const response = await fetch(`${PORTAL_ORIGIN}/api/admin/ingest-runs`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${ADMIN_TOKEN}`,
+      },
+      body: JSON.stringify(run),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Falha ao registrar ingestao: ${response.status}`);
+  } catch (error) {
+    console.warn(`[ingest-runs] ${error.message}`);
+  }
+};
+
 const runHousekeeping = async () => {
   const response = await fetch(`${PORTAL_ORIGIN}/api/admin/pitches?olderThanDays=${HOUSEKEEPING_DAYS}`, {
     method: 'DELETE',
@@ -560,6 +577,7 @@ const balancePitches = (topicPitches, radarPitches, limit) => {
 
 const main = async () => {
   if (!ADMIN_TOKEN) throw new Error('ADMIN_TOKEN ausente.');
+  const startedAt = new Date().toISOString();
 
   const allItems = (await Promise.all(Object.entries(FEEDS).map(fetchFeed))).flat();
   const feedCounts = allItems.reduce((acc, item) => {
@@ -592,6 +610,21 @@ const main = async () => {
   );
 
   await runHousekeeping();
+  const skipped = Math.max(0, pitches.length - saved);
+  await postIngestRun({
+    id: `ingest:${startedAt}`,
+    status: skipped > 0 ? 'partial' : 'success',
+    itemsTotal: allItems.length,
+    topicClusters: topicPitches.length,
+    radarClusters: radarPitches.length,
+    selectedPitches: pitches.length,
+    savedPitches: saved,
+    skippedPitches: skipped,
+    feedCounts,
+    startedAt,
+    finishedAt: new Date().toISOString(),
+    notes: `${saved}/${pitches.length} pautas salvas`,
+  });
   console.log(
     `Ingestao concluida: ${saved}/${pitches.length} pautas salvas. Itens: ${allItems.length}. Clusters por assunto: ${topicPitches.length}. Radares por categoria: ${radarPitches.length}.`,
   );

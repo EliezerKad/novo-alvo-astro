@@ -35,12 +35,13 @@ const categories = [
             Sinais coletados por RSS e agrupados como ideias de pauta. Nada aqui é publicado automaticamente.
           </p>
         </div>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <button type="button" data-refresh-pitches class="rounded-2xl border border-zinc-200 bg-white px-5 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-900">
             Atualizar
           </button>
-          <button type="button" data-dismiss-visible-pitches class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-red-700 transition hover:border-red-600 hover:bg-red-600 hover:text-white dark:border-red-950 dark:bg-red-950/30 dark:text-red-300">
-            Descartar leva
+          <button type="button" data-dismiss-visible-pitches class="group inline-flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white/70 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700 dark:border-zinc-800 dark:bg-zinc-900/70 dark:text-zinc-400 dark:hover:border-red-950 dark:hover:bg-red-950/20 dark:hover:text-red-300" title="Descartar todas as pautas visiveis nesta aba">
+            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-100 text-xs text-zinc-500 transition group-hover:bg-red-600 group-hover:text-white dark:bg-zinc-800">x</span>
+            Limpar visiveis
           </button>
           <a href="/admin/nova/" class="rounded-2xl bg-red-600 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-red-600/20 transition hover:-translate-y-0.5 hover:bg-red-500">
             Nova matéria
@@ -64,6 +65,48 @@ const categories = [
         </label>
       </div>
     </header>
+
+    <section class="grid gap-3 rounded-[2rem] border border-white/70 bg-white/70 p-4 shadow-[0_24px_80px_rgba(15,23,42,0.05)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/70 md:grid-cols-[1.1fr_1fr]">
+      <div class="rounded-[1.5rem] bg-zinc-950 p-5 text-white dark:bg-white dark:text-zinc-950">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p class="text-[10px] font-black uppercase tracking-[0.28em] text-red-400">Pulso da ingestao</p>
+            <strong class="mt-2 block text-2xl font-black" data-ingest-latest>Sem historico ainda</strong>
+          </div>
+          <span class="rounded-full bg-white/10 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white/70 dark:bg-zinc-950/10 dark:text-zinc-600" data-ingest-state>Diagnostico</span>
+        </div>
+        <div class="mt-5 grid grid-cols-3 gap-2">
+          <div class="rounded-2xl bg-white/8 p-3 dark:bg-zinc-950/5">
+            <p class="text-[9px] font-black uppercase tracking-widest text-white/50 dark:text-zinc-500">Itens</p>
+            <strong class="mt-1 block text-xl" data-ingest-items>0</strong>
+          </div>
+          <div class="rounded-2xl bg-white/8 p-3 dark:bg-zinc-950/5">
+            <p class="text-[9px] font-black uppercase tracking-widest text-white/50 dark:text-zinc-500">Clusters</p>
+            <strong class="mt-1 block text-xl" data-ingest-clusters>0</strong>
+          </div>
+          <div class="rounded-2xl bg-white/8 p-3 dark:bg-zinc-950/5">
+            <p class="text-[9px] font-black uppercase tracking-widest text-white/50 dark:text-zinc-500">Salvas</p>
+            <strong class="mt-1 block text-xl" data-ingest-saved>0</strong>
+          </div>
+        </div>
+        <p class="mt-4 text-xs font-bold leading-5 text-white/55 dark:text-zinc-500" data-ingest-note>
+          Depois de ativar a tabela de historico, cada rodada aparece aqui com itens, clusters e descartes.
+        </p>
+      </div>
+
+      <div class="rounded-[1.5rem] border border-zinc-100 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-400">Categorias captadas</p>
+            <strong class="mt-2 block text-sm text-zinc-700 dark:text-zinc-200" data-ingest-categories-title>Aguardando leitura...</strong>
+          </div>
+          <span class="rounded-full bg-red-50 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-red-700 dark:bg-red-950/30 dark:text-red-300" data-ingest-skipped>0 ignoradas</span>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-2" data-ingest-categories>
+          <span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:bg-zinc-900">Carregando</span>
+        </div>
+      </div>
+    </section>
 
     <section class="overflow-hidden rounded-[2rem] border border-white/70 bg-white/82 shadow-[0_24px_80px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/82">
       <div class="flex flex-col gap-3 border-b border-zinc-100 p-5 dark:border-zinc-800 md:flex-row md:items-center md:justify-between">
@@ -187,6 +230,15 @@ const categories = [
       const filterInput = document.querySelector('[data-filter-pitches]');
       const refreshButton = document.querySelector('[data-refresh-pitches]');
       const dismissVisibleButton = document.querySelector('[data-dismiss-visible-pitches]');
+      const ingestLatest = document.querySelector('[data-ingest-latest]');
+      const ingestState = document.querySelector('[data-ingest-state]');
+      const ingestItems = document.querySelector('[data-ingest-items]');
+      const ingestClusters = document.querySelector('[data-ingest-clusters]');
+      const ingestSaved = document.querySelector('[data-ingest-saved]');
+      const ingestSkipped = document.querySelector('[data-ingest-skipped]');
+      const ingestNote = document.querySelector('[data-ingest-note]');
+      const ingestCategoriesTitle = document.querySelector('[data-ingest-categories-title]');
+      const ingestCategories = document.querySelector('[data-ingest-categories]');
       const categoryFilter = document.querySelector('[data-category-filter]');
       const statusButtons = [...document.querySelectorAll('[data-status-filter]')];
       const modal = document.querySelector('[data-pitch-modal]');
@@ -239,6 +291,75 @@ const categories = [
         const date = new Date(value);
         if (Number.isNaN(date.getTime())) return 'Sem data';
         return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(date);
+      };
+
+      const parseObject = (value) => {
+        try {
+          const parsed = typeof value === 'string' ? JSON.parse(value || '{}') : value;
+          return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+        } catch {
+          return {};
+        }
+      };
+
+      const renderIngestDiagnostics = (data) => {
+        const runs = Array.isArray(data?.runs) ? data.runs : [];
+        const latest = runs[0];
+        if (!latest) {
+          if (ingestLatest) ingestLatest.textContent = data?.warning ? 'Historico pendente' : 'Sem rodadas registradas';
+          if (ingestState) ingestState.textContent = data?.configured === false ? 'Ativar D1' : 'Pronto';
+          if (ingestNote) ingestNote.textContent = data?.warning || 'Rode a ingestao para preencher este painel.';
+          if (ingestCategoriesTitle) ingestCategoriesTitle.textContent = 'Nenhuma rodada lida ainda';
+          if (ingestCategories) ingestCategories.innerHTML = '<span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:bg-zinc-900">Sem dados</span>';
+          return;
+        }
+
+        const feedCounts = parseObject(latest.feed_counts);
+        const categories = Object.entries(feedCounts)
+          .sort((a, b) => Number(b[1] || 0) - Number(a[1] || 0))
+          .slice(0, 14);
+        const topicClusters = Number(latest.topic_clusters || 0);
+        const radarClusters = Number(latest.radar_clusters || 0);
+        const selected = Number(latest.selected_pitches || 0);
+        const saved = Number(latest.saved_pitches || 0);
+        const skipped = Number(latest.skipped_pitches || Math.max(0, selected - saved));
+
+        if (ingestLatest) ingestLatest.textContent = formatDate(latest.finished_at || latest.started_at);
+        if (ingestState) ingestState.textContent = latest.status === 'partial' ? 'Parcial' : latest.status || 'Ok';
+        if (ingestItems) ingestItems.textContent = Number(latest.items_total || 0);
+        if (ingestClusters) ingestClusters.textContent = topicClusters + radarClusters;
+        if (ingestSaved) ingestSaved.textContent = saved;
+        if (ingestSkipped) ingestSkipped.textContent = `${skipped} ignorada${skipped === 1 ? '' : 's'}`;
+        if (ingestNote) ingestNote.textContent = `${selected} pautas selecionadas. ${topicClusters} clusters por assunto e ${radarClusters} radares por categoria.`;
+        if (ingestCategoriesTitle) ingestCategoriesTitle.textContent = `${categories.length} categorias com sinal na ultima rodada`;
+        if (ingestCategories) {
+          ingestCategories.innerHTML = categories.length
+            ? categories
+                .map(([category, count]) => `<span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">${escapeHtml(category)} ${Number(count || 0)}</span>`)
+                .join('')
+            : '<span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:bg-zinc-900">Sem categorias</span>';
+        }
+      };
+
+      const loadIngestDiagnostics = async () => {
+        const token = getToken();
+        if (!token) return;
+        try {
+          const response = await fetch('/api/admin/ingest-runs', {
+            headers: { authorization: `Bearer ${token}` },
+          });
+          const data = await response.json().catch(() => ({}));
+          if (response.status === 401) {
+            try {
+              localStorage.removeItem('admin-token');
+            } catch {}
+            redirectToLogin();
+            return;
+          }
+          renderIngestDiagnostics(data);
+        } catch {
+          renderIngestDiagnostics({ configured: false, warning: 'Nao foi possivel ler o historico da ingestao.' });
+        }
       };
 
       const render = () => {
@@ -481,6 +602,7 @@ const categories = [
           if (!response.ok) throw new Error(data.error || 'Erro ao buscar pautas.');
           pitches = Array.isArray(data.pitches) ? data.pitches : [];
           render();
+          loadIngestDiagnostics();
         } catch (error) {
           if (statusNode) statusNode.textContent = error.message || 'Falha ao conectar com o CMS.';
           if (list) list.innerHTML = '';
@@ -596,6 +718,7 @@ const categories = [
           if (!response.ok) throw new Error(data.error || 'Nao foi possivel descartar a leva.');
           pitches = [];
           render();
+          loadIngestDiagnostics();
           if (statusNode) statusNode.textContent = `${Number(data.dismissed || 0)} pauta(s) descartada(s).`;
         } catch (error) {
           if (statusNode) statusNode.textContent = error.message || 'Falha ao descartar pautas.';
@@ -654,6 +777,7 @@ const categories = [
       dismissVisibleButton?.addEventListener('click', dismissVisiblePitches);
       setActiveStatus();
       loadPitches();
+      loadIngestDiagnostics();
     })();
   </script>
 </AdminLayout>
