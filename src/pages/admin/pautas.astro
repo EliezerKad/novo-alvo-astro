@@ -19,6 +19,9 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
           <button type="button" data-refresh-pitches class="rounded-2xl border border-zinc-200 bg-white px-5 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-900">
             Atualizar
           </button>
+          <button type="button" data-dismiss-visible-pitches class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-red-700 transition hover:border-red-600 hover:bg-red-600 hover:text-white dark:border-red-950 dark:bg-red-950/30 dark:text-red-300">
+            Descartar leva
+          </button>
           <a href="/admin/nova/" class="rounded-2xl bg-red-600 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-red-600/20 transition hover:-translate-y-0.5 hover:bg-red-500">
             Nova matéria
           </a>
@@ -163,6 +166,7 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
       const emptyState = document.querySelector('[data-empty-state]');
       const filterInput = document.querySelector('[data-filter-pitches]');
       const refreshButton = document.querySelector('[data-refresh-pitches]');
+      const dismissVisibleButton = document.querySelector('[data-dismiss-visible-pitches]');
       const categoryFilter = document.querySelector('[data-category-filter]');
       const statusButtons = [...document.querySelectorAll('[data-status-filter]')];
       const modal = document.querySelector('[data-pitch-modal]');
@@ -526,6 +530,64 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
         }
       };
 
+      const dismissVisiblePitches = async () => {
+        const token = getToken();
+        if (!token) return;
+        if (!['new', 'reviewed'].includes(status)) {
+          if (statusNode) statusNode.textContent = 'Descarte em massa vale apenas para Novas ou Revisadas.';
+          return;
+        }
+        if (!pitches.length) {
+          if (statusNode) statusNode.textContent = 'Nenhuma pauta para descartar nesta leva.';
+          return;
+        }
+
+        const category = String(categoryFilter?.value || '');
+        const statusLabel = status === 'new' ? 'Novas' : 'Revisadas';
+        const label = category ? `${pitches.length} pauta(s) de ${category}` : `${pitches.length} pauta(s) em ${statusLabel}`;
+        const confirmed = window.confirm(`Descartar ${label}? Elas nao voltam nas proximas ingestoes.`);
+        if (!confirmed) return;
+
+        const previousLabel = dismissVisibleButton?.textContent || '';
+        if (dismissVisibleButton) {
+          dismissVisibleButton.disabled = true;
+          dismissVisibleButton.textContent = 'Descartando...';
+          dismissVisibleButton.classList.add('opacity-60');
+        }
+        if (statusNode) statusNode.textContent = 'Descartando leva editorial...';
+
+        try {
+          const response = await fetch('/api/admin/pitches', {
+            method: 'PATCH',
+            headers: {
+              'content-type': 'application/json',
+              authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ all: true, status: 'dismissed', currentStatus: status, category, minSources: 8 }),
+          });
+          const data = await response.json().catch(() => ({}));
+          if (response.status === 401) {
+            try {
+              localStorage.removeItem('admin-token');
+            } catch {}
+            redirectToLogin();
+            return;
+          }
+          if (!response.ok) throw new Error(data.error || 'Nao foi possivel descartar a leva.');
+          pitches = [];
+          render();
+          if (statusNode) statusNode.textContent = `${Number(data.dismissed || 0)} pauta(s) descartada(s).`;
+        } catch (error) {
+          if (statusNode) statusNode.textContent = error.message || 'Falha ao descartar pautas.';
+        } finally {
+          if (dismissVisibleButton) {
+            dismissVisibleButton.disabled = false;
+            dismissVisibleButton.textContent = previousLabel;
+            dismissVisibleButton.classList.remove('opacity-60');
+          }
+        }
+      };
+
       statusButtons.forEach((button) => {
         button.addEventListener('click', () => {
           status = button.dataset.statusFilter || 'new';
@@ -569,6 +631,7 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
       filterInput?.addEventListener('input', render);
       categoryFilter?.addEventListener('change', loadPitches);
       refreshButton?.addEventListener('click', loadPitches);
+      dismissVisibleButton?.addEventListener('click', dismissVisiblePitches);
       setActiveStatus();
       loadPitches();
     })();

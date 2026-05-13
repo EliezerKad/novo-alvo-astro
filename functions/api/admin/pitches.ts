@@ -223,6 +223,42 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   return json({ ok: true, pitch: { id: pitch.id, clusterKey: pitch.clusterKey, status: pitch.status } });
 };
 
+const dismissMany = async (db: D1Database, payload: { currentStatus?: string; category?: string; minSources?: number }) => {
+  const currentStatus = clean(payload.currentStatus, 24) || 'new';
+  const category = clean(payload.category, 80);
+  const minSources = Math.max(1, Math.min(20, Number(payload.minSources || 8)));
+  const now = new Date().toISOString();
+  const tombstoneExpiresAt = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString();
+
+  if (!['new', 'reviewed'].includes(currentStatus)) {
+    return { error: 'Descarte em massa permitido apenas para pautas novas ou revisadas.', status: 400 };
+  }
+
+  if (category) {
+    const result = await db
+      .prepare(
+        `UPDATE editorial_pitches
+         SET status = 'dismissed', expires_at = ?, updated_at = ?
+         WHERE status = ? AND category = ? AND source_count >= ?
+           AND (expires_at IS NULL OR expires_at = '' OR expires_at >= ?)`,
+      )
+      .bind(tombstoneExpiresAt, now, currentStatus, category, minSources, now)
+      .run();
+    return { ok: true, dismissed: (result as { meta?: { changes?: number } })?.meta?.changes || 0 };
+  }
+
+  const result = await db
+    .prepare(
+      `UPDATE editorial_pitches
+       SET status = 'dismissed', expires_at = ?, updated_at = ?
+       WHERE status = ? AND source_count >= ?
+         AND (expires_at IS NULL OR expires_at = '' OR expires_at >= ?)`,
+    )
+    .bind(tombstoneExpiresAt, now, currentStatus, minSources, now)
+    .run();
+  return { ok: true, dismissed: (result as { meta?: { changes?: number } })?.meta?.changes || 0 };
+};
+
 export const onRequestPatch = async ({ request, env }: { request: Request; env: Env }) => {
   const authError = requireAdmin(request, env);
   if (authError) return authError;
@@ -230,11 +266,17 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
   const db = getDb(env);
   if (!db) return json({ error: 'Binding EDITORIAL_DB nao configurado.' }, { status: 503 });
 
-  let payload: { id?: string; clusterKey?: string; status?: string };
+  let payload: { id?: string; clusterKey?: string; status?: string; all?: boolean; currentStatus?: string; category?: string; minSources?: number };
   try {
     payload = await request.json();
   } catch {
     return json({ error: 'JSON invalido.' }, { status: 400 });
+  }
+
+  if (payload.all && clean(payload.status, 24) === 'dismissed') {
+    const result = await dismissMany(db, payload);
+    if ('error' in result) return json({ error: result.error }, { status: result.status });
+    return json(result);
   }
 
   const id = clean(payload.id, 120);
