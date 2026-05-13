@@ -254,6 +254,46 @@ const stripRadarPrefix = (value: unknown) =>
     .replace(/^Radar\s+[^:]{2,40}:\s*/i, '')
     .trim();
 
+const titleSimilarity = (left: unknown, right: unknown) => semanticOverlap(stripRadarPrefix(left), stripRadarPrefix(right));
+
+const isBorrowedTitle = (title: unknown, sourceTitles: string[]) => {
+  const candidate = stripRadarPrefix(title);
+  const candidateKey = slugify(candidate);
+  if (!candidateKey) return false;
+  return sourceTitles.some((sourceTitle) => {
+    const source = stripRadarPrefix(sourceTitle);
+    const sourceKey = slugify(source);
+    return sourceKey === candidateKey || titleSimilarity(candidate, source) >= 0.86;
+  });
+};
+
+const originalTitleFromSignals = (result: Record<string, unknown>, fallbackTitle: string, category: string, sourceTitles: string[]) => {
+  const activeAgent = clipWholeWord(result.active_agent || '', 44);
+  const consequence = clipWholeWord(result.conflict_point || result.latent_cause || result.fact_static || '', 76);
+  const fact = clipWholeWord(result.fact_static || fallbackTitle, 82);
+  const categoryHooks: Record<string, string> = {
+    Politica: 'O custo politico aparece',
+    Economia: 'A conta chega ao bolso',
+    Cinema: 'A regra do cinema muda',
+    Tecnologia: 'O hype encontra o limite',
+    Futebol: 'A pressao saiu do campo',
+    Esportes: 'A margem de erro acabou',
+    Famosos: 'A imagem virou ativo',
+    Moda: 'A tendencia encontrou mercado',
+    Educacao: 'A carreira entrou em choque',
+  };
+
+  const options = [
+    activeAgent && consequence ? `${activeAgent}: ${consequence}` : '',
+    activeAgent && fact ? `${activeAgent}: ${fact}` : '',
+    `${categoryHooks[category] || 'O ponto de pressao'}: ${fact}`,
+  ]
+    .map((item) => clipWholeWord(stripRadarPrefix(item), 88))
+    .filter(Boolean);
+
+  return options.find((option) => !isBorrowedTitle(option, sourceTitles)) || clipWholeWord(options[0] || fallbackTitle, 88);
+};
+
 const pickCandidateImage = (value: unknown, candidates: ImageCandidate[], fallback: string) => {
   const requested = clean(value, 1000);
   if (!isUsableImage(requested)) return fallback;
@@ -461,6 +501,13 @@ const generateArticleWithAi = async (
     })
     .filter(Boolean)
     .join('\n');
+  const sourceTitles = sources
+    .map((source) => (source && typeof source === 'object' ? plain((source as Record<string, unknown>).title, 180) : ''))
+    .filter(Boolean);
+  const forbiddenTitles = [...new Set([row.title, editorialTitle, ...sourceTitles].map(stripRadarPrefix).filter(Boolean))]
+    .slice(0, 24)
+    .map((title) => `- ${title}`)
+    .join('\n');
 
   const system =
     'Voce e um jornalista profissional de alto nivel do Portal Novo Alvo. Gere uma materia completa, precisa e independente. As personas, micro-personas e diretrizes sao calibragem interna: nunca cite NEXA, IA, prompt, modelo, cluster, Geracao X, Millennials, Gen Z, publico-alvo ou processo editorial no texto publicado. Escreva em portugues do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e valido.';
@@ -531,6 +578,8 @@ CLASSIFICACAO PREVIA OBRIGATORIA:
 ESTRUTURA PADRONIZADA (OBRIGATORIA):
 1. TITULO: direto, impactante e otimizado para SEO. Maximo de 65 caracteres.
    Nunca use o prefixo "Radar" no titulo final, salvo se Radar for nome proprio do fato.
+   O titulo final deve ser autoral do Portal Novo Alvo. E proibido copiar, parafrasear de perto ou manter a mesma estrutura de qualquer titulo das fontes.
+   Se uma fonte diz "X gera Y", crie uma sintese propria com agente ativo, consequencia e tensao editorial.
 2. LIDE: 5W2H em no maximo 3 frases curtas. Va direto ao ponto.
 3. CORPO DO TEXTO: subtitulos <h2> a cada cerca de 200 palavras. Sentencas curtas, no maximo 20 palavras. Use <strong> em termos cruciais.
 4. SECAO "POR QUE ISSO IMPORTA": bloco final em <blockquote>. De um passo atras da noticia, analise com ceticismo, projete impacto futuro e entregue o veredito editorial.
@@ -583,6 +632,8 @@ DADOS DO CLUSTER:
 [IMAGEM ESCOLHIDA PARA CAPA]: ${selectedImage}
 [IMAGENS CANDIDATAS COM CONTEXTO]:
 ${imageLines || 'Sem imagens candidatas.'}
+[TITULOS PROIBIDOS PARA COPIA]:
+${forbiddenTitles || 'Sem titulos listados.'}
 [FONTES]:
 ${sourceLines || 'Fontes nao listadas.'}
 
@@ -635,7 +686,10 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       imageCandidates,
       '',
     );
-    const cleanTitle = stripRadarPrefix(result.title) || fallback.title;
+    const rawCleanTitle = stripRadarPrefix(result.title) || fallback.title;
+    const cleanTitle = isBorrowedTitle(rawCleanTitle, sourceTitles)
+      ? originalTitleFromSignals(result, fallback.title, row.category, sourceTitles)
+      : rawCleanTitle;
 
     return {
       title: clipWholeWord(cleanTitle, 220) || fallback.title,
