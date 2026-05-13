@@ -50,6 +50,7 @@ type ImageCandidate = {
 };
 
 const CATEGORY_IMAGES: Record<string, string> = {
+  Politica: 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1600&q=80',
   Brasil: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=1600&q=80',
   Mundo: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80',
   Economia: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80',
@@ -63,8 +64,11 @@ const CATEGORY_IMAGES: Record<string, string> = {
   Games: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1600&q=80',
   Lifestyle: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80',
   Educacao: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1600&q=80',
+  Cultura: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&w=1600&q=80',
   Moda: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1600&q=80',
+  Musica: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1600&q=80',
   Cinema: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80',
+  Entrevistas: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1600&q=80',
 };
 
 const fallbackImageForCategory = (category: unknown) => CATEGORY_IMAGES[clean(category, 80)] || '/og-default.svg';
@@ -238,6 +242,13 @@ const plain = (value: unknown, max: number) =>
     .trim()
     .slice(0, max);
 
+const clipWholeWord = (value: unknown, max: number) => {
+  const text = plain(value, max + 80);
+  if (text.length <= max) return text;
+  const clipped = text.slice(0, max).replace(/\s+\S*$/, '').trim();
+  return clipped || text.slice(0, max).trim();
+};
+
 const extractText = (response: unknown) => {
   if (typeof response === 'string') return response;
   if (!response || typeof response !== 'object') return '';
@@ -310,14 +321,14 @@ const buildStructuredArticleHtml = (html: string) => {
 const normalizeArticleHtml = (html: string) => {
   const normalized = safeHtml(html)
     .replace(/<\/(h2|h3|p|blockquote|li)>\s*/gi, '</$1>\n')
-    .replace(/<(h2|h3)[^>]*>\s*(.*?)\s*<\/\1>/gi, (_match, tag, text) => `<${tag}>${plain(text, 140)}</${tag}>`)
+    .replace(/<(h2|h3)[^>]*>\s*(.*?)\s*<\/\1>/gi, (_match, tag, text) => `<${tag}>${clipWholeWord(text, 140)}</${tag}>`)
     .replace(/<p[^>]*>\s*([\s\S]*?)\s*<\/p>/gi, (_match, text) =>
       splitLongText(String(text).replace(/<[^>]+>/g, ' '))
         .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
         .join(''),
     )
-    .replace(/<blockquote[^>]*>\s*([\s\S]*?)\s*<\/blockquote>/gi, (_match, text) => `<blockquote>${escapeHtml(plain(text, 360))}</blockquote>`)
-    .replace(/<li[^>]*>\s*([\s\S]*?)\s*<\/li>/gi, (_match, text) => `<li>${escapeHtml(plain(text, 220))}</li>`);
+    .replace(/<blockquote[^>]*>\s*([\s\S]*?)\s*<\/blockquote>/gi, (_match, text) => `<blockquote>${escapeHtml(clipWholeWord(text, 520))}</blockquote>`)
+    .replace(/<li[^>]*>\s*([\s\S]*?)\s*<\/li>/gi, (_match, text) => `<li>${escapeHtml(clipWholeWord(text, 220))}</li>`);
 
   const hasHeading = /<h[23]>/i.test(normalized);
   const paragraphs = (normalized.match(/<p>/gi) || []).length;
@@ -553,13 +564,13 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
     }
 
     return {
-      title: plain(result.title, 220) || fallback.title,
-      summary: plain(result.summary || result.meta_description, 700) || fallback.summary,
-      seoDescription: plain(result.meta_description || result.seoDescription, 155) || fallback.seoDescription,
+      title: clipWholeWord(result.title, 220) || fallback.title,
+      summary: clipWholeWord(result.summary || result.meta_description, 700) || fallback.summary,
+      seoDescription: clipWholeWord(result.meta_description || result.seoDescription, 155) || fallback.seoDescription,
       keywords: plain(result.keywords, 700) || fallback.keywords,
-      imageAlt: plain(result.image_alt || result.imageAlt, 180) || fallback.title,
+      imageAlt: clipWholeWord(result.image_alt || result.imageAlt, 180) || fallback.title,
       imageCaption: '',
-      bodyHtml: stripLeadingDuplicateTitle(generatedBody, plain(result.title, 180) || fallback.title),
+      bodyHtml: stripLeadingDuplicateTitle(generatedBody, clipWholeWord(result.title, 180) || fallback.title),
       generatedWithAi: true,
       generationModel,
       generationError: '',

@@ -1,6 +1,8 @@
 const FEEDS = {
   Brasil:
     'https://news.google.com/rss/headlines/section/topic/CAAqJQgKIh9DQkFTRVFvSUwyMHZNRzV6Y0hjU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
+  Politica:
+    'https://news.google.com/rss/search?q=politica+OR+governo+OR+congresso+OR+STF+OR+eleicoes+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
   Mundo:
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx1YlY4U0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
   Economia:
@@ -20,7 +22,10 @@ const FEEDS = {
   Games: 'https://news.google.com/rss/search?q=games+OR+playstation+OR+xbox+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
   Lifestyle: 'https://news.google.com/rss/search?q=estilo+de+vida+OR+comportamento+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
   Educacao: 'https://news.google.com/rss/search?q=educacao+OR+enem+OR+carreira+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
+  Cultura: 'https://news.google.com/rss/search?q=cultura+OR+arte+OR+literatura+OR+teatro+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
   Moda: 'https://news.google.com/rss/search?q=moda+OR+fashion+OR+tendencias+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
+  Musica: 'https://news.google.com/rss/search?q=musica+OR+shows+OR+album+OR+festival+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
+  Entrevistas: 'https://news.google.com/rss/search?q=entrevista+OR+declarou+OR+afirma+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
   Cinema: 'https://news.google.com/rss/search?q=cinema+OR+filmes+OR+streaming+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
 };
 
@@ -152,7 +157,11 @@ const CATEGORY_SIGNALS = [
   {
     category: 'Futebol',
     pattern:
-      /\b(futebol|brasileirao|serie\s?[abcd]|copa do brasil|libertadores|sul-americana|corinthians|flamengo|fluminense|palmeiras|sao paulo|santos|vasco|botafogo|gremio|internacional|cruzeiro|atletico|bahia|fortaleza|guarani|mirassol|santa cruz|diniz|luxemburgo)\b/i,
+      /\b(futebol|brasileirao|serie\s?[abcd]|copa do brasil|libertadores|sul-americana|corinthians|flamengo|fluminense|palmeiras|sao paulo|santos|vasco|botafogo|gremio|internacional|cruzeiro|atletico|bahia|fortaleza|guarani|mirassol|santa cruz|diniz|luxemburgo|tecnico|treinador|vitoria|derrota|clube|time|estadio|rodada)\b/i,
+  },
+  {
+    category: 'Politica',
+    pattern: /\b(politica|governo|congresso|senado|camara|stf|planalto|eleicao|eleicoes|prefeito|governador|presidente|ministro|deputado|senador)\b/i,
   },
   {
     category: 'Economia',
@@ -164,8 +173,16 @@ const CATEGORY_SIGNALS = [
     pattern: /\b(games?|playstation|xbox|nintendo|steam|game pass|gta|fortnite|minecraft|console|ps5)\b/i,
   },
   {
+    category: 'Musica',
+    pattern: /\b(musica|show|shows|album|single|turne|festival|cantor|cantora|banda|funk|sertanejo|rap|pop|rock)\b/i,
+  },
+  {
     category: 'Cinema',
     pattern: /\b(cinema|filme|filmes|serie|series|streaming|festival de cannes|oscar|bilheteria|hbo|max|prime video)\b/i,
+  },
+  {
+    category: 'Cultura',
+    pattern: /\b(cultura|arte|artes|literatura|livro|livros|teatro|exposicao|museu|bienal)\b/i,
   },
   {
     category: 'Moda',
@@ -176,11 +193,11 @@ const CATEGORY_SIGNALS = [
 const classifyCategory = (feedCategory, title, source) => {
   const text = normalizedText(`${title} ${source}`);
   const matches = CATEGORY_SIGNALS.filter((item) => item.pattern.test(text));
-  const football = matches.find((item) => item.category === 'Futebol');
+  const priorityMatch = ['Futebol', 'Politica', 'Games', 'Cinema', 'Musica', 'Cultura'].map((category) => matches.find((item) => item.category === category)).find(Boolean);
   const economy = matches.find((item) => item.category === 'Economia');
   const fashion = matches.find((item) => item.category === 'Moda');
   const fashionScore = (text.match(/\b(moda|fashion|look|looks|tendencia|tendencias|passarela|estilista|vestido|grife|colecao)\b/gi) || []).length;
-  if (football) return 'Futebol';
+  if (priorityMatch) return priorityMatch.category;
   if (economy && (feedCategory === 'Educacao' || feedCategory === 'Lifestyle' || feedCategory === 'Brasil')) return 'Economia';
   if (fashion && fashionScore < 2 && feedCategory !== 'Moda') return feedCategory;
   const matched = matches[0];
@@ -511,6 +528,36 @@ const runHousekeeping = async () => {
   }
 };
 
+const addUniquePitch = (selected, seen, pitch) => {
+  if (!pitch || seen.has(pitch.clusterKey)) return false;
+  selected.push(pitch);
+  seen.add(pitch.clusterKey);
+  return true;
+};
+
+const balancePitches = (topicPitches, radarPitches, limit) => {
+  const selected = [];
+  const seen = new Set();
+  const radarByCategory = new Map();
+
+  for (const pitch of radarPitches) {
+    if (!radarByCategory.has(pitch.category)) radarByCategory.set(pitch.category, []);
+    radarByCategory.get(pitch.category).push(pitch);
+  }
+
+  for (const category of Object.keys(FEEDS)) {
+    addUniquePitch(selected, seen, radarByCategory.get(category)?.[0]);
+    if (selected.length >= limit) return selected;
+  }
+
+  for (const pitch of [...topicPitches, ...radarPitches]) {
+    addUniquePitch(selected, seen, pitch);
+    if (selected.length >= limit) return selected;
+  }
+
+  return selected;
+};
+
 const main = async () => {
   if (!ADMIN_TOKEN) throw new Error('ADMIN_TOKEN ausente.');
 
@@ -528,8 +575,7 @@ const main = async () => {
     .map(buildPitch)
     .filter((pitch) => pitch.sourceCount >= MIN_SOURCES && !topicPitches.some((existing) => existing.clusterKey === pitch.clusterKey))
     .sort((a, b) => b.score - a.score);
-  const pitches = [...topicPitches, ...radarPitches]
-    .slice(0, Number(process.env.MAX_PITCHES || 80));
+  const pitches = balancePitches(topicPitches, radarPitches, Number(process.env.MAX_PITCHES || 80));
 
   let saved = 0;
   const enrichedPitches = await Promise.all(pitches.map(enrichPitchImages));
