@@ -204,6 +204,12 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
         }
       };
 
+      const imageUrl = (image) => {
+        if (!image) return '';
+        if (typeof image === 'string') return image;
+        return String(image.url || image.src || '');
+      };
+
       const formatDate = (value) => {
         if (!value) return 'Sem data';
         const date = new Date(value);
@@ -287,6 +293,7 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
           <section class="${mode === 'article' ? 'rounded-[1.75rem] border border-zinc-100 bg-gradient-to-br from-zinc-950 via-zinc-900 to-red-950 p-5 text-white shadow-2xl shadow-zinc-950/10 dark:border-zinc-800 md:p-6' : 'rounded-[1.5rem] bg-zinc-50 p-5 dark:bg-zinc-900/70'}">
             <p class="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-400">Resumo editorial</p>
             <p class="mt-3 text-base font-medium leading-8 ${mode === 'article' ? 'text-zinc-200' : 'text-zinc-700 dark:text-zinc-300'}">${mode === 'article' ? 'Texto final sintetizado pela engine. Os sinais técnicos ficam abaixo, como bastidor de curadoria.' : escapeHtml(pitch.summary || 'Sem resumo ainda.')}</p>
+            ${mode === 'article' && !images.some(imageUrl) ? '<p class="mt-4 rounded-2xl bg-amber-400/15 p-4 text-sm font-black leading-6 text-amber-200">Sem imagem real extraída nesta pauta. A fila usará capa editorial de segurança até uma imagem melhor ser adicionada.</p>' : ''}
           </section>
 
           ${
@@ -345,11 +352,16 @@ const categories = ['Brasil', 'Mundo', 'Economia', 'Tecnologia', 'Entretenimento
                   <div class="mt-3 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
                     ${images
                       .slice(0, 6)
-                      .map((image) => `
-                        <a href="${escapeHtml(image)}" target="_blank" rel="noopener noreferrer" class="group block overflow-hidden rounded-[1.25rem] bg-zinc-100 dark:bg-zinc-900">
-                          <img src="${escapeHtml(image)}" alt="" class="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" referrerpolicy="no-referrer" />
+                      .map((image) => {
+                        const src = imageUrl(image);
+                        if (!src) return '';
+                        const label = typeof image === 'object' && image ? image.sourceTitle || image.sourcePublisher || '' : '';
+                        return `
+                        <a href="${escapeHtml(src)}" target="_blank" rel="noopener noreferrer" class="group block overflow-hidden rounded-[1.25rem] bg-zinc-100 dark:bg-zinc-900">
+                          <img src="${escapeHtml(src)}" alt="" class="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" referrerpolicy="no-referrer" />
+                          ${label ? `<span class="block p-3 text-[10px] font-bold leading-4 text-zinc-500">${escapeHtml(label)}</span>` : ''}
                         </a>
-                      `)
+                      `;})
                       .join('')}
                   </div>
                 </section>`

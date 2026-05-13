@@ -564,7 +564,7 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
   const sources = parseArray(row.sources);
   const tags = parseArray(row.tags).map(String).filter(Boolean);
   const imageCandidates = uniqueImageCandidates(parseArray(row.image_candidates));
-  const coverUrl = imageCandidates.length ? chooseBestImage(imageCandidates, row.title, row.category) : '';
+  const coverUrl = chooseBestImage(imageCandidates, row.title, row.category);
   const inlineImageUrl = chooseInlineImage(imageCandidates, coverUrl, row.title, row.category);
   const sourceNames = [
     ...new Set(

@@ -33,7 +33,8 @@ type PitchPayload = {
 
 type PitchRecord = {
   id: string;
-  category: string;
+  category?: string;
+  status?: string;
 };
 
 const json = (body: unknown, init: ResponseInit = {}) =>
@@ -120,30 +121,34 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
       .prepare(
         `SELECT * FROM editorial_pitches
          WHERE status = ? AND category = ? AND source_count >= ?
+           AND (expires_at IS NULL OR expires_at = '' OR expires_at >= ? OR status IN ('queued', 'converted'))
          ORDER BY score DESC, updated_at DESC
          LIMIT ?`,
       )
-      .bind(status, category, minSources, limit)
+      .bind(status, category, minSources, new Date().toISOString(), limit)
       .all();
   } else if (status) {
     result = await db
       .prepare(
         `SELECT * FROM editorial_pitches
          WHERE status = ? AND source_count >= ?
+           AND (expires_at IS NULL OR expires_at = '' OR expires_at >= ? OR status IN ('queued', 'converted'))
          ORDER BY score DESC, updated_at DESC
          LIMIT ?`,
       )
-      .bind(status, minSources, limit)
+      .bind(status, minSources, new Date().toISOString(), limit)
       .all();
   } else {
     result = await db
       .prepare(
         `SELECT * FROM editorial_pitches
          WHERE source_count >= ?
+           AND status != 'dismissed'
+           AND (expires_at IS NULL OR expires_at = '' OR expires_at >= ? OR status IN ('queued', 'converted'))
          ORDER BY score DESC, updated_at DESC
          LIMIT ?`,
       )
-      .bind(minSources, limit)
+      .bind(minSources, new Date().toISOString(), limit)
       .all();
   }
 
@@ -165,6 +170,15 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   }
 
   const pitch = normalizePitch(rawPayload);
+  const existing = await db
+    .prepare('SELECT id, status FROM editorial_pitches WHERE cluster_key = ? LIMIT 1')
+    .bind(pitch.clusterKey)
+    .first<PitchRecord>();
+
+  if (existing?.status === 'dismissed') {
+    return json({ ok: true, skipped: true, reason: 'Pauta descartada preservada.', pitch: { id: existing.id, clusterKey: pitch.clusterKey, status: existing.status } });
+  }
+
   await db
     .prepare(
       `INSERT INTO editorial_pitches (
@@ -242,10 +256,19 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
     return json({ error: 'Pauta nao encontrada.' }, { status: 404 });
   }
 
-  await db
-    .prepare('UPDATE editorial_pitches SET status = ?, updated_at = ? WHERE id = ? OR cluster_key = ?')
-    .bind(status, new Date().toISOString(), existing.id, lookupKey)
-    .run();
+  const now = new Date().toISOString();
+  const tombstoneExpiresAt = status === 'dismissed' ? new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString() : '';
+  if (status === 'dismissed') {
+    await db
+      .prepare('UPDATE editorial_pitches SET status = ?, expires_at = ?, updated_at = ? WHERE id = ? OR cluster_key = ?')
+      .bind(status, tombstoneExpiresAt, now, existing.id, lookupKey)
+      .run();
+  } else {
+    await db
+      .prepare('UPDATE editorial_pitches SET status = ?, updated_at = ? WHERE id = ? OR cluster_key = ?')
+      .bind(status, now, existing.id, lookupKey)
+      .run();
+  }
 
   let queue = null;
   if (status === 'queued') {
@@ -310,8 +333,8 @@ export const onRequestDelete = async ({ request, env }: { request: Request; env:
   await db
     .prepare(
       `DELETE FROM editorial_pitches
-       WHERE (status IN ('dismissed', 'converted') AND updated_at < ?)
-          OR (expires_at IS NOT NULL AND expires_at != '' AND expires_at < ?)`,
+       WHERE (status = 'converted' AND updated_at < ?)
+          OR (status NOT IN ('dismissed', 'converted') AND expires_at IS NOT NULL AND expires_at != '' AND expires_at < ?)`,
     )
     .bind(cutoff, new Date().toISOString())
     .run();

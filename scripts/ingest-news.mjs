@@ -155,6 +155,11 @@ const CATEGORY_SIGNALS = [
       /\b(futebol|brasileirao|serie\s?[abcd]|copa do brasil|libertadores|sul-americana|corinthians|flamengo|fluminense|palmeiras|sao paulo|santos|vasco|botafogo|gremio|internacional|cruzeiro|atletico|bahia|fortaleza|guarani|mirassol|santa cruz|diniz|luxemburgo)\b/i,
   },
   {
+    category: 'Economia',
+    pattern:
+      /\b(economia|mercado|emprego|vagas|salario|renda|trabalho|trabalhador|trabalhadora|carreira|empresa|empresas|negocios|credito|juros|inflacao|bolsa|maternidade|licenca maternidade|teto materno|infojobs)\b/i,
+  },
+  {
     category: 'Games',
     pattern: /\b(games?|playstation|xbox|nintendo|steam|game pass|gta|fortnite|minecraft|console|ps5)\b/i,
   },
@@ -170,10 +175,18 @@ const CATEGORY_SIGNALS = [
 
 const classifyCategory = (feedCategory, title, source) => {
   const text = normalizedText(`${title} ${source}`);
-  const matched = CATEGORY_SIGNALS.find((item) => item.pattern.test(text));
+  const matches = CATEGORY_SIGNALS.filter((item) => item.pattern.test(text));
+  const football = matches.find((item) => item.category === 'Futebol');
+  const economy = matches.find((item) => item.category === 'Economia');
+  const fashion = matches.find((item) => item.category === 'Moda');
+  const fashionScore = (text.match(/\b(moda|fashion|look|looks|tendencia|tendencias|passarela|estilista|vestido|grife|colecao)\b/gi) || []).length;
+  if (football) return 'Futebol';
+  if (economy && (feedCategory === 'Educacao' || feedCategory === 'Lifestyle' || feedCategory === 'Brasil')) return 'Economia';
+  if (fashion && fashionScore < 2 && feedCategory !== 'Moda') return feedCategory;
+  const matched = matches[0];
   if (!matched || matched.category === feedCategory) return feedCategory;
   const feedSignal = CATEGORY_SIGNALS.find((item) => item.category === feedCategory);
-  if (feedSignal?.pattern.test(text) && feedCategory !== 'Moda') return feedCategory;
+  if (feedSignal?.pattern.test(text) && feedCategory !== 'Moda' && feedCategory !== 'Educacao') return feedCategory;
   return matched.category;
 };
 
