@@ -173,6 +173,15 @@ const dataImageToUpload = (value: string) => {
   };
 };
 
+const base64ToArrayBuffer = (value: string) => {
+  const binary = atob(value);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  return bytes.buffer;
+};
+
 const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
   const bytes = new Uint8Array(buffer);
   let binary = '';
@@ -190,6 +199,33 @@ const imageExtensionFromType = (contentType: string) => {
   if (type.includes('webp')) return 'webp';
   if (type.includes('avif')) return 'avif';
   return 'jpg';
+};
+
+const uploadImageBufferToR2 = async (
+  env: Env,
+  keyBase: string,
+  mime: string,
+  buffer: ArrayBuffer,
+  source: string,
+) => {
+  if (!env.MEDIA_BUCKET || !buffer.byteLength || buffer.byteLength > 8_000_000) return null;
+
+  const extension = imageExtensionFromType(mime);
+  const key = `${keyBase}.${extension}`;
+  await env.MEDIA_BUCKET.put(key, buffer, {
+    httpMetadata: {
+      contentType: mime.split(';')[0],
+      cacheControl: 'public, max-age=31536000, immutable',
+    },
+    customMetadata: {
+      source: source.slice(0, 500),
+    },
+  });
+
+  return {
+    key,
+    publicPath: `/media/${key}`,
+  };
 };
 
 const uploadRemoteImageToR2 = async (env: Env, url: string, keyBase: string) => {
@@ -214,25 +250,16 @@ const uploadRemoteImageToR2 = async (env: Env, url: string, keyBase: string) => 
     const buffer = await response.arrayBuffer();
     if (!buffer.byteLength || buffer.byteLength > 8_000_000) return null;
 
-    const extension = imageExtensionFromType(contentType);
-    const key = `${keyBase}.${extension}`;
-    await env.MEDIA_BUCKET.put(key, buffer, {
-      httpMetadata: {
-        contentType: contentType.split(';')[0],
-        cacheControl: 'public, max-age=31536000, immutable',
-      },
-      customMetadata: {
-        source: url.slice(0, 500),
-      },
-    });
-
-    return {
-      key,
-      publicPath: `/media/${key}`,
-    };
+    return await uploadImageBufferToR2(env, keyBase, contentType, buffer, url);
   } catch {
     return null;
   }
+};
+
+const uploadDataImageToR2 = async (env: Env, dataUrl: string, keyBase: string) => {
+  const upload = dataImageToUpload(dataUrl);
+  if (!upload) return null;
+  return await uploadImageBufferToR2(env, keyBase, upload.mime, base64ToArrayBuffer(upload.content), 'data-url');
 };
 
 const remoteImageToUpload = async (value: string) => {
@@ -401,62 +428,87 @@ const publishMarkdownToGitHub = async (
   const uploadedAssets: string[] = [];
   const coverUpload = dataImageToUpload(articleForMarkdown.coverUrl);
   if (coverUpload) {
-    const assetPath = `public/uploads/news/${article.slug}-cover.${coverUpload.extension}`;
-    await putGitHubFile({
-      repository,
-      branch,
-      path: assetPath,
-      content: coverUpload.content,
-      message: `upload article cover: ${article.title}`,
-      headers,
-    });
-    articleForMarkdown.coverUrl = `/uploads/news/${article.slug}-cover.${coverUpload.extension}`;
-    uploadedAssets.push(assetPath);
-  } else {
-    const remoteCoverUpload = await remoteImageToUpload(articleForMarkdown.coverUrl);
-    if (remoteCoverUpload) {
-      const assetPath = `public/uploads/news/${article.slug}-cover.${remoteCoverUpload.extension}`;
+    const r2Cover = await uploadDataImageToR2(env, articleForMarkdown.coverUrl, `news/${article.slug}-cover`);
+    if (r2Cover) {
+      articleForMarkdown.coverUrl = r2Cover.publicPath;
+      uploadedAssets.push(r2Cover.key);
+    } else {
+      const assetPath = `public/uploads/news/${article.slug}-cover.${coverUpload.extension}`;
       await putGitHubFile({
         repository,
         branch,
         path: assetPath,
-        content: remoteCoverUpload.content,
-        message: `mirror article cover: ${article.title}`,
+        content: coverUpload.content,
+        message: `upload article cover: ${article.title}`,
         headers,
       });
-      articleForMarkdown.coverUrl = `/uploads/news/${article.slug}-cover.${remoteCoverUpload.extension}`;
+      articleForMarkdown.coverUrl = `/uploads/news/${article.slug}-cover.${coverUpload.extension}`;
       uploadedAssets.push(assetPath);
+    }
+  } else {
+    const r2Cover = await uploadRemoteImageToR2(env, articleForMarkdown.coverUrl, `news/${article.slug}-cover`);
+    if (r2Cover) {
+      articleForMarkdown.coverUrl = r2Cover.publicPath;
+      uploadedAssets.push(r2Cover.key);
+    } else {
+      const remoteCoverUpload = await remoteImageToUpload(articleForMarkdown.coverUrl);
+      if (remoteCoverUpload) {
+        const assetPath = `public/uploads/news/${article.slug}-cover.${remoteCoverUpload.extension}`;
+        await putGitHubFile({
+          repository,
+          branch,
+          path: assetPath,
+          content: remoteCoverUpload.content,
+          message: `mirror article cover: ${article.title}`,
+          headers,
+        });
+        articleForMarkdown.coverUrl = `/uploads/news/${article.slug}-cover.${remoteCoverUpload.extension}`;
+        uploadedAssets.push(assetPath);
+      }
     }
   }
 
   let inlineIndex = 0;
   const inlineUploads: Array<{ path: string; content: string }> = [];
-  articleForMarkdown.bodyHtml = articleForMarkdown.bodyHtml.replace(/data:image\/(?:png|jpe?g|webp);base64,[a-z0-9+/=]+/gi, (dataUrl) => {
+  const dataInlineImages = [...articleForMarkdown.bodyHtml.matchAll(/data:image\/(?:png|jpe?g|webp);base64,[a-z0-9+/=]+/gi)].map((match) => match[0]);
+  for (const dataUrl of dataInlineImages) {
     const upload = dataImageToUpload(dataUrl);
-    if (!upload) return dataUrl;
+    if (!upload) continue;
     inlineIndex += 1;
-    const assetPath = `public/uploads/news/${article.slug}-${inlineIndex}.${upload.extension}`;
-    uploadedAssets.push(assetPath);
-    inlineUploads.push({ path: assetPath, content: upload.content });
-    return `/uploads/news/${article.slug}-${inlineIndex}.${upload.extension}`;
-  });
+    const r2Image = await uploadDataImageToR2(env, dataUrl, `news/${article.slug}-${inlineIndex}`);
+    if (r2Image) {
+      uploadedAssets.push(r2Image.key);
+      articleForMarkdown.bodyHtml = articleForMarkdown.bodyHtml.split(dataUrl).join(r2Image.publicPath);
+    } else {
+      const assetPath = `public/uploads/news/${article.slug}-${inlineIndex}.${upload.extension}`;
+      uploadedAssets.push(assetPath);
+      inlineUploads.push({ path: assetPath, content: upload.content });
+      articleForMarkdown.bodyHtml = articleForMarkdown.bodyHtml.split(dataUrl).join(`/uploads/news/${article.slug}-${inlineIndex}.${upload.extension}`);
+    }
+  }
 
   const remoteInlineImages = [
     ...new Set(
       [...articleForMarkdown.bodyHtml.matchAll(/<img[^>]+src=["'](https?:\/\/[^"']+)["'][^>]*>/gi)]
         .map((match) => match[1])
-        .filter((src) => !/^https:\/\/portalnovoalvo\.com\.br\/uploads\//i.test(src)),
+        .filter((src) => !/^https:\/\/portalnovoalvo\.com\.br\/(?:uploads|media)\//i.test(src)),
     ),
   ].slice(0, 4);
 
   for (const remoteImage of remoteInlineImages) {
-    const upload = await remoteImageToUpload(remoteImage);
-    if (!upload) continue;
     inlineIndex += 1;
-    const assetPath = `public/uploads/news/${article.slug}-${inlineIndex}.${upload.extension}`;
-    uploadedAssets.push(assetPath);
-    inlineUploads.push({ path: assetPath, content: upload.content });
-    articleForMarkdown.bodyHtml = articleForMarkdown.bodyHtml.split(remoteImage).join(`/uploads/news/${article.slug}-${inlineIndex}.${upload.extension}`);
+    const r2Image = await uploadRemoteImageToR2(env, remoteImage, `news/${article.slug}-${inlineIndex}`);
+    if (r2Image) {
+      uploadedAssets.push(r2Image.key);
+      articleForMarkdown.bodyHtml = articleForMarkdown.bodyHtml.split(remoteImage).join(r2Image.publicPath);
+    } else {
+      const upload = await remoteImageToUpload(remoteImage);
+      if (!upload) continue;
+      const assetPath = `public/uploads/news/${article.slug}-${inlineIndex}.${upload.extension}`;
+      uploadedAssets.push(assetPath);
+      inlineUploads.push({ path: assetPath, content: upload.content });
+      articleForMarkdown.bodyHtml = articleForMarkdown.bodyHtml.split(remoteImage).join(`/uploads/news/${article.slug}-${inlineIndex}.${upload.extension}`);
+    }
   }
 
   for (const upload of inlineUploads) {

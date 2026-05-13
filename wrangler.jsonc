@@ -17,16 +17,11 @@
       "database_name": "novo-alvo-editorial",
       "database_id": "a15d72bf-96ac-432d-8379-e179ea387bb7"
     }
-  ]
-  /*
-  Depois de criar o bucket R2 "novo-alvo-media" no Cloudflare,
-  adicione uma vírgula depois do bloco d1_databases e ative o binding abaixo:
-
+  ],
   "r2_buckets": [
     {
       "binding": "MEDIA_BUCKET",
       "bucket_name": "novo-alvo-media"
     }
   ]
-  */
 }
