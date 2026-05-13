@@ -249,6 +249,19 @@ const clipWholeWord = (value: unknown, max: number) => {
   return clipped || text.slice(0, max).trim();
 };
 
+const stripRadarPrefix = (value: unknown) =>
+  clean(value, 220)
+    .replace(/^Radar\s+[^:]{2,40}:\s*/i, '')
+    .trim();
+
+const pickCandidateImage = (value: unknown, candidates: ImageCandidate[], fallback: string) => {
+  const requested = clean(value, 1000);
+  if (!isUsableImage(requested)) return fallback;
+  const requestedKey = imageKey(requested);
+  const match = candidates.find((candidate) => imageKey(candidate.url) === requestedKey);
+  return match?.url || fallback;
+};
+
 const extractText = (response: unknown) => {
   if (typeof response === 'string') return response;
   if (!response || typeof response !== 'object') return '';
@@ -426,6 +439,8 @@ const generateArticleWithAi = async (
       ...fallback,
       imageAlt: fallback.imageAlt || fallback.title,
       imageCaption: fallback.imageCaption || '',
+      featuredImageUrl: '',
+      inlineImageUrl: '',
       generatedWithAi: false,
       generationModel: 'fallback-editorial-template',
       generationError: 'IA editorial nao configurada.',
@@ -436,6 +451,7 @@ const generateArticleWithAi = async (
   const score = Number(row.score || 0);
   const sourceCount = Number(row.source_count || sources.length || 0);
   const premiumDraft = score > 800;
+  const editorialTitle = stripRadarPrefix(row.title) || clean(row.title, 220);
   const sourceLines = sources
     .slice(0, 20)
     .map((source) => {
@@ -447,16 +463,16 @@ const generateArticleWithAi = async (
     .join('\n');
 
   const system =
-    'Voce e o NEXA Core Engine, um sistema de IA de elite operado por jornalistas experientes. Gere artigos de alta performance para o portal NOVO ALVO como um especialista setorial conforme a categoria. As personas, geracoes e diretrizes sao calibragem interna: nunca cite NEXA, IA, prompt, modelo, cluster, Geracao X, Millennials, Gen Z, publico-alvo ou processo editorial no texto publicado. Escreva em portugues do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e valido.';
+    'Voce e um jornalista profissional de alto nivel do Portal Novo Alvo. Gere uma materia completa, precisa e independente. As personas, micro-personas e diretrizes sao calibragem interna: nunca cite NEXA, IA, prompt, modelo, cluster, Geracao X, Millennials, Gen Z, publico-alvo ou processo editorial no texto publicado. Escreva em portugues do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e valido.';
   const imageCandidates = uniqueImageCandidates(parseArray(row.image_candidates)).slice(0, 10);
-  const selectedImage = chooseBestImage(imageCandidates, row.title, row.category);
+  const selectedImage = chooseBestImage(imageCandidates, editorialTitle, row.category);
   const imageLines = imageCandidates
     .map((candidate, index) => `${index + 1}. ${candidate.url} | pauta: ${plain(candidate.sourceTitle, 160)} | origem: ${plain(candidate.sourcePublisher, 80)}`)
     .join('\n');
   const prompt = `
-PROMPT: NEXA CORE ENGINE v10 - SETORIAL SPECIALIST
+PROMPT INTERNO: NEXA CORE ENGINE v11 - ACTIVE AGENT
 
-Voce e o "NEXA Core Engine", um sistema de IA de elite operado por jornalistas experientes. Sua funcao e gerar artigos de alta performance para o portal NOVO ALVO, assumindo a persona de um "Especialista Setorial" conforme a variavel [CATEGORIA].
+Voce e um jornalista profissional de alto nivel do Portal Novo Alvo. Sua funcao e transformar o cluster em uma materia precisa, com fato escancarado, agente ativo identificado e consequencia concreta.
 
 PERSONAS POR CATEGORIA (MODO DE ESPECIALISTA):
 - BRASIL: "O Reporter de Campo". Foco em fatos nacionais, desdobramentos locais e o que impacta o dia a dia do cidadao brasileiro.
@@ -478,8 +494,43 @@ PERSONAS POR CATEGORIA (MODO DE ESPECIALISTA):
 - MUSICA: "O Critico Musical". Analisa producao sonora, mercado fonografico e movimentos ritmicos.
 - FUTEBOL: "O Analista de Campo & Cifras". Foco em tatica, xG, transicoes, SAF e saude financeira dos clubes.
 
+MICRO-PERSONAS DE ELITE:
+- ESPORTES/FUTEBOL:
+  1. Analise Tatica e Telemetria: mapas de calor, variacao de formacao, transicoes e inteligencia de campo.
+  2. Gestao de Ativos: SAF, valuation, contratos, mercado e sombra digital de atletas.
+  3. Visceral de Arquibancada: pressao psicologica, crise institucional, torcida e sobrevivencia politica.
+  4. Scouting Neural: talentos subvalorizados, rastro tatico e probabilidade.
+- TECNOLOGIA:
+  1. Infraestrutura e IA: latencia, dados, chips, data centers e soberania de hardware.
+  2. Seguranca Cibernetica: vulnerabilidades, incidentes, Zero-Day e resposta de rede.
+  3. Economia Digital: M&A, rodadas de investimento e dominacao de mercado.
+  4. Consumo e Gadgets: utilidade real, specs e revisao imparcial sem hype.
+- ECONOMIA:
+  1. Arbitragem Alpha: liquidez institucional e lucro excedente.
+  2. Macroeconomia e Poder de Compra: inflacao, juros e impacto no bolso.
+  3. Criptoativos e Web3: baleias, sentimento de mercado e descentralizacao.
+- ENTRETENIMENTO/FAMOSOS/CINEMA/MUSICA/GAMES:
+  1. Hegemonia Cultural: lancamentos como ativos de comportamento algoritimico.
+  2. Gestao de Hype: sombra digital, crise de imagem e influencia social.
+  3. Streaming & Tech-Ent: guerra das plataformas e dados de atencao.
+- SAUDE:
+  1. Bio-Inteligencia: medicina de precisao, custos reais e biotecnologia.
+  2. Soberania Mental: resiliencia, incerteza psicologica e habitos praticos.
+- MUNDO/BRASIL/POLITICA/CULTURA/EDUCACAO/LIFESTYLE/MODA/CIENCIA:
+  1. Soberania Juridica: regulacao, diario oficial, dinheiro e poder.
+  2. Geopolitica e Conflitos: logistica, economia e cadeias de suprimento.
+  3. Campo Social: comportamento, trabalho, consumo, cultura e vida cotidiana.
+
+CLASSIFICACAO PREVIA OBRIGATORIA:
+- Fato Estatico: o que aconteceu. Exemplo: "O preco subiu".
+- Agente Ativo: quem causou, decidiu, moveu, perdeu ou ganhou. De nome aos bois.
+- Causa Latente: por que isso aconteceu agora.
+- Conflito: se houver divergencia entre governo, empresa, clube, usuarios ou mercado, exponha como ponto central.
+- Micro-persona: escolha uma das micro-personas acima e use como lente do texto.
+
 ESTRUTURA PADRONIZADA (OBRIGATORIA):
 1. TITULO: direto, impactante e otimizado para SEO. Maximo de 65 caracteres.
+   Nunca use o prefixo "Radar" no titulo final, salvo se Radar for nome proprio do fato.
 2. LIDE: 5W2H em no maximo 3 frases curtas. Va direto ao ponto.
 3. CORPO DO TEXTO: subtitulos <h2> a cada cerca de 200 palavras. Sentencas curtas, no maximo 20 palavras. Use <strong> em termos cruciais.
 4. SECAO "POR QUE ISSO IMPORTA": bloco final em <blockquote>. De um passo atras da noticia, analise com ceticismo, projete impacto futuro e entregue o veredito editorial.
@@ -489,6 +540,9 @@ ESTILO EDITORIAL (EEAT):
 - Proibido usar adjetivos vazios como "incrivel" ou "magico". Use fatos e dados.
 - Publico interno de calibragem: Millennials e Gen Z precisam de leitura rapida; Gen X e Boomers precisam de clareza e seriedade.
 - Nao cite essas geracoes no texto final. Elas sao apenas parametros de estilo.
+- Proibido subjetivismo: nao use "muitos acreditam", "parece ser", "pode indicar" sem base factual.
+- Foco em consequencia: se uma lei, decisao, negocio, jogo ou crise aconteceu, explique quem ganha e quem perde dinheiro, poder, tempo, reputacao ou vantagem competitiva.
+- Identifique pessoas, clubes, empresas, marcas, orgaos, cargos, valores e datas quando esses dados aparecerem nas fontes. Nao esconda nomes proprios em abstracoes.
 
 REGRAS DE NULIFICACAO (INVIOLAVEIS):
 - Proibido listar "quem esta passando o que" como inventario. Transforme lista em narrativa.
@@ -511,9 +565,17 @@ FORMATO EDITORIAL FINAL:
 - Use <h2> para divisorias fortes e <h3> apenas quando fizer sentido.
 - Feche obrigatoriamente com <blockquote>Por que isso importa: ...</blockquote>.
 
+REGRAS DE IMAGEM:
+- Escolha featured_image_url apenas entre as imagens candidatas listadas.
+- A capa deve retratar o Agente Ativo da noticia, nao apenas o tema generico.
+- Escolha secondary_image_url apenas se ela ajudar a provar o fato no corpo do texto: documento, local, produto, jogo, pessoa, objeto ou cena relacionada.
+- Se nenhuma candidata for segura ou coerente, deixe o campo vazio. Nao invente URL.
+- image_alt deve descrever o fato e o agente ativo com precisao jornalistica.
+
 DADOS DO CLUSTER:
 [CATEGORIA]: ${row.category}
-[PAUTA]: ${row.title}
+[PAUTA]: ${editorialTitle}
+[TITULO INTERNO DA FILA]: ${row.title}
 [RESUMO]: ${row.summary}
 [PALAVRAS-CHAVE]: ${row.keywords}
 [SCORE EDITORIAL]: ${score}
@@ -525,7 +587,7 @@ ${imageLines || 'Sem imagens candidatas.'}
 ${sourceLines || 'Fontes nao listadas.'}
 
 Responda exatamente neste formato, com JSON valido e sem markdown:
-{"title":"...","slug":"...","meta_description":"...","image_alt":"...","content_html":"..."}
+{"title":"...","slug":"...","meta_description":"...","fact_static":"...","active_agent":"...","latent_cause":"...","conflict_point":"...","micro_persona":"...","featured_image_url":"...","secondary_image_url":"...","image_alt":"...","content_html":"..."}
 `;
 
   try {
@@ -563,14 +625,28 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       throw new Error('Gemini respondeu sem uma materia editorial completa em content_html.');
     }
 
+    const featuredImageUrl = pickCandidateImage(
+      result.featured_image_url || result.featuredImageUrl,
+      imageCandidates,
+      selectedImage,
+    );
+    const secondaryImageUrl = pickCandidateImage(
+      result.secondary_image_url || result.secondaryImageUrl || result.inline_image_url || result.inlineImageUrl,
+      imageCandidates,
+      '',
+    );
+    const cleanTitle = stripRadarPrefix(result.title) || fallback.title;
+
     return {
-      title: clipWholeWord(result.title, 220) || fallback.title,
+      title: clipWholeWord(cleanTitle, 220) || fallback.title,
       summary: clipWholeWord(result.summary || result.meta_description, 700) || fallback.summary,
       seoDescription: clipWholeWord(result.meta_description || result.seoDescription, 155) || fallback.seoDescription,
       keywords: plain(result.keywords, 700) || fallback.keywords,
       imageAlt: clipWholeWord(result.image_alt || result.imageAlt, 180) || fallback.title,
       imageCaption: '',
-      bodyHtml: stripLeadingDuplicateTitle(generatedBody, clipWholeWord(result.title, 180) || fallback.title),
+      featuredImageUrl,
+      inlineImageUrl: secondaryImageUrl,
+      bodyHtml: stripLeadingDuplicateTitle(generatedBody, clipWholeWord(cleanTitle, 180) || fallback.title),
       generatedWithAi: true,
       generationModel,
       generationError: '',
@@ -580,6 +656,8 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       ...fallback,
       imageAlt: fallback.imageAlt || fallback.title,
       imageCaption: '',
+      featuredImageUrl: '',
+      inlineImageUrl: '',
       generatedWithAi: false,
       generationModel: env.GEMINI_API_KEY ? env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL : WORKERS_AI_MODEL,
       generationError: error instanceof Error ? error.message : 'Falha desconhecida na geracao por IA.',
@@ -591,8 +669,9 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
   const sources = parseArray(row.sources);
   const tags = parseArray(row.tags).map(String).filter(Boolean);
   const imageCandidates = uniqueImageCandidates(parseArray(row.image_candidates));
-  const coverUrl = chooseBestImage(imageCandidates, row.title, row.category);
-  const inlineImageUrl = chooseInlineImage(imageCandidates, coverUrl, row.title, row.category);
+  const title = stripRadarPrefix(row.title) || clean(row.title, 220);
+  const coverUrl = chooseBestImage(imageCandidates, title, row.category);
+  const inlineImageUrl = chooseInlineImage(imageCandidates, coverUrl, title, row.category);
   const sourceNames = [
     ...new Set(
       sources
@@ -601,7 +680,6 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
         .filter(Boolean),
     ),
   ];
-  const title = clean(row.title, 220);
   const summary = clean(row.summary, 700) || `Pauta consolidada a partir de ${sourceNames.length || sources.length} fontes monitoradas.`;
   const slug = slugify(title);
   const publishedAt = new Date().toISOString();
@@ -632,6 +710,8 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
     },
     env,
   );
+  const finalCoverUrl = aiArticle.featuredImageUrl || coverUrl;
+  const finalInlineImageUrl = aiArticle.inlineImageUrl || chooseInlineImage(imageCandidates, finalCoverUrl, aiArticle.title || title, row.category) || inlineImageUrl;
 
   return {
     id: `article:${slug}`,
@@ -641,7 +721,7 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
     bodyHtml: insertInlineImage(
       aiArticle.bodyHtml,
       {
-        src: inlineImageUrl,
+        src: finalInlineImageUrl,
         alt: aiArticle.imageAlt || aiArticle.title,
         caption: '',
       },
@@ -650,17 +730,17 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
     category: row.category || 'Brasil',
     author: 'Redação Novo Alvo',
     status: 'published',
-    coverUrl,
+    coverUrl: finalCoverUrl,
     coverAlt: aiArticle.imageAlt || aiArticle.title,
     seoDescription: aiArticle.seoDescription,
     keywords: aiArticle.keywords,
     tags,
     sources: sourceNames,
-    media: [coverUrl, ...imageCandidates.map((candidate) => candidate.url).filter((src) => src !== coverUrl && isUsableImage(src))].filter(Boolean).map((src) => ({
+    media: [finalCoverUrl, ...imageCandidates.map((candidate) => candidate.url).filter((src) => src !== finalCoverUrl && isUsableImage(src))].filter(Boolean).map((src) => ({
       src,
       type: 'image',
-      role: src === coverUrl ? 'cover' : src === inlineImageUrl ? 'body' : 'candidate',
-      alt: src === coverUrl || src === inlineImageUrl ? aiArticle.imageAlt || aiArticle.title : '',
+      role: src === finalCoverUrl ? 'cover' : src === finalInlineImageUrl ? 'body' : 'candidate',
+      alt: src === finalCoverUrl || src === finalInlineImageUrl ? aiArticle.imageAlt || aiArticle.title : '',
       caption: '',
     })),
     readingMinutes: Math.max(1, Math.ceil(aiArticle.bodyHtml.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length / 220)),
