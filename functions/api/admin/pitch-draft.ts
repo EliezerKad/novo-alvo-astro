@@ -25,6 +25,7 @@ type Env = {
 
 type PitchRow = {
   id: string;
+  cluster_key?: string;
   category: string;
   title: string;
   summary: string;
@@ -70,16 +71,22 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
 
   const url = new URL(request.url);
   const id = clean(url.searchParams.get('id'), 120);
-  if (!id) return json({ error: 'ID da pauta ausente.' }, { status: 400 });
+  const clusterKey = clean(url.searchParams.get('clusterKey') || url.searchParams.get('cluster_key'), 180);
+  const title = clean(url.searchParams.get('title'), 240);
+  if (!id && !clusterKey && !title) return json({ error: 'Identificador da pauta ausente.' }, { status: 400 });
 
   const pitch = await db
     .prepare(
-      `SELECT id, title, summary, category, sources, tags, keywords, image_candidates, score, source_count, updated_at
+      `SELECT id, cluster_key, title, summary, category, sources, tags, keywords, image_candidates, score, source_count, updated_at
        FROM editorial_pitches
-       WHERE id = ? OR cluster_key = ?
+       WHERE id = ?
+          OR cluster_key = ?
+          OR cluster_key = ?
+          OR title = ?
+       ORDER BY updated_at DESC
        LIMIT 1`,
     )
-    .bind(id, id)
+    .bind(id, id, clusterKey, title)
     .first<PitchRow>();
 
   if (!pitch) return json({ error: 'Pauta nao encontrada.' }, { status: 404 });

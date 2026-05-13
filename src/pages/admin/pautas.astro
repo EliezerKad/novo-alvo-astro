@@ -401,7 +401,7 @@ const categories = [
                 </div>
                 <div class="flex flex-wrap gap-2 md:justify-end">
                   <button type="button" data-pitch-preview="${escapeHtml(pitch.id)}" class="rounded-xl border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:border-zinc-950 hover:text-zinc-950 dark:border-zinc-800 dark:hover:border-white dark:hover:text-white">Ver pauta</button>
-                  <button type="button" data-pitch-article="${escapeHtml(pitch.id)}" class="rounded-xl bg-red-600 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-500">Ver matéria</button>
+                  <button type="button" data-pitch-article="${escapeHtml(pitch.id)}" data-pitch-cluster="${escapeHtml(pitch.cluster_key || pitch.clusterKey || '')}" class="rounded-xl bg-red-600 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-500">Ver matéria</button>
                   ${pitch.primary_url ? `<a href="${escapeHtml(pitch.primary_url)}" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:border-red-600 hover:text-red-600 dark:border-zinc-800">Fonte</a>` : ''}
                   ${
                     pitch.status === 'queued'
@@ -453,7 +453,7 @@ const categories = [
                       <p class="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-400">Matéria final</p>
                       <p class="mt-2 text-sm font-medium leading-6 text-zinc-500">Gere uma prévia separada para ver exatamente o texto que será enviado para a fila.</p>
                     </div>
-                    <button type="button" data-pitch-article-inline="${escapeHtml(id)}" class="rounded-xl bg-red-600 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white transition hover:bg-red-500">Ver matéria gerada</button>
+                    <button type="button" data-pitch-article-inline="${escapeHtml(id)}" data-pitch-cluster="${escapeHtml(pitch.cluster_key || pitch.clusterKey || '')}" class="rounded-xl bg-red-600 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white transition hover:bg-red-500">Ver matéria gerada</button>
                   </div>
                 </section>`
           }
@@ -527,9 +527,15 @@ const categories = [
         const target = document.querySelector('[data-generated-article]');
         const token = getToken();
         if (!target || !token) return;
+        const pitch = pitches.find((item) => String(item.id || '') === String(id || ''));
+        const params = new URLSearchParams({ id: String(id || '') });
+        const clusterKey = String(pitch?.cluster_key || pitch?.clusterKey || '');
+        const title = String(pitch?.title || '');
+        if (clusterKey) params.set('clusterKey', clusterKey);
+        if (title) params.set('title', title);
 
         try {
-          const response = await fetch(`/api/admin/pitch-draft?id=${encodeURIComponent(id)}`, {
+          const response = await fetch(`/api/admin/pitch-draft?${params.toString()}`, {
             headers: { authorization: `Bearer ${token}` },
           });
           const data = await response.json().catch(() => ({}));
