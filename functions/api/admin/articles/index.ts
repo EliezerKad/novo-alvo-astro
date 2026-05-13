@@ -49,6 +49,7 @@ type ArticlePayload = {
   status?: string;
   coverUrl?: string;
   coverAlt?: string;
+  coverCaption?: string;
   seoDescription?: string;
   keywords?: string;
   tags?: unknown[];
@@ -122,6 +123,27 @@ const publicUrl = (value: string) => {
   if (/^https?:\/\//i.test(cleanValue)) return cleanValue;
   if (cleanValue.startsWith('/')) return `https://portalnovoalvo.com.br${cleanValue}`;
   return cleanValue;
+};
+
+const cleanImageCredit = (value: unknown) => {
+  const credit = clean(value, 180);
+  if (!credit) return '';
+  const normalized = credit.toLowerCase();
+  if (normalized.startsWith('http')) return '';
+  if (normalized === 'undefined' || normalized === 'null') return '';
+  return credit;
+};
+
+const mediaCoverCaption = (mediaJson: string, coverUrl: string) => {
+  const media = fromJsonArray(mediaJson);
+  const cover = media.find((item) => {
+    if (!item || typeof item !== 'object') return false;
+    const record = item as Record<string, unknown>;
+    return String(record.src || '') === coverUrl || record.role === 'cover';
+  });
+  if (!cover || typeof cover !== 'object') return '';
+  const record = cover as Record<string, unknown>;
+  return cleanImageCredit(record.credit || record.caption || record.sourcePublisher);
 };
 
 const toBase64 = (value: string) => {
@@ -321,6 +343,7 @@ const createMarkdownFile = (article: ReturnType<typeof normalizePayload>, id: st
   const sources = yamlStringArray(article.sources);
   const body = article.bodyHtml || `<p>${article.summary}</p>`;
   const coverUrl = publicUrl(article.coverUrl) || `https://picsum.photos/seed/${id}/1600/900`;
+  const coverCaption = cleanImageCredit(article.coverCaption) || mediaCoverCaption(article.media, article.coverUrl) || '';
 
   return `---
 title: ${yamlString(article.title)}
@@ -339,7 +362,7 @@ views: 0
 cover:
   src: ${yamlString(coverUrl)}
   alt: ${yamlString(article.coverAlt || article.title)}
-  caption: ${yamlString(article.coverAlt || '')}
+  caption: ${yamlString(coverCaption)}
   layout: ${yamlString(article.coverUrl ? 'full' : 'none')}
 ogImage: ${yamlString(coverUrl)}
 tags: ${tags}
@@ -502,6 +525,7 @@ const normalizePayload = (payload: ArticlePayload) => {
     status,
     coverUrl: clean(payload.coverUrl, 8000000),
     coverAlt: clean(payload.coverAlt, 240),
+    coverCaption: cleanImageCredit(payload.coverCaption),
     seoDescription: clean(payload.seoDescription, 220),
     keywords: clean(payload.keywords, 700),
     tags: asJson(payload.tags),

@@ -49,6 +49,14 @@ type ImageCandidate = {
   category?: string;
 };
 
+const imageCreditFor = (url: string, candidates: ImageCandidate[]) => {
+  const candidate = candidates.find((item) => item.url === url);
+  const publisher = plain(candidate?.sourcePublisher, 80);
+  if (!publisher) return '';
+  if (/google\s*news/i.test(publisher)) return '';
+  return `Credito: ${publisher}`;
+};
+
 const CATEGORY_IMAGES: Record<string, string> = {
   Politica: 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1600&q=80',
   Brasil: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=1600&q=80',
@@ -620,6 +628,7 @@ REGRAS DE IMAGEM:
 - Escolha secondary_image_url apenas se ela ajudar a provar o fato no corpo do texto: documento, local, produto, jogo, pessoa, objeto ou cena relacionada.
 - Se nenhuma candidata for segura ou coerente, deixe o campo vazio. Nao invente URL.
 - image_alt deve descrever o fato e o agente ativo com precisao jornalistica.
+- image_credit deve ser credito curto da imagem escolhida. Use a origem/autoria real quando estiver clara. Nunca repita o alt como credito. Nao invente autor.
 
 DADOS DO CLUSTER:
 [CATEGORIA]: ${row.category}
@@ -638,7 +647,7 @@ ${forbiddenTitles || 'Sem titulos listados.'}
 ${sourceLines || 'Fontes nao listadas.'}
 
 Responda exatamente neste formato, com JSON valido e sem markdown:
-{"title":"...","slug":"...","meta_description":"...","fact_static":"...","active_agent":"...","latent_cause":"...","conflict_point":"...","micro_persona":"...","featured_image_url":"...","secondary_image_url":"...","image_alt":"...","content_html":"..."}
+{"title":"...","slug":"...","meta_description":"...","fact_static":"...","active_agent":"...","latent_cause":"...","conflict_point":"...","micro_persona":"...","featured_image_url":"...","secondary_image_url":"...","image_alt":"...","image_credit":"...","content_html":"..."}
 `;
 
   try {
@@ -697,7 +706,7 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       seoDescription: clipWholeWord(result.meta_description || result.seoDescription, 155) || fallback.seoDescription,
       keywords: plain(result.keywords, 700) || fallback.keywords,
       imageAlt: clipWholeWord(result.image_alt || result.imageAlt, 180) || fallback.title,
-      imageCaption: '',
+      imageCaption: clipWholeWord(result.image_credit || result.imageCredit, 180) || imageCreditFor(featuredImageUrl, imageCandidates),
       featuredImageUrl,
       inlineImageUrl: secondaryImageUrl,
       bodyHtml: stripLeadingDuplicateTitle(generatedBody, clipWholeWord(cleanTitle, 180) || fallback.title),
@@ -786,6 +795,7 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
     status: 'published',
     coverUrl: finalCoverUrl,
     coverAlt: aiArticle.imageAlt || aiArticle.title,
+    coverCaption: aiArticle.imageCaption || imageCreditFor(finalCoverUrl, imageCandidates),
     seoDescription: aiArticle.seoDescription,
     keywords: aiArticle.keywords,
     tags,
@@ -795,7 +805,8 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
       type: 'image',
       role: src === finalCoverUrl ? 'cover' : src === finalInlineImageUrl ? 'body' : 'candidate',
       alt: src === finalCoverUrl || src === finalInlineImageUrl ? aiArticle.imageAlt || aiArticle.title : '',
-      caption: '',
+      caption: src === finalCoverUrl ? aiArticle.imageCaption || imageCreditFor(src, imageCandidates) : '',
+      credit: imageCreditFor(src, imageCandidates),
     })),
     readingMinutes: Math.max(1, Math.ceil(aiArticle.bodyHtml.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length / 220)),
     publishedAt,
