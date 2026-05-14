@@ -18,6 +18,9 @@ type Env = {
   ADMIN_TOKEN?: string;
   GEMINI_API_KEY?: string;
   GEMINI_MODEL?: string;
+  BING_IMAGE_SEARCH_KEY?: string;
+  BING_IMAGE_SEARCH_ENDPOINT?: string;
+  BING_IMAGE_LICENSE?: string;
 };
 
 type QueueRow = {
@@ -52,28 +55,7 @@ const imageCreditFor = (url: string, candidates: ImageCandidate[]) => {
   return `Credito: ${publisher}`;
 };
 
-const CATEGORY_IMAGES: Record<string, string> = {
-  Politica: 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1600&q=80',
-  Brasil: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=1600&q=80',
-  Mundo: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80',
-  Economia: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80',
-  Tecnologia: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80',
-  Entretenimento: 'https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?auto=format&fit=crop&w=1600&q=80',
-  Esportes: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1600&q=80',
-  Ciencia: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=1600&q=80',
-  Saude: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1600&q=80',
-  Famosos: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1600&q=80',
-  Futebol: 'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?auto=format&fit=crop&w=1600&q=80',
-  Games: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1600&q=80',
-  Lifestyle: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80',
-  Educacao: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1600&q=80',
-  Cultura: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&w=1600&q=80',
-  Moda: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1600&q=80',
-  Musica: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1600&q=80',
-  Cinema: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80',
-};
-
-const fallbackImageForCategory = (category: unknown) => CATEGORY_IMAGES[clean(category, 80)] || '/og-default.svg';
+const fallbackImageForCategory = (_category: unknown) => '';
 
 const isBlockedImageUrl = (value: unknown) => {
   const url = clean(value, 1000).toLowerCase();
@@ -87,13 +69,79 @@ const isBlockedImageUrl = (value: unknown) => {
 const isUsableImage = (value: unknown) => {
   const url = clean(value, 1000);
   if (!/^https:\/\//i.test(url)) return false;
-  if (/source\.unsplash\.com/i.test(url)) return false;
+  if (/(^|\/\/|\.)(source\.)?unsplash\.com|images\.unsplash\.com/i.test(url)) return false;
   if (/\.(svg|gif|ico)(\?|$)/i.test(url)) return false;
   if (isBlockedImageUrl(url)) return false;
   return true;
 };
 
 const enrichImageCandidatesFromSources = async (candidates: ImageCandidate[]) => candidates;
+
+const blockedBingHosts = /(unsplash\.com|pexels\.com|pixabay\.com|freepik\.com|shutterstock\.com|alamy\.com|istockphoto\.com|dreamstime\.com|depositphotos\.com|gettyimages\.com)$/i;
+
+const bingQueryFor = (title: string, category: string) => {
+  const terms = tokenize(`${title} ${category}`)
+    .filter((term) => !['radar', 'noticia', 'noticias'].includes(term))
+    .slice(0, 8)
+    .join(' ');
+  const categoryHint = category === 'Futebol' ? 'futebol Brasil' : category === 'Cinema' ? 'cinema filme' : category;
+  return `${terms || title} ${categoryHint} noticia`;
+};
+
+const hostFromUrl = (value: unknown) => {
+  try {
+    return new URL(clean(value, 1000)).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+};
+
+const searchBingImageCandidates = async (row: QueueRow, env: Env): Promise<ImageCandidate[]> => {
+  const key = clean(env.BING_IMAGE_SEARCH_KEY, 300);
+  if (!key) return [];
+
+  const endpoint = clean(env.BING_IMAGE_SEARCH_ENDPOINT, 400) || 'https://api.bing.microsoft.com/v7.0/images/search';
+  const url = new URL(endpoint);
+  url.searchParams.set('q', bingQueryFor(stripRadarPrefix(row.title) || row.title, row.category));
+  url.searchParams.set('count', '8');
+  url.searchParams.set('mkt', 'pt-BR');
+  url.searchParams.set('safeSearch', 'Strict');
+  url.searchParams.set('imageType', 'Photo');
+  url.searchParams.set('size', 'Large');
+  url.searchParams.set('freshness', 'Month');
+  const license = clean(env.BING_IMAGE_LICENSE, 40);
+  if (license) url.searchParams.set('license', license);
+
+  try {
+    const response = await fetch(url.toString(), {
+      headers: {
+        'Ocp-Apim-Subscription-Key': key,
+        accept: 'application/json',
+      },
+      signal: AbortSignal.timeout(7000),
+    });
+    if (!response.ok) return [];
+    const data = (await response.json()) as { value?: Array<Record<string, unknown>> };
+    return (data.value || [])
+      .map((item) => {
+        const contentUrl = clean(item.contentUrl, 1200);
+        const hostPageUrl = clean(item.hostPageUrl, 1200);
+        const host = hostFromUrl(hostPageUrl || contentUrl);
+        return {
+          url: contentUrl,
+          sourceTitle: clean(item.name, 240),
+          sourcePublisher: host || 'Bing Images',
+          sourceUrl: hostPageUrl,
+          category: row.category,
+          role: 'cover',
+        };
+      })
+      .filter((candidate) => isUsableImage(candidate.url) && !blockedBingHosts.test(hostFromUrl(candidate.sourceUrl || candidate.url)))
+      .slice(0, 8);
+  } catch {
+    return [];
+  }
+};
 
 const imageKey = (value: unknown) => {
   try {
@@ -724,9 +772,11 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
 export const buildArticlePayload = async (row: QueueRow, env: Env) => {
   const sources = parseArray(row.sources);
   const tags = parseArray(row.tags).map(String).filter(Boolean);
-  const imageCandidates = await enrichImageCandidatesFromSources(
+  const baseImageCandidates = await enrichImageCandidatesFromSources(
     uniqueImageCandidates(parseArray(row.image_candidates)),
   );
+  const bingImageCandidates = baseImageCandidates.length ? [] : await searchBingImageCandidates(row, env);
+  const imageCandidates = uniqueImageCandidates([...baseImageCandidates, ...bingImageCandidates]);
   const title = stripRadarPrefix(row.title) || clean(row.title, 220);
   const coverUrl = chooseBestImage(imageCandidates, title, row.category);
   const inlineImageUrl = chooseInlineImage(imageCandidates, coverUrl, title, row.category);

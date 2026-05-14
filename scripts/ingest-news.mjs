@@ -4,85 +4,85 @@ const googleNewsSearch = (query) =>
 const FEEDS = {
   Brasil: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJQgKIh9DQkFTRVFvSUwyMHZNRzV6Y0hjU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-    googleNewsSearch('Brasil governo estados cidades crise servicos publicos when:12h'),
-    googleNewsSearch('brasileiros policia transporte educacao saude urbana when:12h'),
+    googleNewsSearch('Brasil governo estados cidades crise servicos publicos when:24h'),
+    googleNewsSearch('brasileiros policia transporte educacao saude urbana when:24h'),
   ],
   Politica: [
-    googleNewsSearch('politica OR governo OR congresso OR STF OR eleicoes when:12h'),
-    googleNewsSearch('Planalto Congresso Senado Camara STF bastidores poder when:12h'),
-    googleNewsSearch('Lula Bolsonaro ministro deputado senador governo when:12h'),
+    googleNewsSearch('politica OR governo OR congresso OR STF OR eleicoes when:24h'),
+    googleNewsSearch('Planalto Congresso Senado Camara STF bastidores poder when:24h'),
+    googleNewsSearch('Lula Bolsonaro ministro deputado senador governo when:24h'),
   ],
   Mundo: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx1YlY4U0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-    googleNewsSearch('geopolitica guerra eleicoes mundo impacto Brasil when:12h'),
-    googleNewsSearch('Estados Unidos China Europa Argentina Oriente Medio when:12h'),
+    googleNewsSearch('geopolitica guerra eleicoes mundo impacto Brasil when:24h'),
+    googleNewsSearch('Estados Unidos China Europa Argentina Oriente Medio when:24h'),
   ],
   Economia: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx6TVd4b1NKVXlMd0pVUXlnQVAB?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-    googleNewsSearch('economia juros inflacao dolar bolsa emprego credito when:12h'),
-    googleNewsSearch('mercado empresas bancos governo poder de compra when:12h'),
+    googleNewsSearch('economia juros inflacao dolar bolsa emprego credito when:24h'),
+    googleNewsSearch('mercado empresas bancos governo poder de compra when:24h'),
   ],
   Tecnologia: [
     'https://news.google.com/rss/headlines/section/topic/CAAqKggKIiRDQkFTRFvSUwyMHZNRGRqTVhZU0JXVnVMVWRDR2dKUVN5Z0FQAQ?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-    googleNewsSearch('tecnologia inteligencia artificial chips ciberseguranca app when:12h'),
-    googleNewsSearch('big tech apple google microsoft meta openai dados privacidade when:12h'),
+    googleNewsSearch('tecnologia inteligencia artificial chips ciberseguranca app when:24h'),
+    googleNewsSearch('big tech apple google microsoft meta openai dados privacidade when:24h'),
   ],
   Entretenimento: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGRqTVdZU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-    googleNewsSearch('entretenimento tv streaming reality show cultura pop when:12h'),
-    googleNewsSearch('celebridades internet viral audiencia tiktok evento when:12h'),
+    googleNewsSearch('entretenimento tv streaming reality show cultura pop when:24h'),
+    googleNewsSearch('celebridades internet viral audiencia tiktok evento when:24h'),
   ],
   Esportes: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFp1ZEdvU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-    googleNewsSearch('esportes olimpico volei basquete formula surf tenis when:12h'),
-    googleNewsSearch('competicao atleta tecnico final campeonato recorde when:12h'),
+    googleNewsSearch('esportes olimpico volei basquete formula surf tenis when:24h'),
+    googleNewsSearch('competicao atleta tecnico final campeonato recorde when:24h'),
   ],
   Ciencia: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFp0Y1RjU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-    googleNewsSearch('ciencia pesquisa espaco clima descoberta estudo cientifico when:12h'),
-    googleNewsSearch('nasa astronomia biologia ambiente inovacao universidade when:12h'),
+    googleNewsSearch('ciencia pesquisa espaco clima descoberta estudo cientifico when:24h'),
+    googleNewsSearch('nasa astronomia biologia ambiente inovacao universidade when:24h'),
   ],
   Saude: [
     'https://news.google.com/rss/headlines/section/topic/CAAqIQgKIhtDQkFTRGdvSUwyMHZNR3QwTlRFU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-    googleNewsSearch('saude medicina vacina hospital bem estar doenca when:12h'),
-    googleNewsSearch('ans sus medicamento pesquisa clinica saude mental when:12h'),
+    googleNewsSearch('saude medicina vacina hospital bem estar doenca when:24h'),
+    googleNewsSearch('ans sus medicamento pesquisa clinica saude mental when:24h'),
   ],
   Famosos: [
-    googleNewsSearch('celebridades famosos influenciadores bastidores viral when:12h'),
-    googleNewsSearch('atriz cantor apresentador influencer relacionamento when:12h'),
+    googleNewsSearch('celebridades famosos influenciadores bastidores viral when:24h'),
+    googleNewsSearch('atriz cantor apresentador influencer relacionamento when:24h'),
   ],
   Futebol: [
-    googleNewsSearch('futebol brasileiro brasileirao libertadores copa do brasil when:12h'),
-    googleNewsSearch('flamengo corinthians palmeiras sao paulo vasco botafogo fluminense when:12h'),
-    googleNewsSearch('mercado da bola tecnico SAF clube jogador when:12h'),
+    googleNewsSearch('futebol brasileiro brasileirao libertadores copa do brasil when:24h'),
+    googleNewsSearch('flamengo corinthians palmeiras sao paulo vasco botafogo fluminense when:24h'),
+    googleNewsSearch('mercado da bola tecnico SAF clube jogador when:24h'),
   ],
   Games: [
-    googleNewsSearch('games playstation xbox nintendo steam game pass when:12h'),
-    googleNewsSearch('ps5 xbox switch 2 gta fortnite lançamento bug review when:12h'),
+    googleNewsSearch('games playstation xbox nintendo steam game pass when:24h'),
+    googleNewsSearch('ps5 xbox switch 2 gta fortnite lançamento bug review when:24h'),
   ],
   Lifestyle: [
-    googleNewsSearch('estilo de vida comportamento viagem gastronomia produtividade when:12h'),
-    googleNewsSearch('casa consumo tendencia comportamento familia rotina when:12h'),
+    googleNewsSearch('estilo de vida comportamento viagem gastronomia produtividade when:24h'),
+    googleNewsSearch('casa consumo tendencia comportamento familia rotina when:24h'),
   ],
   Educacao: [
-    googleNewsSearch('educacao enem vestibular carreira escola universidade when:12h'),
-    googleNewsSearch('mec professor aluno ensino superior concurso when:12h'),
+    googleNewsSearch('educacao enem vestibular carreira escola universidade when:24h'),
+    googleNewsSearch('mec professor aluno ensino superior concurso when:24h'),
   ],
   Cultura: [
-    googleNewsSearch('cultura arte literatura teatro museu livro when:12h'),
-    googleNewsSearch('exposicao festival premio autor artista cultura brasileira when:12h'),
+    googleNewsSearch('cultura arte literatura teatro museu livro when:24h'),
+    googleNewsSearch('exposicao festival premio autor artista cultura brasileira when:24h'),
   ],
   Moda: [
-    googleNewsSearch('moda fashion tendencias passarela marca colecao when:12h'),
-    googleNewsSearch('look estilista grife beleza consumo moda sustentavel when:12h'),
+    googleNewsSearch('moda fashion tendencias passarela marca colecao when:24h'),
+    googleNewsSearch('look estilista grife beleza consumo moda sustentavel when:24h'),
   ],
   Musica: [
-    googleNewsSearch('musica shows album festival cantor cantora banda when:12h'),
-    googleNewsSearch('turne single spotify funk sertanejo rap pop rock when:12h'),
+    googleNewsSearch('musica shows album festival cantor cantora banda when:24h'),
+    googleNewsSearch('turne single spotify funk sertanejo rap pop rock when:24h'),
   ],
   Cinema: [
-    googleNewsSearch('cinema filmes streaming bilheteria festival Cannes Oscar when:12h'),
-    googleNewsSearch('Netflix Max Prime Video Disney filme serie estreia when:12h'),
+    googleNewsSearch('cinema filmes streaming bilheteria festival Cannes Oscar when:24h'),
+    googleNewsSearch('Netflix Max Prime Video Disney filme serie estreia when:24h'),
   ],
 };
 
@@ -152,7 +152,7 @@ const CATEGORY_SIGNALS = [
   {
     category: 'Futebol',
     pattern:
-      /\b(futebol|brasileirao|serie\s?[abcd]|copa do brasil|libertadores|sul-americana|corinthians|flamengo|fluminense|palmeiras|sao paulo|santos|vasco|botafogo|gremio|internacional|cruzeiro|atletico|bahia|fortaleza|guarani|mirassol|santa cruz|diniz|luxemburgo|tecnico|treinador|vitoria|derrota|clube|time|estadio|rodada)\b/i,
+      /\b(futebol|brasileirao|serie\s?[abcd]|copa do brasil|copa do mundo|libertadores|sul-americana|selecao|neymar|ancelotti|corinthians|flamengo|fluminense|palmeiras|sao paulo|santos|vasco|botafogo|gremio|internacional|cruzeiro|atletico|bahia|fortaleza|guarani|mirassol|santa cruz|diniz|luxemburgo|tecnico|treinador|vitoria|derrota|clube|time|estadio|rodada)\b/i,
   },
   {
     category: 'Politica',
@@ -498,9 +498,22 @@ const runHousekeeping = async () => {
 
 const addUniquePitch = (selected, seen, pitch) => {
   if (!pitch || seen.has(pitch.clusterKey)) return false;
+  const repeatedSubject = selected.some((item) => item.category === pitch.category && semanticPitchOverlap(item, pitch) >= 0.72);
+  if (repeatedSubject) return false;
   selected.push(pitch);
   seen.add(pitch.clusterKey);
   return true;
+};
+
+const semanticPitchOverlap = (left, right) => {
+  const leftTokens = new Set(extractKeywords(left?.title || '', left?.category || '').slice(0, 8));
+  const rightTokens = new Set(extractKeywords(right?.title || '', right?.category || '').slice(0, 8));
+  if (!leftTokens.size || !rightTokens.size) return 0;
+  let shared = 0;
+  for (const token of leftTokens) {
+    if (rightTokens.has(token)) shared += 1;
+  }
+  return shared / Math.min(leftTokens.size, rightTokens.size);
 };
 
 const balancePitches = (topicPitches, radarPitches, limit) => {
