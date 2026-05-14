@@ -20,6 +20,7 @@ GOOGLE_BRANDING_RE = re.compile(
 IMAGE_EXT_RE = re.compile(r"\.(?:jpe?g|png|webp)(?:[?#].*)?$", re.I)
 USER_AGENT = "PortalNovoAlvoAssetScout/1.0"
 CRAWL4AI_FIRST = os.environ.get("CRAWL4AI_FIRST") == "1"
+CAMOUFOX_ENABLED = os.environ.get("CAMOUFOX_ENABLED", "1") != "0"
 
 
 def clean(value, limit=2000):
@@ -168,6 +169,66 @@ def fetch_with_scrapling(url):
         return fetch_stdlib(url)
 
 
+def fetch_with_camoufox(url):
+    from camoufox.sync_api import Camoufox
+
+    images = []
+    with Camoufox(headless=True, locale="pt-BR", window=(1366, 900)) as browser:
+        page = browser.new_page()
+        page.set_extra_http_headers({"Accept-Language": "pt-BR,pt;q=0.9,en;q=0.6"})
+        page.set_default_timeout(14000)
+        page.goto(url, wait_until="domcontentloaded", timeout=18000)
+        try:
+            page.wait_for_load_state("networkidle", timeout=5000)
+        except Exception:
+            pass
+        try:
+            page.wait_for_timeout(900)
+        except Exception:
+            pass
+        final_url = clean(page.url or url, 2000)
+        images = page.evaluate(
+            """() => Array.from(document.images).map((img) => {
+              const figure = img.closest('figure');
+              const container = figure || img.closest('article, main, section, div');
+              const caption = figure?.querySelector('figcaption')?.innerText
+                || container?.querySelector?.('[class*="caption" i], [class*="legenda" i], [class*="credit" i], [class*="credito" i]')?.innerText
+                || '';
+              const rect = img.getBoundingClientRect();
+              return {
+                url: img.currentSrc || img.src || img.getAttribute('data-src') || '',
+                alt: img.alt || img.getAttribute('aria-label') || '',
+                caption,
+                width: img.naturalWidth || Math.round(rect.width) || 0,
+                height: img.naturalHeight || Math.round(rect.height) || 0
+              };
+            })"""
+        )
+        html = page.content()
+
+    normalized = []
+    for item in images or []:
+        if not isinstance(item, dict):
+            continue
+        absolute = urljoin(final_url, unescape(clean(item.get("url"), 2000)))
+        width = int(item.get("width") or 0)
+        height = int(item.get("height") or 0)
+        if not usable_image(absolute) or width < 280 or height < 160:
+            continue
+        caption = clean(item.get("caption"), 260)
+        normalized.append(
+            {
+                "url": absolute,
+                "kind": "camoufox",
+                "alt": clean(item.get("alt"), 220),
+                "credit": caption if re.search(r"(foto|cr[eé]dito|imagem|reprodu[cç][aã]o|divulga[cç][aã]o)", caption, re.I) else "",
+                "caption": caption,
+                "sourceUrl": final_url,
+            }
+        )
+    return final_url, html, unique_images(normalized, 10), excerpt_from_html(html)
+
+
 async def fetch_with_crawl4ai_async(url):
     from crawl4ai import AsyncWebCrawler
 
@@ -231,7 +292,18 @@ def extract_one(source):
     try:
         crawl_images = []
         excerpt = ""
-        if CRAWL4AI_FIRST:
+        if CAMOUFOX_ENABLED:
+            try:
+                final_url, html, crawl_images, excerpt = fetch_with_camoufox(source_url)
+            except Exception:
+                if CRAWL4AI_FIRST:
+                    try:
+                        final_url, html, crawl_images, excerpt = fetch_with_crawl4ai(source_url)
+                    except Exception:
+                        final_url, html = fetch_with_scrapling(source_url)
+                else:
+                    final_url, html = fetch_with_scrapling(source_url)
+        elif CRAWL4AI_FIRST:
             try:
                 final_url, html, crawl_images, excerpt = fetch_with_crawl4ai(source_url)
             except Exception:
@@ -241,7 +313,18 @@ def extract_one(source):
         if is_google_url(final_url):
             external = first_external_url(html)
             if external:
-                if CRAWL4AI_FIRST:
+                if CAMOUFOX_ENABLED:
+                    try:
+                        final_url, html, crawl_images, excerpt = fetch_with_camoufox(external)
+                    except Exception:
+                        if CRAWL4AI_FIRST:
+                            try:
+                                final_url, html, crawl_images, excerpt = fetch_with_crawl4ai(external)
+                            except Exception:
+                                final_url, html = fetch_with_scrapling(external)
+                        else:
+                            final_url, html = fetch_with_scrapling(external)
+                elif CRAWL4AI_FIRST:
                     try:
                         final_url, html, crawl_images, excerpt = fetch_with_crawl4ai(external)
                     except Exception:

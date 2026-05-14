@@ -29,7 +29,8 @@ jobs:
 
       - name: Install asset extractor
         run: |
-          python -m pip install --disable-pip-version-check scrapling crawl4ai
+          python -m pip install --disable-pip-version-check camoufox scrapling crawl4ai
+          python -m camoufox fetch || true
           python -m playwright install chromium
 
       - name: Ingest RSS into editorial pitches
@@ -43,6 +44,7 @@ jobs:
           MAX_ITEM_AGE_HOURS: 30
           RADAR_BATCHES_PER_CATEGORY: 3
           CRAWL4AI_FIRST: 1
+          CAMOUFOX_ENABLED: 1
           ENABLE_SCRAPLING_ASSETS: 1
           SCRAPLING_FIRST: 1
           SCRAPLING_SOURCE_LIMIT: 8
