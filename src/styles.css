@@ -22,6 +22,11 @@
     color: #101010;
   }
 
+  .dark body {
+    background: #080809;
+    color: #fafafa;
+  }
+
   html {
     scroll-behavior: smooth;
   }

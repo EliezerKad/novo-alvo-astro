@@ -247,6 +247,7 @@ const categories = [
       const modalClose = document.querySelector('[data-pitch-modal-close]');
       let pitches = [];
       let status = 'new';
+      const generatedArticles = new Map();
 
       const escapeHtml = (value) =>
         String(value || '')
@@ -614,6 +615,7 @@ const categories = [
           const data = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(data.error || 'Não foi possível gerar a matéria.');
           const article = data.article || {};
+          generatedArticles.set(String(id || ''), article);
           if (modalTitle && article.title) modalTitle.textContent = article.title;
           const fallbackWarning =
             data.generatedWithAi === false
@@ -631,6 +633,7 @@ const categories = [
           target.innerHTML = `
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 pb-5 dark:border-zinc-800">
               <p class="text-[10px] font-black uppercase tracking-[0.28em] text-red-600">Matéria completa gerada</p>
+              <button type="button" data-edit-generated-article="${escapeHtml(id)}" class="rounded-full bg-zinc-950 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950">Editar materia</button>
               <span class="rounded-full bg-zinc-100 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900">${escapeHtml(data.model || (data.aiEnabled ? 'Gemini' : 'Modelo local'))}</span>
               ${article.generationTier === 'nexa-premium' ? '<span class="rounded-full bg-red-600 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white">Alta pontuação</span>' : ''}
             </div>
@@ -654,6 +657,74 @@ const categories = [
       const closePitchPreview = () => {
         modal?.classList.add('hidden');
         modal?.classList.remove('flex');
+      };
+
+      const editGeneratedArticle = async (button, id) => {
+        const token = getToken();
+        const article = generatedArticles.get(String(id || ''));
+        const pitch = pitches.find((item) => String(item.id || '') === String(id || ''));
+        if (!token || !article || !pitch) return;
+
+        const previousLabel = button?.textContent || '';
+        if (button) {
+          button.disabled = true;
+          button.textContent = 'Abrindo editor...';
+          button.classList.add('opacity-60');
+        }
+        if (statusNode) statusNode.textContent = 'Salvando versao editavel da materia...';
+
+        try {
+          const slug = String(article.slug || pitch.slug || pitch.title || id)
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .slice(0, 120);
+          const response = await fetch('/api/admin/articles', {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              id: `draft:${slug || id}`,
+              slug,
+              title: article.title || pitch.title,
+              summary: article.summary || pitch.summary || '',
+              bodyHtml: article.bodyHtml || '<p></p>',
+              category: article.category || pitch.category || 'Politica',
+              author: article.author || 'Redacao Novo Alvo',
+              status: 'draft',
+              coverUrl: article.coverUrl || '',
+              coverAlt: article.coverAlt || article.title || pitch.title || '',
+              seoDescription: article.seoDescription || article.metaDescription || article.summary || pitch.summary || '',
+              keywords: article.keywords || pitch.keywords || '',
+              tags: Array.isArray(article.tags) ? article.tags : parseArray(pitch.tags),
+              sources: Array.isArray(article.sources) ? article.sources : parseArray(pitch.sources),
+              media: Array.isArray(article.media) ? article.media : [],
+              readingMinutes: article.readingMinutes || 0,
+            }),
+          });
+          const data = await response.json().catch(() => ({}));
+          if (response.status === 401) {
+            try {
+              localStorage.removeItem('admin-token');
+            } catch {}
+            redirectToLogin();
+            return;
+          }
+          if (!response.ok) throw new Error(data.error || 'Nao foi possivel abrir a materia para edicao.');
+          const articleId = data.article?.id || `draft:${slug || id}`;
+          window.location.href = `/admin/nova/?id=${encodeURIComponent(articleId)}`;
+        } catch (error) {
+          if (statusNode) statusNode.textContent = error.message || 'Falha ao abrir editor.';
+          if (button) {
+            button.disabled = false;
+            button.textContent = previousLabel;
+            button.classList.remove('opacity-60');
+          }
+        }
       };
 
       const setActiveStatus = () => {
@@ -709,7 +780,7 @@ const categories = [
           button.textContent = 'Movendo...';
           button.classList.add('opacity-60');
         }
-        if (statusNode) statusNode.textContent = nextStatus === 'reviewed' ? 'Movendo pauta para Revisadas...' : nextStatus === 'queued' ? 'Aprovando pauta para a fila editorial...' : 'Atualizando pauta...';
+        if (statusNode) statusNode.textContent = nextStatus === 'reviewed' ? 'Marcando pauta como revisada...' : nextStatus === 'queued' ? 'Aprovando pauta para a fila editorial...' : 'Atualizando pauta...';
 
         try {
           const response = await fetch('/api/admin/pitches', {
@@ -742,7 +813,15 @@ const categories = [
             return;
           }
 
-          if (nextStatus === 'reviewed' || nextStatus === 'queued' || nextStatus === 'converted') {
+          if (nextStatus === 'reviewed') {
+            const pitch = pitches.find((item) => String(item.id || '') === String(id));
+            if (pitch) pitch.status = 'reviewed';
+            render();
+            if (statusNode) statusNode.textContent = 'Pauta revisada. Ela continua aqui para voce aprovar para a fila.';
+            return;
+          }
+
+          if (nextStatus === 'queued' || nextStatus === 'converted') {
             status = nextStatus;
             setActiveStatus();
           }
@@ -897,6 +976,12 @@ const categories = [
 
       modalClose?.addEventListener('click', closePitchPreview);
       modal?.addEventListener('click', (event) => {
+        const editButton = event.target.closest('[data-edit-generated-article]');
+        if (editButton) {
+          editGeneratedArticle(editButton, editButton.dataset.editGeneratedArticle || '');
+          return;
+        }
+
         const imageButton = event.target.closest('[data-pitch-image-role]');
         if (imageButton) {
           updatePitchImageRole(

@@ -40,6 +40,7 @@ const MAX_IMAGE_SOURCE_FETCHES_PER_PITCH = Number(process.env.MAX_IMAGE_SOURCE_F
 const SOURCE_EXPANSION_TARGET = Number(process.env.SOURCE_EXPANSION_TARGET || 12);
 const SOURCE_EXPANSION_MIN_OVERLAP = Number(process.env.SOURCE_EXPANSION_MIN_OVERLAP || 0.34);
 const ENABLE_SCRAPLING_ASSETS = process.env.ENABLE_SCRAPLING_ASSETS === '1';
+const SCRAPLING_FIRST = process.env.SCRAPLING_FIRST === '1';
 const SCRAPLING_SOURCE_LIMIT = Number(process.env.SCRAPLING_SOURCE_LIMIT || 5);
 const SCRAPLING_TIMEOUT_MS = Number(process.env.SCRAPLING_TIMEOUT_MS || 22000);
 const SCRAPLING_MAX_PITCHES_PER_RUN = Number(process.env.SCRAPLING_MAX_PITCHES_PER_RUN || 18);
@@ -630,36 +631,70 @@ const buildPitch = (items) => {
 const enrichPitchImages = async (pitch) => {
   const current = Array.isArray(pitch.imageCandidates) ? pitch.imageCandidates : [];
   const sources = Array.isArray(pitch.sources) ? pitch.sources : [];
-  let assets = await Promise.all(
-    sources
+  const sourceWindow = sources.slice(0, MAX_IMAGE_SOURCE_FETCHES_PER_PITCH);
+  let assets = sourceWindow.map((source) => ({
+    source,
+    assets: {
+      url: source.url,
+      images: [],
+      excerpt: source.excerpt || '',
+    },
+  }));
+
+  const mergeScraplingSources = (scraplingSources) => {
+    if (!scraplingSources.length) return;
+    const bySourceKey = new Map(
+      scraplingSources.map((source) => [String(source.url || source.sourceUrl || source.title || '').toLowerCase(), source]),
+    );
+    assets = assets.map((item) => {
+      const key = String(item.source?.url || item.source?.title || '').toLowerCase();
+      const enriched = bySourceKey.get(key);
+      if (!enriched) return item;
+      const images = Array.isArray(enriched.images)
+        ? enriched.images.map((image) => image.url).filter(Boolean)
+        : item.assets?.images || [];
+      return {
+        source: item.source,
+        assets: {
+          url: enriched.resolvedUrl || item.assets?.url || item.source.url,
+          images,
+          excerpt: enriched.excerpt || item.assets?.excerpt || '',
+        },
+      };
+    });
+  };
+
+  if (SCRAPLING_FIRST) {
+    mergeScraplingSources(fetchScraplingAssets(sources, pitch.category));
+  }
+
+  const sourcesNeedingNode = assets.filter((item) => !(item.assets?.images?.length)).map((item) => item.source);
+  const nodeAssets = await Promise.all(
+    sourcesNeedingNode
       .slice(0, MAX_IMAGE_SOURCE_FETCHES_PER_PITCH)
       .map(async (source) => ({
         source,
         assets: await fetchArticleAssets(source.url),
       })),
   );
+  const nodeByUrl = new Map(nodeAssets.map((item) => [String(item.source?.url || '').toLowerCase(), item.assets]));
+  assets = assets.map((item) => {
+    const node = nodeByUrl.get(String(item.source?.url || '').toLowerCase());
+    if (!node) return item;
+    return {
+      source: item.source,
+      assets: {
+        url: item.assets?.url || node.url || item.source.url,
+        images: item.assets?.images?.length ? item.assets.images : node.images || [],
+        excerpt: item.assets?.excerpt || node.excerpt || '',
+      },
+    };
+  });
 
-  const nodeImageCount = assets.reduce((total, item) => total + (item.assets?.images?.length || 0), 0);
-  if (nodeImageCount < 2) {
+  const imageCount = assets.reduce((total, item) => total + (item.assets?.images?.length || 0), 0);
+  if (!SCRAPLING_FIRST && imageCount < 2) {
     const scraplingSources = fetchScraplingAssets(sources, pitch.category);
-    if (scraplingSources.length) {
-      const bySourceKey = new Map(
-        scraplingSources.map((source) => [String(source.url || source.sourceUrl || source.title || '').toLowerCase(), source]),
-      );
-      assets = assets.map((item) => {
-        const key = String(item.source?.url || item.source?.title || '').toLowerCase();
-        const enriched = bySourceKey.get(key);
-        if (!enriched) return item;
-        return {
-          source: item.source,
-          assets: {
-            url: enriched.resolvedUrl || item.assets?.url || item.source.url,
-            images: Array.isArray(enriched.images) ? enriched.images.map((image) => image.url).filter(Boolean) : item.assets?.images || [],
-            excerpt: item.assets?.excerpt || enriched.excerpt || '',
-          },
-        };
-      });
-    }
+    mergeScraplingSources(scraplingSources);
   }
   const sourceImages = assets
     .map(({ source, assets }) =>
