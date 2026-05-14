@@ -21,6 +21,10 @@ IMAGE_EXT_RE = re.compile(r"\.(?:jpe?g|png|webp)(?:[?#].*)?$", re.I)
 USER_AGENT = "PortalNovoAlvoAssetScout/1.0"
 CRAWL4AI_FIRST = os.environ.get("CRAWL4AI_FIRST") == "1"
 CAMOUFOX_ENABLED = os.environ.get("CAMOUFOX_ENABLED", "1") != "0"
+CAMOUFOX_SOURCE_LIMIT = max(0, int(os.environ.get("CAMOUFOX_SOURCE_LIMIT", "2")))
+CAMOUFOX_NAV_TIMEOUT_MS = max(3000, int(os.environ.get("CAMOUFOX_NAV_TIMEOUT_MS", "7000")))
+CAMOUFOX_IDLE_TIMEOUT_MS = max(500, int(os.environ.get("CAMOUFOX_IDLE_TIMEOUT_MS", "1500")))
+CAMOUFOX_SETTLE_MS = max(0, int(os.environ.get("CAMOUFOX_SETTLE_MS", "250")))
 
 
 def clean(value, limit=2000):
@@ -176,14 +180,14 @@ def fetch_with_camoufox(url):
     with Camoufox(headless=True, locale="pt-BR", window=(1366, 900)) as browser:
         page = browser.new_page()
         page.set_extra_http_headers({"Accept-Language": "pt-BR,pt;q=0.9,en;q=0.6"})
-        page.set_default_timeout(14000)
-        page.goto(url, wait_until="domcontentloaded", timeout=18000)
+        page.set_default_timeout(CAMOUFOX_NAV_TIMEOUT_MS)
+        page.goto(url, wait_until="domcontentloaded", timeout=CAMOUFOX_NAV_TIMEOUT_MS)
         try:
-            page.wait_for_load_state("networkidle", timeout=5000)
+            page.wait_for_load_state("networkidle", timeout=CAMOUFOX_IDLE_TIMEOUT_MS)
         except Exception:
             pass
         try:
-            page.wait_for_timeout(900)
+            page.wait_for_timeout(CAMOUFOX_SETTLE_MS)
         except Exception:
             pass
         final_url = clean(page.url or url, 2000)
@@ -285,14 +289,14 @@ def first_external_url(html):
     return ""
 
 
-def extract_one(source):
+def extract_one(source, use_camoufox=True):
     source_url = clean(source.get("url"), 2000)
     if not source_url:
         return {**source, "resolvedUrl": "", "images": []}
     try:
         crawl_images = []
         excerpt = ""
-        if CAMOUFOX_ENABLED:
+        if CAMOUFOX_ENABLED and use_camoufox:
             try:
                 final_url, html, crawl_images, excerpt = fetch_with_camoufox(source_url)
             except Exception:
@@ -313,7 +317,7 @@ def extract_one(source):
         if is_google_url(final_url):
             external = first_external_url(html)
             if external:
-                if CAMOUFOX_ENABLED:
+                if CAMOUFOX_ENABLED and use_camoufox:
                     try:
                         final_url, html, crawl_images, excerpt = fetch_with_camoufox(external)
                     except Exception:
@@ -342,7 +346,11 @@ def main():
     sources = payload.get("sources") or []
     category = clean(payload.get("category"), 80)
     normalized = [{**source, "category": clean(source.get("category") or category, 80)} for source in sources if isinstance(source, dict)]
-    json.dump({"sources": [extract_one(source) for source in normalized]}, sys.stdout, ensure_ascii=False)
+    json.dump(
+        {"sources": [extract_one(source, index < CAMOUFOX_SOURCE_LIMIT) for index, source in enumerate(normalized)]},
+        sys.stdout,
+        ensure_ascii=False,
+    )
 
 
 if __name__ == "__main__":
