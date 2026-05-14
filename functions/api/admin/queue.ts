@@ -69,7 +69,7 @@ const isBlockedImageUrl = (value: unknown) => {
 const isUsableImage = (value: unknown) => {
   const url = clean(value, 1000);
   if (!/^https:\/\//i.test(url)) return false;
-  if (/(^|\/\/|\.)(source\.)?unsplash\.com|images\.unsplash\.com/i.test(url)) return false;
+  if (/images\.unsplash\.com/i.test(url)) return false;
   if (/\.(svg|gif|ico)(\?|$)/i.test(url)) return false;
   if (isBlockedImageUrl(url)) return false;
   return true;
@@ -143,6 +143,91 @@ const searchBingImageCandidates = async (row: QueueRow, env: Env): Promise<Image
   }
 };
 
+const wikipediaQueryFor = (title: string, category: string) => {
+  const terms = tokenize(`${title} ${category}`)
+    .filter((term) => !['radar', 'noticia', 'noticias', 'portal'].includes(term))
+    .slice(0, 7)
+    .join(' ');
+  return terms || clean(title, 140);
+};
+
+const searchWikipediaImageCandidates = async (row: QueueRow): Promise<ImageCandidate[]> => {
+  const query = wikipediaQueryFor(stripRadarPrefix(row.title) || row.title, row.category);
+  if (!query) return [];
+  const url = new URL('https://pt.wikipedia.org/w/api.php');
+  url.searchParams.set('action', 'query');
+  url.searchParams.set('generator', 'search');
+  url.searchParams.set('gsrsearch', query);
+  url.searchParams.set('gsrlimit', '5');
+  url.searchParams.set('prop', 'pageimages|info');
+  url.searchParams.set('pithumbsize', '1600');
+  url.searchParams.set('pilicense', 'any');
+  url.searchParams.set('inprop', 'url');
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('origin', '*');
+
+  try {
+    const response = await fetch(url.toString(), {
+      headers: { accept: 'application/json', 'user-agent': 'PortalNovoAlvoEditorial/1.0' },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!response.ok) return [];
+    const data = (await response.json()) as { query?: { pages?: Record<string, Record<string, unknown>> } };
+    return Object.values(data.query?.pages || {})
+      .map((page) => {
+        const thumbnail = page.thumbnail && typeof page.thumbnail === 'object' ? (page.thumbnail as Record<string, unknown>) : {};
+        return {
+          url: clean(thumbnail.source, 1200),
+          sourceTitle: clean(page.title, 240),
+          sourcePublisher: 'Wikimedia Commons',
+          sourceUrl: clean(page.fullurl, 1200),
+          category: row.category,
+          role: 'cover',
+        };
+      })
+      .filter((candidate) => isUsableImage(candidate.url))
+      .slice(0, 4);
+  } catch {
+    return [];
+  }
+};
+
+const dynamicUnsplashCandidate = (row: QueueRow): ImageCandidate[] => {
+  const title = stripRadarPrefix(row.title) || row.title;
+  const terms = tokenize(`${title} ${row.category}`)
+    .filter((term) => !['radar', 'noticia', 'noticias', 'portal'].includes(term))
+    .slice(0, 6);
+  const categoryMap: Record<string, string[]> = {
+    Futebol: ['soccer', 'stadium', 'football'],
+    Esportes: ['athlete', 'sport', 'competition'],
+    Cinema: ['cinema', 'movie', 'film'],
+    Games: ['gaming', 'console', 'technology'],
+    Musica: ['concert', 'music', 'stage'],
+    Moda: ['fashion', 'runway', 'style'],
+    Economia: ['business', 'finance', 'market'],
+    Tecnologia: ['technology', 'data', 'hardware'],
+    Saude: ['healthcare', 'medicine', 'wellness'],
+    Educacao: ['education', 'classroom', 'students'],
+    Mundo: ['world', 'city', 'geopolitics'],
+    Brasil: ['brazil', 'city', 'people'],
+    Politica: ['government', 'congress', 'politics'],
+  };
+  const query = [...terms, ...(categoryMap[row.category] || [row.category])]
+    .slice(0, 9)
+    .join(',');
+  if (!query) return [];
+  return [
+    {
+      url: `https://source.unsplash.com/1600x900/?${encodeURIComponent(query)}`,
+      sourceTitle: title,
+      sourcePublisher: 'Unsplash',
+      sourceUrl: 'https://unsplash.com',
+      category: row.category,
+      role: 'cover',
+    },
+  ];
+};
+
 const imageKey = (value: unknown) => {
   try {
     const url = new URL(clean(value, 1000));
@@ -214,6 +299,7 @@ const scoreImageCandidate = (candidate: ImageCandidate, title: string, category:
   const terms = tokenize(`${title} ${category}`);
   let score = 0;
   if (/images\.unsplash\.com/.test(lowerUrl)) score -= 25;
+  if (/source\.unsplash\.com/.test(lowerUrl)) score -= 8;
   if (/\.(jpe?g|png|webp)(\?|$)/i.test(url)) score += 12;
   if (/(1200|1600|1920|large|xl|original|og|share|cover)/i.test(url)) score += 18;
   if (isBlockedImageUrl(url)) score -= 100;
@@ -227,6 +313,7 @@ const scoreImageCandidate = (candidate: ImageCandidate, title: string, category:
   if (category === 'Cinema' && /(movie|film|cinema|poster|still|serie|stream|cannes|hbo|max)/i.test(`${url} ${context}`)) score += 20;
   if (category === 'Futebol' && /(futebol|football|soccer|campo|jogo|time|club|stadium|estadio|brasileirao)/i.test(`${url} ${context}`)) score += 20;
   if (category === 'Moda' && /(fashion|moda|look|runway|dress|vestido|tendencia|passarela)/i.test(`${url} ${context}`)) score += 20;
+  if (/wikimedia|wikipedia/i.test(context)) score += 10;
   return score;
 };
 
@@ -244,7 +331,7 @@ const chooseBestImage = (candidates: ImageCandidate[], title: string, category: 
 
 const chooseInlineImage = (candidates: ImageCandidate[], coverUrl: string, title: string, category: string) =>
   uniqueImageCandidates(candidates)
-    .filter((candidate) => imageKey(candidate.url) !== imageKey(coverUrl) && !/images\.unsplash\.com/i.test(candidate.url))
+    .filter((candidate) => imageKey(candidate.url) !== imageKey(coverUrl) && !/images\.unsplash\.com/i.test(candidate.url) && !/source\.unsplash\.com/i.test(candidate.url))
     .sort((a, b) => (a.role === 'body' ? -1 : 0) - (b.role === 'body' ? -1 : 0))
     .map((candidate, index) => ({ candidate, index, score: (candidate.role === 'body' ? 1000 : 0) + scoreImageCandidate(candidate, title, category) - index }))
     .sort((a, b) => b.score - a.score)[0]?.candidate.url || '';
@@ -776,7 +863,10 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
     uniqueImageCandidates(parseArray(row.image_candidates)),
   );
   const bingImageCandidates = baseImageCandidates.length ? [] : await searchBingImageCandidates(row, env);
-  const imageCandidates = uniqueImageCandidates([...baseImageCandidates, ...bingImageCandidates]);
+  const wikipediaImageCandidates = baseImageCandidates.length || bingImageCandidates.length ? [] : await searchWikipediaImageCandidates(row);
+  const preFallbackCandidates = uniqueImageCandidates([...baseImageCandidates, ...bingImageCandidates, ...wikipediaImageCandidates]);
+  const unsplashImageCandidates = preFallbackCandidates.length ? [] : dynamicUnsplashCandidate(row);
+  const imageCandidates = uniqueImageCandidates([...preFallbackCandidates, ...unsplashImageCandidates]);
   const title = stripRadarPrefix(row.title) || clean(row.title, 220);
   const coverUrl = chooseBestImage(imageCandidates, title, row.category);
   const inlineImageUrl = chooseInlineImage(imageCandidates, coverUrl, title, row.category);

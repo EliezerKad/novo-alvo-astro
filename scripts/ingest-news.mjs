@@ -164,6 +164,14 @@ const CATEGORY_SIGNALS = [
       /\b(economia|mercado|emprego|vagas|salario|renda|trabalho|trabalhador|trabalhadora|carreira|empresa|empresas|negocios|credito|juros|inflacao|bolsa|maternidade|licenca maternidade|teto materno|infojobs)\b/i,
   },
   {
+    category: 'Saude',
+    pattern: /\b(saude|medicina|vacina|hospital|doenca|medico|medica|sus|ans|medicamento|clinica|mental|bem estar|bem-estar)\b/i,
+  },
+  {
+    category: 'Ciencia',
+    pattern: /\b(ciencia|pesquisa|estudo|cientifico|cientifica|nasa|espaco|clima|biologia|astronomia|universidade|descoberta)\b/i,
+  },
+  {
     category: 'Games',
     pattern: /\b(games?|playstation|xbox|nintendo|steam|game pass|gta|fortnite|minecraft|console|ps5)\b/i,
   },
@@ -183,12 +191,20 @@ const CATEGORY_SIGNALS = [
     category: 'Moda',
     pattern: /\b(moda|fashion|look|looks|tendencia|tendencias|passarela|estilista|vestido|grife|colecao)\b/i,
   },
+  {
+    category: 'Famosos',
+    pattern: /\b(famosos|celebridade|celebridades|influencer|influenciador|atriz|ator|cantor|cantora|apresentador|apresentadora|viral)\b/i,
+  },
+  {
+    category: 'Lifestyle',
+    pattern: /\b(lifestyle|estilo de vida|comportamento|viagem|gastronomia|produtividade|rotina|familia|casa)\b/i,
+  },
 ];
 
 const classifyCategory = (feedCategory, title, source) => {
   const text = normalizedText(`${title} ${source}`);
   const matches = CATEGORY_SIGNALS.filter((item) => item.pattern.test(text));
-  const priorityMatch = ['Futebol', 'Politica', 'Games', 'Cinema', 'Musica', 'Cultura'].map((category) => matches.find((item) => item.category === category)).find(Boolean);
+  const priorityMatch = ['Futebol', 'Politica', 'Games', 'Cinema', 'Musica', 'Cultura', 'Saude', 'Ciencia'].map((category) => matches.find((item) => item.category === category)).find(Boolean);
   const economy = matches.find((item) => item.category === 'Economia');
   const fashion = matches.find((item) => item.category === 'Moda');
   const fashionScore = (text.match(/\b(moda|fashion|look|looks|tendencia|tendencias|passarela|estilista|vestido|grife|colecao)\b/gi) || []).length;
@@ -347,6 +363,34 @@ const buildCategoryRadarClusters = async (items) => {
     }
   }
   return clusters;
+};
+
+const buildCategoryFloorPitches = (items, existingPitches = []) => {
+  const covered = new Set(existingPitches.map((pitch) => pitch.category));
+  const byCategory = new Map();
+  for (const item of items) {
+    const bucket = byCategory.get(item.category) || [];
+    bucket.push(item);
+    byCategory.set(item.category, bucket);
+  }
+
+  return Object.keys(FEEDS)
+    .filter((category) => !covered.has(category))
+    .map((category) => {
+      const categoryItems = distinctBySource(byCategory.get(category) || [])
+        .sort((a, b) => itemRelevanceScore(b, byCategory.get(category) || []) - itemRelevanceScore(a, byCategory.get(category) || []))
+        .slice(0, Math.max(3, Math.min(MIN_SOURCES, SOURCE_EXPANSION_TARGET)));
+      if (categoryItems.length < 3) return null;
+      const pitch = buildPitch(categoryItems.map((item) => ({ ...item, radarCluster: true, coverageFloor: true })));
+      return {
+        ...pitch,
+        clusterKey: `${slugify(category)}:coverage:${slugify(categoryItems[0].title)}`,
+        sourceCount: categoryItems.length,
+        score: Math.min(780, 520 + categoryItems.length * 35 + pitch.tags.length * 6),
+        summary: `Cobertura minima da editoria ${category}. A abordagem editorial deve escolher o fato mais forte, evitar repeticao e transformar a pauta em materia util.`,
+      };
+    })
+    .filter(Boolean);
 };
 
 const parseRssItems = (xml, category) => {
@@ -516,22 +560,27 @@ const semanticPitchOverlap = (left, right) => {
   return shared / Math.min(leftTokens.size, rightTokens.size);
 };
 
-const balancePitches = (topicPitches, radarPitches, limit) => {
+const balancePitches = (topicPitches, radarPitches, coveragePitches, limit) => {
   const selected = [];
   const seen = new Set();
   const radarByCategory = new Map();
+  const coverageByCategory = new Map();
 
   for (const pitch of radarPitches) {
     if (!radarByCategory.has(pitch.category)) radarByCategory.set(pitch.category, []);
     radarByCategory.get(pitch.category).push(pitch);
   }
+  for (const pitch of coveragePitches) {
+    if (!coverageByCategory.has(pitch.category)) coverageByCategory.set(pitch.category, []);
+    coverageByCategory.get(pitch.category).push(pitch);
+  }
 
   for (const category of Object.keys(FEEDS)) {
-    addUniquePitch(selected, seen, radarByCategory.get(category)?.[0]);
+    addUniquePitch(selected, seen, radarByCategory.get(category)?.[0] || coverageByCategory.get(category)?.[0]);
     if (selected.length >= limit) return selected;
   }
 
-  for (const pitch of [...topicPitches, ...radarPitches]) {
+  for (const pitch of [...topicPitches, ...radarPitches, ...coveragePitches]) {
     addUniquePitch(selected, seen, pitch);
     if (selected.length >= limit) return selected;
   }
@@ -559,7 +608,8 @@ const main = async () => {
     .map(buildPitch)
     .filter((pitch) => pitch.sourceCount >= MIN_SOURCES && !topicPitches.some((existing) => existing.clusterKey === pitch.clusterKey))
     .sort((a, b) => b.score - a.score);
-  const pitches = balancePitches(topicPitches, radarPitches, Number(process.env.MAX_PITCHES || 80));
+  const coveragePitches = buildCategoryFloorPitches(allItems, [...topicPitches, ...radarPitches]);
+  const pitches = balancePitches(topicPitches, radarPitches, coveragePitches, Number(process.env.MAX_PITCHES || 80));
 
   let saved = 0;
   const enrichedPitches = await Promise.all(pitches.map(normalizePitchAssets));
@@ -582,7 +632,7 @@ const main = async () => {
     status: skipped > 0 ? 'partial' : 'success',
     itemsTotal: allItems.length,
     topicClusters: topicPitches.length,
-    radarClusters: radarPitches.length,
+    radarClusters: radarPitches.length + coveragePitches.length,
     selectedPitches: pitches.length,
     savedPitches: saved,
     skippedPitches: skipped,
@@ -592,7 +642,7 @@ const main = async () => {
     notes: `${saved}/${pitches.length} pautas salvas`,
   });
   console.log(
-    `Ingestao concluida: ${saved}/${pitches.length} pautas salvas. Itens: ${allItems.length}. Clusters por assunto: ${topicPitches.length}. Radares por categoria: ${radarPitches.length}.`,
+    `Ingestao concluida: ${saved}/${pitches.length} pautas salvas. Itens: ${allItems.length}. Clusters por assunto: ${topicPitches.length}. Radares por categoria: ${radarPitches.length}. Cobertura minima: ${coveragePitches.length}.`,
   );
   console.log(`Itens por categoria: ${JSON.stringify(feedCounts)}`);
 };
