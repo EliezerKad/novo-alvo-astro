@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import asyncio
+import contextlib
 from html import unescape
 from urllib.parse import urljoin
 from urllib.request import Request, urlopen
@@ -346,11 +347,10 @@ def main():
     sources = payload.get("sources") or []
     category = clean(payload.get("category"), 80)
     normalized = [{**source, "category": clean(source.get("category") or category, 80)} for source in sources if isinstance(source, dict)]
-    json.dump(
-        {"sources": [extract_one(source, index < CAMOUFOX_SOURCE_LIMIT) for index, source in enumerate(normalized)]},
-        sys.stdout,
-        ensure_ascii=False,
-    )
+    output_stream = sys.stdout
+    with contextlib.redirect_stdout(sys.stderr):
+        extracted = [extract_one(source, index < CAMOUFOX_SOURCE_LIMIT) for index, source in enumerate(normalized)]
+    json.dump({"sources": extracted}, output_stream, ensure_ascii=False)
 
 
 if __name__ == "__main__":
