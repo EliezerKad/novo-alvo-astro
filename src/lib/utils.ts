@@ -23,7 +23,6 @@ export function getCategoryColor(category: string): string {
     Carros: "bg-slate-700",
     Games: "bg-indigo-600",
     Música: "bg-purple-600",
-    Entrevistas: "bg-rose-700",
     Geral: "bg-red-600",
     DESTAQUE: "bg-red-700",
   };

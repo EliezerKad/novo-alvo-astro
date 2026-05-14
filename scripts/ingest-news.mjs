@@ -1,4 +1,6 @@
-﻿const FEEDS = {
+import { spawnSync } from 'node:child_process';
+
+const FEEDS = {
   Brasil:
     'https://news.google.com/rss/headlines/section/topic/CAAqJQgKIh9DQkFTRVFvSUwyMHZNRzV6Y0hjU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
   Politica:
@@ -25,7 +27,6 @@
   Cultura: 'https://news.google.com/rss/search?q=cultura+OR+arte+OR+literatura+OR+teatro+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
   Moda: 'https://news.google.com/rss/search?q=moda+OR+fashion+OR+tendencias+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
   Musica: 'https://news.google.com/rss/search?q=musica+OR+shows+OR+album+OR+festival+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Entrevistas: 'https://news.google.com/rss/search?q=entrevista+OR+declarou+OR+afirma+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
   Cinema: 'https://news.google.com/rss/search?q=cinema+OR+filmes+OR+streaming+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
 };
 
@@ -38,6 +39,11 @@ const HOUSEKEEPING_DAYS = Number(process.env.HOUSEKEEPING_DAYS || 30);
 const MAX_IMAGE_SOURCE_FETCHES_PER_PITCH = Number(process.env.MAX_IMAGE_SOURCE_FETCHES_PER_PITCH || 8);
 const SOURCE_EXPANSION_TARGET = Number(process.env.SOURCE_EXPANSION_TARGET || 12);
 const SOURCE_EXPANSION_MIN_OVERLAP = Number(process.env.SOURCE_EXPANSION_MIN_OVERLAP || 0.34);
+const ENABLE_SCRAPLING_ASSETS = process.env.ENABLE_SCRAPLING_ASSETS === '1';
+const SCRAPLING_SOURCE_LIMIT = Number(process.env.SCRAPLING_SOURCE_LIMIT || 5);
+const SCRAPLING_TIMEOUT_MS = Number(process.env.SCRAPLING_TIMEOUT_MS || 22000);
+const SCRAPLING_MAX_PITCHES_PER_RUN = Number(process.env.SCRAPLING_MAX_PITCHES_PER_RUN || 18);
+let scraplingPitchAttempts = 0;
 
 const decodeEntities = (value) =>
   String(value || '')
@@ -346,6 +352,44 @@ const fetchArticleAssets = async (url) => {
   }
 };
 
+const fetchScraplingAssets = (sources, category) => {
+  if (!ENABLE_SCRAPLING_ASSETS || !sources.length) return [];
+  if (scraplingPitchAttempts >= SCRAPLING_MAX_PITCHES_PER_RUN) return [];
+  scraplingPitchAttempts += 1;
+  const payload = {
+    category,
+    sources: sources.slice(0, SCRAPLING_SOURCE_LIMIT).map((source) => ({
+      title: source.title,
+      publisher: source.publisher,
+      url: source.url,
+      publishedAt: source.publishedAt,
+      category,
+    })),
+  };
+
+  const command = process.env.PYTHON || 'python3';
+  const result = spawnSync(command, ['scripts/extract-source-assets.py'], {
+    input: JSON.stringify(payload),
+    encoding: 'utf8',
+    timeout: SCRAPLING_TIMEOUT_MS,
+    maxBuffer: 1024 * 1024,
+  });
+
+  if (result.error || result.status !== 0) {
+    const message = result.error?.message || result.stderr || `status ${result.status}`;
+    console.warn(`[scrapling] assets indisponiveis: ${String(message).slice(0, 180)}`);
+    return [];
+  }
+
+  try {
+    const data = JSON.parse(result.stdout || '{}');
+    return Array.isArray(data.sources) ? data.sources : [];
+  } catch (error) {
+    console.warn(`[scrapling] JSON invalido: ${error.message}`);
+    return [];
+  }
+};
+
 const keywordSet = (item) => new Set(extractKeywords(item.title, item.category).slice(0, 8));
 
 const overlapScore = (left, right) => {
@@ -586,7 +630,7 @@ const buildPitch = (items) => {
 const enrichPitchImages = async (pitch) => {
   const current = Array.isArray(pitch.imageCandidates) ? pitch.imageCandidates : [];
   const sources = Array.isArray(pitch.sources) ? pitch.sources : [];
-  const assets = await Promise.all(
+  let assets = await Promise.all(
     sources
       .slice(0, MAX_IMAGE_SOURCE_FETCHES_PER_PITCH)
       .map(async (source) => ({
@@ -594,6 +638,29 @@ const enrichPitchImages = async (pitch) => {
         assets: await fetchArticleAssets(source.url),
       })),
   );
+
+  const nodeImageCount = assets.reduce((total, item) => total + (item.assets?.images?.length || 0), 0);
+  if (nodeImageCount < 2) {
+    const scraplingSources = fetchScraplingAssets(sources, pitch.category);
+    if (scraplingSources.length) {
+      const bySourceKey = new Map(
+        scraplingSources.map((source) => [String(source.url || source.sourceUrl || source.title || '').toLowerCase(), source]),
+      );
+      assets = assets.map((item) => {
+        const key = String(item.source?.url || item.source?.title || '').toLowerCase();
+        const enriched = bySourceKey.get(key);
+        if (!enriched) return item;
+        return {
+          source: item.source,
+          assets: {
+            url: enriched.resolvedUrl || item.assets?.url || item.source.url,
+            images: Array.isArray(enriched.images) ? enriched.images.map((image) => image.url).filter(Boolean) : item.assets?.images || [],
+            excerpt: item.assets?.excerpt || enriched.excerpt || '',
+          },
+        };
+      });
+    }
+  }
   const sourceImages = assets
     .map(({ source, assets }) =>
       assets.images.map((url) => ({

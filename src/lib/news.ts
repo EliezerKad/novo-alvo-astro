@@ -34,7 +34,6 @@ export const categoryLabels: Record<string, string> = {
   Moda: 'Moda',
   Musica: 'Musica',
   Futebol: 'Futebol',
-  Entrevistas: 'Entrevistas',
   Geral: 'Geral',
 };
 
@@ -48,7 +47,6 @@ export const subCategoriesList = [
   'Moda',
   'Musica',
   'Futebol',
-  'Entrevistas',
 ];
 
 export function sortNewsByDate(entries: NewsEntry[]): NewsEntry[] {

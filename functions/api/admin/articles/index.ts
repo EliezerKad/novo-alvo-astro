@@ -192,6 +192,7 @@ const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
 };
 
 const isRemoteImageUrl = (value: string) => /^https?:\/\//i.test(value) && !/\/media\/news\//i.test(value);
+const isFallbackRemoteImage = (value: string) => /images\.unsplash\.com|source\.unsplash\.com|picsum\.photos/i.test(value);
 
 const imageExtensionFromType = (contentType: string) => {
   const type = contentType.toLowerCase();
@@ -230,6 +231,7 @@ const uploadImageBufferToR2 = async (
 
 const uploadRemoteImageToR2 = async (env: Env, url: string, keyBase: string) => {
   if (!env.MEDIA_BUCKET || !isRemoteImageUrl(url)) return null;
+  if (isFallbackRemoteImage(url)) return null;
 
   try {
     const response = await fetch(url, {
@@ -491,7 +493,7 @@ const publishMarkdownToGitHub = async (
     ...new Set(
       [...articleForMarkdown.bodyHtml.matchAll(/<img[^>]+src=["'](https?:\/\/[^"']+)["'][^>]*>/gi)]
         .map((match) => match[1])
-        .filter((src) => !/^https:\/\/portalnovoalvo\.com\.br\/(?:uploads|media)\//i.test(src)),
+        .filter((src) => !/^https:\/\/portalnovoalvo\.com\.br\/(?:uploads|media)\//i.test(src) && !isFallbackRemoteImage(src)),
     ),
   ].slice(0, 4);
 

@@ -47,6 +47,7 @@ type ImageCandidate = {
   sourcePublisher?: string;
   sourceUrl?: string;
   category?: string;
+  role?: string;
 };
 
 const imageCreditFor = (url: string, candidates: ImageCandidate[]) => {
@@ -76,7 +77,6 @@ const CATEGORY_IMAGES: Record<string, string> = {
   Moda: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1600&q=80',
   Musica: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1600&q=80',
   Cinema: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80',
-  Entrevistas: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1600&q=80',
 };
 
 const fallbackImageForCategory = (category: unknown) => CATEGORY_IMAGES[clean(category, 80)] || '/og-default.svg';
@@ -229,6 +229,7 @@ const normalizeImageCandidate = (value: unknown): ImageCandidate | null => {
       sourcePublisher: clean(record.sourcePublisher, 120),
       sourceUrl: clean(record.sourceUrl, 900),
       category: clean(record.category, 80),
+      role: clean(record.role, 24),
     };
   }
   return { url };
@@ -293,6 +294,8 @@ const scoreImageCandidate = (candidate: ImageCandidate, title: string, category:
 const chooseBestImage = (candidates: ImageCandidate[], title: string, category: string) => {
   const fallback = fallbackImageForCategory(category);
   const cleanCandidates = uniqueImageCandidates(candidates).filter((candidate) => imageKey(candidate.url) !== imageKey(fallback));
+  const selectedCover = cleanCandidates.find((candidate) => candidate.role === 'cover' && !/images\.unsplash\.com/i.test(candidate.url));
+  if (selectedCover) return selectedCover.url;
   return (
     cleanCandidates
       .map((candidate, index) => ({ candidate, index, score: scoreImageCandidate(candidate, title, category) - index }))
@@ -303,7 +306,8 @@ const chooseBestImage = (candidates: ImageCandidate[], title: string, category: 
 const chooseInlineImage = (candidates: ImageCandidate[], coverUrl: string, title: string, category: string) =>
   uniqueImageCandidates(candidates)
     .filter((candidate) => imageKey(candidate.url) !== imageKey(coverUrl) && !/images\.unsplash\.com/i.test(candidate.url))
-    .map((candidate, index) => ({ candidate, index, score: scoreImageCandidate(candidate, title, category) - index }))
+    .sort((a, b) => (a.role === 'body' ? -1 : 0) - (b.role === 'body' ? -1 : 0))
+    .map((candidate, index) => ({ candidate, index, score: (candidate.role === 'body' ? 1000 : 0) + scoreImageCandidate(candidate, title, category) - index }))
     .sort((a, b) => b.score - a.score)[0]?.candidate.url || '';
 
 const json = (body: unknown, init: ResponseInit = {}) =>

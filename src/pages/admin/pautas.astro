@@ -20,7 +20,6 @@ const categories = [
   'Moda',
   'Musica',
   'Futebol',
-  'Entrevistas',
 ];
 ---
 
@@ -286,6 +285,11 @@ const categories = [
         return String(image.url || image.src || '');
       };
 
+      const imageRole = (image) => {
+        if (!image || typeof image !== 'object') return '';
+        return String(image.role || '');
+      };
+
       const formatDate = (value) => {
         if (!value) return 'Sem data';
         const date = new Date(value);
@@ -493,19 +497,44 @@ const categories = [
           ${
             images.length
               ? `<section>
-                  <p class="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-400">Imagens candidatas</p>
-                  <div class="mt-3 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+                  <div class="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                    <div>
+                      <p class="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-400">Mesa visual da pauta</p>
+                      <p class="mt-2 text-sm font-medium leading-6 text-zinc-500 dark:text-zinc-400">Escolha a capa ou marque imagens para entrar no corpo. O R2 só recebe a imagem quando a matéria é salva/publicada.</p>
+                    </div>
+                    <span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900">${images.length} candidata${images.length === 1 ? '' : 's'}</span>
+                  </div>
+                  <div class="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                     ${images
-                      .slice(0, 6)
-                      .map((image) => {
+                      .slice(0, 24)
+                      .map((image, index) => {
                         const src = imageUrl(image);
                         if (!src) return '';
                         const label = typeof image === 'object' && image ? image.sourceTitle || image.sourcePublisher || '' : '';
+                        const publisher = typeof image === 'object' && image ? image.sourcePublisher || '' : '';
+                        const role = imageRole(image);
                         return `
-                        <a href="${escapeHtml(src)}" target="_blank" rel="noopener noreferrer" class="group block overflow-hidden rounded-[1.25rem] bg-zinc-100 dark:bg-zinc-900">
-                          <img src="${escapeHtml(src)}" alt="" class="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" referrerpolicy="no-referrer" />
-                          ${label ? `<span class="block p-3 text-[10px] font-bold leading-4 text-zinc-500">${escapeHtml(label)}</span>` : ''}
-                        </a>
+                        <article class="group overflow-hidden rounded-[1.35rem] border ${role === 'cover' ? 'border-red-500 bg-red-50 dark:border-red-500 dark:bg-red-950/20' : role === 'body' ? 'border-zinc-950 bg-zinc-50 dark:border-white dark:bg-zinc-900' : 'border-zinc-100 bg-white dark:border-zinc-800 dark:bg-zinc-950'} shadow-sm">
+                          <a href="${escapeHtml(src)}" target="_blank" rel="noopener noreferrer" class="block overflow-hidden bg-zinc-100 dark:bg-zinc-900">
+                            <img src="${escapeHtml(src)}" alt="" class="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" referrerpolicy="no-referrer" />
+                          </a>
+                          <div class="space-y-3 p-3">
+                            <div class="flex flex-wrap items-center gap-2">
+                              <span class="rounded-full bg-zinc-100 px-2 py-1 text-[8px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900">#${index + 1}</span>
+                              ${role === 'cover' ? '<span class="rounded-full bg-red-600 px-2 py-1 text-[8px] font-black uppercase tracking-widest text-white">Capa</span>' : ''}
+                              ${role === 'body' ? '<span class="rounded-full bg-zinc-950 px-2 py-1 text-[8px] font-black uppercase tracking-widest text-white dark:bg-white dark:text-zinc-950">Corpo</span>' : ''}
+                              ${role === 'ignored' ? '<span class="rounded-full bg-zinc-200 px-2 py-1 text-[8px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-800">Ignorada</span>' : ''}
+                            </div>
+                            ${publisher ? `<strong class="block text-[10px] font-black uppercase tracking-widest text-zinc-600 dark:text-zinc-300">${escapeHtml(publisher)}</strong>` : ''}
+                            ${label ? `<span class="line-clamp-2 block text-[10px] font-bold leading-4 text-zinc-500">${escapeHtml(label)}</span>` : ''}
+                            <div class="grid grid-cols-2 gap-2">
+                              <button type="button" data-pitch-image-role="cover" data-pitch-id="${escapeHtml(id)}" data-image-url="${escapeHtml(src)}" class="rounded-xl bg-red-600 px-3 py-2 text-[8px] font-black uppercase tracking-widest text-white transition hover:bg-red-500">Usar capa</button>
+                              <button type="button" data-pitch-image-role="body" data-pitch-id="${escapeHtml(id)}" data-image-url="${escapeHtml(src)}" class="rounded-xl bg-zinc-950 px-3 py-2 text-[8px] font-black uppercase tracking-widest text-white transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-950">No texto</button>
+                              <button type="button" data-pitch-image-role="ignored" data-pitch-id="${escapeHtml(id)}" data-image-url="${escapeHtml(src)}" class="rounded-xl border border-zinc-200 px-3 py-2 text-[8px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">Ignorar</button>
+                              <a href="${escapeHtml(src)}" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-zinc-200 px-3 py-2 text-center text-[8px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-zinc-950 hover:text-zinc-950 dark:border-zinc-800 dark:hover:border-white dark:hover:text-white">Abrir</a>
+                            </div>
+                          </div>
+                        </article>
                       `;})
                       .join('')}
                   </div>
@@ -744,6 +773,52 @@ const categories = [
         }
       };
 
+      const updatePitchImageRole = async (button, id, imageUrl, imageRole) => {
+        const token = getToken();
+        if (!token || !id || !imageUrl || !imageRole) return;
+        const previousLabel = button?.textContent || '';
+        if (button) {
+          button.disabled = true;
+          button.textContent = 'Salvando...';
+          button.classList.add('opacity-60');
+        }
+        if (statusNode) statusNode.textContent = 'Salvando escolha visual da pauta...';
+
+        try {
+          const response = await fetch('/api/admin/pitches', {
+            method: 'PATCH',
+            headers: {
+              'content-type': 'application/json',
+              authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ id, imageUrl, imageRole }),
+          });
+          const data = await response.json().catch(() => ({}));
+          if (response.status === 401) {
+            try {
+              localStorage.removeItem('admin-token');
+            } catch {}
+            redirectToLogin();
+            return;
+          }
+          if (!response.ok) throw new Error(data.error || 'Nao foi possivel salvar a escolha da imagem.');
+          const pitch = pitches.find((item) => String(item.id || '') === String(id));
+          if (pitch && Array.isArray(data.imageCandidates)) {
+            pitch.image_candidates = JSON.stringify(data.imageCandidates);
+          }
+          if (statusNode) statusNode.textContent = imageRole === 'cover' ? 'Capa definida para esta pauta.' : imageRole === 'body' ? 'Imagem marcada para o corpo da matéria.' : 'Imagem ignorada nesta pauta.';
+          openPitchPreview(id);
+        } catch (error) {
+          if (statusNode) statusNode.textContent = error.message || 'Falha ao salvar imagem.';
+        } finally {
+          if (button) {
+            button.disabled = false;
+            button.textContent = previousLabel;
+            button.classList.remove('opacity-60');
+          }
+        }
+      };
+
       statusButtons.forEach((button) => {
         button.addEventListener('click', () => {
           status = button.dataset.statusFilter || 'new';
@@ -778,6 +853,23 @@ const categories = [
 
       modalClose?.addEventListener('click', closePitchPreview);
       modal?.addEventListener('click', (event) => {
+        const imageButton = event.target.closest('[data-pitch-image-role]');
+        if (imageButton) {
+          updatePitchImageRole(
+            imageButton,
+            imageButton.dataset.pitchId || '',
+            imageButton.dataset.imageUrl || '',
+            imageButton.dataset.pitchImageRole || '',
+          );
+          return;
+        }
+
+        const inlineArticleButton = event.target.closest('[data-pitch-article-inline]');
+        if (inlineArticleButton) {
+          openPitchPreview(inlineArticleButton.dataset.pitchArticleInline || '', 'article');
+          return;
+        }
+
         if (event.target === modal) closePitchPreview();
       });
       document.addEventListener('keydown', (event) => {

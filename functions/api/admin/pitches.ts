@@ -35,6 +35,7 @@ type PitchRecord = {
   id: string;
   category?: string;
   status?: string;
+  image_candidates?: string;
 };
 
 const json = (body: unknown, init: ResponseInit = {}) =>
@@ -63,6 +64,66 @@ const slugify = (value: unknown) =>
     .slice(0, 120);
 
 const asJson = (value: unknown) => JSON.stringify(Array.isArray(value) ? value : []);
+
+const parseArray = (value: unknown) => {
+  try {
+    const parsed = typeof value === 'string' ? JSON.parse(value || '[]') : value;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const imageUrl = (value: unknown) => {
+  if (!value) return '';
+  if (typeof value === 'string') return clean(value, 1200);
+  if (typeof value !== 'object') return '';
+  const record = value as Record<string, unknown>;
+  return clean(record.url || record.src, 1200);
+};
+
+const imageKey = (value: unknown) => {
+  try {
+    const url = new URL(clean(value, 1200));
+    return `${url.hostname}${url.pathname}`.toLowerCase().replace(/\/+/g, '/');
+  } catch {
+    return clean(value, 1200).toLowerCase().split('?')[0];
+  }
+};
+
+const normalizeImageCandidates = (values: unknown[]) => {
+  const seen = new Set<string>();
+  const output: Record<string, unknown>[] = [];
+  for (const value of values) {
+    const url = imageUrl(value);
+    if (!/^https:\/\//i.test(url)) continue;
+    const key = imageKey(url);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    output.push(typeof value === 'object' && value ? { ...(value as Record<string, unknown>), url } : { url });
+  }
+  return output;
+};
+
+const mergePreservedImageRoles = (incomingJson: string, existingJson: string) => {
+  const incoming = normalizeImageCandidates(parseArray(incomingJson));
+  const existing = normalizeImageCandidates(parseArray(existingJson));
+  const roleByKey = new Map<string, string>();
+  for (const candidate of existing) {
+    const role = clean(candidate.role, 24);
+    if (!role) continue;
+    roleByKey.set(imageKey(candidate.url), role);
+  }
+  const merged = incoming.map((candidate) => {
+    const role = roleByKey.get(imageKey(candidate.url));
+    return role ? { ...candidate, role } : candidate;
+  });
+  for (const candidate of existing) {
+    const key = imageKey(candidate.url);
+    if (roleByKey.has(key) && !merged.some((item) => imageKey(item.url) === key)) merged.unshift(candidate);
+  }
+  return JSON.stringify(merged.slice(0, 24));
+};
 
 const requireAdmin = (request: Request, env: Env) => {
   if (!env.ADMIN_TOKEN) return json({ error: 'ADMIN_TOKEN nao configurado.' }, { status: 503 });
@@ -171,12 +232,16 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
 
   const pitch = normalizePitch(rawPayload);
   const existing = await db
-    .prepare('SELECT id, status FROM editorial_pitches WHERE cluster_key = ? LIMIT 1')
+    .prepare('SELECT id, status, image_candidates FROM editorial_pitches WHERE cluster_key = ? LIMIT 1')
     .bind(pitch.clusterKey)
     .first<PitchRecord>();
 
   if (existing?.status === 'dismissed') {
     return json({ ok: true, skipped: true, reason: 'Pauta descartada preservada.', pitch: { id: existing.id, clusterKey: pitch.clusterKey, status: existing.status } });
+  }
+
+  if (existing?.image_candidates) {
+    pitch.imageCandidates = mergePreservedImageRoles(pitch.imageCandidates, existing.image_candidates);
   }
 
   await db
@@ -266,7 +331,17 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
   const db = getDb(env);
   if (!db) return json({ error: 'Binding EDITORIAL_DB nao configurado.' }, { status: 503 });
 
-  let payload: { id?: string; clusterKey?: string; status?: string; all?: boolean; currentStatus?: string; category?: string; minSources?: number };
+  let payload: {
+    id?: string;
+    clusterKey?: string;
+    status?: string;
+    all?: boolean;
+    currentStatus?: string;
+    category?: string;
+    minSources?: number;
+    imageUrl?: string;
+    imageRole?: string;
+  };
   try {
     payload = await request.json();
   } catch {
@@ -282,14 +357,18 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
   const id = clean(payload.id, 120);
   const clusterKey = clean(payload.clusterKey, 180);
   const status = clean(payload.status, 24);
+  const imageRole = clean(payload.imageRole, 24);
+  const selectedImageUrl = clean(payload.imageUrl, 1200);
   if (!id && !clusterKey) return json({ error: 'ID ausente.' }, { status: 400 });
-  if (!['new', 'reviewed', 'queued', 'dismissed', 'converted'].includes(status)) {
+  if (imageRole) {
+    if (!['cover', 'body', 'ignored', 'clear'].includes(imageRole)) return json({ error: 'Papel de imagem invalido.' }, { status: 400 });
+  } else if (!['new', 'reviewed', 'queued', 'dismissed', 'converted'].includes(status)) {
     return json({ error: 'Status invalido.' }, { status: 400 });
   }
 
   const lookupKey = clusterKey || id;
   const existing = await db
-    .prepare('SELECT id, category FROM editorial_pitches WHERE id = ? OR cluster_key = ? LIMIT 1')
+    .prepare('SELECT id, category, image_candidates FROM editorial_pitches WHERE id = ? OR cluster_key = ? LIMIT 1')
     .bind(id || lookupKey, lookupKey)
     .first<PitchRecord>();
 
@@ -299,6 +378,26 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
   }
 
   const now = new Date().toISOString();
+  if (imageRole) {
+    const candidates = normalizeImageCandidates(parseArray(existing.image_candidates));
+    const selectedKey = imageKey(selectedImageUrl);
+    const nextCandidates = candidates.map((candidate) => {
+      const key = imageKey(candidate.url);
+      if (imageRole === 'clear') return { ...candidate, role: clean(candidate.role, 24) === 'ignored' ? 'ignored' : '' };
+      if (key === selectedKey) return { ...candidate, role: imageRole };
+      if (imageRole === 'cover' && clean(candidate.role, 24) === 'cover') return { ...candidate, role: '' };
+      return candidate;
+    });
+    if (selectedImageUrl && !nextCandidates.some((candidate) => imageKey(candidate.url) === selectedKey)) {
+      nextCandidates.unshift({ url: selectedImageUrl, role: imageRole });
+    }
+    await db
+      .prepare('UPDATE editorial_pitches SET image_candidates = ?, updated_at = ? WHERE id = ? OR cluster_key = ?')
+      .bind(JSON.stringify(nextCandidates), now, existing.id, lookupKey)
+      .run();
+    return json({ ok: true, imageCandidates: nextCandidates });
+  }
+
   const tombstoneExpiresAt = status === 'dismissed' ? new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString() : '';
   if (status === 'dismissed') {
     await db

@@ -21,7 +21,6 @@ const subCategoriesList = [
   'Moda',
   'Música',
   'Futebol',
-  'Entrevistas',
 ];
 
 function MenuIcon({ className }: { className: string }) {
