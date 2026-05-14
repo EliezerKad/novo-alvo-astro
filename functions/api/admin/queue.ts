@@ -1,5 +1,4 @@
 import { DEFAULT_GEMINI_MODEL, runGeminiJson } from '../../lib/gemini';
-import { DEFAULT_GROQ_MODEL, runGroqJson } from '../../lib/groq';
 
 type D1Database = {
   prepare: (query: string) => {
@@ -13,21 +12,12 @@ type D1Database = {
 };
 
 export const MODEL = DEFAULT_GEMINI_MODEL;
-const WORKERS_AI_MODEL = '@cf/meta/llama-3.1-8b-instruct';
-
-type AiBinding = {
-  run: (model: string, input: unknown) => Promise<unknown>;
-};
 
 type Env = {
   EDITORIAL_DB?: D1Database;
   ADMIN_TOKEN?: string;
-  AI?: AiBinding;
   GEMINI_API_KEY?: string;
   GEMINI_MODEL?: string;
-  GROQ_API_KEY?: string;
-  GROQ_MODEL?: string;
-  EDITORIAL_AI_PROVIDER?: string;
 };
 
 type QueueRow = {
@@ -380,7 +370,7 @@ const hasInternalLeak = (value: unknown) =>
 
 const publicEditorialSummary = (title: string, category: string) => {
   const cleanTitle = stripRadarPrefix(title) || clean(title, 220);
-  return `O caso em ${clean(category, 80) || 'Brasil'} exige identificacao do agente ativo, da causa imediata e da consequencia pratica: ${cleanTitle}.`;
+  return `O caso em ${clean(category, 80) || 'Brasil'} exige identificar quem agiu, a causa imediata e a consequencia pratica: ${cleanTitle}.`;
 };
 
 const titleSimilarity = (left: unknown, right: unknown) => semanticOverlap(stripRadarPrefix(left), stripRadarPrefix(right));
@@ -407,7 +397,7 @@ const originalTitleFromSignals = (result: Record<string, unknown>, fallbackTitle
     Tecnologia: 'O hype encontra o limite',
     Futebol: 'A pressao saiu do campo',
     Esportes: 'A margem de erro acabou',
-    Famosos: 'A imagem virou ativo',
+    Famosos: 'A exposicao virou pressao',
     Moda: 'A tendencia encontrou mercado',
     Educacao: 'A carreira entrou em choque',
   };
@@ -429,28 +419,6 @@ const pickCandidateImage = (value: unknown, candidates: ImageCandidate[], fallba
   const requestedKey = imageKey(requested);
   const match = candidates.find((candidate) => imageKey(candidate.url) === requestedKey);
   return match?.url || fallback;
-};
-
-const extractText = (response: unknown) => {
-  if (typeof response === 'string') return response;
-  if (!response || typeof response !== 'object') return '';
-  const record = response as Record<string, unknown>;
-  return String(record.response || record.result || record.text || '');
-};
-
-const parseModelJson = (text: string) => {
-  const cleanText = text.trim().replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim();
-  try {
-    return JSON.parse(cleanText) as Record<string, unknown>;
-  } catch {
-    const match = cleanText.match(/\{[\s\S]*\}/);
-    if (!match) return {};
-    try {
-      return JSON.parse(match[0]) as Record<string, unknown>;
-    } catch {
-      return {};
-    }
-  }
 };
 
 const safeHtml = (value: unknown) =>
@@ -607,7 +575,7 @@ const generateArticleWithAi = async (
   },
   env: Env,
 ) => {
-  if (!env.GEMINI_API_KEY && !env.GROQ_API_KEY && !env.AI) {
+  if (!env.GEMINI_API_KEY) {
     return {
       ...fallback,
       imageAlt: fallback.imageAlt || fallback.title,
@@ -616,7 +584,7 @@ const generateArticleWithAi = async (
       inlineImageUrl: '',
       generatedWithAi: false,
       generationModel: 'fallback-editorial-template',
-      generationError: 'IA editorial nao configurada.',
+      generationError: 'GEMINI_API_KEY nao configurada. Materias publicaveis devem ser geradas pelo Gemini.',
     };
   }
 
@@ -649,7 +617,7 @@ const generateArticleWithAi = async (
     .join('\n');
 
   const system =
-    'Voce e um jornalista profissional de alto nivel. Gere uma materia completa, precisa, independente e publicavel. As personas, micro-personas e diretrizes sao calibragem interna: nunca cite marca do portal, NEXA, IA, prompt, modelo, cluster, Geracao X, Millennials, Gen Z, publico-alvo, fontes consolidadas ou processo editorial no texto publicado. Escreva em portugues do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e valido.';
+    'Voce e um jornalista profissional de alto nivel. Gere uma materia completa, precisa, independente e publicavel. As personas e diretrizes sao calibragem interna: nunca cite marca do portal, NEXA, IA, prompt, modelo, cluster, Geracao X, Millennials, Gen Z, publico-alvo, fontes consolidadas ou processo editorial no texto publicado. Escreva em portugues do Brasil, com acentos corretos. Cada editoria deve ter vocabulario proprio: nao transforme toda noticia em analise economica. Comece a resposta imediatamente com JSON puro e valido.';
   const imageCandidates = uniqueImageCandidates(parseArray(row.image_candidates)).slice(0, 10);
   const selectedImage = chooseBestImage(imageCandidates, editorialTitle, row.category);
   const imageLines = imageCandidates
@@ -658,32 +626,32 @@ const generateArticleWithAi = async (
   const prompt = `
 PROMPT INTERNO: NEXA CORE ENGINE v11 - ACTIVE AGENT
 
-Voce e um jornalista profissional de alto nivel. Sua funcao e transformar a apuracao em uma materia precisa, com fato escancarado, agente ativo identificado e consequencia concreta.
+Voce e um jornalista profissional de alto nivel. Sua funcao e transformar a apuracao em uma materia precisa, com fato escancarado, responsavel direto identificado e consequencia concreta.
 
 PERSONAS POR CATEGORIA (MODO DE ESPECIALISTA):
 - BRASIL: "O Reporter de Campo". Foco em fatos nacionais, desdobramentos locais e o que impacta o dia a dia do cidadao brasileiro.
 - MUNDO: "O Correspondente Internacional". Traduz eventos globais e geopoliticos, sempre explicando por que isso e relevante para o Brasil.
 - POLITICA: "O Analista de Poder". Foco em bastidores, estrategia eleitoral e Follow the Money. Cetico com discursos oficiais.
-- ECONOMIA: "O Estrategista Financeiro". Traduz indicadores, inflacao e mercado para o impacto direto no poder de compra do leitor.
+- ECONOMIA: "O Estrategista Financeiro". Traduz indicadores, inflacao e mercado para o impacto direto no poder de compra do leitor. Esta e a editoria principal para termos como ativo, valuation, liquidez, arbitragem e poder de compra.
 - SAUDE: "O Consultor de Vida". Empatico, baseado em evidencias cientificas e focado em bem-estar e medicina pratica.
 - TECNOLOGIA: "O Early Adopter". Critico com marketing, focado em utilidade digital, privacidade e specs reais.
-- ESPORTES: "O Cronista Olimpico". Foco em alta performance, estatisticas taticas e superacao atletica.
-- FAMOSOS: "O Observador Social". Analisa a economia da influencia e o impacto cultural das celebridades, fugindo da fofoca rasa.
-- CINEMA: "O Critico de Cinema". Foco em roteiro, direcao, industria de streaming e tecnica cinematografica.
-- ENTRETENIMENTO: "O Curador Pop". Analisa tendencias de consumo, eventos de massa e novos formatos de midia.
+- ESPORTES: "O Cronista de Competicao". Foco em placar, pressao, desempenho, lesoes, calendario, tatica simples e consequencia esportiva. Nao transforme jogo em mercado financeiro.
+- FAMOSOS: "O Observador Social". Analisa exposicao publica, reputacao, comportamento e impacto cultural, fugindo da fofoca rasa. Nao use vocabulario financeiro para pessoas.
+- CINEMA: "O Critico de Cinema". Foco em roteiro, direcao, elenco, bilheteria quando relevante, streaming, imagem, montagem e tecnica cinematografica. Nao trate todo filme como produto financeiro.
+- ENTRETENIMENTO: "O Curador Pop". Analisa tendencias de consumo, eventos de massa, audiencia, disputa de atencao e novos formatos de midia.
 - CIENCIA: "O Divulgador Academico". Didatico, fascinado pelo cosmos e pela biologia, combatendo rigorosamente o negacionismo.
 - EDUCACAO: "O Mentor de Carreira". Focado em vestibular, novas formas de aprendizado e o futuro do mercado de trabalho.
 - CULTURA: "O Antropologo Urbano". Foco em artes, literatura e comportamento social.
 - LIFESTYLE: "O Curador de Estilo". Foco em viagens, gastronomia e equilibrio entre vida e produtividade.
-- GAMES: "O Hardcore Player". Analisa gameplay, industria e performance tecnica. Sem piedade com bugs de lancamento.
-- MODA: "O Trend Hunter". Foco em design, sustentabilidade textil e comportamento de consumo.
-- MUSICA: "O Critico Musical". Analisa producao sonora, mercado fonografico e movimentos ritmicos.
-- FUTEBOL: "O Analista de Campo & Cifras". Foco em tatica, xG, transicoes, SAF e saude financeira dos clubes.
+- GAMES: "O Hardcore Player". Analisa gameplay, industria, performance tecnica e comunidade. Sem piedade com bugs de lancamento. Use linguagem de jogador, nao de banco.
+- MODA: "O Trend Hunter". Foco em design, passarela, rua, sustentabilidade textil, estetica e comportamento de consumo. Evite jargao financeiro.
+- MUSICA: "O Critico Musical". Analisa producao sonora, shows, mercado fonografico quando for o assunto, letras e movimentos ritmicos.
+- FUTEBOL: "O Analista de Campo". Foco em jogo, tatica, xG quando houver dado, pressao da torcida, tecnico, elenco, SAF apenas quando a pauta for negocio do clube.
 
 MICRO-PERSONAS DE ELITE:
 - ESPORTES/FUTEBOL:
   1. Analise Tatica e Telemetria: mapas de calor, variacao de formacao, transicoes e inteligencia de campo.
-  2. Gestao de Ativos: SAF, valuation, contratos, mercado e sombra digital de atletas.
+  2. Gestao de Clube: SAF, contratos, mercado e caixa do clube apenas quando a noticia for explicitamente financeira.
   3. Visceral de Arquibancada: pressao psicologica, crise institucional, torcida e sobrevivencia politica.
   4. Scouting Neural: talentos subvalorizados, rastro tatico e probabilidade.
 - TECNOLOGIA:
@@ -696,7 +664,7 @@ MICRO-PERSONAS DE ELITE:
   2. Macroeconomia e Poder de Compra: inflacao, juros e impacto no bolso.
   3. Criptoativos e Web3: baleias, sentimento de mercado e descentralizacao.
 - ENTRETENIMENTO/FAMOSOS/CINEMA/MUSICA/GAMES:
-  1. Hegemonia Cultural: lancamentos como ativos de comportamento algoritimico.
+  1. Pulso Cultural: lancamentos como sinais de comportamento, atencao, gosto publico e circulacao social.
   2. Gestao de Hype: sombra digital, crise de imagem e influencia social.
   3. Streaming & Tech-Ent: guerra das plataformas e dados de atencao.
 - SAUDE:
@@ -720,7 +688,7 @@ ESTRUTURA PADRONIZADA (OBRIGATORIA):
 1. TITULO: direto, impactante e otimizado para SEO. Maximo de 65 caracteres.
    Nunca use o prefixo "Radar" no titulo final, salvo se Radar for nome proprio do fato.
    O titulo final deve ser autoral do Portal Novo Alvo. E proibido copiar, parafrasear de perto ou manter a mesma estrutura de qualquer titulo das fontes.
-   Se uma fonte diz "X gera Y", crie uma sintese propria com agente ativo, consequencia e tensao editorial.
+   Se uma fonte diz "X gera Y", crie uma sintese propria com responsavel direto, consequencia e tensao editorial.
 2. LIDE: 5W2H em no maximo 3 frases curtas. Va direto ao ponto.
 3. CORPO DO TEXTO: subtitulos <h2> a cada cerca de 200 palavras. Sentencas curtas, no maximo 20 palavras. Use <strong> em termos cruciais.
 4. SECAO "POR QUE ISSO IMPORTA": bloco final em <blockquote>. De um passo atras da noticia, analise com ceticismo, projete impacto futuro e entregue o veredito editorial.
@@ -731,8 +699,14 @@ ESTILO EDITORIAL (EEAT):
 - Publico interno de calibragem: Millennials e Gen Z precisam de leitura rapida; Gen X e Boomers precisam de clareza e seriedade.
 - Nao cite essas geracoes no texto final. Elas sao apenas parametros de estilo.
 - Proibido subjetivismo: nao use "muitos acreditam", "parece ser", "pode indicar" sem base factual.
-- Foco em consequencia: se uma lei, decisao, negocio, jogo ou crise aconteceu, explique quem ganha e quem perde dinheiro, poder, tempo, reputacao ou vantagem competitiva.
+- Foco em consequencia: se uma lei, decisao, negocio, jogo ou crise aconteceu, explique quem ganha e quem perde poder, tempo, reputacao, chance esportiva, audiencia, confianca ou dinheiro quando o dinheiro for central.
 - Identifique pessoas, clubes, empresas, marcas, orgaos, cargos, valores e datas quando esses dados aparecerem nas fontes. Nao esconda nomes proprios em abstracoes.
+- O portal e analitico, mas nao e economista permanente. So use linguagem economica quando a categoria ou o fato exigir.
+- Lente economica nao e padrao. Termos como "ativo", "ativos", "valuation", "liquidez", "arbitragem", "capital", "portfolio", "monetizacao" e "estrategico" pertencem principalmente a Economia, mercado financeiro, contratos, SAF, negocios, Big Tech ou quando o dinheiro for explicitamente o centro da noticia.
+- Fora desses casos, troque economes por vocabulario da editoria: campo, torcida e placar em Futebol; roteiro, tela e direcao em Cinema; reputacao e exposicao em Famosos; estetica e consumo em Moda; gameplay e comunidade em Games; evidencia e cuidado em Saude; sala de aula, vaga e carreira em Educacao.
+- Em Esportes e Futebol, escreva com campo, pressao, placar, tecnico, elenco, erro, calendario e torcida. Use dinheiro apenas se a pauta for contrato, SAF ou mercado.
+- Em Famosos, Entretenimento, Cinema, Musica e Games, escreva com cultura, reputacao, audiencia, narrativa, fandom, lancamento, tela, som, gameplay e consumo. Nao aplique economes por padrao.
+- Em Saude, Educacao, Ciencia, Brasil e Mundo, privilegie impacto humano, servico publico, evidencia, decisao e consequencia pratica.
 
 REGRAS DE NULIFICACAO (INVIOLAVEIS):
 - Proibido listar "quem esta passando o que" como inventario. Transforme lista em narrativa.
@@ -759,10 +733,10 @@ FORMATO EDITORIAL FINAL:
 
 REGRAS DE IMAGEM:
 - Escolha featured_image_url apenas entre as imagens candidatas listadas.
-- A capa deve retratar o Agente Ativo da noticia, nao apenas o tema generico.
+- A capa deve retratar o responsavel direto ou a cena concreta da noticia, nao apenas o tema generico.
 - Escolha secondary_image_url apenas se ela ajudar a provar o fato no corpo do texto: documento, local, produto, jogo, pessoa, objeto ou cena relacionada.
 - Se nenhuma candidata for segura ou coerente, deixe o campo vazio. Nao invente URL.
-- image_alt deve descrever o fato e o agente ativo com precisao jornalistica.
+- image_alt deve descrever o fato e o responsavel direto com precisao jornalistica.
 - image_credit deve ser credito curto da imagem escolhida. Use a origem/autoria real quando estiver clara. Nunca repita o alt como credito. Nao invente autor.
 
 DADOS DO CLUSTER:
@@ -786,74 +760,16 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
 `;
 
   try {
-    const provider = clean(env.EDITORIAL_AI_PROVIDER, 24).toLowerCase();
-    let generationModel = '';
-    let result: Record<string, unknown> | null = null;
-    let lastGenerationError = '';
-
-    const runGeminiDraft = async () => {
-      const gemini = await runGeminiJson({
-        apiKey: env.GEMINI_API_KEY,
-        model: premiumDraft ? DEFAULT_GEMINI_MODEL : env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
-        system,
-        prompt,
-        maxOutputTokens: premiumDraft ? 7600 : 6200,
-        temperature: premiumDraft ? 0.28 : 0.35,
-      });
-      generationModel = gemini.model;
-      return gemini.result;
-    };
-
-    const runGroqDraft = async () => {
-      const groq = await runGroqJson({
-        apiKey: env.GROQ_API_KEY,
-        model: env.GROQ_MODEL || DEFAULT_GROQ_MODEL,
-        system,
-        prompt,
-        maxOutputTokens: premiumDraft ? 7600 : 6200,
-        temperature: premiumDraft ? 0.24 : 0.32,
-      });
-      generationModel = groq.model;
-      return groq.result;
-    };
-
-    const runWorkersDraft = async () => {
-      const response = await env.AI!.run(WORKERS_AI_MODEL, {
-        messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: prompt },
-        ],
-        max_tokens: 1400,
-        temperature: 0.35,
-      });
-      generationModel = WORKERS_AI_MODEL;
-      return parseModelJson(extractText(response));
-    };
-
-    const runners =
-      provider === 'groq'
-        ? [
-            env.GROQ_API_KEY ? runGroqDraft : null,
-            env.GEMINI_API_KEY ? runGeminiDraft : null,
-            env.AI ? runWorkersDraft : null,
-          ]
-        : [
-            env.GEMINI_API_KEY ? runGeminiDraft : null,
-            env.GROQ_API_KEY ? runGroqDraft : null,
-            env.AI ? runWorkersDraft : null,
-          ];
-
-    for (const runner of runners) {
-      if (!runner) continue;
-      try {
-        result = await runner();
-        break;
-      } catch (error) {
-        lastGenerationError = error instanceof Error ? error.message : 'Falha desconhecida no provedor de IA.';
-      }
-    }
-
-    if (!result) throw new Error(lastGenerationError || 'Nenhum provedor de IA conseguiu gerar a materia.');
+    const gemini = await runGeminiJson({
+      apiKey: env.GEMINI_API_KEY,
+      model: premiumDraft ? DEFAULT_GEMINI_MODEL : env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
+      system,
+      prompt,
+      maxOutputTokens: premiumDraft ? 7600 : 6200,
+      temperature: premiumDraft ? 0.28 : 0.35,
+    });
+    const generationModel = gemini.model;
+    const result = gemini.result;
 
     const generatedBody = htmlFromModelField(
       result.content_html || result.bodyHtml || result.contentHtml || result.content || result.article || result.text,
@@ -902,14 +818,7 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       featuredImageUrl: '',
       inlineImageUrl: '',
       generatedWithAi: false,
-      generationModel:
-        clean(env.EDITORIAL_AI_PROVIDER, 24).toLowerCase() === 'groq'
-          ? env.GROQ_MODEL || DEFAULT_GROQ_MODEL
-          : env.GEMINI_API_KEY
-            ? env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL
-            : env.GROQ_API_KEY
-              ? env.GROQ_MODEL || DEFAULT_GROQ_MODEL
-              : WORKERS_AI_MODEL,
+      generationModel: env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
       generationError: error instanceof Error ? error.message : 'Falha desconhecida na geracao por IA.',
     };
   }
