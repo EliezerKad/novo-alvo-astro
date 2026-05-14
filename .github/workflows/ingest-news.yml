@@ -8,7 +8,7 @@ on:
 jobs:
   ingest:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,7 +28,9 @@ jobs:
         run: npm ci --progress=false
 
       - name: Install asset extractor
-        run: python -m pip install --disable-pip-version-check scrapling
+        run: |
+          python -m pip install --disable-pip-version-check scrapling crawl4ai
+          python -m playwright install chromium
 
       - name: Ingest RSS into editorial pitches
         run: npm run ingest:news
@@ -39,9 +41,10 @@ jobs:
           MAX_PITCHES: 80
           MIN_SOURCES: 8
           RADAR_BATCHES_PER_CATEGORY: 3
+          CRAWL4AI_FIRST: 1
           ENABLE_SCRAPLING_ASSETS: 1
           SCRAPLING_FIRST: 1
           SCRAPLING_SOURCE_LIMIT: 8
-          SCRAPLING_TIMEOUT_MS: 22000
+          SCRAPLING_TIMEOUT_MS: 42000
           SCRAPLING_MAX_PITCHES_PER_RUN: 18
           HOUSEKEEPING_DAYS: 30

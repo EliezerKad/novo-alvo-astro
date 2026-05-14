@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import json
+import os
 import re
 import sys
+import asyncio
 from html import unescape
 from urllib.parse import urljoin
 from urllib.request import Request, urlopen
@@ -17,6 +19,7 @@ GOOGLE_BRANDING_RE = re.compile(
 )
 IMAGE_EXT_RE = re.compile(r"\.(?:jpe?g|png|webp)(?:[?#].*)?$", re.I)
 USER_AGENT = "PortalNovoAlvoAssetScout/1.0"
+CRAWL4AI_FIRST = os.environ.get("CRAWL4AI_FIRST") == "1"
 
 
 def clean(value, limit=2000):
@@ -26,6 +29,13 @@ def clean(value, limit=2000):
 def attr(tag, name):
     match = re.search(rf"""\s{name}\s*=\s*["']([^"']+)["']""", tag or "", re.I)
     return unescape(match.group(1).strip()) if match else ""
+
+
+def strip_html(value, limit=3200):
+    text = re.sub(r"<script[\s\S]*?</script>", " ", str(value or ""), flags=re.I)
+    text = re.sub(r"<style[\s\S]*?</style>", " ", text, flags=re.I)
+    text = re.sub(r"<[^>]+>", " ", text)
+    return clean(unescape(re.sub(r"\s+", " ", text)), limit)
 
 
 def usable_image(url):
@@ -87,18 +97,46 @@ def images_from_html(html, base_url, source):
     for match in re.finditer(r"<script\b[^>]*type=['\"]application/ld\+json['\"][^>]*>([\s\S]*?)</script>", html, re.I):
         for url in re.findall(r"https?:\\?/\\?/[^\"',}\]\s]+", match.group(1)):
             push(url.replace("\\/", "/"), "jsonld")
+        for key in ("contentUrl", "thumbnailUrl", "url"):
+            for url in re.findall(rf'"{key}"\s*:\s*"([^"]+)"', match.group(1), re.I):
+                push(url.replace("\\/", "/"), f"jsonld:{key}")
 
     for tag in re.findall(r"<(?:figure|picture|img|source)\b[^>]*>", html, re.I):
         if BLOCKED_IMAGE_RE.search(tag):
             continue
-        push(attr(tag, "src") or attr(tag, "data-src") or attr(tag, "data-original") or attr(tag, "data-lazy-src"), "dom", tag)
-        srcset = attr(tag, "srcset") or attr(tag, "data-srcset")
+        push(
+            attr(tag, "src")
+            or attr(tag, "data-src")
+            or attr(tag, "data-original")
+            or attr(tag, "data-lazy-src")
+            or attr(tag, "data-image")
+            or attr(tag, "data-url"),
+            "dom",
+            tag,
+        )
+        srcset = attr(tag, "srcset") or attr(tag, "data-srcset") or attr(tag, "data-lazy-srcset")
         if srcset:
             urls = [part.strip().split()[0] for part in srcset.split(",") if part.strip()]
             if urls:
                 push(urls[-1], "srcset", tag)
 
     return unique_images(output)
+
+
+def excerpt_from_html(html):
+    blocks = []
+    for match in re.finditer(r"<(?:article|main)\b[^>]*>([\s\S]*?)</(?:article|main)>", html or "", re.I):
+        blocks.append(strip_html(match.group(1), 3200))
+    paragraph_text = " ".join(
+        strip_html(match.group(1), 700)
+        for match in re.finditer(r"<p\b[^>]*>([\s\S]*?)</p>", html or "", re.I)
+        if len(strip_html(match.group(1), 700)) > 50
+    )
+    if paragraph_text:
+        blocks.append(clean(paragraph_text, 3200))
+    if not blocks:
+        blocks.append(strip_html(html, 3200))
+    return sorted(blocks, key=len, reverse=True)[0] if blocks else ""
 
 
 def fetch_stdlib(url):
@@ -130,6 +168,50 @@ def fetch_with_scrapling(url):
         return fetch_stdlib(url)
 
 
+async def fetch_with_crawl4ai_async(url):
+    from crawl4ai import AsyncWebCrawler
+
+    try:
+        from crawl4ai import BrowserConfig, CrawlerRunConfig
+
+        browser_config = BrowserConfig(headless=True, verbose=False)
+        run_config = CrawlerRunConfig(word_count_threshold=20, excluded_tags=["script", "style", "nav", "footer"])
+        async with AsyncWebCrawler(config=browser_config) as crawler:
+            result = await crawler.arun(url=url, config=run_config)
+    except TypeError:
+        async with AsyncWebCrawler() as crawler:
+            result = await crawler.arun(url=url)
+
+    final_url = clean(getattr(result, "url", "") or url, 2000)
+    html = str(getattr(result, "cleaned_html", "") or getattr(result, "html", "") or "")
+    markdown = str(getattr(result, "markdown", "") or "")
+    media = getattr(result, "media", {}) or {}
+    images = []
+    raw_images = media.get("images") if isinstance(media, dict) else []
+    for item in raw_images or []:
+        if not isinstance(item, dict):
+            continue
+        candidate_url = item.get("src") or item.get("url") or item.get("data-src")
+        absolute = urljoin(final_url, unescape(clean(candidate_url, 2000)))
+        if not usable_image(absolute):
+            continue
+        images.append(
+            {
+                "url": absolute,
+                "kind": "crawl4ai",
+                "alt": clean(item.get("alt") or item.get("desc") or item.get("title"), 220),
+                "credit": "",
+                "sourceUrl": final_url,
+            }
+        )
+    excerpt = strip_html(markdown, 3200) or excerpt_from_html(html)
+    return final_url, html, images, excerpt
+
+
+def fetch_with_crawl4ai(url):
+    return asyncio.run(fetch_with_crawl4ai_async(url))
+
+
 def is_google_url(url):
     return bool(re.search(r"https?://([^/]+\.)?(news\.google|google|gstatic|googleusercontent)\.", clean(url), re.I))
 
@@ -147,12 +229,27 @@ def extract_one(source):
     if not source_url:
         return {**source, "resolvedUrl": "", "images": []}
     try:
-        final_url, html = fetch_with_scrapling(source_url)
+        crawl_images = []
+        excerpt = ""
+        if CRAWL4AI_FIRST:
+            try:
+                final_url, html, crawl_images, excerpt = fetch_with_crawl4ai(source_url)
+            except Exception:
+                final_url, html = fetch_with_scrapling(source_url)
+        else:
+            final_url, html = fetch_with_scrapling(source_url)
         if is_google_url(final_url):
             external = first_external_url(html)
             if external:
-                final_url, html = fetch_with_scrapling(external)
-        return {**source, "resolvedUrl": final_url, "images": images_from_html(html, final_url, source)}
+                if CRAWL4AI_FIRST:
+                    try:
+                        final_url, html, crawl_images, excerpt = fetch_with_crawl4ai(external)
+                    except Exception:
+                        final_url, html = fetch_with_scrapling(external)
+                else:
+                    final_url, html = fetch_with_scrapling(external)
+        images = unique_images([*crawl_images, *images_from_html(html, final_url, source)])
+        return {**source, "resolvedUrl": final_url, "images": images, "excerpt": excerpt or excerpt_from_html(html)}
     except Exception as error:
         return {**source, "resolvedUrl": source_url, "images": [], "error": str(error)[:180]}
 

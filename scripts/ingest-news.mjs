@@ -696,6 +696,14 @@ const enrichPitchImages = async (pitch) => {
     const scraplingSources = fetchScraplingAssets(sources, pitch.category);
     mergeScraplingSources(scraplingSources);
   }
+  const finalImageCount = assets.reduce((total, item) => total + (item.assets?.images?.length || 0), 0);
+  const sourcesWithImages = assets.filter((item) => item.assets?.images?.length).length;
+  const titlePreview = pitch.title.slice(0, 86);
+  if (finalImageCount) {
+    console.log(`[assets] ${pitch.category}: ${finalImageCount} imagens em ${sourcesWithImages} fontes para "${titlePreview}"`);
+  } else {
+    console.log(`[assets] ${pitch.category}: nenhuma imagem real encontrada para "${titlePreview}"`);
+  }
   const sourceImages = assets
     .map(({ source, assets }) =>
       assets.images.map((image) => {

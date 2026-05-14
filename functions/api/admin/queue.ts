@@ -85,7 +85,7 @@ const isBlockedImageUrl = (value: unknown) => {
   const url = clean(value, 1000).toLowerCase();
   return (
     /(logo|avatar|icon|sprite|profile|pixel|tracking|blank|placeholder|favicon|author|badge|watermark)/i.test(url) ||
-    /(^|\/\/|\.)(google|gstatic|googleusercontent)\./i.test(url) ||
+    /(^|\/\/|\.)news\.google\./i.test(url) ||
     /google(?:logo|news)|google\.com\/images\/branding|gstatic\.com\/images\/branding|www\.gstatic\.com\/images\/branding/i.test(url)
   );
 };
@@ -174,7 +174,7 @@ const fetchArticleImageCandidates = async (source: Record<string, unknown>, cate
 
   try {
     const articleUrl = await resolveArticleUrl(sourceUrl);
-    if (!articleUrl || /^https?:\/\/([^/]+\.)?(google|gstatic|googleusercontent)\./i.test(articleUrl)) return [];
+    if (!articleUrl || /^https?:\/\/([^/]+\.)?news\.google\./i.test(articleUrl)) return [];
     const response = await fetch(articleUrl, {
       headers: {
         accept: 'text/html,application/xhtml+xml',
