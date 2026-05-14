@@ -123,7 +123,7 @@ const isBlockedImageUrl = (value) => {
   const url = String(value || '').toLowerCase();
   return (
     /(logo|avatar|icon|sprite|profile|pixel|tracking|blank|placeholder|favicon|author|badge|watermark)/i.test(url) ||
-    /(^|\/\/|\.)(google|gstatic|googleusercontent)\./i.test(url) ||
+    /(^|\/\/|\.)news\.google\./i.test(url) ||
     /google(?:logo|news)|google\.com\/images\/branding|gstatic\.com\/images\/branding|www\.gstatic\.com\/images\/branding/i.test(url)
   );
 };
@@ -324,11 +324,11 @@ const resolveArticleUrl = async (url) => {
 
 const fetchArticleAssets = async (url) => {
   try {
-    if (/^https?:\/\/([^/]+\.)?(google|gstatic|googleusercontent)\./i.test(String(url || '')) && !isGoogleNewsUrl(url)) {
+    if (/^https?:\/\/([^/]+\.)?google\./i.test(String(url || '')) && !isGoogleNewsUrl(url)) {
       return { url, images: [], excerpt: '' };
     }
     const articleUrl = await resolveArticleUrl(url);
-    if (/^https?:\/\/([^/]+\.)?(google|gstatic|googleusercontent)\./i.test(String(articleUrl || ''))) {
+    if (/^https?:\/\/([^/]+\.)?google\./i.test(String(articleUrl || ''))) {
       return { url: articleUrl, images: [], excerpt: '' };
     }
     const response = await fetch(articleUrl, {
@@ -651,7 +651,7 @@ const enrichPitchImages = async (pitch) => {
       const enriched = bySourceKey.get(key);
       if (!enriched) return item;
       const images = Array.isArray(enriched.images)
-        ? enriched.images.map((image) => image.url).filter(Boolean)
+        ? enriched.images.map((image) => (typeof image === 'object' && image ? image : { url: image })).filter((image) => image.url)
         : item.assets?.images || [];
       return {
         source: item.source,
@@ -698,13 +698,17 @@ const enrichPitchImages = async (pitch) => {
   }
   const sourceImages = assets
     .map(({ source, assets }) =>
-      assets.images.map((url) => ({
-        url,
-        sourceTitle: source.title,
-        sourcePublisher: source.publisher,
-        sourceUrl: assets.url || source.url,
-        category: pitch.category,
-      })),
+      assets.images.map((image) => {
+        const candidate = typeof image === 'object' && image ? image : { url: image };
+        return {
+          ...candidate,
+          url: candidate.url,
+          sourceTitle: candidate.sourceTitle || source.title,
+          sourcePublisher: candidate.sourcePublisher || source.publisher,
+          sourceUrl: candidate.sourceUrl || assets.url || source.url,
+          category: candidate.category || pitch.category,
+        };
+      }),
     )
     .flat();
   const enrichedSources = sources.map((source) => {

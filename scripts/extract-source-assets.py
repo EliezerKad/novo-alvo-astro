@@ -8,7 +8,11 @@ from urllib.request import Request, urlopen
 
 
 BLOCKED_IMAGE_RE = re.compile(
-    r"(logo|avatar|icon|sprite|profile|pixel|tracking|blank|placeholder|favicon|author|badge|watermark|google)",
+    r"(logo|avatar|icon|sprite|profile|pixel|tracking|blank|placeholder|favicon|author|badge|watermark)",
+    re.I,
+)
+GOOGLE_BRANDING_RE = re.compile(
+    r"(google(?:logo|news)|google\.com/images/branding|gstatic\.com/images/branding|/logos/|/branding/)",
     re.I,
 )
 IMAGE_EXT_RE = re.compile(r"\.(?:jpe?g|png|webp)(?:[?#].*)?$", re.I)
@@ -31,9 +35,11 @@ def usable_image(url):
     lowered = url.lower()
     if BLOCKED_IMAGE_RE.search(lowered):
         return False
+    if GOOGLE_BRANDING_RE.search(lowered):
+        return False
     if re.search(r"\.(?:svg|gif|ico)(?:[?#]|$)", lowered):
         return False
-    if "news.google." in lowered or "gstatic.com" in lowered or "googleusercontent.com" in lowered:
+    if "news.google." in lowered:
         return False
     return True
 
