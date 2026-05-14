@@ -2,22 +2,22 @@
 title: "Ancelotti movimenta mercado: Neymar na pré-lista da Copa"
 slug: "neymar-esta-na-pre-lista-de-carlo-ancelotti-para-a-copa-do-mundo-estevao-fica-de-fora"
 summary: "A decisão de Carlo Ancelotti de incluir Neymar na pré-lista da Copa do Mundo, enquanto Estêvão fica de fora, impacta diretamente a valorização de ativos no futebol global."
-seoDescription: "A decisão de Carlo Ancelotti de incluir Neymar na pré-lista da Copa do Mundo, enquanto Estêvão fica de fora, impacta diretamente a valorização de ativos"
+seoDescription: "Economia: A decisão de Carlo Ancelotti de incluir Neymar na pré-lista da Copa do Mundo, enquanto Estêvão fica de fora, impacta diretamente a valorização de…"
 category: "Economia"
 author: "Redação Novo Alvo"
 sources: ["GCMais", "A Tribuna", "Terra", "ND Mais", "Portal Piauí Hoje", "Portal R10", "D24AM", "A Província do Pará", "Observador", "ABCD Jornal", "Extra online", "CNN Brasil"]
-publishedAt: "2026-05-14T14:47:43.954Z"
-updatedAt: "2026-05-14T14:48:08.010Z"
+publishedAt: "2026-05-14T14:57:33.723Z"
+updatedAt: "2026-05-14T14:57:35.339Z"
 featured: false
 isFeatured: false
 urgent: false
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/neymar-esta-na-pre-lista-de-carlo-ancelotti-para-a-copa-do-mundo-estevao-fica-de-fora-cover.avif"
+  src: "2wCEAAkGBxMSEhUSEhMWFRUVGBkXGBcYFxcaGBcYGh0YGBgZFx0YHyggGBomHhgVITEiJSkrLi4uFx8zODMsNygtLisBCgoKDg0OGhAQGy0lICUtLS0tLS0tLS0vLS0tKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf"
   alt: "Reunião de negócios, simbolizando as decisões de mercado e valorização de ativos no futebol."
   caption: "Unsplash"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/neymar-esta-na-pre-lista-de-carlo-ancelotti-para-a-copa-do-mundo-estevao-fica-de-fora-cover.avif"
+ogImage: "2wCEAAkGBxMSEhUSEhMWFRUVGBkXGBcYFxcaGBcYGh0YGBgZFx0YHyggGBomHhgVITEiJSkrLi4uFx8zODMsNygtLisBCgoKDg0OGhAQGy0lICUtLS0tLS0tLS0vLS0tKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf"
 tags: ["economia", "neymar", "esta", "lista", "carlo", "ancelotti", "copa", "mundo", "estevao", "fica"]
 ---
 
