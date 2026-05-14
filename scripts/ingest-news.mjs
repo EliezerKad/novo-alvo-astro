@@ -568,7 +568,7 @@ const buildPitch = (items) => {
   return {
     clusterKey: `${slugify(first.category)}:${isRadar ? 'radar:' : ''}${signature}`,
     title: first.title,
-    summary: `Pauta consolidada por ${sourceCount} fonte${sourceCount === 1 ? '' : 's'} sobre ${first.title}. A engine deve escolher angulo proprio, ler o contexto das fontes e gerar uma materia inedita antes da fila.`,
+    summary: `O fato central envolve ${first.title}. A abordagem editorial deve identificar o agente ativo, a causa imediata e a consequencia concreta para o leitor.`,
     category: first.category,
     status: 'new',
     sourceCount,

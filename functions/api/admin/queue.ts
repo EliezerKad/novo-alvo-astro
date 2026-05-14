@@ -367,6 +367,14 @@ const stripRadarPrefix = (value: unknown) =>
     .replace(/^Radar\s+[^:]{2,40}:\s*/i, '')
     .trim();
 
+const hasInternalLeak = (value: unknown) =>
+  /(?:pauta consolidada|fontes consolidadas|fontes monitoradas|entrou na fila|fila editorial|engine|prompt|cluster|modelo de seguran|rascunho exige|materia inedita antes da fila|mat[eé]ria in[eé]dita antes da fila|processo editorial|portal novo alvo registra|portal novo alvo)/i.test(plain(value, 6000));
+
+const publicEditorialSummary = (title: string, category: string) => {
+  const cleanTitle = stripRadarPrefix(title) || clean(title, 220);
+  return `O caso em ${clean(category, 80) || 'Brasil'} exige identificacao do agente ativo, da causa imediata e da consequencia pratica: ${cleanTitle}.`;
+};
+
 const titleSimilarity = (left: unknown, right: unknown) => semanticOverlap(stripRadarPrefix(left), stripRadarPrefix(right));
 
 const isBorrowedTitle = (title: unknown, sourceTitles: string[]) => {
@@ -566,6 +574,7 @@ const hasEditorialBody = (html: string) => {
   if (/pauta consolidada por \d+ fontes/i.test(text)) return false;
   if (/o rascunho exige angulo proprio|o rascunho exige ângulo próprio/i.test(text)) return false;
   if (/fontes monitoradas|entrou na fila editorial|resumo editorial|cluster de dados/i.test(text)) return false;
+  if (hasInternalLeak(text)) return false;
   return true;
 };
 
@@ -632,7 +641,7 @@ const generateArticleWithAi = async (
     .join('\n');
 
   const system =
-    'Voce e um jornalista profissional de alto nivel do Portal Novo Alvo. Gere uma materia completa, precisa e independente. As personas, micro-personas e diretrizes sao calibragem interna: nunca cite NEXA, IA, prompt, modelo, cluster, Geracao X, Millennials, Gen Z, publico-alvo ou processo editorial no texto publicado. Escreva em portugues do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e valido.';
+    'Voce e um jornalista profissional de alto nivel. Gere uma materia completa, precisa, independente e publicavel. As personas, micro-personas e diretrizes sao calibragem interna: nunca cite marca do portal, NEXA, IA, prompt, modelo, cluster, Geracao X, Millennials, Gen Z, publico-alvo, fontes consolidadas ou processo editorial no texto publicado. Escreva em portugues do Brasil, com acentos corretos. Comece a resposta imediatamente com JSON puro e valido.';
   const imageCandidates = uniqueImageCandidates(parseArray(row.image_candidates)).slice(0, 10);
   const selectedImage = chooseBestImage(imageCandidates, editorialTitle, row.category);
   const imageLines = imageCandidates
@@ -641,7 +650,7 @@ const generateArticleWithAi = async (
   const prompt = `
 PROMPT INTERNO: NEXA CORE ENGINE v11 - ACTIVE AGENT
 
-Voce e um jornalista profissional de alto nivel do Portal Novo Alvo. Sua funcao e transformar o cluster em uma materia precisa, com fato escancarado, agente ativo identificado e consequencia concreta.
+Voce e um jornalista profissional de alto nivel. Sua funcao e transformar a apuracao em uma materia precisa, com fato escancarado, agente ativo identificado e consequencia concreta.
 
 PERSONAS POR CATEGORIA (MODO DE ESPECIALISTA):
 - BRASIL: "O Reporter de Campo". Foco em fatos nacionais, desdobramentos locais e o que impacta o dia a dia do cidadao brasileiro.
@@ -692,7 +701,7 @@ MICRO-PERSONAS DE ELITE:
 
 CLASSIFICACAO PREVIA OBRIGATORIA:
 - Antes de escrever, leia o conjunto inteiro de fontes e identifique a noticia central mais relevante. Nao assuma que a primeira fonte e a pauta principal.
-- Use as fontes como apuracao consolidada: cruze os trechos, descarte repeticao, priorize o dado exclusivo e construa uma materia inedita do Portal Novo Alvo.
+- Use os dados como apuracao consolidada: cruze os trechos, descarte repeticao, priorize o dado exclusivo e construa uma materia inedita. Nunca explique esse processo ao leitor.
 - Fato Estatico: o que aconteceu. Exemplo: "O preco subiu".
 - Agente Ativo: quem causou, decidiu, moveu, perdeu ou ganhou. De nome aos bois.
 - Causa Latente: por que isso aconteceu agora.
@@ -732,7 +741,8 @@ REGRA DE PROMESSA DA MANCHETE:
 
 FORMATO EDITORIAL FINAL:
 - Escreva uma materia completa, nao um resumo de pauta.
-- Nunca mencione IA, modelo, prompt, cluster, fontes consolidadas ou processo interno no texto publicado.
+- Nunca mencione IA, modelo, prompt, cluster, fontes consolidadas, quantidade de fontes, fila, engine, pauta ou processo interno no texto publicado.
+- O campo [RESUMO] abaixo e contexto operacional. Nao copie, nao parafraseie e nao transforme esse texto em lide.
 - O primeiro paragrafo deve abrir com o dado mais forte.
 - Use 7 a 11 paragrafos curtos, com 1 a 3 frases por paragrafo.
 - Use <h2> para divisorias fortes e <h3> apenas quando fizer sentido.
@@ -801,6 +811,9 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
     if (!hasEditorialBody(generatedBody)) {
       throw new Error('Gemini respondeu sem uma materia editorial completa em content_html.');
     }
+    if (hasInternalLeak(result.title) || hasInternalLeak(result.summary || result.meta_description)) {
+      throw new Error('Gemini vazou instrucoes internas no titulo ou resumo.');
+    }
 
     const featuredImageUrl = pickCandidateImage(
       result.featured_image_url || result.featuredImageUrl,
@@ -864,23 +877,10 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
         .filter(Boolean),
     ),
   ];
-  const summary = clean(row.summary, 700) || `Pauta consolidada a partir de ${sourceNames.length || sources.length} fontes monitoradas.`;
+  const summary = hasInternalLeak(row.summary) ? publicEditorialSummary(title, row.category) : clean(row.summary, 700) || publicEditorialSummary(title, row.category);
   const slug = slugify(title);
   const publishedAt = new Date().toISOString();
-  const bodyHtml = `
-    <p>${escapeHtml(summary)}</p>
-    <p>O ponto central é simples: a pauta apareceu de forma recorrente em veículos distintos e entrou na fila editorial por relevância, volume de cobertura e aderência à categoria ${escapeHtml(row.category)}.</p>
-    <h2>O que importa agora</h2>
-    <p>O Portal Novo Alvo registra o movimento como sinal editorial consolidado, priorizando contexto, impacto público e acompanhamento dos próximos desdobramentos.</p>
-    ${
-      sourceNames.length
-        ? `<section class="article-sources"><h2>Fontes e transparência</h2><ul>${sourceNames
-            .slice(0, 8)
-            .map((source) => `<li>${escapeHtml(source)}</li>`)
-            .join('')}</ul></section>`
-        : ''
-    }
-  `;
+  const bodyHtml = '';
   const rowWithEnrichedImages = {
     ...row,
     image_candidates: JSON.stringify(imageCandidates),
@@ -898,6 +898,32 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
     },
     env,
   );
+  if (!aiArticle.generatedWithAi || !hasEditorialBody(aiArticle.bodyHtml)) {
+    return {
+      id: `article:${slug}`,
+      slug,
+      title,
+      summary,
+      bodyHtml: '',
+      category: row.category || 'Brasil',
+      author: 'Redação Novo Alvo',
+      status: 'draft',
+      coverUrl: '',
+      coverAlt: title,
+      coverCaption: '',
+      seoDescription: summary.slice(0, 155),
+      keywords: clean(row.keywords, 700),
+      tags,
+      sources: sourceNames,
+      media: [],
+      readingMinutes: 1,
+      publishedAt,
+      generatedWithAi: false,
+      generationModel: aiArticle.generationModel,
+      generationTier: Number(row.score || 0) > 800 ? 'nexa-premium' : 'standard',
+      generationError: aiArticle.generationError || 'A materia nao passou na validacao editorial.',
+    };
+  }
   const finalCoverUrl = aiArticle.featuredImageUrl || coverUrl;
   const finalInlineImageUrl = aiArticle.inlineImageUrl || chooseInlineImage(imageCandidates, finalCoverUrl, aiArticle.title || title, row.category) || inlineImageUrl;
 
@@ -989,6 +1015,9 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   for (const item of due.results || []) {
     const article = await buildArticlePayload(item, env);
     try {
+      if (!(article as { generatedWithAi?: boolean }).generatedWithAi) {
+        throw new Error((article as { generationError?: string }).generationError || 'Materia bloqueada pela validacao editorial.');
+      }
       const response = await fetch(`${origin}/api/admin/articles`, {
         method: 'POST',
         headers: {

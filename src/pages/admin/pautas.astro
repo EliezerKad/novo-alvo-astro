@@ -546,6 +546,15 @@ const categories = [
             data.generatedWithAi === false
               ? `<p class="mt-4 rounded-2xl bg-amber-50 p-4 text-sm font-bold leading-6 text-amber-800 dark:bg-amber-950/30 dark:text-amber-200">Atenção: esta prévia caiu no modelo de segurança, não na geração final do Gemini. Motivo: ${escapeHtml(data.generationError || 'IA indisponível.')}</p>`
               : '';
+          const articleMarkup =
+            data.generatedWithAi === false
+              ? `<article class="mt-6 rounded-[1.5rem] bg-[#f7f3ea] p-5 text-zinc-950 dark:bg-zinc-900 dark:text-zinc-50 md:p-7">
+                  <p class="text-base font-bold leading-7 text-zinc-600 dark:text-zinc-300">Esta pauta ainda não tem uma matéria publicável. Rode uma nova ingestão ou aguarde outra tentativa antes de aprovar para fila.</p>
+                </article>`
+              : `<article class="mt-6 rounded-[1.5rem] bg-[#f7f3ea] p-5 text-zinc-950 dark:bg-zinc-900 dark:text-zinc-50 md:p-7">
+                  <p class="text-lg font-medium leading-8 text-zinc-600 dark:text-zinc-300">${escapeHtml(article.summary || '')}</p>
+                  <div class="generated-article-body mt-8">${article.bodyHtml || ''}</div>
+                </article>`;
           target.innerHTML = `
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 pb-5 dark:border-zinc-800">
               <p class="text-[10px] font-black uppercase tracking-[0.28em] text-red-600">Matéria completa gerada</p>
@@ -559,10 +568,7 @@ const categories = [
                 : ''
             }
             <h3 class="admin-display mt-4 text-3xl leading-none">${escapeHtml(article.title || 'Sem título')}</h3>
-            <article class="mt-6 rounded-[1.5rem] bg-[#f7f3ea] p-5 text-zinc-950 dark:bg-zinc-900 dark:text-zinc-50 md:p-7">
-              <p class="text-lg font-medium leading-8 text-zinc-600 dark:text-zinc-300">${escapeHtml(article.summary || '')}</p>
-              <div class="generated-article-body mt-8">${article.bodyHtml || ''}</div>
-            </article>
+            ${articleMarkup}
           `;
         } catch (error) {
           target.innerHTML = `
