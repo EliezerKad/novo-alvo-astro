@@ -93,110 +93,7 @@ const isUsableImage = (value: unknown) => {
   return true;
 };
 
-const attrFromTag = (tag: string, attr: string) => {
-  const match = String(tag || '').match(new RegExp(`\\s${attr}=["']([^"']+)["']`, 'i'));
-  return clean(match?.[1], 2000);
-};
-
-const absoluteImageUrl = (value: unknown, base: string) => {
-  try {
-    return new URL(clean(value, 2000), base).toString();
-  } catch {
-    return '';
-  }
-};
-
-const isGoogleNewsUrl = (value: unknown) => /^https?:\/\/([^/]+\.)?news\.google\./i.test(clean(value, 2000));
-
-const resolveArticleUrl = async (value: unknown) => {
-  const url = clean(value, 2000);
-  if (!url || !isGoogleNewsUrl(url)) return url;
-
-  try {
-    const response = await fetch(url, {
-      redirect: 'follow',
-      headers: {
-        accept: 'text/html,application/xhtml+xml',
-        'user-agent': 'PortalNovoAlvoImageScout/1.0',
-      },
-      signal: AbortSignal.timeout(7000),
-    });
-    if (response.url && !isGoogleNewsUrl(response.url)) return response.url;
-    const html = await response.text().catch(() => '');
-    const external = [...html.matchAll(/https?:\/\/(?![^"'\s]*?(?:news\.google|google\.com|gstatic\.com|googleusercontent\.com))[^"'\s<>]+/gi)]
-      .map((match) => match[0])
-      .find(Boolean);
-    return external || url;
-  } catch {
-    return url;
-  }
-};
-
-const imagesFromArticleHtml = (html: string, baseUrl: string) => {
-  const output: string[] = [];
-  const push = (value: unknown) => {
-    const url = absoluteImageUrl(value, baseUrl);
-    if (isUsableImage(url)) output.push(url);
-  };
-
-  for (const match of html.matchAll(/<meta\b[^>]*>/gi)) {
-    const tag = match[0];
-    const name = `${attrFromTag(tag, 'property')} ${attrFromTag(tag, 'name')}`.toLowerCase();
-    if (/(^|\s)(og:image|twitter:image|twitter:image:src)(\s|$)/i.test(name)) push(attrFromTag(tag, 'content'));
-  }
-
-  for (const match of html.matchAll(/<(?:img|source)\b[^>]*>/gi)) {
-    const tag = match[0];
-    if (/alt=["'][^"']*(logo|avatar|marca|perfil|icone|ícone|google)[^"']*["']/i.test(tag)) continue;
-    push(attrFromTag(tag, 'src') || attrFromTag(tag, 'data-src') || attrFromTag(tag, 'data-original') || attrFromTag(tag, 'data-lazy-src'));
-    const srcset = attrFromTag(tag, 'srcset') || attrFromTag(tag, 'data-srcset');
-    if (srcset) {
-      const urls = srcset
-        .split(',')
-        .map((item) => item.trim().split(/\s+/)[0])
-        .filter(Boolean);
-      push(urls.at(-1) || urls[0]);
-    }
-  }
-
-  return [...new Set(output)].slice(0, 8);
-};
-
-const fetchArticleImageCandidates = async (source: Record<string, unknown>, category: string) => {
-  const sourceUrl = clean(source.url, 2000);
-  if (!sourceUrl) return [];
-
-  try {
-    const articleUrl = await resolveArticleUrl(sourceUrl);
-    if (!articleUrl || /^https?:\/\/([^/]+\.)?news\.google\./i.test(articleUrl)) return [];
-    const response = await fetch(articleUrl, {
-      headers: {
-        accept: 'text/html,application/xhtml+xml',
-        'user-agent': 'PortalNovoAlvoImageScout/1.0',
-      },
-      signal: AbortSignal.timeout(7000),
-    });
-    if (!response.ok || !/text\/html|application\/xhtml/i.test(response.headers.get('content-type') || '')) return [];
-    return imagesFromArticleHtml(await response.text(), response.url || articleUrl).map((url) => ({
-      url,
-      sourceTitle: clean(source.title, 240),
-      sourcePublisher: clean(source.publisher, 120),
-      sourceUrl: articleUrl,
-      category,
-    }));
-  } catch {
-    return [];
-  }
-};
-
-const enrichImageCandidatesFromSources = async (candidates: ImageCandidate[], sources: unknown[], category: string) => {
-  if (candidates.length >= 3) return candidates;
-  const sourceRecords = sources.filter((source): source is Record<string, unknown> => Boolean(source && typeof source === 'object'));
-  const found = (
-    await Promise.all(sourceRecords.slice(0, 5).map((source) => fetchArticleImageCandidates(source, category)))
-  ).flat();
-  return uniqueImageCandidates([...candidates, ...found]).slice(0, 12);
-};
+const enrichImageCandidatesFromSources = async (candidates: ImageCandidate[]) => candidates;
 
 const imageKey = (value: unknown) => {
   try {
@@ -829,8 +726,6 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
   const tags = parseArray(row.tags).map(String).filter(Boolean);
   const imageCandidates = await enrichImageCandidatesFromSources(
     uniqueImageCandidates(parseArray(row.image_candidates)),
-    sources,
-    row.category,
   );
   const title = stripRadarPrefix(row.title) || clean(row.title, 220);
   const coverUrl = chooseBestImage(imageCandidates, title, row.category);

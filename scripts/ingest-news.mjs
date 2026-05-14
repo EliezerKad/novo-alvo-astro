@@ -1,5 +1,3 @@
-import { spawnSync } from 'node:child_process';
-
 const googleNewsSearch = (query) =>
   `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
 
@@ -95,15 +93,8 @@ const MIN_SOURCES = Number(process.env.MIN_SOURCES || 8);
 const RADAR_BATCHES_PER_CATEGORY = Number(process.env.RADAR_BATCHES_PER_CATEGORY || 3);
 const MAX_ITEM_AGE_HOURS = Number(process.env.MAX_ITEM_AGE_HOURS || 30);
 const HOUSEKEEPING_DAYS = Number(process.env.HOUSEKEEPING_DAYS || 30);
-const MAX_IMAGE_SOURCE_FETCHES_PER_PITCH = Number(process.env.MAX_IMAGE_SOURCE_FETCHES_PER_PITCH || 8);
 const SOURCE_EXPANSION_TARGET = Number(process.env.SOURCE_EXPANSION_TARGET || 12);
 const SOURCE_EXPANSION_MIN_OVERLAP = Number(process.env.SOURCE_EXPANSION_MIN_OVERLAP || 0.34);
-const ENABLE_SCRAPLING_ASSETS = process.env.ENABLE_SCRAPLING_ASSETS === '1';
-const SCRAPLING_FIRST = process.env.SCRAPLING_FIRST === '1';
-const SCRAPLING_SOURCE_LIMIT = Number(process.env.SCRAPLING_SOURCE_LIMIT || 5);
-const SCRAPLING_TIMEOUT_MS = Number(process.env.SCRAPLING_TIMEOUT_MS || 22000);
-const SCRAPLING_MAX_PITCHES_PER_RUN = Number(process.env.SCRAPLING_MAX_PITCHES_PER_RUN || 18);
-let scraplingPitchAttempts = 0;
 
 const decodeEntities = (value) =>
   String(value || '')
@@ -122,11 +113,6 @@ const textBetween = (xml, tag) => {
 
 const attrBetween = (xml, tag, attr) => {
   const match = String(xml).match(new RegExp(`<${tag}[^>]*\\s${attr}=["']([^"']+)["'][^>]*>`, 'i'));
-  return decodeEntities(match?.[1] || '');
-};
-
-const attrFromTag = (tag, attr) => {
-  const match = String(tag || '').match(new RegExp(`\\s${attr}=["']([^"']+)["']`, 'i'));
   return decodeEntities(match?.[1] || '');
 };
 
@@ -154,87 +140,6 @@ const extractKeywords = (title, category) => {
     .split(/[^a-z0-9]+/)
     .filter((word) => word.length > 3 && !blocked.has(word));
   return [...new Set(words)].slice(0, 10);
-};
-
-const stripHtml = (value) =>
-  decodeEntities(String(value || '').replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' '))
-    .replace(/\s+/g, ' ')
-    .trim();
-
-const extractArticleText = (html) => {
-  const candidates = [];
-  for (const match of String(html).matchAll(/<(?:article|main)\b[^>]*>([\s\S]*?)<\/(?:article|main)>/gi)) {
-    candidates.push(stripHtml(match[1]));
-  }
-  const paragraphText = [...String(html).matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)]
-    .map((match) => stripHtml(match[1]))
-    .filter((text) => text.length > 40)
-    .join(' ');
-  if (paragraphText) candidates.push(paragraphText);
-  candidates.push(stripHtml(html));
-  return candidates
-    .sort((a, b) => b.length - a.length)[0]
-    ?.replace(/\s+/g, ' ')
-    .slice(0, 2600) || '';
-};
-
-const isBlockedImageUrl = (value) => {
-  const url = String(value || '').toLowerCase();
-  return (
-    /(logo|avatar|icon|sprite|profile|pixel|tracking|blank|placeholder|favicon|author|badge|watermark)/i.test(url) ||
-    /(^|\/\/|\.)news\.google\./i.test(url) ||
-    /google(?:logo|news)|google\.com\/images\/branding|gstatic\.com\/images\/branding|www\.gstatic\.com\/images\/branding/i.test(url)
-  );
-};
-
-const isUsableImage = (value) => {
-  const url = String(value || '');
-  if (!/^https:\/\//i.test(url)) return false;
-  if (/source\.unsplash\.com/i.test(url)) return false;
-  if (/\.(svg|gif|ico)(\?|$)/i.test(url)) return false;
-  if (isBlockedImageUrl(url)) return false;
-  return true;
-};
-
-const imageKey = (value) => {
-  try {
-    const url = new URL(String(value || ''));
-    return `${url.hostname}${url.pathname}`.toLowerCase().replace(/\/+/g, '/');
-  } catch {
-    return String(value || '').toLowerCase().split('?')[0];
-  }
-};
-
-const uniqueImages = (values, limit = 16) => {
-  const seen = new Set();
-  const output = [];
-  for (const value of values) {
-    const url = String(value || '');
-    if (!isUsableImage(url)) continue;
-    const key = imageKey(url);
-    if (!key || seen.has(key)) continue;
-    seen.add(key);
-    output.push(url);
-    if (output.length >= limit) break;
-  }
-  return output;
-};
-
-const imageCandidateUrl = (value) => (typeof value === 'object' && value ? value.url : value);
-
-const uniqueImageCandidates = (values, limit = 16) => {
-  const seen = new Set();
-  const output = [];
-  for (const value of values) {
-    const url = String(imageCandidateUrl(value) || '');
-    if (!isUsableImage(url)) continue;
-    const key = imageKey(url);
-    if (!key || seen.has(key)) continue;
-    seen.add(key);
-    output.push(typeof value === 'object' && value ? { ...value, url } : { url });
-    if (output.length >= limit) break;
-  }
-  return output;
 };
 
 const normalizedText = (value) =>
@@ -295,177 +200,6 @@ const classifyCategory = (feedCategory, title, source) => {
   const feedSignal = CATEGORY_SIGNALS.find((item) => item.category === feedCategory);
   if (feedSignal?.pattern.test(text) && feedCategory !== 'Moda' && feedCategory !== 'Educacao') return feedCategory;
   return matched.category;
-};
-
-const absoluteUrl = (value, base) => {
-  try {
-    return new URL(decodeEntities(value), base).toString();
-  } catch {
-    return '';
-  }
-};
-
-const imagesFromArticleHtml = (html, baseUrl) => {
-  const output = [];
-  const push = (value) => {
-    const url = absoluteUrl(value, baseUrl);
-    if (isUsableImage(url)) output.push(url);
-  };
-
-  for (const match of String(html).matchAll(/<meta\b[^>]*>/gi)) {
-    const tag = match[0];
-    const name = `${attrFromTag(tag, 'property')} ${attrFromTag(tag, 'name')}`.toLowerCase();
-    if (/(^|\s)(og:image|twitter:image|twitter:image:src)(\s|$)/i.test(name)) push(attrFromTag(tag, 'content'));
-  }
-
-  for (const match of String(html).matchAll(/<img[^>]+(?:src|data-src|data-original)=["']([^"']+)["'][^>]*>/gi)) {
-    const candidate = match[1] || '';
-    if (isBlockedImageUrl(candidate) || /alt=["'][^"']*(logo|avatar|marca|perfil|icone|Ã­cone|google)[^"']*["']/i.test(match[0])) continue;
-    push(candidate);
-  }
-
-  for (const match of String(html).matchAll(/"image"\s*:\s*(?:"([^"]+)"|\[([\s\S]*?)\]|\{([\s\S]*?)\})/gi)) {
-    const raw = match[1] || match[2] || match[3] || '';
-    for (const urlMatch of raw.matchAll(/https?:\\?\/\\?\/[^"',}\]\s]+/gi)) {
-      push(urlMatch[0].replace(/\\\//g, '/'));
-    }
-  }
-
-  for (const match of String(html).matchAll(/<(?:img|source)\b[^>]*>/gi)) {
-    const tag = match[0];
-    const candidate =
-      attrFromTag(tag, 'src') ||
-      attrFromTag(tag, 'data-src') ||
-      attrFromTag(tag, 'data-original') ||
-      attrFromTag(tag, 'data-lazy-src') ||
-      '';
-    if (isBlockedImageUrl(candidate) || /alt=["'][^"']*(logo|avatar|marca|perfil|icone|google)[^"']*["']/i.test(tag)) continue;
-    push(candidate);
-    const srcset = attrFromTag(tag, 'srcset') || attrFromTag(tag, 'data-srcset');
-    if (srcset) {
-      const urls = srcset
-        .split(',')
-        .map((item) => item.trim().split(/\s+/)[0])
-        .filter(Boolean);
-      push(urls.at(-1) || urls[0]);
-    }
-  }
-
-  return uniqueImages(output, 10);
-};
-
-const isGoogleNewsUrl = (url) => /^https?:\/\/([^/]+\.)?news\.google\./i.test(String(url || ''));
-
-const googleNewsEmbeddedUrl = (url) => {
-  try {
-    const parsed = new URL(String(url || ''));
-    if (!/(^|\.)news\.google\./i.test(parsed.hostname)) return '';
-    const token = parsed.pathname.match(/\/(?:rss\/)?articles\/([^/?#]+)/i)?.[1];
-    if (!token) return '';
-    const normalized = token.replace(/-/g, '+').replace(/_/g, '/');
-    const decoded = Buffer.from(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '='), 'base64').toString('latin1');
-    const match = decoded.match(/https?:\/\/[^\x00-\x20"'<>()]+/i);
-    const candidate = match?.[0]?.replace(/\\+$/, '') || '';
-    return candidate && !isGoogleNewsUrl(candidate) ? candidate : '';
-  } catch {
-    return '';
-  }
-};
-
-const resolveArticleUrl = async (url) => {
-  try {
-    const embedded = googleNewsEmbeddedUrl(url);
-    if (embedded) return embedded;
-    if (!isGoogleNewsUrl(url)) return url;
-    const response = await fetch(url, {
-      redirect: 'follow',
-      headers: {
-        accept: 'text/html,application/xhtml+xml',
-        'user-agent': 'PortalNovoAlvoImageScout/1.0',
-      },
-      signal: AbortSignal.timeout(8000),
-    });
-    const finalUrl = response.url || url;
-    if (finalUrl && !isGoogleNewsUrl(finalUrl)) return finalUrl;
-    const html = await response.text().catch(() => '');
-    const canonical = attrBetween(html, 'link', 'href');
-    if (canonical && !isGoogleNewsUrl(canonical)) return canonical;
-    const external = [...html.matchAll(/https?:\/\/(?![^"'\s]*?(?:news\.google|google\.com|gstatic\.com|googleusercontent\.com))[^"'\s<>]+/gi)]
-      .map((match) => match[0])
-      .find(Boolean);
-    return external || url;
-  } catch {
-    return url;
-  }
-};
-
-const fetchArticleAssets = async (url) => {
-  try {
-    if (/^https?:\/\/([^/]+\.)?google\./i.test(String(url || '')) && !isGoogleNewsUrl(url)) {
-      return { url, images: [], excerpt: '' };
-    }
-    const articleUrl = await resolveArticleUrl(url);
-    if (/^https?:\/\/([^/]+\.)?google\./i.test(String(articleUrl || ''))) {
-      return { url: articleUrl, images: [], excerpt: '' };
-    }
-    const response = await fetch(articleUrl, {
-      headers: {
-        accept: 'text/html,application/xhtml+xml',
-        'user-agent': 'PortalNovoAlvoImageScout/1.0',
-      },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!response.ok) return { url: articleUrl, images: [], excerpt: '' };
-    const contentType = response.headers.get('content-type') || '';
-    if (!/text\/html|application\/xhtml/i.test(contentType)) return { url: articleUrl, images: [], excerpt: '' };
-    const html = await response.text();
-    const finalUrl = response.url || articleUrl;
-    return {
-      url: finalUrl,
-      images: imagesFromArticleHtml(html, finalUrl),
-      excerpt: extractArticleText(html),
-    };
-  } catch {
-    return { url, images: [], excerpt: '' };
-  }
-};
-
-const fetchScraplingAssets = (sources, category) => {
-  if (!ENABLE_SCRAPLING_ASSETS || !sources.length) return [];
-  if (scraplingPitchAttempts >= SCRAPLING_MAX_PITCHES_PER_RUN) return [];
-  scraplingPitchAttempts += 1;
-  const payload = {
-    category,
-    sources: sources.slice(0, SCRAPLING_SOURCE_LIMIT).map((source) => ({
-      title: source.title,
-      publisher: source.publisher,
-      url: source.url,
-      publishedAt: source.publishedAt,
-      category,
-    })),
-  };
-
-  const command = process.env.PYTHON || 'python3';
-  const result = spawnSync(command, ['scripts/extract-source-assets.py'], {
-    input: JSON.stringify(payload),
-    encoding: 'utf8',
-    timeout: SCRAPLING_TIMEOUT_MS,
-    maxBuffer: 1024 * 1024,
-  });
-
-  if (result.error || result.status !== 0) {
-    const message = result.error?.message || result.stderr || `status ${result.status}`;
-    console.warn(`[scrapling] assets indisponiveis: ${String(message).slice(0, 180)}`);
-    return [];
-  }
-
-  try {
-    const data = JSON.parse(result.stdout || '{}');
-    return Array.isArray(data.sources) ? data.sources : [];
-  } catch (error) {
-    console.warn(`[scrapling] JSON invalido: ${error.message}`);
-    return [];
-  }
 };
 
 const keywordSet = (item) => new Set(extractKeywords(item.title, item.category).slice(0, 8));
@@ -715,113 +449,10 @@ const buildPitch = (items) => {
   };
 };
 
-const enrichPitchImages = async (pitch) => {
-  const current = Array.isArray(pitch.imageCandidates) ? pitch.imageCandidates : [];
-  const sources = Array.isArray(pitch.sources) ? pitch.sources : [];
-  const sourceWindow = sources.slice(0, MAX_IMAGE_SOURCE_FETCHES_PER_PITCH);
-  let assets = sourceWindow.map((source) => ({
-    source,
-    assets: {
-      url: source.url,
-      images: [],
-      excerpt: source.excerpt || '',
-    },
-  }));
-
-  const mergeScraplingSources = (scraplingSources) => {
-    if (!scraplingSources.length) return;
-    const bySourceKey = new Map(
-      scraplingSources.map((source) => [String(source.url || source.sourceUrl || source.title || '').toLowerCase(), source]),
-    );
-    assets = assets.map((item) => {
-      const key = String(item.source?.url || item.source?.title || '').toLowerCase();
-      const enriched = bySourceKey.get(key);
-      if (!enriched) return item;
-      const images = Array.isArray(enriched.images)
-        ? enriched.images.map((image) => (typeof image === 'object' && image ? image : { url: image })).filter((image) => image.url)
-        : item.assets?.images || [];
-      return {
-        source: item.source,
-        assets: {
-          url: enriched.resolvedUrl || item.assets?.url || item.source.url,
-          images,
-          excerpt: enriched.excerpt || item.assets?.excerpt || '',
-        },
-      };
-    });
-  };
-
-  if (SCRAPLING_FIRST) {
-    mergeScraplingSources(fetchScraplingAssets(sources, pitch.category));
-  }
-
-  const sourcesNeedingNode = assets.filter((item) => !(item.assets?.images?.length)).map((item) => item.source);
-  const nodeAssets = await Promise.all(
-    sourcesNeedingNode
-      .slice(0, MAX_IMAGE_SOURCE_FETCHES_PER_PITCH)
-      .map(async (source) => ({
-        source,
-        assets: await fetchArticleAssets(source.url),
-      })),
-  );
-  const nodeByUrl = new Map(nodeAssets.map((item) => [String(item.source?.url || '').toLowerCase(), item.assets]));
-  assets = assets.map((item) => {
-    const node = nodeByUrl.get(String(item.source?.url || '').toLowerCase());
-    if (!node) return item;
-    return {
-      source: item.source,
-      assets: {
-        url: item.assets?.url || node.url || item.source.url,
-        images: item.assets?.images?.length ? item.assets.images : node.images || [],
-        excerpt: item.assets?.excerpt || node.excerpt || '',
-      },
-    };
-  });
-
-  const imageCount = assets.reduce((total, item) => total + (item.assets?.images?.length || 0), 0);
-  if (!SCRAPLING_FIRST && imageCount < 2) {
-    const scraplingSources = fetchScraplingAssets(sources, pitch.category);
-    mergeScraplingSources(scraplingSources);
-  }
-  const finalImageCount = assets.reduce((total, item) => total + (item.assets?.images?.length || 0), 0);
-  const sourcesWithImages = assets.filter((item) => item.assets?.images?.length).length;
-  const titlePreview = pitch.title.slice(0, 86);
-  if (finalImageCount) {
-    console.log(`[assets] ${pitch.category}: ${finalImageCount} imagens em ${sourcesWithImages} fontes para "${titlePreview}"`);
-  } else {
-    console.log(`[assets] ${pitch.category}: nenhuma imagem real encontrada para "${titlePreview}"`);
-  }
-  const sourceImages = assets
-    .map(({ source, assets }) =>
-      assets.images.map((image) => {
-        const candidate = typeof image === 'object' && image ? image : { url: image };
-        return {
-          ...candidate,
-          url: candidate.url,
-          sourceTitle: candidate.sourceTitle || source.title,
-          sourcePublisher: candidate.sourcePublisher || source.publisher,
-          sourceUrl: candidate.sourceUrl || assets.url || source.url,
-          category: candidate.category || pitch.category,
-        };
-      }),
-    )
-    .flat();
-  const enrichedSources = sources.map((source) => {
-    const match = assets.find((item) => item.source === source);
-    if (!match?.assets) return source;
-    return {
-      ...source,
-      url: match.assets.url || source.url,
-      excerpt: match.assets.excerpt || source.excerpt || '',
-    };
-  });
-
-  return {
-    ...pitch,
-    sources: enrichedSources,
-    imageCandidates: uniqueImageCandidates([...current, ...sourceImages], 18),
-  };
-};
+const normalizePitchAssets = async (pitch) => ({
+  ...pitch,
+  imageCandidates: Array.isArray(pitch.imageCandidates) ? pitch.imageCandidates : [],
+});
 
 const postPitch = async (pitch) => {
   const response = await fetch(`${PORTAL_ORIGIN}/api/admin/pitches`, {
@@ -918,7 +549,7 @@ const main = async () => {
   const pitches = balancePitches(topicPitches, radarPitches, Number(process.env.MAX_PITCHES || 80));
 
   let saved = 0;
-  const enrichedPitches = await Promise.all(pitches.map(enrichPitchImages));
+  const enrichedPitches = await Promise.all(pitches.map(normalizePitchAssets));
 
   await Promise.all(
     enrichedPitches.map(async (pitch) => {
