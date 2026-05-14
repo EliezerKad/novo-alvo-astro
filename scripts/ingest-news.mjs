@@ -356,8 +356,26 @@ const imagesFromArticleHtml = (html, baseUrl) => {
 
 const isGoogleNewsUrl = (url) => /^https?:\/\/([^/]+\.)?news\.google\./i.test(String(url || ''));
 
+const googleNewsEmbeddedUrl = (url) => {
+  try {
+    const parsed = new URL(String(url || ''));
+    if (!/(^|\.)news\.google\./i.test(parsed.hostname)) return '';
+    const token = parsed.pathname.match(/\/(?:rss\/)?articles\/([^/?#]+)/i)?.[1];
+    if (!token) return '';
+    const normalized = token.replace(/-/g, '+').replace(/_/g, '/');
+    const decoded = Buffer.from(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '='), 'base64').toString('latin1');
+    const match = decoded.match(/https?:\/\/[^\x00-\x20"'<>()]+/i);
+    const candidate = match?.[0]?.replace(/\\+$/, '') || '';
+    return candidate && !isGoogleNewsUrl(candidate) ? candidate : '';
+  } catch {
+    return '';
+  }
+};
+
 const resolveArticleUrl = async (url) => {
   try {
+    const embedded = googleNewsEmbeddedUrl(url);
+    if (embedded) return embedded;
     if (!isGoogleNewsUrl(url)) return url;
     const response = await fetch(url, {
       redirect: 'follow',

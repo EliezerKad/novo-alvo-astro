@@ -5,8 +5,10 @@ import re
 import sys
 import asyncio
 import contextlib
+import base64
 from html import unescape
 from urllib.parse import urljoin
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 
@@ -282,6 +284,26 @@ def is_google_url(url):
     return bool(re.search(r"https?://([^/]+\.)?(news\.google|google|gstatic|googleusercontent)\.", clean(url), re.I))
 
 
+def google_news_embedded_url(url):
+    try:
+        parsed = urlparse(clean(url, 2000))
+        if not re.search(r"(^|\.)news\.google\.", parsed.netloc, re.I):
+            return ""
+        match = re.search(r"/(?:rss/)?articles/([^/?#]+)", parsed.path)
+        if not match:
+            return ""
+        token = match.group(1)
+        padded = token + ("=" * (-len(token) % 4))
+        decoded = base64.urlsafe_b64decode(padded).decode("latin-1", errors="ignore")
+        for candidate in re.findall(r"https?://[^\x00-\x20\"'<>()]+", decoded):
+            candidate = clean(candidate, 2000).rstrip("\\")
+            if candidate and not is_google_url(candidate):
+                return candidate
+    except Exception:
+        return ""
+    return ""
+
+
 def first_external_url(html):
     for match in re.finditer(r"https?:\/\/[^\"'\s<>]+", html or "", re.I):
         candidate = unescape(match.group(0)).replace("\\/", "/")
@@ -291,7 +313,7 @@ def first_external_url(html):
 
 
 def extract_one(source, use_camoufox=True):
-    source_url = clean(source.get("url"), 2000)
+    source_url = google_news_embedded_url(source.get("url")) or clean(source.get("url"), 2000)
     if not source_url:
         return {**source, "resolvedUrl": "", "images": []}
     try:
