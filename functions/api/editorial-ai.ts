@@ -1,4 +1,5 @@
 import { DEFAULT_GEMINI_MODEL, runGeminiJson } from '../lib/gemini';
+import { DEFAULT_GROQ_MODEL, runGroqJson } from '../lib/groq';
 
 const WORKERS_AI_MODEL = '@cf/meta/llama-3.1-8b-instruct';
 
@@ -158,7 +159,15 @@ export const onRequestPost = async ({
   env,
 }: {
   request: Request;
-  env: { AI?: AiBinding; ADMIN_TOKEN?: string; GEMINI_API_KEY?: string; GEMINI_MODEL?: string };
+  env: {
+    AI?: AiBinding;
+    ADMIN_TOKEN?: string;
+    GEMINI_API_KEY?: string;
+    GEMINI_MODEL?: string;
+    GROQ_API_KEY?: string;
+    GROQ_MODEL?: string;
+    EDITORIAL_AI_PROVIDER?: string;
+  };
 }) => {
   if (!env.ADMIN_TOKEN) {
     return json({ error: 'ADMIN_TOKEN nao configurado.' }, { status: 503 });
@@ -168,11 +177,11 @@ export const onRequestPost = async ({
     return json({ error: 'Token editorial invalido.' }, { status: 401 });
   }
 
-  if (!env.GEMINI_API_KEY && !env.AI) {
+  if (!env.GEMINI_API_KEY && !env.GROQ_API_KEY && !env.AI) {
     return json(
       {
         error:
-          'IA editorial nao configurada. Adicione GEMINI_API_KEY nos segredos do Cloudflare Pages ou mantenha o binding Workers AI.',
+          'IA editorial nao configurada. Adicione GEMINI_API_KEY ou GROQ_API_KEY nos segredos do Cloudflare Pages, ou mantenha o binding Workers AI.',
       },
       { status: 503 },
     );
@@ -200,8 +209,21 @@ export const onRequestPost = async ({
 
   let model = env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
   let rawResult: Record<string, unknown>;
+  const provider = clip(env.EDITORIAL_AI_PROVIDER, 24).toLowerCase();
 
-  if (env.GEMINI_API_KEY) {
+  if (provider === 'groq' && env.GROQ_API_KEY) {
+    const groq = await runGroqJson({
+      apiKey: env.GROQ_API_KEY,
+      model: env.GROQ_MODEL || DEFAULT_GROQ_MODEL,
+      system:
+        'Voce e um editor-chefe de um portal de noticias brasileiro. Escreva sempre em portugues do Brasil, com acentos, cedilha e pontuacao corretos. Responda somente JSON valido.',
+      prompt: buildPrompt(payload),
+      maxOutputTokens: 900,
+      temperature: 0.42,
+    });
+    model = groq.model;
+    rawResult = groq.result;
+  } else if (env.GEMINI_API_KEY) {
     const gemini = await runGeminiJson({
       apiKey: env.GEMINI_API_KEY,
       model,
@@ -213,6 +235,18 @@ export const onRequestPost = async ({
     });
     model = gemini.model;
     rawResult = gemini.result;
+  } else if (env.GROQ_API_KEY) {
+    const groq = await runGroqJson({
+      apiKey: env.GROQ_API_KEY,
+      model: env.GROQ_MODEL || DEFAULT_GROQ_MODEL,
+      system:
+        'Voce e um editor-chefe de um portal de noticias brasileiro. Escreva sempre em portugues do Brasil, com acentos, cedilha e pontuacao corretos. Responda somente JSON valido.',
+      prompt: buildPrompt(payload),
+      maxOutputTokens: 900,
+      temperature: 0.42,
+    });
+    model = groq.model;
+    rawResult = groq.result;
   } else {
     const response = await env.AI!.run(WORKERS_AI_MODEL, {
       messages: [

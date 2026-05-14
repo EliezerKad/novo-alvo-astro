@@ -1,4 +1,5 @@
 import { DEFAULT_GEMINI_MODEL, runGeminiJson } from '../../lib/gemini';
+import { DEFAULT_GROQ_MODEL, runGroqJson } from '../../lib/groq';
 
 type D1Database = {
   prepare: (query: string) => {
@@ -24,6 +25,9 @@ type Env = {
   AI?: AiBinding;
   GEMINI_API_KEY?: string;
   GEMINI_MODEL?: string;
+  GROQ_API_KEY?: string;
+  GROQ_MODEL?: string;
+  EDITORIAL_AI_PROVIDER?: string;
 };
 
 type QueueRow = {
@@ -603,7 +607,7 @@ const generateArticleWithAi = async (
   },
   env: Env,
 ) => {
-  if (!env.GEMINI_API_KEY && !env.AI) {
+  if (!env.GEMINI_API_KEY && !env.GROQ_API_KEY && !env.AI) {
     return {
       ...fallback,
       imageAlt: fallback.imageAlt || fallback.title,
@@ -782,32 +786,74 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
 `;
 
   try {
-    let generationModel = WORKERS_AI_MODEL;
-    const result = env.GEMINI_API_KEY
-      ? await runGeminiJson({
-            apiKey: env.GEMINI_API_KEY,
-            model: premiumDraft ? DEFAULT_GEMINI_MODEL : env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
-            system,
-            prompt,
-            maxOutputTokens: premiumDraft ? 7600 : 6200,
-            temperature: premiumDraft ? 0.28 : 0.35,
-          })
-          .then((gemini) => {
-            generationModel = gemini.model;
-            return gemini.result;
-          })
-      : parseModelJson(
-          extractText(
-            await env.AI!.run(WORKERS_AI_MODEL, {
-              messages: [
-                { role: 'system', content: system },
-                { role: 'user', content: prompt },
-              ],
-              max_tokens: 1400,
-              temperature: 0.35,
-            }),
-          ),
-        );
+    const provider = clean(env.EDITORIAL_AI_PROVIDER, 24).toLowerCase();
+    let generationModel = '';
+    let result: Record<string, unknown> | null = null;
+    let lastGenerationError = '';
+
+    const runGeminiDraft = async () => {
+      const gemini = await runGeminiJson({
+        apiKey: env.GEMINI_API_KEY,
+        model: premiumDraft ? DEFAULT_GEMINI_MODEL : env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
+        system,
+        prompt,
+        maxOutputTokens: premiumDraft ? 7600 : 6200,
+        temperature: premiumDraft ? 0.28 : 0.35,
+      });
+      generationModel = gemini.model;
+      return gemini.result;
+    };
+
+    const runGroqDraft = async () => {
+      const groq = await runGroqJson({
+        apiKey: env.GROQ_API_KEY,
+        model: env.GROQ_MODEL || DEFAULT_GROQ_MODEL,
+        system,
+        prompt,
+        maxOutputTokens: premiumDraft ? 7600 : 6200,
+        temperature: premiumDraft ? 0.24 : 0.32,
+      });
+      generationModel = groq.model;
+      return groq.result;
+    };
+
+    const runWorkersDraft = async () => {
+      const response = await env.AI!.run(WORKERS_AI_MODEL, {
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: prompt },
+        ],
+        max_tokens: 1400,
+        temperature: 0.35,
+      });
+      generationModel = WORKERS_AI_MODEL;
+      return parseModelJson(extractText(response));
+    };
+
+    const runners =
+      provider === 'groq'
+        ? [
+            env.GROQ_API_KEY ? runGroqDraft : null,
+            env.GEMINI_API_KEY ? runGeminiDraft : null,
+            env.AI ? runWorkersDraft : null,
+          ]
+        : [
+            env.GEMINI_API_KEY ? runGeminiDraft : null,
+            env.GROQ_API_KEY ? runGroqDraft : null,
+            env.AI ? runWorkersDraft : null,
+          ];
+
+    for (const runner of runners) {
+      if (!runner) continue;
+      try {
+        result = await runner();
+        break;
+      } catch (error) {
+        lastGenerationError = error instanceof Error ? error.message : 'Falha desconhecida no provedor de IA.';
+      }
+    }
+
+    if (!result) throw new Error(lastGenerationError || 'Nenhum provedor de IA conseguiu gerar a materia.');
 
     const generatedBody = htmlFromModelField(
       result.content_html || result.bodyHtml || result.contentHtml || result.content || result.article || result.text,
@@ -856,7 +902,14 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       featuredImageUrl: '',
       inlineImageUrl: '',
       generatedWithAi: false,
-      generationModel: env.GEMINI_API_KEY ? env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL : WORKERS_AI_MODEL,
+      generationModel:
+        clean(env.EDITORIAL_AI_PROVIDER, 24).toLowerCase() === 'groq'
+          ? env.GROQ_MODEL || DEFAULT_GROQ_MODEL
+          : env.GEMINI_API_KEY
+            ? env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL
+            : env.GROQ_API_KEY
+              ? env.GROQ_MODEL || DEFAULT_GROQ_MODEL
+              : WORKERS_AI_MODEL,
       generationError: error instanceof Error ? error.message : 'Falha desconhecida na geracao por IA.',
     };
   }

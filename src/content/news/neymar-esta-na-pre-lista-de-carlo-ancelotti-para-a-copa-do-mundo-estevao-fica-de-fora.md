@@ -13,11 +13,11 @@ isFeatured: false
 urgent: false
 views: 0
 cover:
-  src: "2wCEAAkGBxMSEhUSEhMWFRUVGBkXGBcYFxcaGBcYGh0YGBgZFx0YHyggGBomHhgVITEiJSkrLi4uFx8zODMsNygtLisBCgoKDg0OGhAQGy0lICUtLS0tLS0tLS0vLS0tKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf"
+  src: "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80"
   alt: "Reunião de negócios, simbolizando as decisões de mercado e valorização de ativos no futebol."
   caption: "Unsplash"
   layout: "full"
-ogImage: "2wCEAAkGBxMSEhUSEhMWFRUVGBkXGBcYFxcaGBcYGh0YGBgZFx0YHyggGBomHhgVITEiJSkrLi4uFx8zODMsNygtLisBCgoKDg0OGhAQGy0lICUtLS0tLS0tLS0vLS0tKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf"
+ogImage: "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80"
 tags: ["economia", "neymar", "esta", "lista", "carlo", "ancelotti", "copa", "mundo", "estevao", "fica"]
 ---
 
