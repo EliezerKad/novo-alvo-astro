@@ -263,7 +263,11 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
         image_candidates = excluded.image_candidates,
         score = excluded.score,
         expires_at = excluded.expires_at,
-        updated_at = excluded.updated_at`,
+        updated_at = CASE
+          WHEN excluded.source_count > editorial_pitches.source_count OR excluded.score > editorial_pitches.score
+          THEN excluded.updated_at
+          ELSE editorial_pitches.updated_at
+        END`,
     )
     .bind(
       pitch.id,

@@ -1,33 +1,91 @@
 import { spawnSync } from 'node:child_process';
 
+const googleNewsSearch = (query) =>
+  `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+
 const FEEDS = {
-  Brasil:
+  Brasil: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJQgKIh9DQkFTRVFvSUwyMHZNRzV6Y0hjU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Politica:
-    'https://news.google.com/rss/search?q=politica+OR+governo+OR+congresso+OR+STF+OR+eleicoes+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Mundo:
+    googleNewsSearch('Brasil governo estados cidades crise servicos publicos when:12h'),
+    googleNewsSearch('brasileiros policia transporte educacao saude urbana when:12h'),
+  ],
+  Politica: [
+    googleNewsSearch('politica OR governo OR congresso OR STF OR eleicoes when:12h'),
+    googleNewsSearch('Planalto Congresso Senado Camara STF bastidores poder when:12h'),
+    googleNewsSearch('Lula Bolsonaro ministro deputado senador governo when:12h'),
+  ],
+  Mundo: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx1YlY4U0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Economia:
+    googleNewsSearch('geopolitica guerra eleicoes mundo impacto Brasil when:12h'),
+    googleNewsSearch('Estados Unidos China Europa Argentina Oriente Medio when:12h'),
+  ],
+  Economia: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx6TVd4b1NKVXlMd0pVUXlnQVAB?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Tecnologia:
+    googleNewsSearch('economia juros inflacao dolar bolsa emprego credito when:12h'),
+    googleNewsSearch('mercado empresas bancos governo poder de compra when:12h'),
+  ],
+  Tecnologia: [
     'https://news.google.com/rss/headlines/section/topic/CAAqKggKIiRDQkFTRFvSUwyMHZNRGRqTVhZU0JXVnVMVWRDR2dKUVN5Z0FQAQ?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Entretenimento:
+    googleNewsSearch('tecnologia inteligencia artificial chips ciberseguranca app when:12h'),
+    googleNewsSearch('big tech apple google microsoft meta openai dados privacidade when:12h'),
+  ],
+  Entretenimento: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGRqTVdZU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Esportes:
+    googleNewsSearch('entretenimento tv streaming reality show cultura pop when:12h'),
+    googleNewsSearch('celebridades internet viral audiencia tiktok evento when:12h'),
+  ],
+  Esportes: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFp1ZEdvU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Ciencia:
+    googleNewsSearch('esportes olimpico volei basquete formula surf tenis when:12h'),
+    googleNewsSearch('competicao atleta tecnico final campeonato recorde when:12h'),
+  ],
+  Ciencia: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFp0Y1RjU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Saude:
+    googleNewsSearch('ciencia pesquisa espaco clima descoberta estudo cientifico when:12h'),
+    googleNewsSearch('nasa astronomia biologia ambiente inovacao universidade when:12h'),
+  ],
+  Saude: [
     'https://news.google.com/rss/headlines/section/topic/CAAqIQgKIhtDQkFTRGdvSUwyMHZNR3QwTlRFU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Famosos: 'https://news.google.com/rss/search?q=celebridades+OR+fofoca+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Futebol: 'https://news.google.com/rss/search?q=futebol+brasileiro+OR+brasileirao+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Games: 'https://news.google.com/rss/search?q=games+OR+playstation+OR+xbox+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Lifestyle: 'https://news.google.com/rss/search?q=estilo+de+vida+OR+comportamento+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Educacao: 'https://news.google.com/rss/search?q=educacao+OR+enem+OR+carreira+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Cultura: 'https://news.google.com/rss/search?q=cultura+OR+arte+OR+literatura+OR+teatro+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Moda: 'https://news.google.com/rss/search?q=moda+OR+fashion+OR+tendencias+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Musica: 'https://news.google.com/rss/search?q=musica+OR+shows+OR+album+OR+festival+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
-  Cinema: 'https://news.google.com/rss/search?q=cinema+OR+filmes+OR+streaming+when:24h&hl=pt-BR&gl=BR&ceid=BR:pt-419',
+    googleNewsSearch('saude medicina vacina hospital bem estar doenca when:12h'),
+    googleNewsSearch('ans sus medicamento pesquisa clinica saude mental when:12h'),
+  ],
+  Famosos: [
+    googleNewsSearch('celebridades famosos influenciadores bastidores viral when:12h'),
+    googleNewsSearch('atriz cantor apresentador influencer relacionamento when:12h'),
+  ],
+  Futebol: [
+    googleNewsSearch('futebol brasileiro brasileirao libertadores copa do brasil when:12h'),
+    googleNewsSearch('flamengo corinthians palmeiras sao paulo vasco botafogo fluminense when:12h'),
+    googleNewsSearch('mercado da bola tecnico SAF clube jogador when:12h'),
+  ],
+  Games: [
+    googleNewsSearch('games playstation xbox nintendo steam game pass when:12h'),
+    googleNewsSearch('ps5 xbox switch 2 gta fortnite lançamento bug review when:12h'),
+  ],
+  Lifestyle: [
+    googleNewsSearch('estilo de vida comportamento viagem gastronomia produtividade when:12h'),
+    googleNewsSearch('casa consumo tendencia comportamento familia rotina when:12h'),
+  ],
+  Educacao: [
+    googleNewsSearch('educacao enem vestibular carreira escola universidade when:12h'),
+    googleNewsSearch('mec professor aluno ensino superior concurso when:12h'),
+  ],
+  Cultura: [
+    googleNewsSearch('cultura arte literatura teatro museu livro when:12h'),
+    googleNewsSearch('exposicao festival premio autor artista cultura brasileira when:12h'),
+  ],
+  Moda: [
+    googleNewsSearch('moda fashion tendencias passarela marca colecao when:12h'),
+    googleNewsSearch('look estilista grife beleza consumo moda sustentavel when:12h'),
+  ],
+  Musica: [
+    googleNewsSearch('musica shows album festival cantor cantora banda when:12h'),
+    googleNewsSearch('turne single spotify funk sertanejo rap pop rock when:12h'),
+  ],
+  Cinema: [
+    googleNewsSearch('cinema filmes streaming bilheteria festival Cannes Oscar when:12h'),
+    googleNewsSearch('Netflix Max Prime Video Disney filme serie estreia when:12h'),
+  ],
 };
 
 const PORTAL_ORIGIN = process.env.PORTAL_ORIGIN || 'https://portalnovoalvo.com.br';
@@ -35,6 +93,7 @@ const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
 const MAX_ITEMS_PER_FEED = Number(process.env.MAX_ITEMS_PER_FEED || 80);
 const MIN_SOURCES = Number(process.env.MIN_SOURCES || 8);
 const RADAR_BATCHES_PER_CATEGORY = Number(process.env.RADAR_BATCHES_PER_CATEGORY || 3);
+const MAX_ITEM_AGE_HOURS = Number(process.env.MAX_ITEM_AGE_HOURS || 30);
 const HOUSEKEEPING_DAYS = Number(process.env.HOUSEKEEPING_DAYS || 30);
 const MAX_IMAGE_SOURCE_FETCHES_PER_PITCH = Number(process.env.MAX_IMAGE_SOURCE_FETCHES_PER_PITCH || 8);
 const SOURCE_EXPANSION_TARGET = Number(process.env.SOURCE_EXPANSION_TARGET || 12);
@@ -411,6 +470,14 @@ const recencyScore = (item) => {
   return Math.max(0, 1 - hours / 48);
 };
 
+const itemAgeHours = (item) => {
+  const timestamp = Date.parse(item?.publishedAt || '');
+  if (!timestamp) return 999;
+  return Math.max(0, (Date.now() - timestamp) / 36e5);
+};
+
+const isFreshItem = (item) => itemAgeHours(item) <= MAX_ITEM_AGE_HOURS;
+
 const itemRelevanceScore = (item, peers = []) => {
   const related = peers.reduce((total, peer) => (peer === item ? total : total + overlapScore(item, peer)), 0);
   const title = normalizedText(item?.title || '');
@@ -572,6 +639,11 @@ const fetchFeed = async ([category, url]) => {
   }
 };
 
+const feedEntries = () =>
+  Object.entries(FEEDS).flatMap(([category, urls]) =>
+    (Array.isArray(urls) ? urls : [urls]).map((url, index) => [category, url, index]),
+  );
+
 const buildPitch = (items) => {
   const first = selectLeadItem(items);
   const orderedItems = [first, ...items.filter((item) => item !== first)].sort((a, b) => {
@@ -600,14 +672,11 @@ const buildPitch = (items) => {
   const imageCandidates = [];
 
   const isRadar = items.some((item) => item.radarCluster);
-  const newestTime = Math.max(...items.map((item) => Date.parse(item.publishedAt) || 0), Date.now());
-  const newest = new Date(newestTime);
-  const sixHourBucket = `${newest.getUTCFullYear()}${String(newest.getUTCMonth() + 1).padStart(2, '0')}${String(newest.getUTCDate()).padStart(2, '0')}-${Math.floor(newest.getUTCHours() / 6)}`;
   const signature = isRadar
-    ? [sixHourBucket, ...items
+    ? items
         .slice(0, 4)
         .map((item) => slugify(item.title).slice(0, 42))
-      ].join('-')
+        .join('-')
     : slugify(first.title);
 
   return {
@@ -812,11 +881,13 @@ const main = async () => {
   if (!ADMIN_TOKEN) throw new Error('ADMIN_TOKEN ausente.');
   const startedAt = new Date().toISOString();
 
-  const allItems = (await Promise.all(Object.entries(FEEDS).map(fetchFeed))).flat();
+  const rawItems = (await Promise.all(feedEntries().map(fetchFeed))).flat();
+  const allItems = rawItems.filter(isFreshItem);
   const feedCounts = allItems.reduce((acc, item) => {
     acc[item.category] = (acc[item.category] || 0) + 1;
     return acc;
   }, {});
+  console.log(`Itens RSS brutos: ${rawItems.length}. Itens frescos (${MAX_ITEM_AGE_HOURS}h): ${allItems.length}.`);
   const topicClusters = await Promise.all(clusterItems(allItems).map(expandClusterSources));
   const topicPitches = topicClusters
     .map(buildPitch)

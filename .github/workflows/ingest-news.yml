@@ -40,6 +40,7 @@ jobs:
           MAX_ITEMS_PER_FEED: 80
           MAX_PITCHES: 80
           MIN_SOURCES: 8
+          MAX_ITEM_AGE_HOURS: 30
           RADAR_BATCHES_PER_CATEGORY: 3
           CRAWL4AI_FIRST: 1
           ENABLE_SCRAPLING_ASSETS: 1
