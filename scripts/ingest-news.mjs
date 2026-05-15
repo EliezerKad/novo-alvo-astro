@@ -31,6 +31,7 @@ const FEEDS = {
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGRqTVdZU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
     googleNewsSearch('entretenimento tv streaming reality show cultura pop when:24h'),
     googleNewsSearch('celebridades internet viral audiencia tiktok evento when:24h'),
+    googleNewsSearch('reality show novela televisao audiencia participante eliminacao when:24h'),
   ],
   Esportes: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFp1ZEdvU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
@@ -77,8 +78,9 @@ const FEEDS = {
     googleNewsSearch('look estilista grife beleza consumo moda sustentavel when:24h'),
   ],
   Musica: [
-    googleNewsSearch('musica shows album festival cantor cantora banda when:24h'),
+    googleNewsSearch('musica shows album festival clipe banda when:24h'),
     googleNewsSearch('turne single spotify funk sertanejo rap pop rock when:24h'),
+    googleNewsSearch('musica brasileira show palco gravadora lancamento musical when:24h'),
   ],
   Cinema: [
     googleNewsSearch('cinema filmes streaming bilheteria festival Cannes Oscar when:24h'),
@@ -148,6 +150,12 @@ const normalizedText = (value) =>
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
+const REALITY_ENTERTAINMENT_PATTERN =
+  /\b(reality|reality show|casa do patrao|bbb|big brother|a fazenda|votacao|eliminacao|eliminado|eliminada|participante|confinamento|paredao|prova do lider|audiencia|programa de tv|televisao|novela)\b/i;
+
+const MUSIC_CONTEXT_PATTERN =
+  /\b(musica|show|shows|album|single|turne|festival|palco|clipe|faixa|gravadora|banda|spotify|funk|sertanejo|rap|pop|rock|lancamento musical)\b/i;
+
 const CATEGORY_SIGNALS = [
   {
     category: 'Futebol',
@@ -176,8 +184,13 @@ const CATEGORY_SIGNALS = [
     pattern: /\b(games?|playstation|xbox|nintendo|steam|game pass|gta|fortnite|minecraft|console|ps5)\b/i,
   },
   {
+    category: 'Entretenimento',
+    pattern:
+      /\b(entretenimento|tv|televisao|streaming|reality|reality show|casa do patrao|bbb|big brother|a fazenda|audiencia|programa|novela|viral|tiktok|participante|eliminado|eliminada|confinamento)\b/i,
+  },
+  {
     category: 'Musica',
-    pattern: /\b(musica|show|shows|album|single|turne|festival|cantor|cantora|banda|funk|sertanejo|rap|pop|rock)\b/i,
+    pattern: /\b(musica|show|shows|album|single|turne|festival|palco|clipe|faixa|gravadora|banda|spotify|funk|sertanejo|rap|pop|rock|lancamento musical)\b/i,
   },
   {
     category: 'Cinema',
@@ -207,11 +220,12 @@ const classifyCategory = (feedCategory, title, source) => {
     const explicitFootball =
       /\b(futebol|brasileirao|serie\s?[abcd]|copa do brasil|libertadores|sul-americana|neymar|ancelotti|corinthians|flamengo|fluminense|palmeiras|sao paulo|santos|vasco|botafogo|gremio|internacional|cruzeiro|guarani|mirassol|santa cruz)\b/i.test(
         text,
-      );
+    );
     if (!explicitFootball) return 'Esportes';
   }
+  if (REALITY_ENTERTAINMENT_PATTERN.test(text) && !MUSIC_CONTEXT_PATTERN.test(text)) return 'Entretenimento';
   const matches = CATEGORY_SIGNALS.filter((item) => item.pattern.test(text));
-  const priorityMatch = ['Futebol', 'Politica', 'Games', 'Cinema', 'Musica', 'Cultura', 'Saude', 'Ciencia'].map((category) => matches.find((item) => item.category === category)).find(Boolean);
+  const priorityMatch = ['Futebol', 'Politica', 'Games', 'Cinema', 'Entretenimento', 'Cultura', 'Saude', 'Ciencia', 'Musica'].map((category) => matches.find((item) => item.category === category)).find(Boolean);
   const economy = matches.find((item) => item.category === 'Economia');
   const fashion = matches.find((item) => item.category === 'Moda');
   const fashionScore = (text.match(/\b(moda|fashion|look|looks|tendencia|tendencias|passarela|estilista|vestido|grife|colecao)\b/gi) || []).length;
@@ -585,6 +599,13 @@ const balancePitches = (topicPitches, radarPitches, coveragePitches, limit) => {
   for (const category of Object.keys(FEEDS)) {
     addUniquePitch(selected, seen, radarByCategory.get(category)?.[0] || coverageByCategory.get(category)?.[0]);
     if (selected.length >= limit) return selected;
+  }
+
+  for (let round = 1; round < RADAR_BATCHES_PER_CATEGORY; round += 1) {
+    for (const category of Object.keys(FEEDS)) {
+      addUniquePitch(selected, seen, radarByCategory.get(category)?.[round] || coverageByCategory.get(category)?.[round]);
+      if (selected.length >= limit) return selected;
+    }
   }
 
   for (const pitch of [...topicPitches, ...radarPitches, ...coveragePitches]) {
