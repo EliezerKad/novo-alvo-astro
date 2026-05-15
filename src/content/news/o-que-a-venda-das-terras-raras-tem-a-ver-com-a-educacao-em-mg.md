@@ -2,22 +2,22 @@
 title: "Mineração de Terras Raras em MG: Impacto na Educação"
 slug: "o-que-a-venda-das-terras-raras-tem-a-ver-com-a-educacao-em-mg"
 summary: "A exploração de terras raras em Minas Gerais levanta debates sobre o futuro da educação e a soberania nacional. Entenda os desdobramentos."
-seoDescription: "A exploração de terras raras em Minas Gerais levanta debates sobre o futuro da educação e a soberania nacional. Entenda os desdobramentos."
+seoDescription: "Brasil: A exploração de terras raras em Minas Gerais levanta debates sobre o futuro da educação e a soberania nacional. Entenda os desdobramentos."
 category: "Brasil"
 author: "Redação Novo Alvo"
 sources: ["Esquerda Diário", "CPG Click Petróleo e Gás", "Notícia Toda Hora", "JORNAL DO VALE", "São Bento em Foco", "CNN Brasil", "vermelho.org.br", "ClimaInfo", "Capital Reset", "O Globo", "Drops de Jogos", "Folha de S.Paulo"]
-publishedAt: "2026-05-14T23:14:07.946Z"
-updatedAt: "2026-05-14T23:14:13.564Z"
+publishedAt: "2026-05-15T00:00:56.887Z"
+updatedAt: "2026-05-15T00:00:57.253Z"
 featured: false
 isFeatured: false
 urgent: false
 views: 0
 cover:
-  src: "https://picsum.photos/seed/article:o-que-a-venda-das-terras-raras-tem-a-ver-com-a-educacao-em-mg/1600/900"
+  src: "https://www.portalnovoalvo.com.br/media/news/o-que-a-venda-das-terras-raras-tem-a-ver-com-a-educacao-em-mg-cover.jpg"
   alt: "O que a venda das terras raras tem a ver com a educação em MG?"
   caption: ""
-  layout: "none"
-ogImage: "https://picsum.photos/seed/article:o-que-a-venda-das-terras-raras-tem-a-ver-com-a-educacao-em-mg/1600/900"
+  layout: "full"
+ogImage: "https://www.portalnovoalvo.com.br/media/news/o-que-a-venda-das-terras-raras-tem-a-ver-com-a-educacao-em-mg-cover.jpg"
 tags: ["brasil", "venda", "terras", "raras", "educacao"]
 ---
 
