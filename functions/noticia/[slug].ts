@@ -42,8 +42,17 @@ const escapeHtml = (value: unknown) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 
+const decodeVisibleEntities = (value: string) =>
+  String(value || '')
+    .replace(/&amp;#(\d+);/g, (_match, code) => String.fromCharCode(Number(code)))
+    .replace(/&#(\d+);/g, (_match, code) => String.fromCharCode(Number(code)))
+    .replace(/&amp;#x([0-9a-f]+);/gi, (_match, code) => String.fromCharCode(Number.parseInt(code, 16)))
+    .replace(/&#x([0-9a-f]+);/gi, (_match, code) => String.fromCharCode(Number.parseInt(code, 16)))
+    .replace(/&amp;apos;|&apos;/gi, "'")
+    .replace(/&amp;quot;|&quot;/gi, '"');
+
 const stripEditorChrome = (html: string) =>
-  String(html || '')
+  decodeVisibleEntities(String(html || ''))
     .replace(/<button\b[^>]*>[\s\S]*?<\/button>/gi, '')
     .replace(/\scontenteditable="[^"]*"/gi, '')
     .replace(/\sdata-[a-z0-9-]+="[^"]*"/gi, '')

@@ -396,6 +396,9 @@ const decodeHtmlEntities = (value: string) =>
     .replace(/&#(\d+);/g, (_match, code) => String.fromCharCode(Number(code)))
     .replace(/&#x([0-9a-f]+);/gi, (_match, code) => String.fromCharCode(Number.parseInt(code, 16)));
 
+const textFromHtmlFragment = (value: unknown, max = 2000) =>
+  decodeHtmlEntities(plain(value, max));
+
 const extractArticleTextFromHtml = (html: string) => {
   const withoutNoise = html
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
@@ -564,7 +567,7 @@ const splitLongText = (text: string) => {
 };
 
 const buildStructuredArticleHtml = (html: string) => {
-  const chunks = splitLongText(plain(html, 12000)).slice(0, 12);
+  const chunks = splitLongText(textFromHtmlFragment(html, 12000)).slice(0, 12);
   if (chunks.length < 4) return html;
 
   const splitAt = Math.max(3, Math.ceil(chunks.length / 2));
@@ -580,21 +583,21 @@ const buildStructuredArticleHtml = (html: string) => {
 const normalizeArticleHtml = (html: string) => {
   const normalized = safeHtml(html)
     .replace(/<\/(h2|h3|p|blockquote|li)>\s*/gi, '</$1>\n')
-    .replace(/<(h2|h3)[^>]*>\s*(.*?)\s*<\/\1>/gi, (_match, tag, text) => `<${tag}>${clipWholeWord(text, 140)}</${tag}>`)
+    .replace(/<(h2|h3)[^>]*>\s*(.*?)\s*<\/\1>/gi, (_match, tag, text) => `<${tag}>${escapeHtml(clipWholeWord(textFromHtmlFragment(text, 500), 140))}</${tag}>`)
     .replace(/<p[^>]*>\s*([\s\S]*?)\s*<\/p>/gi, (_match, text) =>
-      splitLongText(String(text).replace(/<[^>]+>/g, ' '))
+      splitLongText(textFromHtmlFragment(text, 3000))
         .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
         .join(''),
     )
-    .replace(/<blockquote[^>]*>\s*([\s\S]*?)\s*<\/blockquote>/gi, (_match, text) => `<blockquote>${escapeHtml(clipWholeWord(text, 520))}</blockquote>`)
-    .replace(/<li[^>]*>\s*([\s\S]*?)\s*<\/li>/gi, (_match, text) => `<li>${escapeHtml(clipWholeWord(text, 220))}</li>`);
+    .replace(/<blockquote[^>]*>\s*([\s\S]*?)\s*<\/blockquote>/gi, (_match, text) => `<blockquote>${escapeHtml(clipWholeWord(textFromHtmlFragment(text, 900), 520))}</blockquote>`)
+    .replace(/<li[^>]*>\s*([\s\S]*?)\s*<\/li>/gi, (_match, text) => `<li>${escapeHtml(clipWholeWord(textFromHtmlFragment(text, 500), 220))}</li>`);
 
   const hasHeading = /<h[23]>/i.test(normalized);
   const paragraphs = (normalized.match(/<p>/gi) || []).length;
   if (paragraphs >= 5 && hasHeading) return normalized;
   if (paragraphs >= 4) return buildStructuredArticleHtml(normalized);
 
-  const text = plain(normalized, 9000);
+  const text = textFromHtmlFragment(normalized, 9000);
   const chunks = splitLongText(text).slice(0, 10);
   if (!chunks.length) return normalized;
   const midpoint = Math.max(2, Math.floor(chunks.length / 2));
@@ -616,7 +619,7 @@ const htmlFromModelField = (value: unknown) => {
     .split(/\n{2,}/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean)
-    .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+    .map((paragraph) => `<p>${escapeHtml(decodeHtmlEntities(paragraph))}</p>`)
       .join(''),
   );
 };
