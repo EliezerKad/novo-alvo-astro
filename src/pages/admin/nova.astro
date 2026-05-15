@@ -1647,6 +1647,40 @@ const aiActions = [
       const createImageBlock = (url, alt, credit = '') =>
         `<figure data-editor-media="image" data-align="center" data-media-size="large" data-credit="${escapeHtml(credit)}" contenteditable="false">${createMediaControls()}<img src="${escapeHtml(url)}" alt="${escapeHtml(alt)}" /><figcaption><span data-caption>${escapeHtml(alt || 'Legenda da imagem')}</span><span class="media-credit" data-credit-label>${escapeHtml(credit)}</span></figcaption></figure><p><br></p>`;
 
+      const createImportedImageBlock = (url, alt, credit = '', align = 'center', size = 'large') =>
+        createImageBlock(url, alt, credit)
+          .replace('data-align="center"', `data-align="${escapeHtml(align)}"`)
+          .replace('data-media-size="large"', `data-media-size="${escapeHtml(size)}"`);
+
+      const replaceNodeWithHtml = (node, html) => {
+        const template = document.createElement('template');
+        template.innerHTML = html;
+        node.replaceWith(...Array.from(template.content.childNodes));
+      };
+
+      const normalizeImportedEditorHtml = (html) => {
+        const template = document.createElement('template');
+        template.innerHTML = html || '<p><br></p>';
+
+        template.content.querySelectorAll('figure:not([data-editor-media])').forEach((figure) => {
+          const image = figure.querySelector('img');
+          if (!image?.src) return;
+          const caption = figure.querySelector('figcaption')?.textContent?.trim() || image.alt || 'Legenda da imagem';
+          const classes = figure.className || '';
+          const align = /--left/.test(classes) ? 'left' : /--right/.test(classes) ? 'right' : 'center';
+          const size = /--left|--right/.test(classes) ? 'medium' : 'large';
+          replaceNodeWithHtml(figure, createImportedImageBlock(image.src, caption, '', align, size));
+        });
+
+        template.content.querySelectorAll('img').forEach((image) => {
+          if (image.closest('[data-editor-media]')) return;
+          const caption = image.alt || image.getAttribute('title') || 'Legenda da imagem';
+          replaceNodeWithHtml(image, createImportedImageBlock(image.src, caption));
+        });
+
+        return template.innerHTML || '<p><br></p>';
+      };
+
       const createCarouselSlide = (item, index) => `
         <figure class="carousel-slide" data-carousel-slide="${index}" data-main="${item.main ? 'true' : 'false'}">
           <div class="carousel-item-controls">
@@ -2352,7 +2386,7 @@ const aiActions = [
           if (slugInput) slugInput.value = article.slug || '';
           if (summaryInput) summaryInput.value = article.summary || '';
           if (categoryInput && article.category) categoryInput.value = article.category;
-          if (editor) editor.innerHTML = article.body_html || '';
+          if (editor) editor.innerHTML = normalizeImportedEditorHtml(article.body_html || '');
           if (seoDescriptionInput) seoDescriptionInput.value = article.seo_description || '';
           if (keywordsInput) keywordsInput.value = article.keywords || '';
 

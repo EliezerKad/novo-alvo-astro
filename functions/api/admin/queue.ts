@@ -385,6 +385,74 @@ const plain = (value: unknown, max: number) =>
     .trim()
     .slice(0, max);
 
+const decodeHtmlEntities = (value: string) =>
+  value
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#039;|&apos;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&#(\d+);/g, (_match, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_match, code) => String.fromCharCode(Number.parseInt(code, 16)));
+
+const extractArticleTextFromHtml = (html: string) => {
+  const withoutNoise = html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')
+    .replace(/<(?:svg|canvas|picture|video|iframe|form|button|header|footer|nav|aside)[\s\S]*?<\/(?:svg|canvas|picture|video|iframe|form|button|header|footer|nav|aside)>/gi, ' ');
+
+  const articleMatch = withoutNoise.match(/<article\b[^>]*>([\s\S]*?)<\/article>/i);
+  const mainMatch = withoutNoise.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i);
+  const source = articleMatch?.[1] || mainMatch?.[1] || withoutNoise;
+  const paragraphs = [...source.matchAll(/<(?:p|h1|h2|h3|li)\b[^>]*>([\s\S]*?)<\/(?:p|h1|h2|h3|li)>/gi)]
+    .map((match) => decodeHtmlEntities(plain(match[1], 1200)))
+    .filter((text) => text.length > 55)
+    .filter((text) => !/(cookies?|newsletter|publicidade|assine|compartilhe|leia tamb[eé]m|todos os direitos|clique aqui)/i.test(text));
+
+  const text = paragraphs.length >= 2 ? paragraphs.join(' ') : decodeHtmlEntities(plain(source, 9000));
+  const compact = text.replace(/\s+/g, ' ').trim();
+  return compact.length >= 320 ? clipWholeWord(compact, 1800) : '';
+};
+
+const fetchSourceExcerpt = async (source: unknown) => {
+  if (!source || typeof source !== 'object') return source;
+  const record = source as Record<string, unknown>;
+  if (plain(record.excerpt, 400).length >= 260) return record;
+  const url = clean(record.sourceUrl || record.url, 1200);
+  if (!/^https?:\/\//i.test(url)) return record;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5500);
+  try {
+    const response = await fetch(url, {
+      redirect: 'follow',
+      signal: controller.signal,
+      headers: {
+        accept: 'text/html,application/xhtml+xml',
+        'user-agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) PortalNovoAlvo/1.0 Safari/537.36',
+      },
+    });
+    if (!response.ok) return record;
+    const contentType = response.headers.get('content-type') || '';
+    if (!/html|text/i.test(contentType)) return record;
+    const html = await response.text();
+    const excerpt = extractArticleTextFromHtml(html);
+    return excerpt ? { ...record, excerpt } : record;
+  } catch {
+    return record;
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
+const enrichSourcesWithText = async (sources: unknown[]) => {
+  const enriched = await Promise.all(sources.slice(0, 5).map((source) => fetchSourceExcerpt(source)));
+  return [...enriched, ...sources.slice(5)];
+};
+
 const clipWholeWord = (value: unknown, max: number) => {
   const text = plain(value, max + 80);
   if (text.length <= max) return text;
@@ -399,6 +467,15 @@ const stripRadarPrefix = (value: unknown) =>
 
 const hasInternalLeak = (value: unknown) =>
   /(?:pauta consolidada|fontes consolidadas|fontes monitoradas|entrou na fila|fila editorial|engine|prompt|cluster|modelo de seguran|rascunho exige|materia inedita antes da fila|mat[eé]ria in[eé]dita antes da fila|processo editorial|portal novo alvo registra|portal novo alvo)/i.test(plain(value, 6000));
+
+const hasUnnamedActiveAgent = (value: unknown) => {
+  const text = plain(value, 9000);
+  const vagueActor =
+    /(?:^|[.!?]\s+)(?:um|uma)\s+(?:pr[eé]-?candidato|candidato|candidata|pol[ií]tico|pol[ií]tica|parlamentar|deputado|deputada|senador|senadora|vereador|vereadora|governador|governadora|prefeito|prefeita|ministro|ministra|autoridade|dirigente|executivo|executiva|empres[aá]rio|empres[aá]ria|atleta|jogador|jogadora|t[eé]cnico|t[eé]cnica|celebridade|influenciador|influenciadora)\b[^.!?]{0,180}\b(?:afirmou|disse|declarou|acusou|admitiu|defendeu|criticou|publicou|decidiu|aprovou|negou|prometeu|gerou|causou|provocou|pediu|atacou|recuou|confirmou|anunciou)\b/i;
+  const passiveVagueActor =
+    /\b(?:foi|foram)\s+(?:afirmado|dito|declarado|admitido|confirmado|anunciado)\s+por\s+(?:um|uma)\s+(?:pr[eé]-?candidato|candidato|candidata|pol[ií]tico|pol[ií]tica|parlamentar|autoridade|dirigente|executivo|executiva)\b/i;
+  return vagueActor.test(text) || passiveVagueActor.test(text);
+};
 
 const publicEditorialSummary = (title: string, category: string) => {
   const cleanTitle = stripRadarPrefix(title) || clean(title, 220);
@@ -583,6 +660,7 @@ const hasEditorialBody = (html: string) => {
   if (/o rascunho exige angulo proprio|o rascunho exige ângulo próprio/i.test(text)) return false;
   if (/fontes monitoradas|entrou na fila editorial|resumo editorial|cluster de dados/i.test(text)) return false;
   if (hasInternalLeak(text)) return false;
+  if (hasUnnamedActiveAgent(text)) return false;
   return true;
 };
 
@@ -620,7 +698,7 @@ const generateArticleWithAi = async (
     };
   }
 
-  const sources = parseArray(row.sources);
+  const sources = await enrichSourcesWithText(parseArray(row.sources));
   const score = Number(row.score || 0);
   const sourceCount = Number(row.source_count || sources.length || 0);
   const premiumDraft = score > 800;
@@ -633,7 +711,7 @@ const generateArticleWithAi = async (
       const excerpt = plain(record.excerpt, 1200);
       return [
         `- ${plain(record.publisher, 80)}: ${plain(record.title, 180)} (${plain(record.url, 400)})`,
-        excerpt ? `  Trecho extraido da materia completa: ${excerpt}` : '',
+        excerpt ? `  Trecho extraido da materia completa (prioritario para nomes, datas e responsaveis): ${excerpt}` : '',
       ]
         .filter(Boolean)
         .join('\n');
@@ -712,6 +790,8 @@ CLASSIFICACAO PREVIA OBRIGATORIA:
 - Use os dados como apuracao consolidada: cruze os trechos, descarte repeticao, priorize o dado exclusivo e construa uma materia inedita. Nunca explique esse processo ao leitor.
 - Fato Estatico: o que aconteceu. Exemplo: "O preco subiu".
 - Agente Ativo: quem causou, decidiu, moveu, perdeu ou ganhou. De nome aos bois.
+- Regra de responsabilidade nominal: se o texto disser que alguem afirmou, declarou, publicou, admitiu, defendeu, acusou, decidiu, aprovou, negou, pediu, atacou ou causou algo, a frase deve trazer o nome da pessoa, orgao, empresa, partido, clube ou cargo oficial responsavel. Nunca escreva "um pre-candidato", "um politico", "uma autoridade", "um dirigente" ou "uma celebridade" como sujeito de acusacao, fala ou decisao.
+- Se as fontes fornecidas nao identificarem nominalmente o responsavel, nao crie a frase acusatoria. Reescreva com o fato verificavel: "A pauta nao identifica nominalmente o autor da fala" ou foque na reacao publica sem atribuir a uma pessoa anonima.
 - Causa Latente: por que isso aconteceu agora.
 - Conflito: se houver divergencia entre governo, empresa, clube, usuarios ou mercado, exponha como ponto central.
 - Micro-persona: escolha uma das micro-personas acima e use como lente do texto.
@@ -733,6 +813,7 @@ ESTILO EDITORIAL (EEAT):
 - Proibido subjetivismo: nao use "muitos acreditam", "parece ser", "pode indicar" sem base factual.
 - Foco em consequencia: se uma lei, decisao, negocio, jogo ou crise aconteceu, explique quem ganha e quem perde poder, tempo, reputacao, chance esportiva, audiencia, confianca ou dinheiro quando o dinheiro for central.
 - Identifique pessoas, clubes, empresas, marcas, orgaos, cargos, valores e datas quando esses dados aparecerem nas fontes. Nao esconda nomes proprios em abstracoes.
+- Grave: nao omita o nome do agente principal quando ele estiver nos titulos, trechos ou fontes. Uma noticia que acusa, atribui fala ou relata decisao sem nomear o responsavel e considerada incompleta.
 - O portal e analitico, mas nao e economista permanente. So use linguagem economica quando a categoria ou o fato exigir.
 - Lente economica nao e padrao. Termos como "ativo", "ativos", "valuation", "liquidez", "arbitragem", "capital", "portfolio", "monetizacao" e "estrategico" pertencem principalmente a Economia, mercado financeiro, contratos, SAF, negocios, Big Tech ou quando o dinheiro for explicitamente o centro da noticia.
 - Fora desses casos, troque economes por vocabulario da editoria: campo, torcida e placar em Futebol; roteiro, tela e direcao em Cinema; reputacao e exposicao em Famosos; estetica e consumo em Moda; gameplay e comunidade em Games; evidencia e cuidado em Saude; sala de aula, vaga e carreira em Educacao.
@@ -786,6 +867,10 @@ ${imageLines || 'Sem imagens candidatas.'}
 ${forbiddenTitles || 'Sem titulos listados.'}
 [FONTES]:
 ${sourceLines || 'Fontes nao listadas.'}
+
+IMPORTANTE SOBRE AS FONTES:
+- Os trechos extraidos da materia completa têm prioridade sobre titulo RSS e resumo operacional.
+- Quando houver nome de pessoa, orgao, clube, empresa ou cargo nesses trechos, use o nome. Nao substitua por sujeito vago.
 
 Responda exatamente neste formato, com JSON valido e sem markdown:
 {"title":"...","slug":"...","meta_description":"...","fact_static":"...","active_agent":"...","latent_cause":"...","conflict_point":"...","micro_persona":"...","featured_image_url":"...","secondary_image_url":"...","image_alt":"...","image_credit":"...","content_html":"..."}
