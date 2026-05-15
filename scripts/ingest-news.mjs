@@ -51,6 +51,8 @@ const FEEDS = {
     googleNewsSearch('competicao atleta tecnico final campeonato recorde when:24h'),
     googleNewsSearch('volei basquete tenis formula 1 surf ufc atletismo natacao when:24h'),
     googleNewsSearch('nba nfl mma skate ginastica olimpica brasileiro mundial when:24h'),
+    googleNewsSearch('olimpiadas mundial panamericano liga nacional atleta brasileiro when:48h'),
+    googleNewsSearch('volei feminino basquete brasileiro tenis brasileiro formula 1 ufc when:48h'),
   ],
   Ciencia: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFp0Y1RjU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
@@ -71,6 +73,7 @@ const FEEDS = {
     googleNewsSearch('atriz cantor apresentador influencer relacionamento when:24h'),
     googleNewsSearch('famoso famosa namoro separacao casamento filho redes sociais when:24h'),
     googleNewsSearch('instagram celebridade artista polemica entrevista bastidor when:24h'),
+    googleNewsSearch('celebridade separacao gravidez casamento ator atriz influenciador when:48h'),
   ],
   Futebol: [
     googleNewsSearch('futebol brasileiro brasileirao libertadores copa do brasil when:24h'),
@@ -84,6 +87,7 @@ const FEEDS = {
     googleNewsSearch('ps5 xbox switch 2 gta fortnite lancamento bug review when:24h'),
     googleNewsSearch('steam epic games game pass nintendo direct playstation plus when:24h'),
     googleNewsSearch('esports gamer trailer gameplay patch update estudio when:24h'),
+    googleNewsSearch('jogo gratuito gameplay review vazamento playstation store xbox store when:48h'),
   ],
   Lifestyle: [
     googleNewsSearch('estilo de vida comportamento viagem gastronomia produtividade when:24h'),
@@ -108,6 +112,7 @@ const FEEDS = {
     googleNewsSearch('look estilista grife beleza consumo moda sustentavel when:24h'),
     googleNewsSearch('semana de moda roupa varejo beleza cosmetico tendencia when:24h'),
     googleNewsSearch('influencer moda marca desfile sapato bolsa estilo when:24h'),
+    googleNewsSearch('beleza cabelo skincare varejo moda brasil tendencia consumo when:48h'),
   ],
   Musica: [
     googleNewsSearch('musica shows album festival clipe banda when:24h'),
@@ -213,7 +218,28 @@ const slugify = (value) =>
     .slice(0, 120);
 
 const extractKeywords = (title, category) => {
-  const blocked = new Set(['para', 'com', 'uma', 'das', 'dos', 'que', 'por', 'sobre', 'apos', 'entre', 'como', 'mais']);
+  const blocked = new Set([
+    'para',
+    'com',
+    'uma',
+    'das',
+    'dos',
+    'que',
+    'por',
+    'sobre',
+    'apos',
+    'entre',
+    'como',
+    'mais',
+    'radar',
+    'veja',
+    'confira',
+    'onde',
+    'hoje',
+    'resumo',
+    'noticias',
+    'noticia',
+  ]);
   const words = `${category} ${title}`
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -221,6 +247,22 @@ const extractKeywords = (title, category) => {
     .split(/[^a-z0-9]+/)
     .filter((word) => word.length > 3 && !blocked.has(word));
   return [...new Set(words)].slice(0, 10);
+};
+
+const subjectSignature = (items, category) => {
+  const blocked = new Set([normalizeCategoryKey(category), 'radar', 'veja', 'confira', 'onde', 'hoje', 'sobre']);
+  const counts = new Map();
+  for (const item of items) {
+    for (const keyword of extractKeywords(item.title, item.category).slice(0, 10)) {
+      if (blocked.has(keyword)) continue;
+      counts.set(keyword, (counts.get(keyword) || 0) + 1);
+    }
+  }
+  const tokens = [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, 7)
+    .map(([token]) => token);
+  return slugify(tokens.join('-')) || slugify(selectLeadItem(items)?.title || category);
 };
 
 const normalizedText = (value) =>
@@ -573,12 +615,7 @@ const buildPitch = (items) => {
   const imageCandidates = [];
 
   const isRadar = items.some((item) => item.radarCluster);
-  const signature = isRadar
-    ? items
-        .slice(0, 4)
-        .map((item) => slugify(item.title).slice(0, 42))
-        .join('-')
-    : slugify(first.title);
+  const signature = subjectSignature(orderedItems, first.category);
 
   return {
     clusterKey: `${slugify(first.category)}:${isRadar ? 'radar:' : ''}${signature}`,
@@ -732,8 +769,8 @@ const main = async () => {
   await Promise.all(
     enrichedPitches.map(async (pitch) => {
       try {
-        await postPitch(pitch);
-        saved += 1;
+        const data = await postPitch(pitch);
+        if (!data?.skipped) saved += 1;
       } catch (error) {
         console.warn(`[pitch] ${pitch.title}: ${error.message}`);
       }

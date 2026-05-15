@@ -35,6 +35,10 @@ type PitchRecord = {
   id: string;
   category?: string;
   status?: string;
+  title?: string;
+  tags?: string;
+  keywords?: string;
+  updated_at?: string;
   image_candidates?: string;
 };
 
@@ -123,6 +127,73 @@ const mergePreservedImageRoles = (incomingJson: string, existingJson: string) =>
     if (roleByKey.has(key) && !merged.some((item) => imageKey(item.url) === key)) merged.unshift(candidate);
   }
   return JSON.stringify(merged.slice(0, 24));
+};
+
+const editorialTokens = (value: unknown) => {
+  const blocked = new Set([
+    'para',
+    'com',
+    'uma',
+    'das',
+    'dos',
+    'que',
+    'por',
+    'sobre',
+    'apos',
+    'entre',
+    'como',
+    'mais',
+    'radar',
+    'veja',
+    'confira',
+    'onde',
+    'hoje',
+    'noticia',
+    'noticias',
+  ]);
+  return clean(value, 1200)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length > 3 && !blocked.has(token));
+};
+
+const recordText = (record: Partial<PitchRecord>) =>
+  `${record.title || ''} ${parseArray(record.tags).join(' ')} ${record.keywords || ''}`;
+
+const semanticOverlap = (left: unknown, right: unknown) => {
+  const leftTokens = new Set(editorialTokens(left).slice(0, 14));
+  const rightTokens = new Set(editorialTokens(right).slice(0, 14));
+  if (!leftTokens.size || !rightTokens.size) return 0;
+  let shared = 0;
+  for (const token of leftTokens) {
+    if (rightTokens.has(token)) shared += 1;
+  }
+  return shared / Math.min(leftTokens.size, rightTokens.size);
+};
+
+const findRecentDuplicate = async (db: D1Database, pitch: ReturnType<typeof normalizePitch>) => {
+  const now = new Date().toISOString();
+  const recent = await db
+    .prepare(
+      `SELECT id, cluster_key, title, status, tags, keywords, updated_at
+       FROM editorial_pitches
+       WHERE category = ?
+         AND (expires_at IS NULL OR expires_at = '' OR expires_at >= ? OR status IN ('dismissed', 'queued', 'converted'))
+       ORDER BY updated_at DESC
+       LIMIT 160`,
+    )
+    .bind(pitch.category, now)
+    .all<PitchRecord & { cluster_key?: string }>();
+
+  const incomingText = `${pitch.title} ${parseArray(pitch.tags).join(' ')} ${pitch.keywords}`;
+  return (recent.results || []).find((record) => {
+    if (record.cluster_key === pitch.clusterKey) return false;
+    const score = semanticOverlap(incomingText, recordText(record));
+    if (record.status === 'dismissed') return score >= 0.62;
+    return score >= 0.76;
+  });
 };
 
 const requireAdmin = (request: Request, env: Env) => {
@@ -238,6 +309,26 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
 
   if (existing?.status === 'dismissed') {
     return json({ ok: true, skipped: true, reason: 'Pauta descartada preservada.', pitch: { id: existing.id, clusterKey: pitch.clusterKey, status: existing.status } });
+  }
+
+  if (!existing) {
+    const duplicate = await findRecentDuplicate(db, pitch);
+    if (duplicate?.status === 'dismissed') {
+      return json({
+        ok: true,
+        skipped: true,
+        reason: 'Assunto descartado recentemente preservado.',
+        pitch: { id: duplicate.id, clusterKey: pitch.clusterKey, status: duplicate.status },
+      });
+    }
+    if (duplicate) {
+      return json({
+        ok: true,
+        skipped: true,
+        reason: 'Assunto recente ja existe no banco editorial.',
+        pitch: { id: duplicate.id, clusterKey: pitch.clusterKey, status: duplicate.status },
+      });
+    }
   }
 
   if (existing?.image_candidates) {
