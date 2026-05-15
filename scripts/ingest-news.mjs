@@ -88,6 +88,42 @@ const FEEDS = {
   ],
 };
 
+const normalizeCategoryKey = (value) =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '');
+
+const categoryByKey = new Map(Object.keys(FEEDS).map((category) => [normalizeCategoryKey(category), category]));
+
+const getArgValue = (name) => {
+  const inline = process.argv.find((arg) => arg.startsWith(`--${name}=`));
+  if (inline) return inline.split('=').slice(1).join('=');
+  const index = process.argv.indexOf(`--${name}`);
+  return index >= 0 ? process.argv[index + 1] : '';
+};
+
+const resolveActiveCategories = () => {
+  const raw = getArgValue('category') || getArgValue('categories') || process.env.INGEST_CATEGORY || process.env.INGEST_CATEGORIES || '';
+  const requested = String(raw || '').trim();
+  if (!requested || /^all|todas|todos$/i.test(requested)) return Object.keys(FEEDS);
+
+  const categories = requested
+    .split(',')
+    .map((item) => categoryByKey.get(normalizeCategoryKey(item)))
+    .filter(Boolean);
+
+  if (!categories.length) {
+    throw new Error(`Categoria invalida para ingest: ${requested}. Opcoes: ${Object.keys(FEEDS).join(', ')}`);
+  }
+
+  return [...new Set(categories)];
+};
+
+const ACTIVE_CATEGORIES = resolveActiveCategories();
+const IS_CATEGORY_MODE = ACTIVE_CATEGORIES.length < Object.keys(FEEDS).length;
+
 const PORTAL_ORIGIN = process.env.PORTAL_ORIGIN || 'https://portalnovoalvo.com.br';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
 const MAX_ITEMS_PER_FEED = Number(process.env.MAX_ITEMS_PER_FEED || 80);
@@ -97,6 +133,8 @@ const MAX_ITEM_AGE_HOURS = Number(process.env.MAX_ITEM_AGE_HOURS || 30);
 const HOUSEKEEPING_DAYS = Number(process.env.HOUSEKEEPING_DAYS || 30);
 const SOURCE_EXPANSION_TARGET = Number(process.env.SOURCE_EXPANSION_TARGET || 12);
 const SOURCE_EXPANSION_MIN_OVERLAP = Number(process.env.SOURCE_EXPANSION_MIN_OVERLAP || 0.34);
+const MAX_PITCHES = Number(process.env.MAX_PITCHES || 80);
+const CATEGORY_MAX_PITCHES = Number(process.env.CATEGORY_MAX_PITCHES || 8);
 
 const decodeEntities = (value) =>
   String(value || '')
@@ -392,7 +430,7 @@ const buildCategoryRadarClusters = async (items) => {
   return clusters;
 };
 
-const buildCategoryFloorPitches = (items, existingPitches = []) => {
+const buildCategoryFloorPitches = (items, existingPitches = [], categories = Object.keys(FEEDS)) => {
   const covered = new Set(existingPitches.map((pitch) => pitch.category));
   const byCategory = new Map();
   for (const item of items) {
@@ -401,7 +439,7 @@ const buildCategoryFloorPitches = (items, existingPitches = []) => {
     byCategory.set(item.category, bucket);
   }
 
-  return Object.keys(FEEDS)
+  return categories
     .filter((category) => !covered.has(category))
     .map((category) => {
       const categoryItems = distinctBySource(byCategory.get(category) || [])
@@ -462,10 +500,12 @@ const fetchFeed = async ([category, url]) => {
   }
 };
 
-const feedEntries = () =>
-  Object.entries(FEEDS).flatMap(([category, urls]) =>
-    (Array.isArray(urls) ? urls : [urls]).map((url, index) => [category, url, index]),
-  );
+const feedEntries = (categories = Object.keys(FEEDS)) =>
+  Object.entries(FEEDS)
+    .filter(([category]) => categories.includes(category))
+    .flatMap(([category, urls]) =>
+      (Array.isArray(urls) ? urls : [urls]).map((url, index) => [category, url, index]),
+    );
 
 const buildPitch = (items) => {
   const first = selectLeadItem(items);
@@ -587,7 +627,7 @@ const semanticPitchOverlap = (left, right) => {
   return shared / Math.min(leftTokens.size, rightTokens.size);
 };
 
-const balancePitches = (topicPitches, radarPitches, coveragePitches, limit) => {
+const balancePitches = (topicPitches, radarPitches, coveragePitches, limit, categories = Object.keys(FEEDS)) => {
   const selected = [];
   const seen = new Set();
   const radarByCategory = new Map();
@@ -602,13 +642,13 @@ const balancePitches = (topicPitches, radarPitches, coveragePitches, limit) => {
     coverageByCategory.get(pitch.category).push(pitch);
   }
 
-  for (const category of Object.keys(FEEDS)) {
+  for (const category of categories) {
     addUniquePitch(selected, seen, radarByCategory.get(category)?.[0] || coverageByCategory.get(category)?.[0]);
     if (selected.length >= limit) return selected;
   }
 
   for (let round = 1; round < RADAR_BATCHES_PER_CATEGORY; round += 1) {
-    for (const category of Object.keys(FEEDS)) {
+    for (const category of categories) {
       addUniquePitch(selected, seen, radarByCategory.get(category)?.[round] || coverageByCategory.get(category)?.[round]);
       if (selected.length >= limit) return selected;
     }
@@ -625,9 +665,12 @@ const balancePitches = (topicPitches, radarPitches, coveragePitches, limit) => {
 const main = async () => {
   if (!ADMIN_TOKEN) throw new Error('ADMIN_TOKEN ausente.');
   const startedAt = new Date().toISOString();
+  const pitchLimit = IS_CATEGORY_MODE ? Math.min(CATEGORY_MAX_PITCHES, MAX_PITCHES) : MAX_PITCHES;
 
-  const rawItems = (await Promise.all(feedEntries().map(fetchFeed))).flat();
-  const allItems = rawItems.filter(isFreshItem);
+  console.log(`Modo ingest: ${IS_CATEGORY_MODE ? ACTIVE_CATEGORIES.join(', ') : 'todas as categorias'}. Limite de pautas: ${pitchLimit}.`);
+  const rawItems = (await Promise.all(feedEntries(ACTIVE_CATEGORIES).map(fetchFeed))).flat();
+  const freshItems = rawItems.filter(isFreshItem);
+  const allItems = IS_CATEGORY_MODE ? freshItems.filter((item) => ACTIVE_CATEGORIES.includes(item.category)) : freshItems;
   const feedCounts = allItems.reduce((acc, item) => {
     acc[item.category] = (acc[item.category] || 0) + 1;
     return acc;
@@ -642,8 +685,8 @@ const main = async () => {
     .map(buildPitch)
     .filter((pitch) => pitch.sourceCount >= MIN_SOURCES && !topicPitches.some((existing) => existing.clusterKey === pitch.clusterKey))
     .sort((a, b) => b.score - a.score);
-  const coveragePitches = buildCategoryFloorPitches(allItems, [...topicPitches, ...radarPitches]);
-  const pitches = balancePitches(topicPitches, radarPitches, coveragePitches, Number(process.env.MAX_PITCHES || 80));
+  const coveragePitches = buildCategoryFloorPitches(allItems, [...topicPitches, ...radarPitches], ACTIVE_CATEGORIES);
+  const pitches = balancePitches(topicPitches, radarPitches, coveragePitches, pitchLimit, ACTIVE_CATEGORIES);
 
   let saved = 0;
   const enrichedPitches = await Promise.all(pitches.map(normalizePitchAssets));

@@ -4,6 +4,32 @@ on:
   schedule:
     - cron: '*/45 * * * *'
   workflow_dispatch:
+    inputs:
+      category:
+        description: 'Categoria para ingest manual'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - Brasil
+          - Politica
+          - Mundo
+          - Economia
+          - Tecnologia
+          - Entretenimento
+          - Esportes
+          - Ciencia
+          - Saude
+          - Famosos
+          - Futebol
+          - Games
+          - Lifestyle
+          - Educacao
+          - Cultura
+          - Moda
+          - Musica
+          - Cinema
 
 jobs:
   ingest:
@@ -29,6 +55,8 @@ jobs:
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
           MAX_ITEMS_PER_FEED: 80
           MAX_PITCHES: 80
+          CATEGORY_MAX_PITCHES: 8
+          INGEST_CATEGORY: ${{ inputs.category }}
           MIN_SOURCES: 8
           MAX_ITEM_AGE_HOURS: 30
           RADAR_BATCHES_PER_CATEGORY: 3
