@@ -150,6 +150,12 @@ const normalizedText = (value) =>
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
+const FOOTBALL_CONTEXT_PATTERN =
+  /\b(futebol|brasileirao|serie\s?[abcd]|copa do brasil|copa do mundo|libertadores|sul-americana|selecao|neymar|ancelotti|corinthians|flamengo|fluminense|palmeiras|sao paulo|santos|vasco|botafogo|gremio|internacional|cruzeiro|atletico|bahia|fortaleza|guarani|mirassol|santa cruz|diniz|luxemburgo|tecnico|treinador|vitoria|derrota|clube|time|estadio|rodada|classificacao|oitavas|quartas|semifinal|final)\b/i;
+
+const POLITICS_CONTEXT_PATTERN =
+  /\b(politica|governo|congresso|senado|camara|stf|planalto|eleicao|eleicoes|prefeito|governador|presidente|ministro|deputado|senador|lula|bolsonaro|flavio bolsonaro|eduardo bolsonaro|pl|pt|mdb|psd|psol|republicanos|tse|pf|policia federal)\b/i;
+
 const REALITY_ENTERTAINMENT_PATTERN =
   /\b(reality|reality show|casa do patrao|bbb|big brother|a fazenda|votacao|eliminacao|eliminado|eliminada|participante|confinamento|paredao|prova do lider|audiencia|programa de tv|televisao|novela)\b/i;
 
@@ -159,12 +165,11 @@ const MUSIC_CONTEXT_PATTERN =
 const CATEGORY_SIGNALS = [
   {
     category: 'Futebol',
-    pattern:
-      /\b(futebol|brasileirao|serie\s?[abcd]|copa do brasil|copa do mundo|libertadores|sul-americana|selecao|neymar|ancelotti|corinthians|flamengo|fluminense|palmeiras|sao paulo|santos|vasco|botafogo|gremio|internacional|cruzeiro|atletico|bahia|fortaleza|guarani|mirassol|santa cruz|diniz|luxemburgo|tecnico|treinador|vitoria|derrota|clube|time|estadio|rodada)\b/i,
+    pattern: FOOTBALL_CONTEXT_PATTERN,
   },
   {
     category: 'Politica',
-    pattern: /\b(politica|governo|congresso|senado|camara|stf|planalto|eleicao|eleicoes|prefeito|governador|presidente|ministro|deputado|senador)\b/i,
+    pattern: POLITICS_CONTEXT_PATTERN,
   },
   {
     category: 'Economia',
@@ -216,12 +221,10 @@ const CATEGORY_SIGNALS = [
 
 const classifyCategory = (feedCategory, title, source) => {
   const text = normalizedText(`${title} ${source}`);
+  if (FOOTBALL_CONTEXT_PATTERN.test(text)) return 'Futebol';
+  if (POLITICS_CONTEXT_PATTERN.test(text)) return 'Politica';
   if (feedCategory === 'Esportes') {
-    const explicitFootball =
-      /\b(futebol|brasileirao|serie\s?[abcd]|copa do brasil|libertadores|sul-americana|neymar|ancelotti|corinthians|flamengo|fluminense|palmeiras|sao paulo|santos|vasco|botafogo|gremio|internacional|cruzeiro|guarani|mirassol|santa cruz)\b/i.test(
-        text,
-    );
-    if (!explicitFootball) return 'Esportes';
+    if (!FOOTBALL_CONTEXT_PATTERN.test(text)) return 'Esportes';
   }
   if (REALITY_ENTERTAINMENT_PATTERN.test(text) && !MUSIC_CONTEXT_PATTERN.test(text)) return 'Entretenimento';
   const matches = CATEGORY_SIGNALS.filter((item) => item.pattern.test(text));
