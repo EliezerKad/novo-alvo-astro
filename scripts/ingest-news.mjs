@@ -203,6 +203,13 @@ const CATEGORY_SIGNALS = [
 
 const classifyCategory = (feedCategory, title, source) => {
   const text = normalizedText(`${title} ${source}`);
+  if (feedCategory === 'Esportes') {
+    const explicitFootball =
+      /\b(futebol|brasileirao|serie\s?[abcd]|copa do brasil|libertadores|sul-americana|neymar|ancelotti|corinthians|flamengo|fluminense|palmeiras|sao paulo|santos|vasco|botafogo|gremio|internacional|cruzeiro|guarani|mirassol|santa cruz)\b/i.test(
+        text,
+      );
+    if (!explicitFootball) return 'Esportes';
+  }
   const matches = CATEGORY_SIGNALS.filter((item) => item.pattern.test(text));
   const priorityMatch = ['Futebol', 'Politica', 'Games', 'Cinema', 'Musica', 'Cultura', 'Saude', 'Ciencia'].map((category) => matches.find((item) => item.category === category)).find(Boolean);
   const economy = matches.find((item) => item.category === 'Economia');

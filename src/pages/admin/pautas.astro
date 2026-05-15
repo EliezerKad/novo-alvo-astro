@@ -245,6 +245,7 @@ const categories = [
       const modalCategory = document.querySelector('[data-pitch-modal-category]');
       const modalBody = document.querySelector('[data-pitch-modal-body]');
       const modalClose = document.querySelector('[data-pitch-modal-close]');
+      const visibleMinSources = '3';
       let pitches = [];
       let status = 'new';
       const generatedArticles = new Map();
@@ -633,7 +634,11 @@ const categories = [
           target.innerHTML = `
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 pb-5 dark:border-zinc-800">
               <p class="text-[10px] font-black uppercase tracking-[0.28em] text-red-600">Matéria completa gerada</p>
-              <button type="button" data-edit-generated-article="${escapeHtml(id)}" class="rounded-full bg-zinc-950 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950">Editar materia</button>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" data-edit-generated-article="${escapeHtml(id)}" class="rounded-full bg-zinc-950 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950">Editar materia</button>
+                <button type="button" data-send-generated-to-queue="${escapeHtml(id)}" data-pitch-cluster="${escapeHtml(pitch?.cluster_key || pitch?.clusterKey || '')}" class="rounded-full bg-red-600 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-500">Enviar para fila</button>
+                <button type="button" data-close-generated-article class="rounded-full border border-zinc-200 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-zinc-950 hover:text-zinc-950 dark:border-zinc-800 dark:hover:border-white dark:hover:text-white">Fechar</button>
+              </div>
               <span class="rounded-full bg-zinc-100 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900">${escapeHtml(data.model || (data.aiEnabled ? 'Gemini' : 'Modelo local'))}</span>
               ${article.generationTier === 'nexa-premium' ? '<span class="rounded-full bg-red-600 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white">Alta pontuação</span>' : ''}
             </div>
@@ -754,7 +759,7 @@ const categories = [
         const token = getToken();
         if (!token) return;
         const category = String(categoryFilter?.value || '');
-        const params = new URLSearchParams({ status, limit: '100' });
+        const params = new URLSearchParams({ status, limit: '100', minSources: visibleMinSources });
         if (category) params.set('category', category);
         if (statusNode) statusNode.textContent = 'Buscando pautas no D1...';
 
@@ -884,7 +889,7 @@ const categories = [
               'content-type': 'application/json',
               authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ all: true, status: 'dismissed', currentStatus: status, category, minSources: 8 }),
+            body: JSON.stringify({ all: true, status: 'dismissed', currentStatus: status, category, minSources: Number(visibleMinSources) }),
           });
           const data = await response.json().catch(() => ({}));
           if (response.status === 401) {
@@ -996,6 +1001,17 @@ const categories = [
           return;
         }
 
+        const queueButton = event.target.closest('[data-send-generated-to-queue]');
+        if (queueButton) {
+          updatePitchStatus(queueButton, queueButton.dataset.sendGeneratedToQueue || '', 'queued', queueButton.dataset.pitchCluster || '').then(closePitchPreview);
+          return;
+        }
+
+        if (event.target.closest('[data-close-generated-article]')) {
+          closePitchPreview();
+          return;
+        }
+
         const imageButton = event.target.closest('[data-pitch-image-role]');
         if (imageButton) {
           updatePitchImageRole(
@@ -1012,8 +1028,6 @@ const categories = [
           openPitchPreview(inlineArticleButton.dataset.pitchArticleInline || '', 'article');
           return;
         }
-
-        if (event.target === modal) closePitchPreview();
       });
       document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') closePitchPreview();
