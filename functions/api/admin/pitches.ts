@@ -33,6 +33,7 @@ type PitchPayload = {
 
 type PitchRecord = {
   id: string;
+  cluster_key?: string;
   category?: string;
   status?: string;
   title?: string;
@@ -40,6 +41,21 @@ type PitchRecord = {
   keywords?: string;
   updated_at?: string;
   image_candidates?: string;
+  source_count?: number;
+  score?: number;
+};
+
+type MemoryRecord = {
+  id: string;
+  subject_key: string;
+  category: string;
+  title: string;
+  status: string;
+  source_count?: number;
+  strength?: number;
+  last_pitch_id?: string;
+  last_seen_at?: string;
+  expires_at?: string;
 };
 
 const json = (body: unknown, init: ResponseInit = {}) =>
@@ -173,6 +189,103 @@ const semanticOverlap = (left: unknown, right: unknown) => {
   return shared / Math.min(leftTokens.size, rightTokens.size);
 };
 
+const missingMemoryTable = (error: unknown) =>
+  String(error instanceof Error ? error.message : error).toLowerCase().includes('no such table: editorial_memory');
+
+const memorySubjectKey = (pitch: Pick<ReturnType<typeof normalizePitch>, 'category' | 'clusterKey' | 'title' | 'summary' | 'tags' | 'keywords'>) => {
+  const category = slugify(pitch.category) || 'geral';
+  const tokens = editorialTokens(`${pitch.title} ${parseArray(pitch.tags).join(' ')} ${pitch.keywords} ${pitch.summary}`)
+    .filter((token, index, values) => values.indexOf(token) === index)
+    .slice(0, 9);
+  return `${category}:${tokens.length >= 3 ? tokens.join('-') : slugify(pitch.clusterKey)}`;
+};
+
+const readMemory = async (db: D1Database, subjectKey: string) => {
+  try {
+    return await db
+      .prepare('SELECT * FROM editorial_memory WHERE subject_key = ? LIMIT 1')
+      .bind(subjectKey)
+      .first<MemoryRecord>();
+  } catch (error) {
+    if (missingMemoryTable(error)) return null;
+    throw error;
+  }
+};
+
+const rememberPitch = async (
+  db: D1Database,
+  pitch: Pick<ReturnType<typeof normalizePitch>, 'id' | 'clusterKey' | 'title' | 'summary' | 'category' | 'tags' | 'keywords' | 'sourceCount' | 'score'>,
+  status = 'seen',
+  expiresAt = '',
+  articleSlug = '',
+) => {
+  const subjectKey = memorySubjectKey(pitch);
+  const now = new Date().toISOString();
+  const metadata = JSON.stringify({ clusterKey: pitch.clusterKey, keywords: pitch.keywords });
+  try {
+    await db
+      .prepare(
+        `INSERT INTO editorial_memory (
+          id, subject_key, category, title, status, source_count, strength,
+          first_seen_at, last_seen_at, last_pitch_id, article_slug, metadata, expires_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(subject_key) DO UPDATE SET
+          category = excluded.category,
+          title = CASE
+            WHEN excluded.source_count >= editorial_memory.source_count OR excluded.strength >= editorial_memory.strength
+            THEN excluded.title
+            ELSE editorial_memory.title
+          END,
+          status = excluded.status,
+          source_count = MAX(editorial_memory.source_count, excluded.source_count),
+          strength = MAX(editorial_memory.strength, excluded.strength),
+          last_seen_at = excluded.last_seen_at,
+          last_pitch_id = excluded.last_pitch_id,
+          article_slug = CASE WHEN excluded.article_slug != '' THEN excluded.article_slug ELSE editorial_memory.article_slug END,
+          metadata = excluded.metadata,
+          expires_at = excluded.expires_at`,
+      )
+      .bind(
+        `memory:${subjectKey}`,
+        subjectKey,
+        pitch.category,
+        pitch.title,
+        status,
+        pitch.sourceCount,
+        pitch.score,
+        now,
+        now,
+        pitch.id,
+        articleSlug,
+        metadata,
+        expiresAt,
+      )
+      .run();
+  } catch (error) {
+    if (!missingMemoryTable(error)) throw error;
+  }
+};
+
+const rememberExistingPitch = async (db: D1Database, record: PitchRecord, status: string, expiresAt = '') => {
+  if (!record.id || !record.title) return;
+  await rememberPitch(
+    db,
+    {
+      id: record.id,
+      clusterKey: record.cluster_key || record.id,
+      title: record.title,
+      summary: '',
+      category: record.category || 'Brasil',
+      tags: record.tags || '[]',
+      keywords: record.keywords || '',
+      sourceCount: Number(record.source_count || 0),
+      score: Number(record.score || 0),
+    },
+    status,
+    expiresAt,
+  );
+};
+
 const findRecentDuplicate = async (db: D1Database, pitch: ReturnType<typeof normalizePitch>) => {
   const now = new Date().toISOString();
   const recent = await db
@@ -302,6 +415,40 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   }
 
   const pitch = normalizePitch(rawPayload);
+  const subjectKey = memorySubjectKey(pitch);
+  const remembered = await readMemory(db, subjectKey);
+  const memoryExpiresAt = remembered?.expires_at ? Date.parse(remembered.expires_at) : 0;
+  const memoryExpired = Boolean(memoryExpiresAt && memoryExpiresAt < Date.now());
+  if (remembered && !memoryExpired) {
+    if (remembered.status === 'dismissed') {
+      return json({
+        ok: true,
+        skipped: true,
+        reason: 'Assunto descartado pela memoria editorial.',
+        pitch: { id: remembered.last_pitch_id || pitch.id, clusterKey: pitch.clusterKey, status: remembered.status },
+      });
+    }
+    if (['queued', 'converted', 'published'].includes(remembered.status)) {
+      return json({
+        ok: true,
+        skipped: true,
+        reason: 'Assunto ja esta em fila ou ja virou materia.',
+        pitch: { id: remembered.last_pitch_id || pitch.id, clusterKey: pitch.clusterKey, status: remembered.status },
+      });
+    }
+    const lastSeen = remembered.last_seen_at ? Date.parse(remembered.last_seen_at) : 0;
+    const freshMemory = lastSeen && Date.now() - lastSeen < 24 * 60 * 60 * 1000;
+    const strongerDevelopment = pitch.sourceCount >= Number(remembered.source_count || 0) + 4 || pitch.score >= Number(remembered.strength || 0) + 45;
+    if (freshMemory && !strongerDevelopment) {
+      return json({
+        ok: true,
+        skipped: true,
+        reason: 'Assunto recente ja memorizado.',
+        pitch: { id: remembered.last_pitch_id || pitch.id, clusterKey: pitch.clusterKey, status: remembered.status },
+      });
+    }
+  }
+
   const existing = await db
     .prepare('SELECT id, status, image_candidates FROM editorial_pitches WHERE cluster_key = ? LIMIT 1')
     .bind(pitch.clusterKey)
@@ -378,7 +525,9 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       pitch.expiresAt,
       pitch.updatedAt,
     )
-    .run();
+      .run();
+
+  await rememberPitch(db, pitch, remembered ? 'developing' : 'seen', pitch.expiresAt);
 
   return json({ ok: true, pitch: { id: pitch.id, clusterKey: pitch.clusterKey, status: pitch.status } });
 };
@@ -395,6 +544,17 @@ const dismissMany = async (db: D1Database, payload: { currentStatus?: string; ca
   }
 
   if (category) {
+    const targets = await db
+      .prepare(
+        `SELECT id, cluster_key, title, category, source_count, score, tags, keywords
+         FROM editorial_pitches
+         WHERE status = ? AND category = ? AND source_count >= ?
+           AND (expires_at IS NULL OR expires_at = '' OR expires_at >= ?)
+         ORDER BY updated_at DESC
+         LIMIT 120`,
+      )
+      .bind(currentStatus, category, minSources, now)
+      .all<PitchRecord>();
     const result = await db
       .prepare(
         `UPDATE editorial_pitches
@@ -404,9 +564,21 @@ const dismissMany = async (db: D1Database, payload: { currentStatus?: string; ca
       )
       .bind(tombstoneExpiresAt, now, currentStatus, category, minSources, now)
       .run();
+    await Promise.all((targets.results || []).map((record) => rememberExistingPitch(db, record, 'dismissed', tombstoneExpiresAt)));
     return { ok: true, dismissed: (result as { meta?: { changes?: number } })?.meta?.changes || 0 };
   }
 
+  const targets = await db
+    .prepare(
+      `SELECT id, cluster_key, title, category, source_count, score, tags, keywords
+       FROM editorial_pitches
+       WHERE status = ? AND source_count >= ?
+         AND (expires_at IS NULL OR expires_at = '' OR expires_at >= ?)
+       ORDER BY updated_at DESC
+       LIMIT 160`,
+    )
+    .bind(currentStatus, minSources, now)
+    .all<PitchRecord>();
   const result = await db
     .prepare(
       `UPDATE editorial_pitches
@@ -416,6 +588,7 @@ const dismissMany = async (db: D1Database, payload: { currentStatus?: string; ca
     )
     .bind(tombstoneExpiresAt, now, currentStatus, minSources, now)
     .run();
+  await Promise.all((targets.results || []).map((record) => rememberExistingPitch(db, record, 'dismissed', tombstoneExpiresAt)));
   return { ok: true, dismissed: (result as { meta?: { changes?: number } })?.meta?.changes || 0 };
 };
 
@@ -463,7 +636,7 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
 
   const lookupKey = clusterKey || id;
   const existing = await db
-    .prepare('SELECT id, category, image_candidates FROM editorial_pitches WHERE id = ? OR cluster_key = ? LIMIT 1')
+    .prepare('SELECT id, cluster_key, title, category, source_count, score, tags, keywords, image_candidates FROM editorial_pitches WHERE id = ? OR cluster_key = ? LIMIT 1')
     .bind(id || lookupKey, lookupKey)
     .first<PitchRecord>();
 
@@ -499,11 +672,13 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
       .prepare('UPDATE editorial_pitches SET status = ?, expires_at = ?, updated_at = ? WHERE id = ? OR cluster_key = ?')
       .bind(status, tombstoneExpiresAt, now, existing.id, lookupKey)
       .run();
+    await rememberExistingPitch(db, existing, status, tombstoneExpiresAt);
   } else {
     await db
       .prepare('UPDATE editorial_pitches SET status = ?, updated_at = ? WHERE id = ? OR cluster_key = ?')
       .bind(status, now, existing.id, lookupKey)
       .run();
+    await rememberExistingPitch(db, existing, status);
   }
 
   let queue = null;

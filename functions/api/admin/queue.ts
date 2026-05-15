@@ -361,6 +361,64 @@ const slugify = (value: unknown) =>
     .replace(/^-+|-+$/g, '')
     .slice(0, 120);
 
+const memoryTokens = (value: unknown) => {
+  const blocked = new Set(['para', 'com', 'uma', 'das', 'dos', 'que', 'por', 'sobre', 'apos', 'entre', 'como', 'mais', 'radar', 'veja', 'confira', 'onde', 'hoje']);
+  return clean(value, 1000)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((token, index, values) => token.length > 3 && !blocked.has(token) && values.indexOf(token) === index)
+    .slice(0, 9);
+};
+
+const memorySubjectKey = (row: Pick<QueueRow, 'category' | 'title' | 'summary' | 'tags' | 'keywords'>) => {
+  const tokens = memoryTokens(`${row.title} ${row.summary} ${parseArray(row.tags).join(' ')} ${row.keywords}`);
+  return `${slugify(row.category) || 'geral'}:${tokens.length >= 3 ? tokens.join('-') : slugify(row.title)}`;
+};
+
+const missingMemoryTable = (error: unknown) =>
+  String(error instanceof Error ? error.message : error).toLowerCase().includes('no such table: editorial_memory');
+
+const markMemoryPublished = async (db: D1Database, row: QueueRow, articleSlug: string) => {
+  const subjectKey = memorySubjectKey(row);
+  const now = new Date().toISOString();
+  try {
+    await db
+      .prepare(
+        `INSERT INTO editorial_memory (
+          id, subject_key, category, title, status, source_count, strength,
+          first_seen_at, last_seen_at, last_pitch_id, article_slug, metadata, expires_at
+        ) VALUES (?, ?, ?, ?, 'published', ?, ?, ?, ?, ?, ?, ?, '')
+        ON CONFLICT(subject_key) DO UPDATE SET
+          status = 'published',
+          source_count = MAX(editorial_memory.source_count, excluded.source_count),
+          strength = MAX(editorial_memory.strength, excluded.strength),
+          last_seen_at = excluded.last_seen_at,
+          last_pitch_id = excluded.last_pitch_id,
+          article_slug = excluded.article_slug,
+          metadata = excluded.metadata,
+          expires_at = ''`,
+      )
+      .bind(
+        `memory:${subjectKey}`,
+        subjectKey,
+        row.category || 'Brasil',
+        row.title || articleSlug,
+        Number(row.source_count || 0),
+        Number(row.score || 0),
+        now,
+        now,
+        row.pitch_id,
+        articleSlug,
+        JSON.stringify({ keywords: row.keywords || '', tags: parseArray(row.tags) }),
+      )
+      .run();
+  } catch (error) {
+    if (!missingMemoryTable(error)) throw error;
+  }
+};
+
 const parseArray = (value: string) => {
   try {
     const parsed = JSON.parse(value || '[]');
@@ -1130,6 +1188,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
         .prepare("UPDATE editorial_pitches SET status = 'converted', updated_at = ? WHERE id = ?")
         .bind(new Date().toISOString(), item.pitch_id)
         .run();
+      await markMemoryPublished(db, item, article.slug);
       published.push({ queueId: item.id, slug: article.slug, title: article.title, staticPublish: (data as { staticPublish?: unknown }).staticPublish });
     } catch (error) {
       await db
