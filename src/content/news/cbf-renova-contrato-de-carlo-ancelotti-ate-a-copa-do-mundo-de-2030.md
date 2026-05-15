@@ -6,18 +6,18 @@ seoDescription: "Futebol: A Confederação Brasileira de Futebol (CBF) renovou o
 category: "Futebol"
 author: "Redação Novo Alvo"
 sources: ["Portal Integração", "Clic Camaquã", "Terra", "Portal Márcia Piovesan", "- Bahia Economica", "A Crítica", "ES HOJE", "n3news.com.br", "CBN", "Folha BV", "UOL Notícias", "portalsalvadorfm.com.br"]
-publishedAt: "2026-05-15T06:55:36.233Z"
-updatedAt: "2026-05-15T06:55:37.005Z"
+publishedAt: "2026-05-15T19:42:11.502Z"
+updatedAt: "2026-05-15T19:42:12.079Z"
 featured: false
 isFeatured: false
 urgent: false
 views: 0
 cover:
-  src: "https://www.portalnovoalvo.com.br/media/news/cbf-renova-contrato-de-carlo-ancelotti-ate-a-copa-do-mundo-de-2030-cover.jpg"
+  src: "https://www.portalnovoalvo.com.br/media/news/cbf-renova-contrato-de-carlo-ancelotti-ate-a-copa-do-mundo-de-2030-cover.webp"
   alt: "Carlo Ancelotti em reunião com Gianni Infantino, presidente da FIFA."
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://www.portalnovoalvo.com.br/media/news/cbf-renova-contrato-de-carlo-ancelotti-ate-a-copa-do-mundo-de-2030-cover.jpg"
+ogImage: "https://www.portalnovoalvo.com.br/media/news/cbf-renova-contrato-de-carlo-ancelotti-ate-a-copa-do-mundo-de-2030-cover.webp"
 tags: ["futebol", "renova", "contrato", "carlo", "ancelotti", "copa", "mundo", "2030"]
 ---
 
