@@ -6,85 +6,121 @@ const FEEDS = {
     'https://news.google.com/rss/headlines/section/topic/CAAqJQgKIh9DQkFTRVFvSUwyMHZNRzV6Y0hjU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
     googleNewsSearch('Brasil governo estados cidades crise servicos publicos when:24h'),
     googleNewsSearch('brasileiros policia transporte educacao saude urbana when:24h'),
+    googleNewsSearch('seguranca publica infraestrutura moradia energia transporte Brasil when:24h'),
+    googleNewsSearch('prefeitura estado governador enchente crime investigacao comunidade when:24h'),
   ],
   Politica: [
     googleNewsSearch('politica OR governo OR congresso OR STF OR eleicoes when:24h'),
     googleNewsSearch('Planalto Congresso Senado Camara STF bastidores poder when:24h'),
     googleNewsSearch('Lula Bolsonaro ministro deputado senador governo when:24h'),
+    googleNewsSearch('votacao projeto de lei relator partido base oposicao when:24h'),
+    googleNewsSearch('governador prefeito camara municipal assembleia legislativa when:24h'),
   ],
   Mundo: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx1YlY4U0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
     googleNewsSearch('geopolitica guerra eleicoes mundo impacto Brasil when:24h'),
     googleNewsSearch('Estados Unidos China Europa Argentina Oriente Medio when:24h'),
+    googleNewsSearch('Trump Xi Putin Europa ONU conflito acordo internacional when:24h'),
+    googleNewsSearch('imigracao sancoes comercio global diplomacia fronteira when:24h'),
   ],
   Economia: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx6TVd4b1NKVXlMd0pVUXlnQVAB?hl=pt-BR&gl=BR&ceid=BR:pt-419',
     googleNewsSearch('economia juros inflacao dolar bolsa emprego credito when:24h'),
     googleNewsSearch('mercado empresas bancos governo poder de compra when:24h'),
+    googleNewsSearch('Banco Central Selic IPCA varejo industria contas publicas when:24h'),
+    googleNewsSearch('petrobras imposto arrecadacao investimento divida consumo when:24h'),
   ],
   Tecnologia: [
     'https://news.google.com/rss/headlines/section/topic/CAAqKggKIiRDQkFTRFvSUwyMHZNRGRqTVhZU0JXVnVMVWRDR2dKUVN5Z0FQAQ?hl=pt-BR&gl=BR&ceid=BR:pt-419',
     googleNewsSearch('tecnologia inteligencia artificial chips ciberseguranca app when:24h'),
     googleNewsSearch('big tech apple google microsoft meta openai dados privacidade when:24h'),
+    googleNewsSearch('startup software hardware vazamento dados android iphone when:24h'),
+    googleNewsSearch('IA generativa data center semicondutor robotica seguranca digital when:24h'),
   ],
   Entretenimento: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGRqTVdZU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
     googleNewsSearch('entretenimento tv streaming reality show cultura pop when:24h'),
     googleNewsSearch('celebridades internet viral audiencia tiktok evento when:24h'),
     googleNewsSearch('reality show novela televisao audiencia participante eliminacao when:24h'),
+    googleNewsSearch('BBB A Fazenda MasterChef novela Globo SBT Record when:24h'),
+    googleNewsSearch('serie plataforma trailer estreia audiencia programa apresentador when:24h'),
   ],
   Esportes: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFp1ZEdvU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
     googleNewsSearch('esportes olimpico volei basquete formula surf tenis when:24h'),
     googleNewsSearch('competicao atleta tecnico final campeonato recorde when:24h'),
+    googleNewsSearch('volei basquete tenis formula 1 surf ufc atletismo natacao when:24h'),
+    googleNewsSearch('nba nfl mma skate ginastica olimpica brasileiro mundial when:24h'),
   ],
   Ciencia: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFp0Y1RjU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
     googleNewsSearch('ciencia pesquisa espaco clima descoberta estudo cientifico when:24h'),
     googleNewsSearch('nasa astronomia biologia ambiente inovacao universidade when:24h'),
+    googleNewsSearch('pesquisadores artigo cientifico experimento planeta oceano clima when:24h'),
+    googleNewsSearch('fossil satelite energia limpa laboratorio descoberta genetica when:24h'),
   ],
   Saude: [
     'https://news.google.com/rss/headlines/section/topic/CAAqIQgKIhtDQkFTRGdvSUwyMHZNR3QwTlRFU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
     googleNewsSearch('saude medicina vacina hospital bem estar doenca when:24h'),
     googleNewsSearch('ans sus medicamento pesquisa clinica saude mental when:24h'),
+    googleNewsSearch('anvisa plano de saude epidemia tratamento cancer dengue when:24h'),
+    googleNewsSearch('medico paciente estudo clinico remedio prevencao nutricao when:24h'),
   ],
   Famosos: [
     googleNewsSearch('celebridades famosos influenciadores bastidores viral when:24h'),
     googleNewsSearch('atriz cantor apresentador influencer relacionamento when:24h'),
+    googleNewsSearch('famoso famosa namoro separacao casamento filho redes sociais when:24h'),
+    googleNewsSearch('instagram celebridade artista polemica entrevista bastidor when:24h'),
   ],
   Futebol: [
     googleNewsSearch('futebol brasileiro brasileirao libertadores copa do brasil when:24h'),
     googleNewsSearch('flamengo corinthians palmeiras sao paulo vasco botafogo fluminense when:24h'),
     googleNewsSearch('mercado da bola tecnico SAF clube jogador when:24h'),
+    googleNewsSearch('serie a serie b escalacao lesao treinador atacante goleiro when:24h'),
+    googleNewsSearch('selecao brasileira CBF Neymar Vini Ancelotti copa when:24h'),
   ],
   Games: [
     googleNewsSearch('games playstation xbox nintendo steam game pass when:24h'),
-    googleNewsSearch('ps5 xbox switch 2 gta fortnite lançamento bug review when:24h'),
+    googleNewsSearch('ps5 xbox switch 2 gta fortnite lancamento bug review when:24h'),
+    googleNewsSearch('steam epic games game pass nintendo direct playstation plus when:24h'),
+    googleNewsSearch('esports gamer trailer gameplay patch update estudio when:24h'),
   ],
   Lifestyle: [
     googleNewsSearch('estilo de vida comportamento viagem gastronomia produtividade when:24h'),
     googleNewsSearch('casa consumo tendencia comportamento familia rotina when:24h'),
+    googleNewsSearch('turismo restaurante receita decoracao bem estar pets when:24h'),
+    googleNewsSearch('relacionamento trabalho remoto rotina consumo viagem barato when:24h'),
   ],
   Educacao: [
     googleNewsSearch('educacao enem vestibular carreira escola universidade when:24h'),
     googleNewsSearch('mec professor aluno ensino superior concurso when:24h'),
+    googleNewsSearch('inep sisu prouni fies escola publica faculdade when:24h'),
+    googleNewsSearch('curso tecnico bolsa estudo aprendizagem salario carreira when:24h'),
   ],
   Cultura: [
     googleNewsSearch('cultura arte literatura teatro museu livro when:24h'),
     googleNewsSearch('exposicao festival premio autor artista cultura brasileira when:24h'),
+    googleNewsSearch('bienal show cultural patrimonio danca teatro cinema nacional when:24h'),
+    googleNewsSearch('escritor artista obra exposicao festival publico agenda cultural when:24h'),
   ],
   Moda: [
     googleNewsSearch('moda fashion tendencias passarela marca colecao when:24h'),
     googleNewsSearch('look estilista grife beleza consumo moda sustentavel when:24h'),
+    googleNewsSearch('semana de moda roupa varejo beleza cosmetico tendencia when:24h'),
+    googleNewsSearch('influencer moda marca desfile sapato bolsa estilo when:24h'),
   ],
   Musica: [
     googleNewsSearch('musica shows album festival clipe banda when:24h'),
     googleNewsSearch('turne single spotify funk sertanejo rap pop rock when:24h'),
     googleNewsSearch('musica brasileira show palco gravadora lancamento musical when:24h'),
+    googleNewsSearch('cantor cantora banda festival lollapalooza rock in rio when:24h'),
+    googleNewsSearch('streaming musical billboard parada clipe composicao turne when:24h'),
   ],
   Cinema: [
     googleNewsSearch('cinema filmes streaming bilheteria festival Cannes Oscar when:24h'),
     googleNewsSearch('Netflix Max Prime Video Disney filme serie estreia when:24h'),
+    googleNewsSearch('filme diretor atriz ator trailer critica festival cinema when:24h'),
+    googleNewsSearch('bilheteria estreia longa metragem documentario streaming salas when:24h'),
   ],
 };
 
@@ -135,6 +171,8 @@ const SOURCE_EXPANSION_TARGET = Number(process.env.SOURCE_EXPANSION_TARGET || 12
 const SOURCE_EXPANSION_MIN_OVERLAP = Number(process.env.SOURCE_EXPANSION_MIN_OVERLAP || 0.34);
 const MAX_PITCHES = Number(process.env.MAX_PITCHES || 80);
 const CATEGORY_MAX_PITCHES = Number(process.env.CATEGORY_MAX_PITCHES || 8);
+const CATEGORY_MIN_SOURCES = Number(process.env.CATEGORY_MIN_SOURCES || 3);
+const ACTIVE_MIN_SOURCES = IS_CATEGORY_MODE ? Math.min(MIN_SOURCES, CATEGORY_MIN_SOURCES) : MIN_SOURCES;
 
 const decodeEntities = (value) =>
   String(value || '')
@@ -400,7 +438,7 @@ const clusterItems = (items) => {
   return clusters;
 };
 
-const buildCategoryRadarClusters = async (items) => {
+const buildCategoryRadarClusters = async (items, minSources = MIN_SOURCES) => {
   const byCategory = new Map();
   for (const item of items) {
     const bucket = byCategory.get(item.category) || [];
@@ -417,20 +455,20 @@ const buildCategoryRadarClusters = async (items) => {
       const expanded = await expandClusterSources([seed]);
       const batch = expanded
         .filter((item) => item === seed || overlapScore(seed, item) >= SOURCE_EXPANSION_MIN_OVERLAP)
-        .slice(0, Math.max(MIN_SOURCES, SOURCE_EXPANSION_TARGET))
+        .slice(0, Math.max(minSources, SOURCE_EXPANSION_TARGET))
         .map((item) => ({
           ...item,
           title: item.title,
           radarCluster: true,
           radarSeed: seed.title,
         }));
-      if (distinctBySource(batch).length >= MIN_SOURCES) clusters.push(batch);
+      if (distinctBySource(batch).length >= minSources) clusters.push(batch);
     }
   }
   return clusters;
 };
 
-const buildCategoryFloorPitches = (items, existingPitches = [], categories = Object.keys(FEEDS)) => {
+const buildCategoryFloorPitches = (items, existingPitches = [], categories = Object.keys(FEEDS), minSources = MIN_SOURCES) => {
   const covered = new Set(existingPitches.map((pitch) => pitch.category));
   const byCategory = new Map();
   for (const item of items) {
@@ -444,8 +482,8 @@ const buildCategoryFloorPitches = (items, existingPitches = [], categories = Obj
     .map((category) => {
       const categoryItems = distinctBySource(byCategory.get(category) || [])
         .sort((a, b) => itemRelevanceScore(b, byCategory.get(category) || []) - itemRelevanceScore(a, byCategory.get(category) || []))
-        .slice(0, Math.max(3, Math.min(MIN_SOURCES, SOURCE_EXPANSION_TARGET)));
-      if (categoryItems.length < 3) return null;
+        .slice(0, Math.max(minSources, Math.min(MIN_SOURCES, SOURCE_EXPANSION_TARGET)));
+      if (categoryItems.length < minSources) return null;
       const pitch = buildPitch(categoryItems.map((item) => ({ ...item, radarCluster: true, coverageFloor: true })));
       return {
         ...pitch,
@@ -667,7 +705,7 @@ const main = async () => {
   const startedAt = new Date().toISOString();
   const pitchLimit = IS_CATEGORY_MODE ? Math.min(CATEGORY_MAX_PITCHES, MAX_PITCHES) : MAX_PITCHES;
 
-  console.log(`Modo ingest: ${IS_CATEGORY_MODE ? ACTIVE_CATEGORIES.join(', ') : 'todas as categorias'}. Limite de pautas: ${pitchLimit}.`);
+  console.log(`Modo ingest: ${IS_CATEGORY_MODE ? ACTIVE_CATEGORIES.join(', ') : 'todas as categorias'}. Limite de pautas: ${pitchLimit}. Fontes minimas: ${ACTIVE_MIN_SOURCES}.`);
   const rawItems = (await Promise.all(feedEntries(ACTIVE_CATEGORIES).map(fetchFeed))).flat();
   const freshItems = rawItems.filter(isFreshItem);
   const allItems = IS_CATEGORY_MODE ? freshItems.filter((item) => ACTIVE_CATEGORIES.includes(item.category)) : freshItems;
@@ -679,13 +717,13 @@ const main = async () => {
   const topicClusters = await Promise.all(clusterItems(allItems).map(expandClusterSources));
   const topicPitches = topicClusters
     .map(buildPitch)
-    .filter((pitch) => pitch.sourceCount >= MIN_SOURCES)
+    .filter((pitch) => pitch.sourceCount >= ACTIVE_MIN_SOURCES)
     .sort((a, b) => b.score - a.score);
-  const radarPitches = (await buildCategoryRadarClusters(allItems))
+  const radarPitches = (await buildCategoryRadarClusters(allItems, ACTIVE_MIN_SOURCES))
     .map(buildPitch)
-    .filter((pitch) => pitch.sourceCount >= MIN_SOURCES && !topicPitches.some((existing) => existing.clusterKey === pitch.clusterKey))
+    .filter((pitch) => pitch.sourceCount >= ACTIVE_MIN_SOURCES && !topicPitches.some((existing) => existing.clusterKey === pitch.clusterKey))
     .sort((a, b) => b.score - a.score);
-  const coveragePitches = buildCategoryFloorPitches(allItems, [...topicPitches, ...radarPitches], ACTIVE_CATEGORIES);
+  const coveragePitches = buildCategoryFloorPitches(allItems, [...topicPitches, ...radarPitches], ACTIVE_CATEGORIES, ACTIVE_MIN_SOURCES);
   const pitches = balancePitches(topicPitches, radarPitches, coveragePitches, pitchLimit, ACTIVE_CATEGORIES);
 
   let saved = 0;
