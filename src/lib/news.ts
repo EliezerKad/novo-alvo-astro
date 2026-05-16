@@ -69,6 +69,7 @@ export function newsEntryToArticle(entry: NewsEntry): Article {
     createdAt: (entry.data.updatedAt ?? entry.data.publishedAt).toISOString(),
     slug: entry.data.slug,
     isFeatured: entry.data.featured || entry.data.isFeatured,
+    homeSection: entry.data.homeSection,
     views: entry.data.views,
     author: entry.data.author,
   };

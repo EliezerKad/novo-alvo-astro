@@ -146,6 +146,15 @@ const mediaCoverCaption = (mediaJson: string, coverUrl: string) => {
   return cleanImageCredit(record.credit || record.caption || record.sourcePublisher);
 };
 
+const mediaHomeSection = (mediaJson: string) => {
+  const marker = fromJsonArray(mediaJson).find((item) => {
+    if (!item || typeof item !== 'object') return false;
+    const record = item as Record<string, unknown>;
+    return record.type === 'editorialFlag' && record.homeSection === 'now';
+  });
+  return marker ? 'now' : '';
+};
+
 const toBase64 = (value: string) => {
   const bytes = new TextEncoder().encode(value);
   let binary = '';
@@ -387,6 +396,7 @@ updatedAt: ${yamlString(article.updatedAt)}
 featured: false
 isFeatured: false
 urgent: false
+homeSection: ${yamlString(mediaHomeSection(article.media))}
 views: 0
 cover:
   src: ${yamlString(coverUrl)}

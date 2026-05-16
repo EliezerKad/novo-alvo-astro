@@ -13,6 +13,7 @@ export interface Article {
   createdAt: string;
   slug: string;
   isFeatured?: boolean;
+  homeSection?: string;
   views?: number;
   author?: string;
 }

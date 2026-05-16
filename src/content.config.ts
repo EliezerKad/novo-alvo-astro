@@ -19,6 +19,7 @@ const news = defineCollection({
     featured: z.boolean().default(false),
     isFeatured: z.boolean().default(false),
     urgent: z.boolean().default(false),
+    homeSection: z.string().optional(),
     views: z.number().int().nonnegative().default(0),
     cover: z.object({
       src: z.url(),

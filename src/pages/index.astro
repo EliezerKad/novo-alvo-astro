@@ -31,8 +31,14 @@ const tickerArticles = urgentNews(newsEntries).map(newsEntryToArticle);
 const featured = featuredArticles[0] || visibleArticles[0];
 const topNews = visibleArticles.filter((article) => article.id !== featured.id).slice(0, 4);
 const pulseArticles = visibleArticles.filter((article) => article.id !== featured.id).slice(0, 3);
-const nowLead = topNews[0] || featured;
-const nowRows = visibleArticles.filter((article) => article.id !== nowLead.id && article.id !== featured.id).slice(0, 4);
+const nowCandidates = visibleArticles.filter((article) => article.homeSection === 'now');
+const nowLead = nowCandidates[0] || topNews[0] || featured;
+const nowRows = [
+  ...nowCandidates.filter((article) => article.id !== nowLead.id),
+  ...visibleArticles.filter(
+    (article) => article.id !== nowLead.id && article.id !== featured.id && article.homeSection !== 'now',
+  ),
+].slice(0, 4);
 const mostRead = [...articles].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
 const categorySections = [...categoriesList, ...subCategoriesList]
   .map((sectionCategory) => ({

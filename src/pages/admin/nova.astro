@@ -298,6 +298,17 @@ const aiActions = [
       </section>
 
       <section class="editor-panel">
+        <h2>Home</h2>
+        <label class="flex cursor-pointer items-center justify-between gap-4 rounded-3xl bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl dark:bg-zinc-950">
+          <span>
+            <span class="block text-xs font-black uppercase tracking-[0.18em] text-zinc-950 dark:text-white">Agora no Portal</span>
+            <span class="mt-1 block text-xs font-medium leading-5 text-zinc-400">Usar esta matéria como destaque da seção Agora no Portal.</span>
+          </span>
+          <input type="checkbox" data-home-now-input class="h-5 w-5 accent-red-600" />
+        </label>
+      </section>
+
+      <section class="editor-panel">
         <h2>Tags</h2>
         <div class="flex gap-2">
           <input data-tag-input class="input-soft" placeholder="Adicionar tag" />
@@ -1353,6 +1364,11 @@ const aiActions = [
         const slug = slugInput?.value.trim() || slugify(title);
         const coverUrl = document.querySelector('[data-cover-url]')?.value.trim() || '';
         const coverAlt = document.querySelector('[data-cover-alt]')?.value.trim() || title;
+        const homeNowInput = document.querySelector('[data-home-now-input]');
+        const editorialMedia = mediaItems.filter((item) => item?.type !== 'editorialFlag');
+        if (homeNowInput?.checked) {
+          editorialMedia.push({ type: 'editorialFlag', homeSection: 'now' });
+        }
         return {
           id: currentArticleId || (slug ? `article:${slug}` : undefined),
           slug,
@@ -1368,7 +1384,7 @@ const aiActions = [
           keywords: keywordsInput?.value.trim() || '',
           tags,
           sources,
-          media: mediaItems,
+          media: editorialMedia,
           readingMinutes: getReadingTime(),
           scheduledAt,
           publishedAt: statusValue === 'published' ? new Date().toISOString() : '',
@@ -2402,9 +2418,14 @@ const aiActions = [
             coverEmpty?.classList.add('hidden');
           }
 
+          const parsedMedia = parseStoredJson(article.media);
+          const homeNowInput = document.querySelector('[data-home-now-input]');
+          if (homeNowInput) {
+            homeNowInput.checked = parsedMedia.some((item) => item?.type === 'editorialFlag' && item?.homeSection === 'now');
+          }
           tags.splice(0, tags.length, ...parseStoredJson(article.tags).map(String));
           sources.splice(0, sources.length, ...parseStoredJson(article.sources));
-          mediaItems.splice(0, mediaItems.length, ...parseStoredJson(article.media));
+          mediaItems.splice(0, mediaItems.length, ...parsedMedia.filter((item) => item?.type !== 'editorialFlag'));
           renderTags();
           renderSources();
           renderMediaList();
