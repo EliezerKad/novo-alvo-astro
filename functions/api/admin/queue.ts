@@ -21,6 +21,7 @@ type Env = {
   BING_IMAGE_SEARCH_KEY?: string;
   BING_IMAGE_SEARCH_ENDPOINT?: string;
   BING_IMAGE_LICENSE?: string;
+  QUEUE_MAX_AGE_HOURS?: string;
 };
 
 type QueueRow = {
@@ -1207,6 +1208,20 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   const url = new URL(request.url);
   const limit = Math.max(1, Math.min(5, Number(url.searchParams.get('limit') || 2)));
   const now = new Date().toISOString();
+  const maxQueueAgeHours = Math.max(1, Math.min(96, Number((env as { QUEUE_MAX_AGE_HOURS?: string }).QUEUE_MAX_AGE_HOURS || 18)));
+  const staleCutoff = new Date(Date.now() - maxQueueAgeHours * 60 * 60 * 1000).toISOString();
+  await db
+    .prepare(
+      `UPDATE editorial_queue
+       SET status = 'failed',
+           error = ?,
+           updated_at = ?
+       WHERE status = 'queued'
+         AND publish_after < ?`,
+    )
+    .bind(`Expirada antes da publicacao automatica (${maxQueueAgeHours}h).`, now, staleCutoff)
+    .run();
+
   const due = await db
     .prepare(
       `SELECT q.id, q.pitch_id, q.category, q.publish_after, p.title, p.summary, p.sources, p.tags, p.keywords, p.image_candidates, p.score, p.source_count

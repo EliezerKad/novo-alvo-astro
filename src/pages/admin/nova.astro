@@ -2551,7 +2551,11 @@ const aiActions = [
                 keywords: keywordsInput?.value || '',
               }),
             });
-            const data = await response.json();
+            const contentType = response.headers.get('content-type') || '';
+            const data = contentType.includes('application/json') ? await response.json() : {};
+            if (!contentType.includes('application/json')) {
+              throw new Error('A rota de IA respondeu HTML em vez de JSON. Reimplante o Pages Functions ou confira /api/editorial-ai.');
+            }
             if (!response.ok) throw new Error(data.error || 'Falha ao gerar sugestao.');
             applyAiResult(action, data.result || {});
             setStatus(`${action}: pronto`);

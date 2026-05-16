@@ -127,6 +127,12 @@ const FEEDS = {
     googleNewsSearch('filme diretor atriz ator trailer critica festival cinema when:24h'),
     googleNewsSearch('bilheteria estreia longa metragem documentario streaming salas when:24h'),
   ],
+  Ocorrencias: [
+    googleNewsSearch('acidente feridos mortos incendio explosao resgate when:24h'),
+    googleNewsSearch('desabamento queda temporal enchente interdição bombeiros when:24h'),
+    googleNewsSearch('tiroteio operação policial prisão investigação crime when:24h'),
+    googleNewsSearch('defesa civil samu vítimas emergência rodovia bloqueio when:24h'),
+  ],
 };
 
 const normalizeCategoryKey = (value) =>
@@ -178,6 +184,10 @@ const MAX_PITCHES = Number(process.env.MAX_PITCHES || 80);
 const CATEGORY_MAX_PITCHES = Number(process.env.CATEGORY_MAX_PITCHES || 8);
 const CATEGORY_MIN_SOURCES = Number(process.env.CATEGORY_MIN_SOURCES || 3);
 const ACTIVE_MIN_SOURCES = IS_CATEGORY_MODE ? Math.min(MIN_SOURCES, CATEGORY_MIN_SOURCES) : MIN_SOURCES;
+const CATEGORY_FLOOR_MIN_SOURCES = Number(process.env.CATEGORY_FLOOR_MIN_SOURCES || 1);
+const CATEGORY_MAX_ITEM_AGE_HOURS = Number(process.env.CATEGORY_MAX_ITEM_AGE_HOURS || 72);
+const ACTIVE_ITEM_AGE_HOURS = IS_CATEGORY_MODE ? Math.max(MAX_ITEM_AGE_HOURS, CATEGORY_MAX_ITEM_AGE_HOURS) : MAX_ITEM_AGE_HOURS;
+const ACTIVE_FLOOR_MIN_SOURCES = IS_CATEGORY_MODE ? Math.max(1, Math.min(ACTIVE_MIN_SOURCES, CATEGORY_FLOOR_MIN_SOURCES)) : ACTIVE_MIN_SOURCES;
 
 const decodeEntities = (value) =>
   String(value || '')
@@ -285,6 +295,11 @@ const MUSIC_CONTEXT_PATTERN =
 
 const CATEGORY_SIGNALS = [
   {
+    category: 'Ocorrencias',
+    pattern:
+      /\b(acidente|acidentes|ferido|feridos|morto|mortos|morte|incendio|incendios|explosao|desabamento|queda|resgate|soterramento|tiroteio|operacao policial|prisao|crime|enchente|alagamento|temporal|interdicao|bombeiros|defesa civil|samu|vitima|vitimas|rodovia bloqueada)\b/i,
+  },
+  {
     category: 'Futebol',
     pattern: FOOTBALL_CONTEXT_PATTERN,
   },
@@ -349,7 +364,7 @@ const classifyCategory = (feedCategory, title, source) => {
   }
   if (REALITY_ENTERTAINMENT_PATTERN.test(text) && !MUSIC_CONTEXT_PATTERN.test(text)) return 'Entretenimento';
   const matches = CATEGORY_SIGNALS.filter((item) => item.pattern.test(text));
-  const priorityMatch = ['Futebol', 'Politica', 'Games', 'Cinema', 'Entretenimento', 'Cultura', 'Saude', 'Ciencia', 'Musica'].map((category) => matches.find((item) => item.category === category)).find(Boolean);
+  const priorityMatch = ['Ocorrencias', 'Futebol', 'Politica', 'Games', 'Cinema', 'Entretenimento', 'Cultura', 'Saude', 'Ciencia', 'Musica'].map((category) => matches.find((item) => item.category === category)).find(Boolean);
   const economy = matches.find((item) => item.category === 'Economia');
   const fashion = matches.find((item) => item.category === 'Moda');
   const fashionScore = (text.match(/\b(moda|fashion|look|looks|tendencia|tendencias|passarela|estilista|vestido|grife|colecao)\b/gi) || []).length;
@@ -389,7 +404,7 @@ const itemAgeHours = (item) => {
   return Math.max(0, (Date.now() - timestamp) / 36e5);
 };
 
-const isFreshItem = (item) => itemAgeHours(item) <= MAX_ITEM_AGE_HOURS;
+const isFreshItem = (item) => itemAgeHours(item) <= ACTIVE_ITEM_AGE_HOURS;
 
 const itemRelevanceScore = (item, peers = []) => {
   const related = peers.reduce((total, peer) => (peer === item ? total : total + overlapScore(item, peer)), 0);
@@ -510,7 +525,14 @@ const buildCategoryRadarClusters = async (items, minSources = MIN_SOURCES) => {
   return clusters;
 };
 
-const buildCategoryFloorPitches = (items, existingPitches = [], categories = Object.keys(FEEDS), minSources = MIN_SOURCES) => {
+const buildCategoryFloorPitches = (
+  items,
+  existingPitches = [],
+  categories = Object.keys(FEEDS),
+  minSources = MIN_SOURCES,
+  perCategoryLimit = 1,
+  respectCovered = true,
+) => {
   const covered = new Set(existingPitches.map((pitch) => pitch.category));
   const byCategory = new Map();
   for (const item of items) {
@@ -520,20 +542,30 @@ const buildCategoryFloorPitches = (items, existingPitches = [], categories = Obj
   }
 
   return categories
-    .filter((category) => !covered.has(category))
-    .map((category) => {
+    .filter((category) => !respectCovered || !covered.has(category))
+    .flatMap((category) => {
       const categoryItems = distinctBySource(byCategory.get(category) || [])
         .sort((a, b) => itemRelevanceScore(b, byCategory.get(category) || []) - itemRelevanceScore(a, byCategory.get(category) || []))
-        .slice(0, Math.max(minSources, Math.min(MIN_SOURCES, SOURCE_EXPANSION_TARGET)));
+        .slice(0, Math.max(perCategoryLimit, Math.min(SOURCE_EXPANSION_TARGET, MAX_ITEMS_PER_FEED)));
       if (categoryItems.length < minSources) return null;
-      const pitch = buildPitch(categoryItems.map((item) => ({ ...item, radarCluster: true, coverageFloor: true })));
-      return {
-        ...pitch,
-        clusterKey: `${slugify(category)}:coverage:${slugify(categoryItems[0].title)}`,
-        sourceCount: categoryItems.length,
-        score: Math.min(780, 520 + categoryItems.length * 35 + pitch.tags.length * 6),
-        summary: `Cobertura minima da editoria ${category}. A abordagem editorial deve escolher o fato mais forte, evitar repeticao e transformar a pauta em materia util.`,
-      };
+      const batchSize = Math.max(1, minSources);
+      const batches = [];
+      for (let index = 0; index < categoryItems.length && batches.length < perCategoryLimit; index += batchSize) {
+        const batch = categoryItems.slice(index, index + batchSize);
+        if (batch.length < minSources) continue;
+        const pitch = buildPitch(batch.map((item) => ({ ...item, radarCluster: true, coverageFloor: true, lowCoverage: minSources < ACTIVE_MIN_SOURCES })));
+        batches.push({
+          ...pitch,
+          clusterKey: `${slugify(category)}:coverage:${slugify(batch[0].title)}`,
+          sourceCount: batch.length,
+          score: Math.min(minSources < 3 ? 690 : 780, 520 + batch.length * 35 + pitch.tags.length * 6),
+          summary:
+            minSources < 3
+              ? `Sinal inicial da editoria ${category}. A pauta ainda tem cobertura pequena, mas pode render nota curta se houver fato concreto, agente identificado e consequencia util.`
+              : `Cobertura minima da editoria ${category}. A abordagem editorial deve escolher o fato mais forte, evitar repeticao e transformar a pauta em materia util.`,
+        });
+      }
+      return batches;
     })
     .filter(Boolean);
 };
@@ -742,7 +774,9 @@ const main = async () => {
   const startedAt = new Date().toISOString();
   const pitchLimit = IS_CATEGORY_MODE ? Math.min(CATEGORY_MAX_PITCHES, MAX_PITCHES) : MAX_PITCHES;
 
-  console.log(`Modo ingest: ${IS_CATEGORY_MODE ? ACTIVE_CATEGORIES.join(', ') : 'todas as categorias'}. Limite de pautas: ${pitchLimit}. Fontes minimas: ${ACTIVE_MIN_SOURCES}.`);
+  console.log(
+    `Modo ingest: ${IS_CATEGORY_MODE ? ACTIVE_CATEGORIES.join(', ') : 'todas as categorias'}. Limite de pautas: ${pitchLimit}. Fontes minimas: ${ACTIVE_MIN_SOURCES}. Piso: ${ACTIVE_FLOOR_MIN_SOURCES}.`,
+  );
   const rawItems = (await Promise.all(feedEntries(ACTIVE_CATEGORIES).map(fetchFeed))).flat();
   const freshItems = rawItems.filter(isFreshItem);
   const allItems = IS_CATEGORY_MODE ? freshItems.filter((item) => ACTIVE_CATEGORIES.includes(item.category)) : freshItems;
@@ -750,7 +784,7 @@ const main = async () => {
     acc[item.category] = (acc[item.category] || 0) + 1;
     return acc;
   }, {});
-  console.log(`Itens RSS brutos: ${rawItems.length}. Itens frescos (${MAX_ITEM_AGE_HOURS}h): ${allItems.length}.`);
+  console.log(`Itens RSS brutos: ${rawItems.length}. Itens frescos (${ACTIVE_ITEM_AGE_HOURS}h): ${allItems.length}.`);
   const topicClusters = await Promise.all(clusterItems(allItems).map(expandClusterSources));
   const topicPitches = topicClusters
     .map(buildPitch)
@@ -760,7 +794,14 @@ const main = async () => {
     .map(buildPitch)
     .filter((pitch) => pitch.sourceCount >= ACTIVE_MIN_SOURCES && !topicPitches.some((existing) => existing.clusterKey === pitch.clusterKey))
     .sort((a, b) => b.score - a.score);
-  const coveragePitches = buildCategoryFloorPitches(allItems, [...topicPitches, ...radarPitches], ACTIVE_CATEGORIES, ACTIVE_MIN_SOURCES);
+  const coveragePitches = buildCategoryFloorPitches(
+    allItems,
+    IS_CATEGORY_MODE ? [] : [...topicPitches, ...radarPitches],
+    ACTIVE_CATEGORIES,
+    ACTIVE_FLOOR_MIN_SOURCES,
+    IS_CATEGORY_MODE ? pitchLimit : 1,
+    !IS_CATEGORY_MODE,
+  );
   const pitches = balancePitches(topicPitches, radarPitches, coveragePitches, pitchLimit, ACTIVE_CATEGORIES);
 
   let saved = 0;

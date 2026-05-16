@@ -194,6 +194,26 @@ const active = viewParam === 'midia' ? 'media' : current.active;
           published: 'Publicada',
         })[value] || value || 'Rascunho';
 
+      const dateStack = (article) => {
+        if (article.status === 'scheduled') {
+          return `
+            <span class="block text-[9px] font-black uppercase tracking-widest text-red-600">Publica</span>
+            <span class="block text-[10px] font-bold text-zinc-600 dark:text-zinc-300">${formatDate(article.scheduled_at)}</span>
+            <span class="mt-1 block text-[9px] font-bold text-zinc-400">Salva ${formatDate(article.updated_at || article.created_at)}</span>
+          `;
+        }
+        if (article.status === 'published') {
+          return `
+            <span class="block text-[9px] font-black uppercase tracking-widest text-emerald-600">Publicada</span>
+            <span class="block text-[10px] font-bold text-zinc-600 dark:text-zinc-300">${formatDate(article.published_at || article.updated_at || article.created_at)}</span>
+          `;
+        }
+        return `
+          <span class="block text-[9px] font-black uppercase tracking-widest text-zinc-400">Atualizada</span>
+          <span class="block text-[10px] font-bold text-zinc-600 dark:text-zinc-300">${formatDate(article.updated_at || article.created_at)}</span>
+        `;
+      };
+
       const render = () => {
         const term = String(filterInput?.value || '').trim().toLowerCase();
         const filtered = articles.filter((article) =>
@@ -229,7 +249,7 @@ const active = viewParam === 'midia' ? 'media' : current.active;
                   </div>
                 </div>
                 <span class="text-[10px] font-black uppercase tracking-widest text-red-600">${escapeHtml(article.category || 'Editorial')}</span>
-                <span class="text-[10px] font-bold text-zinc-500">${formatDate(article.updated_at || article.created_at)}</span>
+                <span class="text-[10px] font-bold leading-5 text-zinc-500">${dateStack(article)}</span>
                 <span class="rounded-full bg-zinc-100 px-3 py-2 text-center text-[8px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900 dark:text-zinc-300">${escapeHtml(statusLabel(article.status))}</span>
                 <div class="flex items-center gap-2">
                   ${viewHref ? `<a href="${viewHref}" class="rounded-xl border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:border-red-600 hover:text-red-600 dark:border-zinc-800">Ver</a>` : ''}
