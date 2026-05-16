@@ -306,6 +306,13 @@ const aiActions = [
           </span>
           <input type="checkbox" data-home-now-input class="h-5 w-5 accent-red-600" />
         </label>
+        <label class="flex cursor-pointer items-center justify-between gap-4 rounded-3xl bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl dark:bg-zinc-950">
+          <span>
+            <span class="block text-xs font-black uppercase tracking-[0.18em] text-zinc-950 dark:text-white">Destaque principal</span>
+            <span class="mt-1 block text-xs font-medium leading-5 text-zinc-400">Usar esta matéria como a primeira chamada visual da home.</span>
+          </span>
+          <input type="checkbox" data-home-featured-input class="h-5 w-5 accent-red-600" />
+        </label>
       </section>
 
       <section class="editor-panel">
@@ -1365,9 +1372,13 @@ const aiActions = [
         const coverUrl = document.querySelector('[data-cover-url]')?.value.trim() || '';
         const coverAlt = document.querySelector('[data-cover-alt]')?.value.trim() || title;
         const homeNowInput = document.querySelector('[data-home-now-input]');
+        const homeFeaturedInput = document.querySelector('[data-home-featured-input]');
         const editorialMedia = mediaItems.filter((item) => item?.type !== 'editorialFlag');
         if (homeNowInput?.checked) {
           editorialMedia.push({ type: 'editorialFlag', homeSection: 'now' });
+        }
+        if (homeFeaturedInput?.checked) {
+          editorialMedia.push({ type: 'editorialFlag', homeSection: 'featured' });
         }
         return {
           id: currentArticleId || (slug ? `article:${slug}` : undefined),
@@ -2420,8 +2431,12 @@ const aiActions = [
 
           const parsedMedia = parseStoredJson(article.media);
           const homeNowInput = document.querySelector('[data-home-now-input]');
+          const homeFeaturedInput = document.querySelector('[data-home-featured-input]');
           if (homeNowInput) {
             homeNowInput.checked = parsedMedia.some((item) => item?.type === 'editorialFlag' && item?.homeSection === 'now');
+          }
+          if (homeFeaturedInput) {
+            homeFeaturedInput.checked = parsedMedia.some((item) => item?.type === 'editorialFlag' && item?.homeSection === 'featured');
           }
           tags.splice(0, tags.length, ...parseStoredJson(article.tags).map(String));
           sources.splice(0, sources.length, ...parseStoredJson(article.sources));

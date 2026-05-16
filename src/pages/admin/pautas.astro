@@ -193,6 +193,7 @@ const categories = [
     }
 
     .generated-article-body .editorial-inline-image {
+      position: relative;
       margin: 2rem 0;
       overflow: hidden;
       border-radius: 1.6rem;
@@ -216,6 +217,30 @@ const categories = [
 
     .dark .generated-article-body .editorial-inline-image {
       background: rgb(24 24 27);
+    }
+
+    .generated-image-remove {
+      position: absolute;
+      right: 0.75rem;
+      top: 0.75rem;
+      z-index: 2;
+      border-radius: 999px;
+      background: rgb(9 9 11 / 0.86);
+      color: white;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.58rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: 0.18s ease;
+    }
+
+    .generated-article-body [data-generated-image-block]:hover .generated-image-remove,
+    .generated-image-remove:focus-visible {
+      opacity: 1;
+      transform: translateY(0);
     }
   </style>
 
@@ -250,6 +275,8 @@ const categories = [
       let pitches = [];
       let status = 'new';
       const generatedArticles = new Map();
+      let activePitchId = '';
+      let activePitchMode = 'pitch';
 
       const escapeHtml = (value) =>
         String(value || '')
@@ -426,6 +453,8 @@ const categories = [
       const openPitchPreview = (id, mode = 'pitch') => {
         const pitch = pitches.find((item) => String(item.id || '') === String(id || ''));
         if (!pitch || !modal || !modalBody) return;
+        activePitchId = String(id || '');
+        activePitchMode = mode || 'pitch';
 
         const sources = parseArray(pitch.sources);
         const tags = parseArray(pitch.tags);
@@ -602,6 +631,27 @@ const categories = [
         if (mode === 'article') loadGeneratedArticle(id);
       };
 
+      const decorateGeneratedImages = (container) => {
+        if (!container) return;
+        [...container.querySelectorAll('img')].forEach((image) => {
+          if (image.closest('[data-generated-image-block]')) return;
+          const figure = image.closest('figure') || document.createElement('figure');
+          if (!image.closest('figure')) {
+            image.parentNode?.insertBefore(figure, image);
+            figure.appendChild(image);
+          }
+          figure.classList.add('editorial-inline-image');
+          figure.setAttribute('data-generated-image-block', 'true');
+          figure.setAttribute('contenteditable', 'false');
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'generated-image-remove';
+          button.dataset.removeGeneratedImage = 'true';
+          button.textContent = 'Remover imagem';
+          figure.appendChild(button);
+        });
+      };
+
       const loadGeneratedArticle = async (id) => {
         const target = document.querySelector('[data-generated-article]');
         const token = getToken();
@@ -666,6 +716,20 @@ const categories = [
             <h3 class="admin-display mt-4 text-3xl leading-none">${escapeHtml(article.title || 'Sem título')}</h3>
             ${articleMarkup}
           `;
+          const coverPanel = target.querySelector('[data-generated-cover-url]')?.closest('div');
+          if (coverPanel && !target.querySelector('[data-generated-featured-home]')) {
+            coverPanel.insertAdjacentHTML(
+              'afterend',
+              `<label class="mt-3 flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-zinc-100 bg-white p-4 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200">
+                <span>
+                  <span class="block text-[10px] font-black uppercase tracking-[0.2em] text-zinc-950 dark:text-white">Destaque principal da home</span>
+                  <span class="mt-1 block text-[10px] font-bold leading-5 text-zinc-400">Ao abrir no editor, esta materia ja fica marcada para assumir o primeiro destaque.</span>
+                </span>
+                <input type="checkbox" data-generated-featured-home class="h-5 w-5 accent-red-600" />
+              </label>`,
+            );
+          }
+          decorateGeneratedImages(target.querySelector('[data-generated-body-edit]'));
         } catch (error) {
           target.innerHTML = `
             <p class="text-[10px] font-black uppercase tracking-[0.28em] text-red-600">Matéria completa gerada</p>
@@ -687,6 +751,11 @@ const categories = [
         const editedBody = document.querySelector(`[data-generated-editor="${CSS.escape(String(id || ''))}"] [data-generated-body-edit]`)?.innerHTML;
         const editedCoverUrl = document.querySelector('[data-generated-cover-url]')?.value.trim();
         const editedCoverAlt = document.querySelector('[data-generated-cover-alt]')?.value.trim();
+        const featuredHomeInput = document.querySelector('[data-generated-featured-home]');
+        const editorialMedia = (Array.isArray(article.media) ? article.media : []).filter((item) => item?.type !== 'editorialFlag');
+        if (featuredHomeInput?.checked) {
+          editorialMedia.push({ type: 'editorialFlag', homeSection: 'featured' });
+        }
 
         const previousLabel = button?.textContent || '';
         if (button) {
@@ -725,7 +794,7 @@ const categories = [
               keywords: article.keywords || pitch.keywords || '',
               tags: Array.isArray(article.tags) ? article.tags : parseArray(pitch.tags),
               sources: Array.isArray(article.sources) ? article.sources : parseArray(pitch.sources),
-              media: Array.isArray(article.media) ? article.media : [],
+              media: editorialMedia,
               readingMinutes: article.readingMinutes || 0,
             }),
           });
@@ -953,7 +1022,11 @@ const categories = [
             pitch.image_candidates = JSON.stringify(data.imageCandidates);
           }
           if (statusNode) statusNode.textContent = imageRole === 'cover' ? 'Capa definida para esta pauta.' : imageRole === 'body' ? 'Imagem marcada para o corpo da matéria.' : 'Imagem ignorada nesta pauta.';
-          openPitchPreview(id);
+          if (activePitchMode === 'article' && String(activePitchId) === String(id)) {
+            if (statusNode) statusNode.textContent += ' A materia gerada foi preservada.';
+          } else {
+            openPitchPreview(id, activePitchMode || 'pitch');
+          }
         } catch (error) {
           if (statusNode) statusNode.textContent = error.message || 'Falha ao salvar imagem.';
         } finally {
@@ -1003,7 +1076,11 @@ const categories = [
               ? `Mesa visual encontrou ${Number(data.found || 0)} imagem(ns) em ${Number(data.tried || 0)} fonte(s).`
               : `Nenhuma imagem editorial segura encontrada em ${Number(data.tried || 0)} fonte(s).`;
           }
-          openPitchPreview(id);
+          if (activePitchMode === 'article' && String(activePitchId) === String(id)) {
+            if (statusNode) statusNode.textContent += ' A materia gerada foi preservada.';
+          } else {
+            openPitchPreview(id, activePitchMode || 'pitch');
+          }
         } catch (error) {
           if (statusNode) statusNode.textContent = error.message || 'Falha ao buscar imagens.';
         } finally {
@@ -1063,6 +1140,16 @@ const categories = [
 
         if (event.target.closest('[data-close-generated-article]')) {
           closePitchPreview();
+          return;
+        }
+
+        const removeGeneratedImage = event.target.closest('[data-remove-generated-image]');
+        if (removeGeneratedImage) {
+          removeGeneratedImage.closest('[data-generated-image-block]')?.remove();
+          const article = generatedArticles.get(String(activePitchId || ''));
+          const editedBody = document.querySelector(`[data-generated-editor="${CSS.escape(String(activePitchId || ''))}"] [data-generated-body-edit]`)?.innerHTML;
+          if (article && editedBody) article.bodyHtml = editedBody;
+          if (statusNode) statusNode.textContent = 'Imagem removida do corpo da materia. Envie para fila ou abra no editor para salvar.';
           return;
         }
 

@@ -25,6 +25,11 @@ type SourceRecord = {
   title?: string;
   publisher?: string;
   url?: string;
+  href?: string;
+  link?: string;
+  sourceUrl?: string;
+  originalUrl?: string;
+  primaryUrl?: string;
 };
 
 type ImageCandidate = {
@@ -110,12 +115,50 @@ const resolveUrl = (value: string, base: string) => {
   }
 };
 
+const hostOf = (value: string) => {
+  try {
+    return new URL(clean(value, 1400)).hostname.replace(/^www\./i, '').toLowerCase();
+  } catch {
+    return '';
+  }
+};
+
+const isGoogleNewsHost = (value: string) => {
+  const host = hostOf(value);
+  return host === 'news.google.com' || host.endsWith('.news.google.com');
+};
+
+const isGoogleAssetUrl = (value: string) => {
+  const host = hostOf(value);
+  return (
+    /(^|\.)googleusercontent\.com$/i.test(host) ||
+    /(^|\.)gstatic\.com$/i.test(host) ||
+    /(^|\.)ggpht\.com$/i.test(host) ||
+    /(^|\.)google\.com$/i.test(host) ||
+    /(^|\.)google\.com\.br$/i.test(host) ||
+    /news\.google|google-news|googlenews|googlelogo|\/google/i.test(value)
+  );
+};
+
+const publisherUrlFromGoogleWrapper = (value: string) => {
+  try {
+    const url = new URL(clean(value, 1400));
+    const direct = url.searchParams.get('url') || url.searchParams.get('q') || url.searchParams.get('u');
+    if (direct && /^https?:\/\//i.test(direct)) return direct;
+  } catch {}
+  return '';
+};
+
+const sourceUrlFromRecord = (source: SourceRecord) =>
+  clean(source.primaryUrl || source.originalUrl || source.sourceUrl || source.link || source.href || source.url, 1200);
+
 const blockedImagePattern =
-  /(news\.google|googleusercontent\.com\/.*\/favicon|googlelogo|\/logo[\W_]|favicon|sprite|placeholder|blank|pixel|tracking|avatar|author|profile|badge|watermark|1x1|\/icons?\/|\/svg\/|\.svg(?:\?|$)|\.gif(?:\?|$)|\.ico(?:\?|$))/i;
+  /(news\.google|googleusercontent|gstatic|ggpht|googlelogo|googlenews|google-news|\/logo[\W_]|favicon|sprite|placeholder|blank|pixel|tracking|avatar|author|profile|badge|watermark|1x1|\/icons?\/|\/svg\/|\.svg(?:\?|$)|\.gif(?:\?|$)|\.ico(?:\?|$))/i;
 
 const isUsableImage = (url: string) => {
   if (!/^https:\/\//i.test(url)) return false;
   if (blockedImagePattern.test(url)) return false;
+  if (isGoogleAssetUrl(url)) return false;
   if (/(width|w)=([1-9][0-9]?|1[0-9]{2})(?:\D|$)/i.test(url)) return false;
   if (/(height|h)=([1-9][0-9]?|1[0-9]{2})(?:\D|$)/i.test(url)) return false;
   return true;
@@ -248,14 +291,17 @@ const extractHtmlImages = (html: string) => {
 };
 
 const extractCandidatesFromSource = async (source: SourceRecord, category: string, pitchTitle: string) => {
-  const sourceUrl = clean(source.url, 1200);
+  const sourceUrl = sourceUrlFromRecord(source);
   if (!/^https?:\/\//i.test(sourceUrl)) return [];
+  const targetUrl = isGoogleNewsHost(sourceUrl) ? publisherUrlFromGoogleWrapper(sourceUrl) : sourceUrl;
+  if (!/^https?:\/\//i.test(targetUrl) || isGoogleNewsHost(targetUrl) || isGoogleAssetUrl(targetUrl)) return [];
 
   try {
-    const response = await fetchWithTimeout(sourceUrl);
+    const response = await fetchWithTimeout(targetUrl);
     const html = await response.text();
-    const finalUrl = response.url || sourceUrl;
-    const base = finalUrl || sourceUrl;
+    const finalUrl = response.url || targetUrl;
+    if (isGoogleNewsHost(finalUrl) || isGoogleAssetUrl(finalUrl)) return [];
+    const base = finalUrl || targetUrl;
     const publisher =
       clean(source.publisher, 120) ||
       clean(extractMeta(html, ['og:site_name', 'application-name']), 120) ||
@@ -319,7 +365,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     .map((source) => (source && typeof source === 'object' ? (source as SourceRecord) : null))
     .filter(Boolean) as SourceRecord[];
   const limit = Math.max(1, Math.min(8, Number(payload.limit || 6)));
-  const selectedSources = sources.filter((source) => /^https?:\/\//i.test(clean(source.url, 1200))).slice(0, limit);
+  const selectedSources = sources.filter((source) => /^https?:\/\//i.test(sourceUrlFromRecord(source))).slice(0, limit);
 
   const batches = await Promise.all(selectedSources.map((source) => extractCandidatesFromSource(source, clean(pitch.category, 80), clean(pitch.title, 260))));
   const extracted = normalizeCandidates(batches.flat()).sort((a, b) => Number(b.score || 0) - Number(a.score || 0));
