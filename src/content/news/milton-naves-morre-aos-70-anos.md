@@ -6,9 +6,9 @@ seoDescription: "Futebol: Milton Naves, ícone do rádio esportivo de Minas Gera
 category: "Futebol"
 author: "Redação Novo Alvo"
 sources: ["SRzd", "Portal ABC do ABC", "MSN", "tmc.com.br", "O POVO", "Terra", "Jogada 10", "Portal Tela", "Repórter Maceió", "O Dia", "Tribuna do Sertão", "Área VIP", "iG Esportes", "Correio Braziliense", "OFuxico", "Lance!"]
-publishedAt: "2026-05-16T22:32:54.927Z"
-updatedAt: "2026-05-16T22:32:57.012Z"
-featured: false
+publishedAt: "2026-05-16T22:33:41.534Z"
+updatedAt: "2026-05-16T22:33:43.622Z"
+featured: true
 isFeatured: false
 urgent: false
 homeSection: ""
