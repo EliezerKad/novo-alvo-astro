@@ -2,23 +2,23 @@
 title: "Varejo bate recorde em março, mas mercado vê futuro incerto"
 slug: "varejo-cresce-em-marco-bate-recorde-e-acende-duvida-sobre-proximos-meses"
 summary: "O setor varejista brasileiro registrou crescimento recorde em março, porém a alta do dólar e a queda da Bolsa indicam um cenário econômico instável para os próximos meses."
-seoDescription: "O setor varejista brasileiro registrou crescimento recorde em março, porém a alta do dólar e a queda da Bolsa indicam um cenário econômico instável para"
+seoDescription: "Economia: O setor varejista brasileiro registrou crescimento recorde em março, porém a alta do dólar e a queda da Bolsa indicam um cenário econômico…"
 category: "Economia"
 author: "Redação Novo Alvo"
 sources: ["Gazeta Mercantil", "oreporter.com", "JOTA"]
-publishedAt: "2026-05-16T04:06:31.260Z"
-updatedAt: "2026-05-16T04:06:57.461Z"
+publishedAt: "2026-05-16T04:22:44.209Z"
+updatedAt: "2026-05-16T04:22:45.595Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://source.unsplash.com/1600x900/?varejo%2Ccresce%2Cmarco%2Cbate%2Crecorde%2Cacende%2Cbusiness%2Cfinance%2Cmarket"
+  src: "https://portalnovoalvo.com.br/uploads/news/varejo-cresce-em-marco-bate-recorde-e-acende-duvida-sobre-proximos-meses-cover.avif"
   alt: "Movimentação em loja de varejo, simbolizando o crescimento do setor em março."
-  caption: "Unsplash"
+  caption: "Credito: Unsplash"
   layout: "full"
-ogImage: "https://source.unsplash.com/1600x900/?varejo%2Ccresce%2Cmarco%2Cbate%2Crecorde%2Cacende%2Cbusiness%2Cfinance%2Cmarket"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/varejo-cresce-em-marco-bate-recorde-e-acende-duvida-sobre-proximos-meses-cover.avif"
 tags: ["economia", "varejo", "cresce", "marco", "bate", "recorde", "acende", "duvida", "proximos", "meses"]
 ---
 
