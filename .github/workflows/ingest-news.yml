@@ -30,6 +30,7 @@ on:
           - Moda
           - Musica
           - Cinema
+          - Ocorrencias
 
 jobs:
   ingest-manual:
@@ -49,16 +50,21 @@ jobs:
       - name: Install dependencies
         run: npm ci --progress=false
 
-      - name: Ingest RSS into editorial pitches
+      - name: Ingest Google Search into editorial pitches
         run: npm run ingest:news
         env:
           PORTAL_ORIGIN: https://portalnovoalvo.com.br
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          GOOGLE_SEARCH_API_KEY: ${{ secrets.GOOGLE_SEARCH_API_KEY }}
+          GOOGLE_SEARCH_CX: ${{ secrets.GOOGLE_SEARCH_CX }}
+          INGEST_DISCOVERY: google_search
+          GOOGLE_SEARCH_PAGES_PER_QUERY: 1
           MAX_ITEMS_PER_FEED: 80
           MAX_PITCHES: 80
           CATEGORY_MAX_PITCHES: 14
-          CATEGORY_MIN_SOURCES: 5
-          CATEGORY_FLOOR_MIN_SOURCES: 5
+          ABSOLUTE_MIN_SOURCES: 8
+          CATEGORY_MIN_SOURCES: 8
+          CATEGORY_FLOOR_MIN_SOURCES: 8
           INGEST_CATEGORY: ${{ inputs.category }}
           MIN_SOURCES: 8
           MAX_ITEM_AGE_HOURS: 48
@@ -93,6 +99,7 @@ jobs:
           - Moda
           - Musica
           - Cinema
+          - Ocorrencias
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -106,16 +113,21 @@ jobs:
       - name: Install dependencies
         run: npm ci --progress=false
 
-      - name: Ingest ${{ matrix.category }} RSS into editorial pitches
+      - name: Ingest ${{ matrix.category }} Google Search into editorial pitches
         run: npm run ingest:news
         env:
           PORTAL_ORIGIN: https://portalnovoalvo.com.br
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          GOOGLE_SEARCH_API_KEY: ${{ secrets.GOOGLE_SEARCH_API_KEY }}
+          GOOGLE_SEARCH_CX: ${{ secrets.GOOGLE_SEARCH_CX }}
+          INGEST_DISCOVERY: google_search
+          GOOGLE_SEARCH_PAGES_PER_QUERY: 1
           MAX_ITEMS_PER_FEED: 80
           MAX_PITCHES: 80
           CATEGORY_MAX_PITCHES: 10
-          CATEGORY_MIN_SOURCES: 5
-          CATEGORY_FLOOR_MIN_SOURCES: 5
+          ABSOLUTE_MIN_SOURCES: 8
+          CATEGORY_MIN_SOURCES: 8
+          CATEGORY_FLOOR_MIN_SOURCES: 8
           INGEST_CATEGORY: ${{ matrix.category }}
           MIN_SOURCES: 8
           MAX_ITEM_AGE_HOURS: 48

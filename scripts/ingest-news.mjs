@@ -36,6 +36,9 @@ const FEEDS = {
     googleNewsSearch('big tech apple google microsoft meta openai dados privacidade when:24h'),
     googleNewsSearch('startup software hardware vazamento dados android iphone when:24h'),
     googleNewsSearch('IA generativa data center semicondutor robotica seguranca digital when:24h'),
+    googleNewsSearch('OpenAI Nvidia chip data center ciberseguranca vazamento when:48h'),
+    googleNewsSearch('android iphone apple google microsoft meta tecnologia brasil when:48h'),
+    googleNewsSearch('golpe digital app banco dados privacidade inteligencia artificial when:48h'),
   ],
   Entretenimento: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGRqTVdZU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
@@ -60,6 +63,8 @@ const FEEDS = {
     googleNewsSearch('nasa astronomia biologia ambiente inovacao universidade when:24h'),
     googleNewsSearch('pesquisadores artigo cientifico experimento planeta oceano clima when:24h'),
     googleNewsSearch('fossil satelite energia limpa laboratorio descoberta genetica when:24h'),
+    googleNewsSearch('pesquisa brasileira descoberta cientifica saude clima universidade when:48h'),
+    googleNewsSearch('estudo cientifico tecnologia espacial biologia meio ambiente when:48h'),
   ],
   Saude: [
     'https://news.google.com/rss/headlines/section/topic/CAAqIQgKIhtDQkFTRGdvSUwyMHZNR3QwTlRFU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
@@ -67,6 +72,8 @@ const FEEDS = {
     googleNewsSearch('ans sus medicamento pesquisa clinica saude mental when:24h'),
     googleNewsSearch('anvisa plano de saude epidemia tratamento cancer dengue when:24h'),
     googleNewsSearch('medico paciente estudo clinico remedio prevencao nutricao when:24h'),
+    googleNewsSearch('dengue covid anvisa remedio hospital medico paciente when:48h'),
+    googleNewsSearch('saude mental alimentacao exercicio tratamento pesquisa clinica when:48h'),
   ],
   Famosos: [
     googleNewsSearch('celebridades famosos influenciadores bastidores viral when:24h'),
@@ -100,6 +107,8 @@ const FEEDS = {
     googleNewsSearch('mec professor aluno ensino superior concurso when:24h'),
     googleNewsSearch('inep sisu prouni fies escola publica faculdade when:24h'),
     googleNewsSearch('curso tecnico bolsa estudo aprendizagem salario carreira when:24h'),
+    googleNewsSearch('enem sisu prouni fies professor escola universidade when:48h'),
+    googleNewsSearch('educacao basica ensino medio estudante faculdade carreira when:48h'),
   ],
   Cultura: [
     googleNewsSearch('cultura arte literatura teatro museu livro when:24h'),
@@ -173,6 +182,10 @@ const IS_CATEGORY_MODE = ACTIVE_CATEGORIES.length < Object.keys(FEEDS).length;
 
 const PORTAL_ORIGIN = process.env.PORTAL_ORIGIN || 'https://portalnovoalvo.com.br';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
+const INGEST_DISCOVERY = String(process.env.INGEST_DISCOVERY || 'rss').toLowerCase();
+const GOOGLE_SEARCH_API_KEY = process.env.GOOGLE_SEARCH_API_KEY || '';
+const GOOGLE_SEARCH_CX = process.env.GOOGLE_SEARCH_CX || '';
+const GOOGLE_SEARCH_PAGES_PER_QUERY = Number(process.env.GOOGLE_SEARCH_PAGES_PER_QUERY || 1);
 const MAX_ITEMS_PER_FEED = Number(process.env.MAX_ITEMS_PER_FEED || 80);
 const MIN_SOURCES = Number(process.env.MIN_SOURCES || 8);
 const RADAR_BATCHES_PER_CATEGORY = Number(process.env.RADAR_BATCHES_PER_CATEGORY || 3);
@@ -182,12 +195,13 @@ const SOURCE_EXPANSION_TARGET = Number(process.env.SOURCE_EXPANSION_TARGET || 12
 const SOURCE_EXPANSION_MIN_OVERLAP = Number(process.env.SOURCE_EXPANSION_MIN_OVERLAP || 0.34);
 const MAX_PITCHES = Number(process.env.MAX_PITCHES || 80);
 const CATEGORY_MAX_PITCHES = Number(process.env.CATEGORY_MAX_PITCHES || 8);
-const CATEGORY_MIN_SOURCES = Number(process.env.CATEGORY_MIN_SOURCES || 5);
-const ACTIVE_MIN_SOURCES = IS_CATEGORY_MODE ? Math.min(MIN_SOURCES, CATEGORY_MIN_SOURCES) : MIN_SOURCES;
-const CATEGORY_FLOOR_MIN_SOURCES = Number(process.env.CATEGORY_FLOOR_MIN_SOURCES || 5);
+const ABSOLUTE_MIN_SOURCES = Number(process.env.ABSOLUTE_MIN_SOURCES || 8);
+const CATEGORY_MIN_SOURCES = Number(process.env.CATEGORY_MIN_SOURCES || 8);
+const ACTIVE_MIN_SOURCES = Math.max(ABSOLUTE_MIN_SOURCES, IS_CATEGORY_MODE ? Math.min(MIN_SOURCES, CATEGORY_MIN_SOURCES) : MIN_SOURCES);
+const CATEGORY_FLOOR_MIN_SOURCES = Number(process.env.CATEGORY_FLOOR_MIN_SOURCES || 8);
 const CATEGORY_MAX_ITEM_AGE_HOURS = Number(process.env.CATEGORY_MAX_ITEM_AGE_HOURS || 72);
 const ACTIVE_ITEM_AGE_HOURS = IS_CATEGORY_MODE ? Math.max(MAX_ITEM_AGE_HOURS, CATEGORY_MAX_ITEM_AGE_HOURS) : MAX_ITEM_AGE_HOURS;
-const ACTIVE_FLOOR_MIN_SOURCES = IS_CATEGORY_MODE ? Math.max(5, Math.min(ACTIVE_MIN_SOURCES, CATEGORY_FLOOR_MIN_SOURCES)) : ACTIVE_MIN_SOURCES;
+const ACTIVE_FLOOR_MIN_SOURCES = IS_CATEGORY_MODE ? Math.max(ABSOLUTE_MIN_SOURCES, Math.min(ACTIVE_MIN_SOURCES, CATEGORY_FLOOR_MIN_SOURCES)) : ACTIVE_MIN_SOURCES;
 
 const decodeEntities = (value) =>
   String(value || '')
@@ -215,6 +229,13 @@ const attrBetween = (xml, tag, attr) => {
 const cleanTitle = (title) =>
   decodeEntities(title)
     .replace(/\s+-\s+[^-]{2,80}$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const cleanPitchTitle = (title) =>
+  cleanTitle(title)
+    .replace(/^radar\s+[a-z\u00c0-\u017f]+:\s*/i, '')
+    .replace(/^\s*[»>-]\s*/, '')
     .replace(/\s+/g, ' ')
     .trim();
 
@@ -293,6 +314,33 @@ const REALITY_ENTERTAINMENT_PATTERN =
 const MUSIC_CONTEXT_PATTERN =
   /\b(musica|show|shows|album|single|turne|festival|palco|clipe|faixa|gravadora|banda|spotify|funk|sertanejo|rap|pop|rock|lancamento musical)\b/i;
 
+const TECH_CONTEXT_PATTERN =
+  /\b(tecnologia|inteligencia artificial|ia generativa|openai|nvidia|chip|chips|semicondutor|data center|ciberseguranca|vazamento de dados|privacidade|android|iphone|apple|microsoft|meta|startup|software|hardware|app|aplicativo|robo|robotica)\b/i;
+
+const ECONOMY_CONTEXT_PATTERN =
+  /\b(economia|mercado|empresa|empresas|banco|bancos|credito|juros|inflacao|selic|ipca|dolar|bolsa|varejo|industria|arrecadacao|imposto|investimento|consumo|poder de compra|emprego|salario|renda|trabalho|vagas)\b/i;
+
+const FAMOUS_CONTEXT_PATTERN =
+  /\b(famosos|celebridade|celebridades|influencer|influenciador|influenciadora|atriz|ator|apresentador|apresentadora|namoro|separacao|casamento|gravidez|filho|filha|redes sociais|instagram|bastidor|polemica)\b/i;
+
+const FASHION_CONTEXT_PATTERN =
+  /\b(moda|fashion|look|looks|tendencia|tendencias|passarela|estilista|vestido|grife|colecao|skincare|beleza|cosmetico|varejo de moda|desfile|bolsa|sapato)\b/i;
+
+const HEALTH_CONTEXT_PATTERN =
+  /\b(saude|medicina|vacina|hospital|doenca|medico|medica|sus|ans|medicamento|clinica|mental|bem estar|bem-estar|anvisa|dengue|covid|tratamento|cancer|paciente|nutricao)\b/i;
+
+const SCIENCE_CONTEXT_PATTERN =
+  /\b(ciencia|pesquisa|estudo|cientifico|cientifica|nasa|espaco|clima|biologia|astronomia|universidade|descoberta|pesquisadores|experimento|fossil|satelite|genetica)\b/i;
+
+const EDUCATION_CONTEXT_PATTERN =
+  /\b(educacao|enem|vestibular|mec|inep|sisu|prouni|fies|professor|aluno|estudante|escola|universidade|faculdade|ensino|curso tecnico|aprendizagem)\b/i;
+
+const ENTERTAINMENT_CONTEXT_PATTERN =
+  /\b(entretenimento|tv|televisao|streaming|reality|reality show|casa do patrao|bbb|big brother|a fazenda|audiencia|programa|novela|viral|tiktok|participante|eliminado|eliminada|confinamento|paredao)\b/i;
+
+const OCCURRENCE_CONTEXT_PATTERN =
+  /\b(acidente|acidentes|ferido|feridos|morto|mortos|morte|incendio|incendios|explosao|desabamento|queda|resgate|soterramento|tiroteio|operacao policial|prisao|crime|enchente|alagamento|temporal|interdicao|bombeiros|defesa civil|samu|vitima|vitimas|rodovia bloqueada)\b/i;
+
 const CATEGORY_SIGNALS = [
   {
     category: 'Ocorrencias',
@@ -357,12 +405,22 @@ const CATEGORY_SIGNALS = [
 
 const classifyCategory = (feedCategory, title, source) => {
   const text = normalizedText(`${title} ${source}`);
+  if (OCCURRENCE_CONTEXT_PATTERN.test(text)) return 'Ocorrencias';
   if (FOOTBALL_CONTEXT_PATTERN.test(text)) return 'Futebol';
   if (POLITICS_CONTEXT_PATTERN.test(text)) return 'Politica';
   if (feedCategory === 'Esportes') {
     if (!FOOTBALL_CONTEXT_PATTERN.test(text)) return 'Esportes';
   }
   if (REALITY_ENTERTAINMENT_PATTERN.test(text) && !MUSIC_CONTEXT_PATTERN.test(text)) return 'Entretenimento';
+  if (ENTERTAINMENT_CONTEXT_PATTERN.test(text) && !MUSIC_CONTEXT_PATTERN.test(text)) return 'Entretenimento';
+  if (TECH_CONTEXT_PATTERN.test(text)) return 'Tecnologia';
+  if (HEALTH_CONTEXT_PATTERN.test(text) && !SCIENCE_CONTEXT_PATTERN.test(text)) return 'Saude';
+  if (SCIENCE_CONTEXT_PATTERN.test(text) && !POLITICS_CONTEXT_PATTERN.test(text)) return 'Ciencia';
+  if (EDUCATION_CONTEXT_PATTERN.test(text) && !ECONOMY_CONTEXT_PATTERN.test(text)) return 'Educacao';
+  if (MUSIC_CONTEXT_PATTERN.test(text) && !REALITY_ENTERTAINMENT_PATTERN.test(text)) return 'Musica';
+  if (FASHION_CONTEXT_PATTERN.test(text) && !FOOTBALL_CONTEXT_PATTERN.test(text) && !REALITY_ENTERTAINMENT_PATTERN.test(text)) return 'Moda';
+  if (FAMOUS_CONTEXT_PATTERN.test(text) && !ECONOMY_CONTEXT_PATTERN.test(text) && !MUSIC_CONTEXT_PATTERN.test(text)) return 'Famosos';
+  if (ECONOMY_CONTEXT_PATTERN.test(text) && !FOOTBALL_CONTEXT_PATTERN.test(text) && !FAMOUS_CONTEXT_PATTERN.test(text) && !REALITY_ENTERTAINMENT_PATTERN.test(text)) return 'Economia';
   const matches = CATEGORY_SIGNALS.filter((item) => item.pattern.test(text));
   const priorityMatch = ['Ocorrencias', 'Futebol', 'Politica', 'Games', 'Cinema', 'Entretenimento', 'Cultura', 'Saude', 'Ciencia', 'Musica'].map((category) => matches.find((item) => item.category === category)).find(Boolean);
   const economy = matches.find((item) => item.category === 'Economia');
@@ -619,8 +677,125 @@ const feedEntries = (categories = Object.keys(FEEDS)) =>
       (Array.isArray(urls) ? urls : [urls]).map((url, index) => [category, url, index]),
     );
 
+const stripSearchOperators = (query) =>
+  String(query || '')
+    .replace(/\bwhen:\d+h\b/gi, '')
+    .replace(/\bOR\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const queryFromGoogleNewsUrl = (url) => {
+  try {
+    const parsed = new URL(url);
+    return stripSearchOperators(parsed.searchParams.get('q') || '');
+  } catch {
+    return '';
+  }
+};
+
+const categorySearchQueries = (category) => {
+  const urls = Array.isArray(FEEDS[category]) ? FEEDS[category] : [FEEDS[category]];
+  const queries = urls
+    .map(queryFromGoogleNewsUrl)
+    .filter(Boolean)
+    .map((query) => `${query} notícia reportagem análise`);
+
+  return [...new Set([`${category} notícias Brasil hoje`, ...queries])].slice(0, 8);
+};
+
+const categorySearchEntries = (categories = Object.keys(FEEDS)) =>
+  categories.flatMap((category) => categorySearchQueries(category).map((query, index) => [category, query, index]));
+
+const publishedFromSearchItem = (item) => {
+  const meta = item?.pagemap?.metatags?.[0] || {};
+  return (
+    meta['article:published_time'] ||
+    meta['article:modified_time'] ||
+    meta['og:updated_time'] ||
+    meta['date'] ||
+    meta['pubdate'] ||
+    new Date().toISOString()
+  );
+};
+
+const normalizeSearchPublisher = (item) => {
+  const meta = item?.pagemap?.metatags?.[0] || {};
+  return (
+    meta['og:site_name'] ||
+    meta['application-name'] ||
+    meta['twitter:site'] ||
+    item?.displayLink ||
+    'Google Search'
+  );
+};
+
+const fetchGoogleSearchQuery = async ([category, query, queryIndex]) => {
+  if (!GOOGLE_SEARCH_API_KEY || !GOOGLE_SEARCH_CX) {
+    throw new Error('GOOGLE_SEARCH_API_KEY e GOOGLE_SEARCH_CX sao obrigatorios para INGEST_DISCOVERY=google_search.');
+  }
+
+  const pages = [];
+  for (let page = 0; page < GOOGLE_SEARCH_PAGES_PER_QUERY; page += 1) {
+    const url = new URL('https://www.googleapis.com/customsearch/v1');
+    url.searchParams.set('key', GOOGLE_SEARCH_API_KEY);
+    url.searchParams.set('cx', GOOGLE_SEARCH_CX);
+    url.searchParams.set('q', query);
+    url.searchParams.set('num', '10');
+    url.searchParams.set('start', String(page * 10 + 1));
+    url.searchParams.set('dateRestrict', `d${Math.max(1, Math.ceil(ACTIVE_ITEM_AGE_HOURS / 24))}`);
+    url.searchParams.set('lr', 'lang_pt');
+    url.searchParams.set('gl', 'br');
+    url.searchParams.set('safe', 'active');
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          accept: 'application/json',
+          'user-agent': 'PortalNovoAlvoEditorialIngest/1.0',
+        },
+        signal: AbortSignal.timeout(12000),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data?.error?.message || `HTTP ${response.status}`);
+      pages.push(...(Array.isArray(data.items) ? data.items : []));
+    } catch (error) {
+      console.warn(`[google-search] ${category} #${queryIndex + 1}: ${error.message}`);
+    }
+  }
+
+  return pages
+    .map((item) => {
+      const title = cleanTitle(item?.title || '');
+      const snippet = decodeEntities(item?.snippet || '');
+      const source = normalizeSearchPublisher(item);
+      const finalCategory = classifyCategory(category, `${title} ${snippet}`, source);
+      return {
+        title,
+        category: finalCategory,
+        feedCategory: category,
+        link: item?.link || '',
+        googleLink: '',
+        sourceUrl: item?.link || '',
+        source,
+        snippet,
+        publishedAt: publishedFromSearchItem(item),
+      };
+    })
+    .filter((item) => item.title && item.link && !/google\.com\/search|webcache|policies\.google/i.test(item.link))
+    .slice(0, MAX_ITEMS_PER_FEED);
+};
+
+const fetchDiscoveryItems = async () => {
+  if (INGEST_DISCOVERY === 'google_search') {
+    return (await Promise.all(categorySearchEntries(ACTIVE_CATEGORIES).map(fetchGoogleSearchQuery))).flat();
+  }
+
+  return (await Promise.all(feedEntries(ACTIVE_CATEGORIES).map(fetchFeed))).flat();
+};
+
 const buildPitch = (items) => {
   const first = selectLeadItem(items);
+  const pitchTitle = cleanPitchTitle(first.title);
   const orderedItems = [first, ...items.filter((item) => item !== first)].sort((a, b) => {
     if (a === first) return -1;
     if (b === first) return 1;
@@ -651,8 +826,8 @@ const buildPitch = (items) => {
 
   return {
     clusterKey: `${slugify(first.category)}:${isRadar ? 'radar:' : ''}${signature}`,
-    title: first.title,
-    summary: `O fato central envolve ${first.title}. A abordagem editorial deve identificar o agente ativo, a causa imediata e a consequencia concreta para o leitor.`,
+    title: pitchTitle,
+    summary: `O fato central envolve ${pitchTitle}. A abordagem editorial deve identificar o agente ativo, a causa imediata e a consequencia concreta para o leitor.`,
     category: first.category,
     status: 'new',
     sourceCount,
@@ -775,16 +950,16 @@ const main = async () => {
   const pitchLimit = IS_CATEGORY_MODE ? Math.min(CATEGORY_MAX_PITCHES, MAX_PITCHES) : MAX_PITCHES;
 
   console.log(
-    `Modo ingest: ${IS_CATEGORY_MODE ? ACTIVE_CATEGORIES.join(', ') : 'todas as categorias'}. Limite de pautas: ${pitchLimit}. Fontes minimas: ${ACTIVE_MIN_SOURCES}. Piso: ${ACTIVE_FLOOR_MIN_SOURCES}.`,
+    `Modo ingest: ${IS_CATEGORY_MODE ? ACTIVE_CATEGORIES.join(', ') : 'todas as categorias'}. Descoberta: ${INGEST_DISCOVERY}. Limite de pautas: ${pitchLimit}. Fontes minimas: ${ACTIVE_MIN_SOURCES}. Piso: ${ACTIVE_FLOOR_MIN_SOURCES}.`,
   );
-  const rawItems = (await Promise.all(feedEntries(ACTIVE_CATEGORIES).map(fetchFeed))).flat();
+  const rawItems = await fetchDiscoveryItems();
   const freshItems = rawItems.filter(isFreshItem);
   const allItems = IS_CATEGORY_MODE ? freshItems.filter((item) => ACTIVE_CATEGORIES.includes(item.category)) : freshItems;
   const feedCounts = allItems.reduce((acc, item) => {
     acc[item.category] = (acc[item.category] || 0) + 1;
     return acc;
   }, {});
-  console.log(`Itens RSS brutos: ${rawItems.length}. Itens frescos (${ACTIVE_ITEM_AGE_HOURS}h): ${allItems.length}.`);
+  console.log(`Itens brutos: ${rawItems.length}. Itens frescos (${ACTIVE_ITEM_AGE_HOURS}h): ${allItems.length}.`);
   const topicClusters = await Promise.all(clusterItems(allItems).map(expandClusterSources));
   const topicPitches = topicClusters
     .map(buildPitch)
@@ -802,7 +977,8 @@ const main = async () => {
     IS_CATEGORY_MODE ? pitchLimit : 1,
     !IS_CATEGORY_MODE,
   );
-  const pitches = balancePitches(topicPitches, radarPitches, coveragePitches, pitchLimit, ACTIVE_CATEGORIES);
+  const pitches = balancePitches(topicPitches, radarPitches, coveragePitches, pitchLimit, ACTIVE_CATEGORIES)
+    .filter((pitch) => pitch.sourceCount >= ABSOLUTE_MIN_SOURCES);
 
   let saved = 0;
   const enrichedPitches = await Promise.all(pitches.map(normalizePitchAssets));
