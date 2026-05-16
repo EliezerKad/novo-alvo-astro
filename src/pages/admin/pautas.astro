@@ -471,7 +471,10 @@ const categories = [
                 <p class="text-[10px] font-black uppercase tracking-[0.28em] text-red-600">Mesa visual da pauta</p>
                 <p class="mt-2 text-sm font-medium leading-6 text-zinc-500 dark:text-zinc-400">Escolha a capa ou marque imagens para entrar no corpo. O R2 recebe a imagem quando a matéria é salva/publicada.</p>
               </div>
-              <span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900">${images.length} candidata${images.length === 1 ? '' : 's'}</span>
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" data-fetch-pitch-images="${escapeHtml(id)}" data-pitch-cluster="${escapeHtml(pitch.cluster_key || pitch.clusterKey || '')}" class="rounded-full border border-zinc-200 bg-white px-4 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-600 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">Buscar imagens</button>
+                <span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900">${images.length} candidata${images.length === 1 ? '' : 's'}</span>
+              </div>
             </div>
             ${
               images.length
@@ -962,6 +965,56 @@ const categories = [
         }
       };
 
+      const fetchPitchImages = async (button, id, clusterKey = '') => {
+        const token = getToken();
+        if (!token || !id) return;
+        const previousLabel = button?.textContent || '';
+        if (button) {
+          button.disabled = true;
+          button.textContent = 'Buscando...';
+          button.classList.add('opacity-60');
+        }
+        if (statusNode) statusNode.textContent = 'Mesa de imagens vasculhando metadados das fontes...';
+
+        try {
+          const response = await fetch('/api/admin/pitch-images', {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ id, clusterKey, limit: 6 }),
+          });
+          const data = await response.json().catch(() => ({}));
+          if (response.status === 401) {
+            try {
+              localStorage.removeItem('admin-token');
+            } catch {}
+            redirectToLogin();
+            return;
+          }
+          if (!response.ok) throw new Error(data.error || 'Nao foi possivel buscar imagens.');
+          const pitch = pitches.find((item) => String(item.id || '') === String(id));
+          if (pitch && Array.isArray(data.candidates)) {
+            pitch.image_candidates = JSON.stringify(data.candidates);
+          }
+          if (statusNode) {
+            statusNode.textContent = Number(data.found || 0)
+              ? `Mesa visual encontrou ${Number(data.found || 0)} imagem(ns) em ${Number(data.tried || 0)} fonte(s).`
+              : `Nenhuma imagem editorial segura encontrada em ${Number(data.tried || 0)} fonte(s).`;
+          }
+          openPitchPreview(id);
+        } catch (error) {
+          if (statusNode) statusNode.textContent = error.message || 'Falha ao buscar imagens.';
+        } finally {
+          if (button) {
+            button.disabled = false;
+            button.textContent = previousLabel;
+            button.classList.remove('opacity-60');
+          }
+        }
+      };
+
       statusButtons.forEach((button) => {
         button.addEventListener('click', () => {
           status = button.dataset.statusFilter || 'new';
@@ -1021,6 +1074,12 @@ const categories = [
             imageButton.dataset.imageUrl || '',
             imageButton.dataset.pitchImageRole || '',
           );
+          return;
+        }
+
+        const fetchImagesButton = event.target.closest('[data-fetch-pitch-images]');
+        if (fetchImagesButton) {
+          fetchPitchImages(fetchImagesButton, fetchImagesButton.dataset.fetchPitchImages || '', fetchImagesButton.dataset.pitchCluster || '');
           return;
         }
 
