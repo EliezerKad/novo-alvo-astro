@@ -186,6 +186,7 @@ const INGEST_DISCOVERY = String(process.env.INGEST_DISCOVERY || 'rss').toLowerCa
 const GOOGLE_SEARCH_API_KEY = process.env.GOOGLE_SEARCH_API_KEY || '';
 const GOOGLE_SEARCH_CX = process.env.GOOGLE_SEARCH_CX || '';
 const GOOGLE_SEARCH_PAGES_PER_QUERY = Number(process.env.GOOGLE_SEARCH_PAGES_PER_QUERY || 1);
+const GOOGLE_SEARCH_QUERIES_PER_CATEGORY = Number(process.env.GOOGLE_SEARCH_QUERIES_PER_CATEGORY || 3);
 const MAX_ITEMS_PER_FEED = Number(process.env.MAX_ITEMS_PER_FEED || 80);
 const MIN_SOURCES = Number(process.env.MIN_SOURCES || 8);
 const RADAR_BATCHES_PER_CATEGORY = Number(process.env.RADAR_BATCHES_PER_CATEGORY || 3);
@@ -700,7 +701,7 @@ const categorySearchQueries = (category) => {
     .filter(Boolean)
     .map((query) => `${query} notícia reportagem análise`);
 
-  return [...new Set([`${category} notícias Brasil hoje`, ...queries])].slice(0, 8);
+  return [...new Set([`${category} notícias Brasil hoje`, ...queries])].slice(0, GOOGLE_SEARCH_QUERIES_PER_CATEGORY);
 };
 
 const categorySearchEntries = (categories = Object.keys(FEEDS)) =>

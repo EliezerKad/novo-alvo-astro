@@ -2,7 +2,7 @@ name: Ingest editorial pitches
 
 on:
   schedule:
-    - cron: '*/45 * * * *'
+    - cron: '0 9 * * *'
   workflow_dispatch:
     inputs:
       category:
@@ -59,6 +59,7 @@ jobs:
           GOOGLE_SEARCH_CX: ${{ secrets.GOOGLE_SEARCH_CX }}
           INGEST_DISCOVERY: google_search
           GOOGLE_SEARCH_PAGES_PER_QUERY: 1
+          GOOGLE_SEARCH_QUERIES_PER_CATEGORY: 3
           MAX_ITEMS_PER_FEED: 80
           MAX_PITCHES: 80
           CATEGORY_MAX_PITCHES: 14
@@ -122,6 +123,7 @@ jobs:
           GOOGLE_SEARCH_CX: ${{ secrets.GOOGLE_SEARCH_CX }}
           INGEST_DISCOVERY: google_search
           GOOGLE_SEARCH_PAGES_PER_QUERY: 1
+          GOOGLE_SEARCH_QUERIES_PER_CATEGORY: 3
           MAX_ITEMS_PER_FEED: 80
           MAX_PITCHES: 80
           CATEGORY_MAX_PITCHES: 10
