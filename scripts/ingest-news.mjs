@@ -4,6 +4,8 @@ const googleNewsSearch = (query) =>
 const FEEDS = {
   Brasil: [
     'https://news.google.com/rss/headlines/section/topic/CAAqJQgKIh9DQkFTRVFvSUwyMHZNRzV6Y0hjU0JXVnVMVWRDS0FBUAE?hl=pt-BR&gl=BR&ceid=BR:pt-419',
+    googleNewsSearch('ultimas noticias Brasil hoje governo sociedade seguranca when:72h'),
+    googleNewsSearch('Brasil noticia quente cidades estados governo crise when:72h'),
     googleNewsSearch('Brasil governo estados cidades crise servicos publicos when:24h'),
     googleNewsSearch('brasileiros policia transporte educacao saude urbana when:24h'),
     googleNewsSearch('seguranca publica infraestrutura moradia energia transporte Brasil when:24h'),
@@ -203,6 +205,9 @@ const CATEGORY_FLOOR_MIN_SOURCES = Number(process.env.CATEGORY_FLOOR_MIN_SOURCES
 const CATEGORY_MAX_ITEM_AGE_HOURS = Number(process.env.CATEGORY_MAX_ITEM_AGE_HOURS || 72);
 const ACTIVE_ITEM_AGE_HOURS = IS_CATEGORY_MODE ? Math.max(MAX_ITEM_AGE_HOURS, CATEGORY_MAX_ITEM_AGE_HOURS) : MAX_ITEM_AGE_HOURS;
 const ACTIVE_FLOOR_MIN_SOURCES = IS_CATEGORY_MODE ? Math.max(ABSOLUTE_MIN_SOURCES, Math.min(ACTIVE_MIN_SOURCES, CATEGORY_FLOOR_MIN_SOURCES)) : ACTIVE_MIN_SOURCES;
+const GOOGLE_SEARCH_FATAL_PATTERNS =
+  /does not have the access to custom search json api|accessnotconfigured|api has not been used|disabled|permission denied/i;
+let googleSearchUnavailable = false;
 
 const decodeEntities = (value) =>
   String(value || '')
@@ -699,9 +704,9 @@ const categorySearchQueries = (category) => {
   const queries = urls
     .map(queryFromGoogleNewsUrl)
     .filter(Boolean)
-    .map((query) => `${query} notícia reportagem análise`);
+    .map((query) => `${query} noticia reportagem analise`);
 
-  return [...new Set([`${category} notícias Brasil hoje`, ...queries])].slice(0, GOOGLE_SEARCH_QUERIES_PER_CATEGORY);
+  return [...new Set([`${category} noticias Brasil hoje`, ...queries])].slice(0, GOOGLE_SEARCH_QUERIES_PER_CATEGORY);
 };
 
 const categorySearchEntries = (categories = Object.keys(FEEDS)) =>
@@ -760,6 +765,7 @@ const fetchGoogleSearchQuery = async ([category, query, queryIndex]) => {
       if (!response.ok) throw new Error(data?.error?.message || `HTTP ${response.status}`);
       pages.push(...(Array.isArray(data.items) ? data.items : []));
     } catch (error) {
+      if (GOOGLE_SEARCH_FATAL_PATTERNS.test(error.message)) googleSearchUnavailable = true;
       console.warn(`[google-search] ${category} #${queryIndex + 1}: ${error.message}`);
     }
   }
@@ -791,6 +797,11 @@ const fetchDiscoveryItems = async () => {
     const searchItems = (await Promise.all(categorySearchEntries(ACTIVE_CATEGORIES).map(fetchGoogleSearchQuery))).flat();
     if (searchItems.length >= ACTIVE_CATEGORIES.length * 4) return searchItems;
 
+    if (googleSearchUnavailable) {
+      console.warn(
+        '[discovery] Google Custom Search sem acesso neste projeto. Habilite a Custom Search JSON API para a chave atual ou use INGEST_DISCOVERY=rss.',
+      );
+    }
     console.warn(
       `[discovery] Google Search retornou ${searchItems.length} itens. Acionando fallback RSS para preservar a pauta.`,
     );
