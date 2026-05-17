@@ -28,6 +28,20 @@ const json = (body: unknown, init: ResponseInit = {}) =>
     },
   });
 
+const resolveProvider = (env: {
+  AI?: AiBinding;
+  GEMINI_API_KEY?: string;
+  GROQ_API_KEY?: string;
+  EDITORIAL_AI_PROVIDER?: string;
+}) => {
+  const provider = clip(env.EDITORIAL_AI_PROVIDER, 24).toLowerCase();
+  if (provider === 'groq' && env.GROQ_API_KEY) return 'groq';
+  if (env.GEMINI_API_KEY) return 'gemini';
+  if (env.GROQ_API_KEY) return 'groq';
+  if (env.AI) return 'workers-ai';
+  return 'unconfigured';
+};
+
 const isAuthorized = (request: Request, token?: string) => {
   if (!token) return false;
   const header = request.headers.get('authorization') || request.headers.get('x-admin-token') || '';
@@ -153,6 +167,37 @@ Regras obrigatórias:
 - Não remova acentos, cedilha, til ou pontuação correta.
 - Responda somente o JSON pedido na tarefa.
 `;
+
+export const onRequestGet = async ({
+  env,
+}: {
+  env: {
+    AI?: AiBinding;
+    GEMINI_API_KEY?: string;
+    GEMINI_MODEL?: string;
+    GROQ_API_KEY?: string;
+    GROQ_MODEL?: string;
+    EDITORIAL_AI_PROVIDER?: string;
+  };
+}) =>
+  json({
+    ok: true,
+    route: '/api/editorial-ai',
+    provider: resolveProvider(env),
+    model:
+      resolveProvider(env) === 'gemini'
+        ? env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL
+        : resolveProvider(env) === 'groq'
+          ? env.GROQ_MODEL || DEFAULT_GROQ_MODEL
+          : resolveProvider(env) === 'workers-ai'
+            ? WORKERS_AI_MODEL
+            : null,
+    configured: {
+      gemini: Boolean(env.GEMINI_API_KEY),
+      groq: Boolean(env.GROQ_API_KEY),
+      workersAi: Boolean(env.AI),
+    },
+  });
 
 export const onRequestPost = async ({
   request,
