@@ -788,7 +788,14 @@ const fetchGoogleSearchQuery = async ([category, query, queryIndex]) => {
 
 const fetchDiscoveryItems = async () => {
   if (INGEST_DISCOVERY === 'google_search') {
-    return (await Promise.all(categorySearchEntries(ACTIVE_CATEGORIES).map(fetchGoogleSearchQuery))).flat();
+    const searchItems = (await Promise.all(categorySearchEntries(ACTIVE_CATEGORIES).map(fetchGoogleSearchQuery))).flat();
+    if (searchItems.length >= ACTIVE_CATEGORIES.length * 4) return searchItems;
+
+    console.warn(
+      `[discovery] Google Search retornou ${searchItems.length} itens. Acionando fallback RSS para preservar a pauta.`,
+    );
+    const rssItems = (await Promise.all(feedEntries(ACTIVE_CATEGORIES).map(fetchFeed))).flat();
+    return [...searchItems, ...rssItems];
   }
 
   return (await Promise.all(feedEntries(ACTIVE_CATEGORIES).map(fetchFeed))).flat();
