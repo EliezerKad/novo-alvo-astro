@@ -2,7 +2,7 @@ name: Ingest editorial pitches
 
 on:
   schedule:
-    - cron: '0 9 * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch:
     inputs:
       category:
@@ -114,14 +114,14 @@ jobs:
       - name: Install dependencies
         run: npm ci --progress=false
 
-      - name: Ingest ${{ matrix.category }} Google Search into editorial pitches
+      - name: Ingest ${{ matrix.category }} RSS into editorial pitches
         run: npm run ingest:news
         env:
           PORTAL_ORIGIN: https://portalnovoalvo.com.br
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
           GOOGLE_SEARCH_API_KEY: ${{ secrets.GOOGLE_SEARCH_API_KEY }}
           GOOGLE_SEARCH_CX: ${{ secrets.GOOGLE_SEARCH_CX }}
-          INGEST_DISCOVERY: google_search
+          INGEST_DISCOVERY: rss
           GOOGLE_SEARCH_PAGES_PER_QUERY: 1
           GOOGLE_SEARCH_QUERIES_PER_CATEGORY: 4
           MAX_ITEMS_PER_FEED: 80
