@@ -6,19 +6,19 @@ seoDescription: "Saude: O ex-ministro José Dirceu foi diagnosticado com linfoma
 category: "Saude"
 author: "Redação Novo Alvo"
 sources: ["É Notícias", "DOL", "Notícias ao Minuto Brasil", "Tribuna do Sertão", "Jornal Digital da Região Oeste", "Opina News", "diariodopara.com.br", "GCMais", "CenárioMT", "romanews.com.br", "Diário de São Paulo", "Jornal Correio", "O Rebate", "Repórter Maceió", "OFuxico", "Se Ligue Bahia"]
-publishedAt: "2026-05-17T01:33:12.794Z"
-updatedAt: "2026-05-17T01:33:12.983Z"
+publishedAt: "2026-05-17T01:34:14.453Z"
+updatedAt: "2026-05-17T01:34:14.526Z"
 featured: true
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://www.portalnovoalvo.com.br/media/news/jose-dirceu-e-diagnosticado-com-linfoma-e-inicia-tratamento-em-sp-cover.jpg"
+  src: "https://www.portalnovoalvo.com.br/media/news/jose-dirceu-e-diagnosticado-com-linfoma-e-inicia-tratamento-em-sp-cover.webp"
   alt: "José Dirceu é diagnosticado com linfoma e inicia tratamento em SP"
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://www.portalnovoalvo.com.br/media/news/jose-dirceu-e-diagnosticado-com-linfoma-e-inicia-tratamento-em-sp-cover.jpg"
+ogImage: "https://www.portalnovoalvo.com.br/media/news/jose-dirceu-e-diagnosticado-com-linfoma-e-inicia-tratamento-em-sp-cover.webp"
 tags: ["saude", "jose", "dirceu", "diagnosticado", "linfoma", "inicia", "tratamento"]
 ---
 
