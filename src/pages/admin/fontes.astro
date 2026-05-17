@@ -1,0 +1,328 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+const categories = [
+  'Politica',
+  'Economia',
+  'Brasil',
+  'Mundo',
+  'Saude',
+  'Tecnologia',
+  'Esportes',
+  'Famosos',
+  'Cinema',
+  'Entretenimento',
+  'Ciencia',
+  'Educacao',
+  'Cultura',
+  'Lifestyle',
+  'Games',
+  'Moda',
+  'Musica',
+  'Futebol',
+  'Ocorrencias',
+];
+---
+
+<AdminLayout title="Fontes editoriais | Admin Novo Alvo" active="sources">
+  <section class="space-y-6" data-sources-admin>
+    <header class="overflow-hidden rounded-[2rem] border border-white/70 bg-white/78 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/78">
+      <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+        <div>
+          <span class="text-[10px] font-black uppercase tracking-[0.35em] text-red-600">Banco de fontes</span>
+          <h1 class="admin-display mt-3 text-4xl md:text-6xl">RSS por editoria</h1>
+          <p class="mt-3 max-w-2xl text-sm font-medium leading-6 text-zinc-500 dark:text-zinc-400">
+            Cole feeds confiaveis por categoria. O ingest usa estas fontes primeiro e so cai no motor antigo quando a editoria ainda estiver vazia.
+          </p>
+        </div>
+        <a href="/admin/pautas/" class="rounded-2xl bg-zinc-950 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-zinc-950/10 transition hover:-translate-y-0.5 hover:bg-red-600 dark:bg-white dark:text-zinc-950">
+          Ver pautas
+        </a>
+      </div>
+    </header>
+
+    <section class="grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
+      <article class="rounded-[2rem] border border-white/70 bg-white/82 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/82">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="text-[10px] font-black uppercase tracking-[0.28em] text-red-600">Entrada rapida</p>
+            <h2 class="admin-display mt-2 text-3xl">Adicionar feeds</h2>
+          </div>
+          <span class="rounded-full bg-zinc-100 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400" data-source-count>0 fontes</span>
+        </div>
+
+        <div class="mt-5 grid gap-3 md:grid-cols-[1fr_160px]">
+          <label>
+            <span class="mb-2 block text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400">Categoria</span>
+            <select data-source-category class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4 text-sm font-black text-zinc-700 outline-none transition focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
+              {categories.map((category) => <option value={category}>{category}</option>)}
+            </select>
+          </label>
+          <label>
+            <span class="mb-2 block text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400">Peso</span>
+            <input data-source-weight type="number" min="1" max="10" value="1" class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4 text-sm font-black text-zinc-700 outline-none transition focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200" />
+          </label>
+        </div>
+
+        <label class="mt-4 block">
+          <span class="mb-2 block text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400">URLs RSS, uma por linha</span>
+          <textarea data-source-urls rows="9" class="w-full resize-y rounded-[1.5rem] border border-zinc-200 bg-zinc-50 px-4 py-4 text-sm font-semibold leading-6 text-zinc-700 outline-none transition focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200" placeholder="https://site.com/rss&#10;https://outroportal.com/feed/"></textarea>
+        </label>
+
+        <label class="mt-4 block">
+          <span class="mb-2 block text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400">Observacao opcional</span>
+          <input data-source-notes class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4 text-sm font-bold text-zinc-700 outline-none transition focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200" placeholder="Ex: fonte local forte para politica municipal" />
+        </label>
+
+        <div class="mt-5 flex flex-wrap gap-3">
+          <button type="button" data-test-sources class="rounded-2xl border border-zinc-200 bg-white px-5 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-600 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+            Testar RSS
+          </button>
+          <button type="button" data-save-valid-sources class="rounded-2xl bg-red-600 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-red-600/20 transition hover:-translate-y-0.5 hover:bg-red-500" disabled>
+            Salvar validas
+          </button>
+        </div>
+
+        <div class="mt-5 hidden rounded-[1.5rem] border border-zinc-100 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/70" data-test-results></div>
+      </article>
+
+      <article class="rounded-[2rem] border border-white/70 bg-white/82 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/82">
+        <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p class="text-[10px] font-black uppercase tracking-[0.28em] text-red-600">Mapa editorial</p>
+            <h2 class="admin-display mt-2 text-3xl">Fontes ativas</h2>
+          </div>
+          <div class="flex gap-2">
+            <select data-list-category class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs font-black text-zinc-600 outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+              <option value="">Todas</option>
+              {categories.map((category) => <option value={category}>{category}</option>)}
+            </select>
+            <button type="button" data-refresh-sources class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-900">
+              Atualizar
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-5 grid gap-3 md:grid-cols-3" data-source-stats>
+          <div class="rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-900">
+            <p class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Total</p>
+            <strong class="mt-1 block text-2xl" data-stat-total>0</strong>
+          </div>
+          <div class="rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-900">
+            <p class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Ativas</p>
+            <strong class="mt-1 block text-2xl" data-stat-active>0</strong>
+          </div>
+          <div class="rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-900">
+            <p class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Categorias</p>
+            <strong class="mt-1 block text-2xl" data-stat-categories>0</strong>
+          </div>
+        </div>
+
+        <div class="mt-5 overflow-hidden rounded-[1.5rem] border border-zinc-100 dark:border-zinc-800">
+          <div class="max-h-[560px] divide-y divide-zinc-100 overflow-y-auto dark:divide-zinc-800" data-sources-list>
+            <div class="p-5">
+              <div class="h-24 animate-pulse rounded-3xl bg-zinc-100 dark:bg-zinc-900"></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+  </section>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-sources-admin]');
+      if (!root) return;
+
+      const token = localStorage.getItem('admin-token') || '';
+      if (!token) {
+        window.location.href = `/redacao/?next=${encodeURIComponent('/admin/fontes/')}`;
+        return;
+      }
+
+      const api = async (url, options = {}) => {
+        const response = await fetch(url, {
+          ...options,
+          headers: {
+            authorization: `Bearer ${token}`,
+            'content-type': 'application/json',
+            ...(options.headers || {}),
+          },
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+        return data;
+      };
+
+      const categoryInput = root.querySelector('[data-source-category]');
+      const listCategory = root.querySelector('[data-list-category]');
+      const urlsInput = root.querySelector('[data-source-urls]');
+      const notesInput = root.querySelector('[data-source-notes]');
+      const weightInput = root.querySelector('[data-source-weight]');
+      const resultsBox = root.querySelector('[data-test-results]');
+      const saveButton = root.querySelector('[data-save-valid-sources]');
+      const list = root.querySelector('[data-sources-list]');
+      const sourceCount = root.querySelector('[data-source-count]');
+      let lastValid = [];
+      let sources = [];
+
+      const escapeHtml = (value) =>
+        String(value || '').replace(/[&<>"']/g, (char) => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+        })[char]);
+
+      const lines = () => [...new Set(String(urlsInput?.value || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean))];
+
+      const renderResults = (results) => {
+        if (!resultsBox) return;
+        resultsBox.classList.remove('hidden');
+        resultsBox.innerHTML = `
+          <p class="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-400">Resultado do teste</p>
+          <div class="mt-3 space-y-2">
+            ${results.map((item) => `
+              <div class="rounded-2xl ${item.ok ? 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/25 dark:text-emerald-100' : 'bg-red-50 text-red-900 dark:bg-red-950/25 dark:text-red-100'} p-3">
+                <div class="flex items-start justify-between gap-3">
+                  <strong class="text-sm">${escapeHtml(item.name || item.feedUrl)}</strong>
+                  <span class="rounded-full bg-white/70 px-2 py-1 text-[9px] font-black uppercase tracking-widest dark:bg-zinc-950/50">${item.ok ? `${item.itemCount} itens` : 'erro'}</span>
+                </div>
+                <p class="mt-1 break-all text-xs font-semibold opacity-70">${escapeHtml(item.feedUrl)}</p>
+                ${item.error ? `<p class="mt-2 text-xs font-bold">${escapeHtml(item.error)}</p>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      };
+
+      const renderSources = () => {
+        const filterCategory = listCategory?.value || '';
+        const filtered = filterCategory ? sources.filter((source) => source.category === filterCategory) : sources;
+        root.querySelector('[data-stat-total]').textContent = String(sources.length);
+        root.querySelector('[data-stat-active]').textContent = String(sources.filter((source) => source.active).length);
+        root.querySelector('[data-stat-categories]').textContent = String(new Set(sources.map((source) => source.category)).size);
+        if (sourceCount) sourceCount.textContent = `${sources.length} fontes`;
+        if (!list) return;
+        if (!filtered.length) {
+          list.innerHTML = '<div class="p-8 text-center text-sm font-bold text-zinc-500">Nenhuma fonte cadastrada nesta visao.</div>';
+          return;
+        }
+        list.innerHTML = filtered.map((source) => `
+          <article class="grid gap-3 p-4 md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="rounded-full bg-red-600 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white">${escapeHtml(source.category)}</span>
+                <span class="rounded-full ${source.active ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-200' : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-900'} px-3 py-1 text-[9px] font-black uppercase tracking-widest">${source.active ? 'ativa' : 'pausada'}</span>
+                <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400">peso ${source.weight || 1}</span>
+              </div>
+              <h3 class="mt-2 text-lg font-black tracking-tight">${escapeHtml(source.name)}</h3>
+              <p class="mt-1 break-all text-xs font-semibold text-zinc-500">${escapeHtml(source.feedUrl)}</p>
+              ${source.lastError ? `<p class="mt-2 text-xs font-bold text-red-600">${escapeHtml(source.lastError)}</p>` : ''}
+            </div>
+            <div class="flex gap-2">
+              <button type="button" data-toggle-source="${escapeHtml(source.id)}" class="rounded-2xl border border-zinc-200 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800">
+                ${source.active ? 'Pausar' : 'Ativar'}
+              </button>
+              <button type="button" data-delete-source="${escapeHtml(source.id)}" class="rounded-2xl bg-zinc-950 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950">
+                Remover
+              </button>
+            </div>
+          </article>
+        `).join('');
+      };
+
+      const loadSources = async () => {
+        if (list) list.innerHTML = '<div class="p-5"><div class="h-24 animate-pulse rounded-3xl bg-zinc-100 dark:bg-zinc-900"></div></div>';
+        try {
+          const data = await api('/api/admin/sources?limit=5000');
+          sources = data.sources || [];
+          renderSources();
+        } catch (error) {
+          if (list) list.innerHTML = `<div class="p-6 text-sm font-bold text-red-600">${escapeHtml(error.message)}</div>`;
+        }
+      };
+
+      root.querySelector('[data-test-sources]')?.addEventListener('click', async () => {
+        const urls = lines();
+        if (!urls.length) return;
+        resultsBox?.classList.remove('hidden');
+        if (resultsBox) resultsBox.innerHTML = '<p class="text-sm font-bold text-zinc-500">Testando feeds...</p>';
+        saveButton.disabled = true;
+        try {
+          const data = await api('/api/admin/sources', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'test', urls, category: categoryInput?.value || 'Brasil' }),
+          });
+          lastValid = (data.results || []).filter((item) => item.ok);
+          renderResults(data.results || []);
+          saveButton.disabled = lastValid.length === 0;
+        } catch (error) {
+          if (resultsBox) resultsBox.innerHTML = `<p class="text-sm font-bold text-red-600">${escapeHtml(error.message)}</p>`;
+        }
+      });
+
+      saveButton?.addEventListener('click', async () => {
+        if (!lastValid.length) return;
+        saveButton.disabled = true;
+        saveButton.textContent = 'Salvando...';
+        try {
+          await api('/api/admin/sources', {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'save',
+              sources: lastValid.map((item) => ({
+                name: item.name,
+                category: item.category || categoryInput?.value || 'Brasil',
+                siteUrl: item.siteUrl,
+                feedUrl: item.feedUrl,
+                weight: Number(weightInput?.value || 1),
+                trustLevel: 3,
+                active: 1,
+                status: 'ok',
+                notes: notesInput?.value || '',
+              })),
+            }),
+          });
+          urlsInput.value = '';
+          lastValid = [];
+          saveButton.disabled = true;
+          if (resultsBox) resultsBox.innerHTML = '<p class="text-sm font-black text-emerald-600">Fontes salvas.</p>';
+          await loadSources();
+        } catch (error) {
+          if (resultsBox) resultsBox.innerHTML = `<p class="text-sm font-bold text-red-600">${escapeHtml(error.message)}</p>`;
+        } finally {
+          saveButton.textContent = 'Salvar validas';
+        }
+      });
+
+      list?.addEventListener('click', async (event) => {
+        const target = event.target.closest('button');
+        if (!target) return;
+        const toggleId = target.getAttribute('data-toggle-source');
+        const deleteId = target.getAttribute('data-delete-source');
+        try {
+          if (toggleId) {
+            const source = sources.find((item) => item.id === toggleId);
+            await api('/api/admin/sources', {
+              method: 'PATCH',
+              body: JSON.stringify({ id: toggleId, active: source?.active ? 0 : 1 }),
+            });
+            await loadSources();
+          }
+          if (deleteId && confirm('Remover esta fonte editorial?')) {
+            await api(`/api/admin/sources?id=${encodeURIComponent(deleteId)}`, { method: 'DELETE' });
+            await loadSources();
+          }
+        } catch (error) {
+          alert(error.message || 'Falha ao atualizar fonte.');
+        }
+      });
+
+      listCategory?.addEventListener('change', renderSources);
+      root.querySelector('[data-refresh-sources]')?.addEventListener('click', loadSources);
+      loadSources();
+    })();
+  </script>
+</AdminLayout>

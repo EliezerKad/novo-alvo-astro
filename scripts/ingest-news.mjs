@@ -198,6 +198,7 @@ const SOURCE_EXPANSION_TARGET = Number(process.env.SOURCE_EXPANSION_TARGET || 12
 const SOURCE_EXPANSION_MIN_OVERLAP = Number(process.env.SOURCE_EXPANSION_MIN_OVERLAP || 0.34);
 const MAX_PITCHES = Number(process.env.MAX_PITCHES || 80);
 const CATEGORY_MAX_PITCHES = Number(process.env.CATEGORY_MAX_PITCHES || 8);
+const CUSTOM_SOURCE_LIMIT = Number(process.env.CUSTOM_SOURCE_LIMIT || 5000);
 const ABSOLUTE_MIN_SOURCES = Number(process.env.ABSOLUTE_MIN_SOURCES || 8);
 const CATEGORY_MIN_SOURCES = Number(process.env.CATEGORY_MIN_SOURCES || 8);
 const ACTIVE_MIN_SOURCES = Math.max(ABSOLUTE_MIN_SOURCES, IS_CATEGORY_MODE ? Math.min(MIN_SOURCES, CATEGORY_MIN_SOURCES) : MIN_SOURCES);
@@ -634,18 +635,18 @@ const buildCategoryFloorPitches = (
     .filter(Boolean);
 };
 
-const parseRssItems = (xml, category) => {
-  const items = [...String(xml).matchAll(/<item\b[\s\S]*?<\/item>/gi)].slice(0, MAX_ITEMS_PER_FEED);
+const parseRssItems = (xml, category, sourceMeta = {}) => {
+  const items = [...String(xml).matchAll(/<(item|entry)\b[\s\S]*?<\/\1>/gi)].slice(0, MAX_ITEMS_PER_FEED);
   return items.map((match) => {
     const itemXml = match[0];
     const rawTitle = textBetween(itemXml, 'title');
     const title = cleanTitle(rawTitle);
-    const source = textBetween(itemXml, 'source') || rawTitle.split(' - ').pop() || 'Google News';
-    const finalCategory = classifyCategory(category, title, source);
-    const googleLink = textBetween(itemXml, 'link');
-    const sourceUrl = attrBetween(itemXml, 'source', 'url');
+    const source = textBetween(itemXml, 'source') || sourceMeta.name || rawTitle.split(' - ').pop() || 'Google News';
+    const finalCategory = sourceMeta.lockCategory ? category : classifyCategory(category, title, source);
+    const googleLink = textBetween(itemXml, 'link') || attrBetween(itemXml, 'link', 'href');
+    const sourceUrl = attrBetween(itemXml, 'source', 'url') || sourceMeta.siteUrl || '';
     const link = googleLink || sourceUrl;
-    const publishedAt = textBetween(itemXml, 'pubDate');
+    const publishedAt = textBetween(itemXml, 'pubDate') || textBetween(itemXml, 'published') || textBetween(itemXml, 'updated');
 
     return {
       title,
@@ -660,7 +661,7 @@ const parseRssItems = (xml, category) => {
   }).filter((item) => item.title && item.link);
 };
 
-const fetchFeed = async ([category, url]) => {
+const fetchFeed = async ([category, url, _index = 0, sourceMeta = {}]) => {
   try {
     const response = await fetch(url, {
       headers: {
@@ -669,19 +670,76 @@ const fetchFeed = async ([category, url]) => {
       },
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return parseRssItems(await response.text(), category);
+    return parseRssItems(await response.text(), category, sourceMeta);
   } catch (error) {
-    console.warn(`[feed] ${category}: ${error.message}`);
+    console.warn(`[feed] ${category} ${sourceMeta?.name ? `(${sourceMeta.name})` : ''}: ${error.message}`);
     return [];
   }
 };
 
-const feedEntries = (categories = Object.keys(FEEDS)) =>
+const fallbackFeedEntries = (categories = Object.keys(FEEDS)) =>
   Object.entries(FEEDS)
     .filter(([category]) => categories.includes(category))
     .flatMap(([category, urls]) =>
       (Array.isArray(urls) ? urls : [urls]).map((url, index) => [category, url, index]),
     );
+
+let editorialSourceEntriesCache = null;
+
+const fetchEditorialSourceEntries = async (categories = Object.keys(FEEDS)) => {
+  if (editorialSourceEntriesCache) return editorialSourceEntriesCache;
+  if (!ADMIN_TOKEN || !PORTAL_ORIGIN) {
+    editorialSourceEntriesCache = [];
+    return editorialSourceEntriesCache;
+  }
+
+  try {
+    const url = new URL('/api/admin/sources', PORTAL_ORIGIN);
+    url.searchParams.set('active', '1');
+    url.searchParams.set('categories', categories.join(','));
+    url.searchParams.set('limit', String(CUSTOM_SOURCE_LIMIT));
+
+    const response = await fetch(url, {
+      headers: {
+        accept: 'application/json',
+        authorization: `Bearer ${ADMIN_TOKEN}`,
+      },
+      signal: AbortSignal.timeout(12000),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+
+    editorialSourceEntriesCache = (Array.isArray(data.sources) ? data.sources : [])
+      .filter((source) => source?.feedUrl && source?.category)
+      .map((source, index) => [
+        source.category,
+        source.feedUrl,
+        index,
+        {
+          name: source.name,
+          siteUrl: source.siteUrl,
+          trustLevel: source.trustLevel,
+          weight: source.weight,
+          lockCategory: true,
+        },
+      ]);
+
+    if (editorialSourceEntriesCache.length) {
+      console.log(`[sources] usando ${editorialSourceEntriesCache.length} fontes RSS do banco editorial.`);
+    }
+    return editorialSourceEntriesCache;
+  } catch (error) {
+    console.warn(`[sources] usando fallback interno: ${error.message}`);
+    editorialSourceEntriesCache = [];
+    return editorialSourceEntriesCache;
+  }
+};
+
+const feedEntries = async (categories = Object.keys(FEEDS)) => {
+  const customEntries = await fetchEditorialSourceEntries(categories);
+  if (customEntries.length) return customEntries.filter(([category]) => categories.includes(category));
+  return fallbackFeedEntries(categories);
+};
 
 const stripSearchOperators = (query) =>
   String(query || '')
@@ -805,11 +863,11 @@ const fetchDiscoveryItems = async () => {
     console.warn(
       `[discovery] Google Search retornou ${searchItems.length} itens. Acionando fallback RSS para preservar a pauta.`,
     );
-    const rssItems = (await Promise.all(feedEntries(ACTIVE_CATEGORIES).map(fetchFeed))).flat();
+    const rssItems = (await Promise.all((await feedEntries(ACTIVE_CATEGORIES)).map(fetchFeed))).flat();
     return [...searchItems, ...rssItems];
   }
 
-  return (await Promise.all(feedEntries(ACTIVE_CATEGORIES).map(fetchFeed))).flat();
+  return (await Promise.all((await feedEntries(ACTIVE_CATEGORIES)).map(fetchFeed))).flat();
 };
 
 const buildPitch = (items) => {
