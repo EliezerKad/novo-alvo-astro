@@ -66,8 +66,8 @@ const categories = [
       </div>
     </header>
 
-    <section class="grid gap-3 rounded-[2rem] border border-white/70 bg-white/70 p-4 shadow-[0_24px_80px_rgba(15,23,42,0.05)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/70 lg:grid-cols-[1.05fr_1fr_0.9fr]">
-      <div class="rounded-[1.5rem] bg-zinc-950 p-5 text-white dark:bg-white dark:text-zinc-950">
+    <section class="grid items-start gap-3 rounded-[2rem] border border-white/70 bg-white/70 p-4 shadow-[0_24px_80px_rgba(15,23,42,0.05)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/70 lg:grid-cols-[1fr_0.86fr_0.92fr]">
+      <div class="rounded-[1.5rem] bg-zinc-950 p-4 text-white dark:bg-white dark:text-zinc-950">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p class="text-[10px] font-black uppercase tracking-[0.28em] text-red-400">Pulso da ingestao</p>
@@ -75,43 +75,43 @@ const categories = [
           </div>
           <span class="rounded-full bg-white/10 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white/70 dark:bg-zinc-950/10 dark:text-zinc-600" data-ingest-state>Diagnostico</span>
         </div>
-        <div class="mt-5 grid grid-cols-3 gap-2">
+        <div class="mt-4 grid grid-cols-3 gap-2">
           <div class="rounded-2xl bg-white/8 p-3 dark:bg-zinc-950/5">
             <p class="text-[9px] font-black uppercase tracking-widest text-white/50 dark:text-zinc-500">Itens</p>
-            <strong class="mt-1 block text-xl" data-ingest-items>0</strong>
+            <strong class="mt-1 block text-lg" data-ingest-items>0</strong>
           </div>
           <div class="rounded-2xl bg-white/8 p-3 dark:bg-zinc-950/5">
             <p class="text-[9px] font-black uppercase tracking-widest text-white/50 dark:text-zinc-500">Clusters</p>
-            <strong class="mt-1 block text-xl" data-ingest-clusters>0</strong>
+            <strong class="mt-1 block text-lg" data-ingest-clusters>0</strong>
           </div>
           <div class="rounded-2xl bg-white/8 p-3 dark:bg-zinc-950/5">
             <p class="text-[9px] font-black uppercase tracking-widest text-white/50 dark:text-zinc-500">Salvas</p>
-            <strong class="mt-1 block text-xl" data-ingest-saved>0</strong>
+            <strong class="mt-1 block text-lg" data-ingest-saved>0</strong>
           </div>
         </div>
-        <p class="mt-4 text-xs font-bold leading-5 text-white/55 dark:text-zinc-500" data-ingest-note>
+        <p class="mt-3 text-[11px] font-bold leading-5 text-white/55 dark:text-zinc-500" data-ingest-note>
           Depois de ativar a tabela de historico, cada rodada aparece aqui com itens, clusters e descartes.
         </p>
       </div>
 
-      <div class="rounded-[1.5rem] border border-zinc-100 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
+      <div class="rounded-[1.5rem] border border-zinc-100 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
         <div class="flex items-center justify-between gap-3">
           <div>
             <p class="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-400">Categorias captadas</p>
-            <strong class="mt-2 block text-sm text-zinc-700 dark:text-zinc-200" data-ingest-categories-title>Aguardando leitura...</strong>
+            <strong class="mt-2 block text-xs leading-5 text-zinc-700 dark:text-zinc-200" data-ingest-categories-title>Aguardando leitura...</strong>
           </div>
           <span class="rounded-full bg-red-50 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-red-700 dark:bg-red-950/30 dark:text-red-300" data-ingest-skipped>0 ignoradas</span>
         </div>
-        <div class="mt-4 flex flex-wrap gap-2" data-ingest-categories>
+        <div class="mt-3 flex max-h-24 flex-wrap gap-2 overflow-hidden" data-ingest-categories>
           <span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:bg-zinc-900">Carregando</span>
         </div>
       </div>
 
-      <div class="rounded-[1.5rem] border border-zinc-100 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
+      <div class="rounded-[1.5rem] border border-zinc-100 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
         <div class="flex items-start justify-between gap-3">
           <div>
             <p class="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-400">Estoque editorial</p>
-            <strong class="mt-2 block text-sm text-zinc-700 dark:text-zinc-200" data-stock-title>Conectando D1...</strong>
+            <strong class="mt-2 block text-xs leading-5 text-zinc-700 dark:text-zinc-200" data-stock-title>Conectando D1...</strong>
           </div>
           <a href="/admin/fontes/" class="rounded-full bg-zinc-950 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950">
             Fontes
@@ -120,21 +120,21 @@ const categories = [
         <div class="mt-4 grid grid-cols-3 gap-2">
           <div class="rounded-2xl bg-zinc-50 p-3 dark:bg-zinc-900">
             <p class="text-[9px] font-black uppercase tracking-widest text-zinc-400">RSS</p>
-            <strong class="mt-1 block text-xl" data-stock-sources>0</strong>
+            <strong class="mt-1 block text-lg" data-stock-sources>0</strong>
           </div>
           <div class="rounded-2xl bg-zinc-50 p-3 dark:bg-zinc-900">
             <p class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Novas</p>
-            <strong class="mt-1 block text-xl" data-stock-new>0</strong>
+            <strong class="mt-1 block text-lg" data-stock-new>0</strong>
           </div>
           <div class="rounded-2xl bg-zinc-50 p-3 dark:bg-zinc-900">
             <p class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Fila</p>
-            <strong class="mt-1 block text-xl" data-stock-queued>0</strong>
+            <strong class="mt-1 block text-lg" data-stock-queued>0</strong>
           </div>
         </div>
-        <p class="mt-4 text-xs font-bold leading-5 text-zinc-500 dark:text-zinc-400" data-stock-note>
+        <p class="mt-3 text-[11px] font-bold leading-5 text-zinc-500 dark:text-zinc-400" data-stock-note>
           Mostra o estoque real do banco, independente da ultima rodada de ingestao.
         </p>
-        <div class="mt-4 flex flex-wrap gap-2" data-stock-categories>
+        <div class="mt-3 flex max-h-20 flex-wrap gap-2 overflow-hidden" data-stock-categories>
           <span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:bg-zinc-900">Carregando</span>
         </div>
       </div>
@@ -564,9 +564,10 @@ const categories = [
         }
 
         const feedCounts = parseObject(latest.feed_counts);
-        const categories = Object.entries(feedCounts)
+        const categoryEntries = Object.entries(feedCounts)
           .sort((a, b) => Number(b[1] || 0) - Number(a[1] || 0))
-          .slice(0, 14);
+          .filter(([, count]) => Number(count || 0) > 0);
+        const categories = categoryEntries.slice(0, 4);
         const topicClusters = Number(latest.topic_clusters || 0);
         const radarClusters = Number(latest.radar_clusters || 0);
         const selected = Number(latest.selected_pitches || 0);
@@ -580,11 +581,18 @@ const categories = [
         if (ingestSaved) ingestSaved.textContent = saved;
         if (ingestSkipped) ingestSkipped.textContent = `${skipped} ignorada${skipped === 1 ? '' : 's'}`;
         if (ingestNote) ingestNote.textContent = `${selected} pautas selecionadas. ${topicClusters} clusters por assunto e ${radarClusters} radares por categoria.`;
-        if (ingestCategoriesTitle) ingestCategoriesTitle.textContent = `${categories.length} categorias com sinal na ultima rodada`;
+        if (ingestCategoriesTitle) {
+          const totalCategories = categoryEntries.length;
+          ingestCategoriesTitle.textContent = `${totalCategories} categoria${totalCategories === 1 ? '' : 's'} com sinal na ultima rodada`;
+        }
         if (ingestCategories) {
           ingestCategories.innerHTML = categories.length
             ? categories
-                .map(([category, count]) => `<span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">${escapeHtml(category)} ${Number(count || 0)}</span>`)
+                .map(([category, count]) => {
+                  const total = Number(count || 0);
+                  const label = total >= 1000 ? `${category} dominante` : `${category} ${total}`;
+                  return `<span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">${escapeHtml(label)}</span>`;
+                })
                 .join('')
             : '<span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:bg-zinc-900">Sem categorias</span>';
         }
@@ -612,7 +620,7 @@ const categories = [
         if (stockCategories) {
           stockCategories.innerHTML = categories.length
             ? categories
-                .slice(0, 14)
+                .slice(0, 6)
                 .map(
                   (item) =>
                     `<span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">${escapeHtml(item.category || 'Fonte')} ${Number(item.active || item.total || 0)}</span>`,
