@@ -6,19 +6,19 @@ seoDescription: "Ciencia: A Organização Mundial da Saúde (OMS) elevou o surto
 category: "Ciencia"
 author: "Redação Novo Alvo"
 sources: ["O Cafezinho", "NP Expresso", "SWI swissinfo.ch", "Hora do Povo", "Portal Tela", "BBC", "Bahia.Ba", "Facebook", "Terra", "tmc.com.br", "Olhar Digital", "Observador", "Público", "CNN Portugal"]
-publishedAt: "2026-05-18T14:33:23.951Z"
-updatedAt: "2026-05-18T14:33:24.119Z"
+publishedAt: "2026-05-18T19:37:08.254Z"
+updatedAt: "2026-05-18T19:37:09.702Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://www.portalnovoalvo.com.br/media/news/oms-declara-emergencia-internacional-por-surto-de-ebola-no-congo-cover.jpg"
+  src: "https://portalnovoalvo.com.br/uploads/news/oms-declara-emergencia-internacional-por-surto-de-ebola-no-congo-cover.avif"
   alt: "Oms declara emergência internacional por surto de ebola no Congo"
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://www.portalnovoalvo.com.br/media/news/oms-declara-emergencia-internacional-por-surto-de-ebola-no-congo-cover.jpg"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/oms-declara-emergencia-internacional-por-surto-de-ebola-no-congo-cover.avif"
 tags: ["ciencia", "declara", "emergencia", "internacional", "surto", "ebola", "congo"]
 ---
 
