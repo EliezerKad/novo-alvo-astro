@@ -379,11 +379,125 @@ const HIGH_SIGNAL_BLOCKED_TOKENS = new Set([
   'vivo',
 ]);
 
+const WEAK_TOPIC_TOKENS = new Set([
+  ...HIGH_SIGNAL_BLOCKED_TOKENS,
+  'fonte',
+  'fontes',
+  'publica',
+  'publicado',
+  'publicada',
+  'divulga',
+  'divulgado',
+  'divulgada',
+  'anuncia',
+  'anunciado',
+  'anunciada',
+  'novo',
+  'nova',
+  'novos',
+  'novas',
+  'melhor',
+  'melhores',
+  'primeiro',
+  'primeira',
+  'semana',
+  'diario',
+  'diaria',
+  'portal',
+  'site',
+  'blog',
+  'coluna',
+  'video',
+  'videos',
+  'cadastro',
+  'bonus',
+  'oferta',
+  'ofertas',
+  'cupom',
+  'codigo',
+  'indicacao',
+  'apostas',
+  'palpite',
+  'palpites',
+  'odds',
+]);
+
+const EVENT_ACTION_TOKENS = new Set([
+  'aprova',
+  'aprovou',
+  'vota',
+  'votou',
+  'fecha',
+  'fechou',
+  'acordo',
+  'cancela',
+  'cancelou',
+  'suspende',
+  'suspendeu',
+  'aumenta',
+  'aumentou',
+  'reduz',
+  'reduziu',
+  'corta',
+  'cortou',
+  'demite',
+  'demitiu',
+  'contrata',
+  'contratou',
+  'renova',
+  'renovou',
+  'vence',
+  'venceu',
+  'perde',
+  'perdeu',
+  'elimina',
+  'eliminou',
+  'avanca',
+  'avancou',
+  'recua',
+  'recuou',
+  'investiga',
+  'prende',
+  'prendeu',
+  'morre',
+  'morreu',
+  'mata',
+  'matou',
+  'fere',
+  'feriu',
+  'explode',
+  'explodiu',
+  'cai',
+  'caiu',
+  'sobe',
+  'subiu',
+  'lanca',
+  'lancou',
+  'estreia',
+  'estreou',
+  'revela',
+  'revelou',
+  'admite',
+  'admitiu',
+  'nega',
+  'negou',
+  'critica',
+  'criticou',
+  'defende',
+  'defendeu',
+  'assina',
+  'assinou',
+]);
+
+const ENTITY_STOPWORDS = new Set(['google news', 'news', 'brasil', 'mundo', 'portal novo alvo', 'novo alvo', 'radar', 'resumo', 'agenda', 'cadastro']);
+
 const tokenList = (value) =>
   normalizedText(value)
     .replace(/\bao vivo\b/g, 'aovivo')
     .split(/[^a-z0-9]+/)
     .filter((token) => token.length > 3 && !HIGH_SIGNAL_BLOCKED_TOKENS.has(token));
+
+const strongTokenList = (value) => tokenList(value).filter((token) => !WEAK_TOPIC_TOKENS.has(token));
 
 const extractEntities = (value) => {
   const text = decodeEntities(value);
@@ -393,7 +507,7 @@ const extractEntities = (value) => {
   ]
     .map((match) => match[0])
     .map((entity) => normalizedText(entity).replace(/[^a-z0-9]+/g, ' ').trim())
-    .filter((entity) => entity.length >= 3 && !HIGH_SIGNAL_BLOCKED_TOKENS.has(entity.replace(/\s+/g, '')));
+    .filter((entity) => entity.length >= 3 && !ENTITY_STOPWORDS.has(entity) && !HIGH_SIGNAL_BLOCKED_TOKENS.has(entity.replace(/\s+/g, '')));
 
   return [...new Set(matches)].slice(0, 8);
 };
@@ -405,7 +519,7 @@ const isGenericEditorialItem = (item) => {
   if (EDITORIAL_NOISE_PATTERN.test(title)) return true;
   if (/^(\W|[0-9])+$/.test(title)) return true;
   if (/^(resumo|agenda|programacao|cadastro|cupom|palpite|onde assistir)\b/i.test(title)) return true;
-  const usefulTokens = tokenList(title).filter((token) => !extractKeywords('', item?.category || '').includes(token));
+  const usefulTokens = strongTokenList(title).filter((token) => !extractKeywords('', item?.category || '').includes(token));
   if (usefulTokens.length < 2 && extractEntities(title).length === 0) return true;
   if (normalized.length <= 12 && extractEntities(title).length <= 1) return true;
   return false;
@@ -423,17 +537,25 @@ const itemTopicProfile = (item) => {
   const title = cleanPitchTitle(item?.title || '');
   const text = `${title} ${item?.source || ''}`;
   const entities = extractEntities(title);
-  const tokens = tokenList(title).filter((token) => !HIGH_SIGNAL_BLOCKED_TOKENS.has(token)).slice(0, 12);
+  const tokens = strongTokenList(title).slice(0, 14);
+  const actions = tokens.filter((token) => EVENT_ACTION_TOKENS.has(token));
   return {
     entities,
     tokens,
+    actions,
     entitySet: new Set(entities),
     tokenSet: new Set(tokens),
+    actionSet: new Set(actions),
     noisy: isGenericEditorialItem(item),
     title,
     text,
   };
 };
+
+const hasConcreteTopicSignal = (profile) =>
+  profile.entities.length >= 2 ||
+  (profile.entities.length >= 1 && profile.tokens.length >= 2) ||
+  (profile.actions.length >= 1 && profile.tokens.length >= 3);
 
 const itemTopicAffinity = (left, right) => {
   if (!left || !right || left.category !== right.category) return 0;
@@ -443,12 +565,14 @@ const itemTopicAffinity = (left, right) => {
 
   const sharedEntities = sharedCount(a.entities, b.entitySet);
   const sharedTokens = sharedCount(a.tokens, b.tokenSet);
+  const sharedActions = sharedCount(a.actions, b.actionSet);
   const overlap = overlapScore(left, right);
   const strongNamedMatch = sharedEntities > 0;
-  const strongTokenMatch = sharedTokens >= 3 || (sharedTokens >= 2 && overlap >= 0.45);
+  const strongActionMatch = sharedActions > 0 && sharedTokens >= 1;
+  const strongTokenMatch = sharedTokens >= 3 || (sharedTokens >= 2 && overlap >= 0.38);
 
-  if (!strongNamedMatch && !strongTokenMatch) return 0;
-  return sharedEntities * 0.42 + sharedTokens * 0.12 + overlap;
+  if (!strongNamedMatch && !strongActionMatch && !strongTokenMatch) return 0;
+  return sharedEntities * 0.42 + sharedActions * 0.2 + sharedTokens * 0.12 + overlap;
 };
 
 const coherentClusterItems = (items, minSources = ACTIVE_MIN_SOURCES) => {
@@ -457,12 +581,13 @@ const coherentClusterItems = (items, minSources = ACTIVE_MIN_SOURCES) => {
 
   const lead = selectLeadItem(distinct);
   const leadProfile = itemTopicProfile(lead);
+  if (!hasConcreteTopicSignal(leadProfile)) return [];
   const selected = distinct
     .map((item) => ({
       item,
       affinity: item === lead ? 999 : itemTopicAffinity(lead, item),
     }))
-    .filter(({ item, affinity }) => item === lead || affinity >= 0.58)
+    .filter(({ item, affinity }) => item === lead || affinity >= (STRICT_TOPIC_CLUSTERING ? 0.42 : 0.3))
     .sort((a, b) => b.affinity - a.affinity)
     .map(({ item }) => item);
 
@@ -470,15 +595,18 @@ const coherentClusterItems = (items, minSources = ACTIVE_MIN_SOURCES) => {
 
   const entityCounts = new Map();
   const tokenCounts = new Map();
+  const actionCounts = new Map();
   for (const item of selected) {
     const profile = itemTopicProfile(item);
     for (const entity of profile.entities) entityCounts.set(entity, (entityCounts.get(entity) || 0) + 1);
     for (const token of profile.tokens) tokenCounts.set(token, (tokenCounts.get(token) || 0) + 1);
+    for (const action of profile.actions) actionCounts.set(action, (actionCounts.get(action) || 0) + 1);
   }
 
-  const hasSharedEntity = [...entityCounts.values()].some((count) => count >= Math.max(2, Math.ceil(selected.length * 0.34)));
-  const hasSharedTokenCore = [...tokenCounts.values()].filter((count) => count >= Math.max(2, Math.ceil(selected.length * 0.42))).length >= 2;
-  if (!hasSharedEntity && !hasSharedTokenCore && leadProfile.tokens.length < 3) return [];
+  const hasSharedEntity = [...entityCounts.values()].some((count) => count >= Math.max(2, Math.ceil(selected.length * 0.25)));
+  const hasSharedAction = [...actionCounts.values()].some((count) => count >= Math.max(2, Math.ceil(selected.length * 0.25)));
+  const hasSharedTokenCore = [...tokenCounts.values()].filter((count) => count >= Math.max(2, Math.ceil(selected.length * 0.3))).length >= 2;
+  if (!hasSharedEntity && !hasSharedAction && !hasSharedTokenCore) return [];
 
   return selected;
 };
