@@ -2,12 +2,12 @@
 title: "Datafolha: Gestão Lula Desaprovada em Segurança e Saúde"
 slug: "datafolha-seguranca-e-saude-tem-pior-avaliacao-no-governo-lula"
 summary: "Pesquisa Datafolha revela que o Governo Lula registra as piores avaliações nas áreas de segurança pública e saúde, gerando pressão sobre a administração federal."
-seoDescription: "Saude: Pesquisa Datafolha revela que o Governo Lula registra as piores avaliações nas áreas de segurança pública e saúde, gerando pressão sobre a…"
-category: "Saude"
+seoDescription: "Politica: Pesquisa Datafolha revela que o Governo Lula registra as piores avaliações nas áreas de segurança pública e saúde, gerando pressão sobre a…"
+category: "Politica"
 author: "Redação Novo Alvo"
 sources: ["InfoMoney", "O Globo", "WH3", "CNN Brasil", "Portal da Abelhinha", "Jovem Pan", "Política Alagoana", "Portal Você Online", "BNews RN", "CBN", "ND Mais", "Terra Brasil Notícias", "Portal Tela", "Jornal O Sul"]
-publishedAt: "2026-05-18T19:35:53.246Z"
-updatedAt: "2026-05-18T19:35:54.617Z"
+publishedAt: "2026-05-18T19:38:57.701Z"
+updatedAt: "2026-05-18T19:38:59.135Z"
 featured: false
 isFeatured: false
 urgent: false
