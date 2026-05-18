@@ -66,7 +66,7 @@ const categories = [
       </div>
     </header>
 
-    <section class="grid gap-3 rounded-[2rem] border border-white/70 bg-white/70 p-4 shadow-[0_24px_80px_rgba(15,23,42,0.05)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/70 md:grid-cols-[1.1fr_1fr]">
+    <section class="grid gap-3 rounded-[2rem] border border-white/70 bg-white/70 p-4 shadow-[0_24px_80px_rgba(15,23,42,0.05)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/70 lg:grid-cols-[1.05fr_1fr_0.9fr]">
       <div class="rounded-[1.5rem] bg-zinc-950 p-5 text-white dark:bg-white dark:text-zinc-950">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -106,6 +106,38 @@ const categories = [
           <span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:bg-zinc-900">Carregando</span>
         </div>
       </div>
+
+      <div class="rounded-[1.5rem] border border-zinc-100 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-400">Estoque editorial</p>
+            <strong class="mt-2 block text-sm text-zinc-700 dark:text-zinc-200" data-stock-title>Conectando D1...</strong>
+          </div>
+          <a href="/admin/fontes/" class="rounded-full bg-zinc-950 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950">
+            Fontes
+          </a>
+        </div>
+        <div class="mt-4 grid grid-cols-3 gap-2">
+          <div class="rounded-2xl bg-zinc-50 p-3 dark:bg-zinc-900">
+            <p class="text-[9px] font-black uppercase tracking-widest text-zinc-400">RSS</p>
+            <strong class="mt-1 block text-xl" data-stock-sources>0</strong>
+          </div>
+          <div class="rounded-2xl bg-zinc-50 p-3 dark:bg-zinc-900">
+            <p class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Novas</p>
+            <strong class="mt-1 block text-xl" data-stock-new>0</strong>
+          </div>
+          <div class="rounded-2xl bg-zinc-50 p-3 dark:bg-zinc-900">
+            <p class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Fila</p>
+            <strong class="mt-1 block text-xl" data-stock-queued>0</strong>
+          </div>
+        </div>
+        <p class="mt-4 text-xs font-bold leading-5 text-zinc-500 dark:text-zinc-400" data-stock-note>
+          Mostra o estoque real do banco, independente da ultima rodada de ingestao.
+        </p>
+        <div class="mt-4 flex flex-wrap gap-2" data-stock-categories>
+          <span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:bg-zinc-900">Carregando</span>
+        </div>
+      </div>
     </section>
 
     <section class="overflow-hidden rounded-[2rem] border border-white/70 bg-white/82 shadow-[0_24px_80px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/82">
@@ -123,7 +155,7 @@ const categories = [
       <div data-empty-state class="hidden p-10 text-center">
         <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-zinc-100 text-2xl dark:bg-zinc-900">+</span>
         <h2 class="admin-display mt-4 text-3xl">Nenhuma pauta encontrada</h2>
-        <p class="mx-auto mt-2 max-w-md text-sm font-medium leading-6 text-zinc-500">Quando o script de ingestão rodar, os sinais editoriais aparecem aqui.</p>
+        <p class="mx-auto mt-2 max-w-md text-sm font-medium leading-6 text-zinc-500" data-empty-copy>Quando o script de ingestão rodar, os sinais editoriais aparecem aqui.</p>
       </div>
 
       <div data-pitches-list class="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -264,6 +296,13 @@ const categories = [
       const ingestNote = document.querySelector('[data-ingest-note]');
       const ingestCategoriesTitle = document.querySelector('[data-ingest-categories-title]');
       const ingestCategories = document.querySelector('[data-ingest-categories]');
+      const stockTitle = document.querySelector('[data-stock-title]');
+      const stockSources = document.querySelector('[data-stock-sources]');
+      const stockNew = document.querySelector('[data-stock-new]');
+      const stockQueued = document.querySelector('[data-stock-queued]');
+      const stockNote = document.querySelector('[data-stock-note]');
+      const stockCategories = document.querySelector('[data-stock-categories]');
+      const emptyCopy = document.querySelector('[data-empty-copy]');
       const categoryFilter = document.querySelector('[data-category-filter]');
       const statusButtons = [...document.querySelectorAll('[data-status-filter]')];
       const modal = document.querySelector('[data-pitch-modal]');
@@ -274,6 +313,7 @@ const categories = [
       const visibleMinSources = '5';
       let pitches = [];
       let status = 'new';
+      let editorialStats = null;
       const generatedArticles = new Map();
       let activePitchId = '';
       let activePitchMode = 'pitch';
@@ -550,6 +590,63 @@ const categories = [
         }
       };
 
+      const renderEditorialStats = (data) => {
+        editorialStats = data || null;
+        const sources = data?.sources || {};
+        const pitchStats = data?.pitches || {};
+        const statuses = pitchStats.visibleStatuses || pitchStats.statuses || {};
+        const sourceTotal = Number(sources.total || 0);
+        const activeSources = Number(sources.active || 0);
+        const newCount = Number(statuses.new || pitchStats.visibleNew || 0);
+        const queuedCount = Number(statuses.queued || 0);
+        const convertedCount = Number(statuses.converted || 0);
+        const categories = Array.isArray(sources.categories) ? sources.categories : [];
+
+        if (stockTitle) stockTitle.textContent = `${activeSources || sourceTotal} fontes ativas no D1`;
+        if (stockSources) stockSources.textContent = activeSources || sourceTotal;
+        if (stockNew) stockNew.textContent = newCount;
+        if (stockQueued) stockQueued.textContent = queuedCount;
+        if (stockNote) {
+          stockNote.textContent = `${Number(pitchStats.total || 0)} pautas historicas. ${convertedCount} convertidas e ${queuedCount} em fila passam pelo fluxo de publicacao.`;
+        }
+        if (stockCategories) {
+          stockCategories.innerHTML = categories.length
+            ? categories
+                .slice(0, 14)
+                .map(
+                  (item) =>
+                    `<span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">${escapeHtml(item.category || 'Fonte')} ${Number(item.active || item.total || 0)}</span>`,
+                )
+                .join('')
+            : '<span class="rounded-full bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:bg-zinc-900">Sem fontes cadastradas</span>';
+        }
+      };
+
+      const loadEditorialStats = async () => {
+        const token = getToken();
+        if (!token) return;
+        try {
+          const response = await fetch(`/api/admin/editorial-stats?minSources=${encodeURIComponent(visibleMinSources)}`, {
+            headers: { authorization: `Bearer ${token}` },
+          });
+          const data = await response.json().catch(() => ({}));
+          if (response.status === 401) {
+            try {
+              localStorage.removeItem('admin-token');
+            } catch {}
+            redirectToLogin();
+            return;
+          }
+          if (!response.ok) throw new Error(data.error || 'Falha ao ler estoque editorial.');
+          renderEditorialStats(data);
+          render();
+        } catch (error) {
+          if (stockTitle) stockTitle.textContent = 'Estoque indisponivel';
+          if (stockNote) stockNote.textContent = error.message || 'Nao foi possivel ler fontes e pautas do D1.';
+          if (stockCategories) stockCategories.innerHTML = '<span class="rounded-full bg-red-50 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-red-700 dark:bg-red-950/30 dark:text-red-300">Falha no diagnostico</span>';
+        }
+      };
+
       const loadIngestDiagnostics = async () => {
         const token = getToken();
         if (!token) return;
@@ -579,6 +676,17 @@ const categories = [
 
         if (statusNode) {
           statusNode.textContent = `${filtered.length} de ${pitches.length} pauta${pitches.length === 1 ? '' : 's'} encontrada${pitches.length === 1 ? '' : 's'}`;
+        }
+        if (emptyCopy && filtered.length === 0) {
+          const statuses = editorialStats?.pitches?.visibleStatuses || editorialStats?.pitches?.statuses || {};
+          const currentCount = Number(statuses[status] || 0);
+          const sourceCount = Number(editorialStats?.sources?.active || editorialStats?.sources?.total || 0);
+          const labels = { new: 'novas', reviewed: 'revisadas', queued: 'em fila', converted: 'convertidas' };
+          emptyCopy.textContent = currentCount > 0
+            ? `Existem ${currentCount} pautas ${labels[status] || status} no D1, mas o filtro atual de categoria/texto nao encontrou resultados.`
+            : sourceCount > 0
+              ? `O banco tem ${sourceCount} fontes cadastradas. Nesta aba nao ha pautas ${labels[status] || status} com a regua atual de fontes e validade.`
+              : 'Cadastre fontes em /admin/fontes/ ou rode a ingestao para preencher este painel.';
         }
 
         emptyState?.classList.toggle('hidden', filtered.length > 0);
@@ -1030,6 +1138,7 @@ const categories = [
           pitches = Array.isArray(data.pitches) ? data.pitches : [];
           render();
           loadIngestDiagnostics();
+          loadEditorialStats();
         } catch (error) {
           if (statusNode) statusNode.textContent = error.message || 'Falha ao conectar com o CMS.';
           if (list) list.innerHTML = '';
