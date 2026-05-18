@@ -252,9 +252,10 @@ export const onRequestPost = async ({
 
   if (!payload.action) return json({ error: 'Acao editorial ausente.' }, { status: 400 });
 
-  let model = env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
-  let rawResult: Record<string, unknown>;
-  const provider = clip(env.EDITORIAL_AI_PROVIDER, 24).toLowerCase();
+  try {
+    let model = env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
+    let rawResult: Record<string, unknown>;
+    const provider = clip(env.EDITORIAL_AI_PROVIDER, 24).toLowerCase();
 
   if (provider === 'groq' && env.GROQ_API_KEY) {
     const groq = await runGroqJson({
@@ -309,9 +310,19 @@ export const onRequestPost = async ({
     rawResult = parseModelJson(extractText(response));
   }
 
-  return json({
-    action: payload.action,
-    model,
-    result: normalizeResult(payload.action, rawResult),
-  });
+    return json({
+      action: payload.action,
+      model,
+      result: normalizeResult(payload.action, rawResult),
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Falha desconhecida na IA editorial.';
+    return json(
+      {
+        error: `IA editorial falhou: ${message}`,
+        provider: resolveProvider(env),
+      },
+      { status: 502 },
+    );
+  }
 };
