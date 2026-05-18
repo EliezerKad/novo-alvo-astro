@@ -648,13 +648,13 @@ const ENTERTAINMENT_CONTEXT_PATTERN =
   /\b(entretenimento|tv|televisao|streaming|reality|reality show|casa do patrao|bbb|big brother|a fazenda|audiencia|programa|novela|viral|tiktok|participante|eliminado|eliminada|confinamento|paredao)\b/i;
 
 const OCCURRENCE_CONTEXT_PATTERN =
-  /\b(acidente|acidentes|ferido|feridos|morto|mortos|morte|incendio|incendios|explosao|desabamento|queda|resgate|soterramento|tiroteio|operacao policial|prisao|crime|enchente|alagamento|temporal|interdicao|bombeiros|defesa civil|samu|vitima|vitimas|rodovia bloqueada)\b/i;
+  /\b(acidente|acidentes|ferido|feridos|morto|mortos|morte|incendio|incendios|explosao|desabamento|queda|resgate|soterramento|tiroteio|operacao policial|prisao|preso|presa|crime|criminoso|criminosa|suspeito|suspeita|investigacao|delegacia|policia|policial|pm|roubo|furto|assalto|sequestro|homicidio|assassinato|feminicidio|agressao|violencia domestica|esfaqueado|esfaqueada|esfaquear|facada|baleado|baleada|enchente|alagamento|temporal|interdicao|bombeiros|defesa civil|samu|vitima|vitimas|rodovia bloqueada)\b/i;
 
 const CATEGORY_SIGNALS = [
   {
     category: 'Ocorrencias',
     pattern:
-      /\b(acidente|acidentes|ferido|feridos|morto|mortos|morte|incendio|incendios|explosao|desabamento|queda|resgate|soterramento|tiroteio|operacao policial|prisao|crime|enchente|alagamento|temporal|interdicao|bombeiros|defesa civil|samu|vitima|vitimas|rodovia bloqueada)\b/i,
+      OCCURRENCE_CONTEXT_PATTERN,
   },
   {
     category: 'Futebol',
@@ -712,8 +712,8 @@ const CATEGORY_SIGNALS = [
   },
 ];
 
-const classifyCategory = (feedCategory, title, source) => {
-  const text = normalizedText(`${title} ${source}`);
+const classifyCategory = (feedCategory, title, source, excerpt = '') => {
+  const text = normalizedText(`${title} ${excerpt} ${source}`);
   if (OCCURRENCE_CONTEXT_PATTERN.test(text)) return 'Ocorrencias';
   if (FOOTBALL_CONTEXT_PATTERN.test(text)) return 'Futebol';
   if (POLITICS_CONTEXT_PATTERN.test(text)) return 'Politica';
@@ -952,8 +952,14 @@ const parseRssItems = (xml, category, sourceMeta = {}) => {
     const itemXml = match[0];
     const rawTitle = textBetween(itemXml, 'title');
     const title = cleanTitle(rawTitle);
+    const summary = cleanTitle(
+      textBetween(itemXml, 'description') ||
+        textBetween(itemXml, 'summary') ||
+        textBetween(itemXml, 'content:encoded') ||
+        textBetween(itemXml, 'content'),
+    );
     const source = textBetween(itemXml, 'source') || sourceMeta.name || rawTitle.split(' - ').pop() || 'Google News';
-    const finalCategory = sourceMeta.lockCategory ? category : classifyCategory(category, title, source);
+    const finalCategory = classifyCategory(category, title, source, summary);
     const googleLink = textBetween(itemXml, 'link') || attrBetween(itemXml, 'link', 'href');
     const sourceUrl = attrBetween(itemXml, 'source', 'url') || sourceMeta.siteUrl || '';
     const link = googleLink || sourceUrl;
@@ -967,6 +973,7 @@ const parseRssItems = (xml, category, sourceMeta = {}) => {
       googleLink,
       sourceUrl,
       source,
+      summary,
       publishedAt,
     };
   }).filter((item) => item.title && item.link);
@@ -1031,7 +1038,6 @@ const fetchEditorialSourceEntries = async (categories = Object.keys(FEEDS)) => {
           siteUrl: source.siteUrl,
           trustLevel: source.trustLevel,
           weight: source.weight,
-          lockCategory: true,
         },
       ]);
 
