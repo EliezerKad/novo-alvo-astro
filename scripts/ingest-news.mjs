@@ -206,6 +206,8 @@ const CATEGORY_FLOOR_MIN_SOURCES = Number(process.env.CATEGORY_FLOOR_MIN_SOURCES
 const CATEGORY_MAX_ITEM_AGE_HOURS = Number(process.env.CATEGORY_MAX_ITEM_AGE_HOURS || 72);
 const ACTIVE_ITEM_AGE_HOURS = IS_CATEGORY_MODE ? Math.max(MAX_ITEM_AGE_HOURS, CATEGORY_MAX_ITEM_AGE_HOURS) : MAX_ITEM_AGE_HOURS;
 const ACTIVE_FLOOR_MIN_SOURCES = IS_CATEGORY_MODE ? Math.max(ABSOLUTE_MIN_SOURCES, Math.min(ACTIVE_MIN_SOURCES, CATEGORY_FLOOR_MIN_SOURCES)) : ACTIVE_MIN_SOURCES;
+const ENABLE_COVERAGE_FLOOR = String(process.env.ENABLE_COVERAGE_FLOOR || '0') === '1';
+const STRICT_TOPIC_CLUSTERING = String(process.env.STRICT_TOPIC_CLUSTERING || '1') !== '0';
 const GOOGLE_SEARCH_FATAL_PATTERNS =
   /does not have the access to custom search json api|accessnotconfigured|api has not been used|disabled|permission denied/i;
 let googleSearchUnavailable = false;
@@ -277,6 +279,38 @@ const extractKeywords = (title, category) => {
     'resumo',
     'noticias',
     'noticia',
+    'cadastro',
+    'bonus',
+    'bonos',
+    'oferta',
+    'ofertas',
+    'plataforma',
+    'plataformas',
+    'codigo',
+    'indicacao',
+    'cupom',
+    'promocao',
+    'apostar',
+    'apostas',
+    'palpite',
+    'palpites',
+    'odds',
+    'superbet',
+    'betano',
+    'bet365',
+    'blaze',
+    'pixbet',
+    'casino',
+    'online',
+    'assistir',
+    'vivo',
+    'programacao',
+    'agenda',
+    'tabela',
+    'horario',
+    'horarios',
+    'gratuito',
+    'gratis',
   ]);
   const words = `${category} ${title}`
     .normalize('NFD')
@@ -308,6 +342,146 @@ const normalizedText = (value) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
+
+const EDITORIAL_NOISE_PATTERN =
+  /\b(cadastro|b[oô]nus|ofertas?|cupom|c[oó]digo de indica[cç][aã]o|palpites?|odds|superbet|betano|bet365|blaze|pixbet|casino|apostas?|jogos?\s+de\s+hoje|onde assistir|assistir ao vivo|programa[cç][aã]o|agenda|hor[aá]rios?|tabela|resultado ao vivo)\b/i;
+
+const HIGH_SIGNAL_BLOCKED_TOKENS = new Set([
+  'brasil',
+  'mundo',
+  'politica',
+  'economia',
+  'tecnologia',
+  'entretenimento',
+  'esportes',
+  'futebol',
+  'cinema',
+  'musica',
+  'moda',
+  'ciencia',
+  'saude',
+  'educacao',
+  'lifestyle',
+  'games',
+  'ocorrencias',
+  'ultimas',
+  'noticias',
+  'noticia',
+  'radar',
+  'impacto',
+  'confira',
+  'veja',
+  'sobre',
+  'hoje',
+  'amanha',
+  'ontem',
+  'aovivo',
+  'vivo',
+]);
+
+const tokenList = (value) =>
+  normalizedText(value)
+    .replace(/\bao vivo\b/g, 'aovivo')
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length > 3 && !HIGH_SIGNAL_BLOCKED_TOKENS.has(token));
+
+const extractEntities = (value) => {
+  const text = decodeEntities(value);
+  const matches = [
+    ...text.matchAll(/\b[A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇ][A-Za-zÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇáàâãéèêíïóôõöúç]{2,}(?:\s+(?:d[aeo]s?|e|do|da|dos|das|de|[A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇ][A-Za-zÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇáàâãéèêíïóôõöúç]{2,})){0,4}/g),
+    ...text.matchAll(/\b[A-Z]{2,8}\b/g),
+  ]
+    .map((match) => match[0])
+    .map((entity) => normalizedText(entity).replace(/[^a-z0-9]+/g, ' ').trim())
+    .filter((entity) => entity.length >= 3 && !HIGH_SIGNAL_BLOCKED_TOKENS.has(entity.replace(/\s+/g, '')));
+
+  return [...new Set(matches)].slice(0, 8);
+};
+
+const isGenericEditorialItem = (item) => {
+  const title = String(item?.title || '');
+  const normalized = normalizedText(title);
+  if (!title || title.length < 8) return true;
+  if (EDITORIAL_NOISE_PATTERN.test(title)) return true;
+  if (/^(\W|[0-9])+$/.test(title)) return true;
+  if (/^(resumo|agenda|programacao|cadastro|cupom|palpite|onde assistir)\b/i.test(title)) return true;
+  const usefulTokens = tokenList(title).filter((token) => !extractKeywords('', item?.category || '').includes(token));
+  if (usefulTokens.length < 2 && extractEntities(title).length === 0) return true;
+  if (normalized.length <= 12 && extractEntities(title).length <= 1) return true;
+  return false;
+};
+
+const sharedCount = (left, right) => {
+  let total = 0;
+  for (const item of left) {
+    if (right.has(item)) total += 1;
+  }
+  return total;
+};
+
+const itemTopicProfile = (item) => {
+  const title = cleanPitchTitle(item?.title || '');
+  const text = `${title} ${item?.source || ''}`;
+  const entities = extractEntities(title);
+  const tokens = tokenList(title).filter((token) => !HIGH_SIGNAL_BLOCKED_TOKENS.has(token)).slice(0, 12);
+  return {
+    entities,
+    tokens,
+    entitySet: new Set(entities),
+    tokenSet: new Set(tokens),
+    noisy: isGenericEditorialItem(item),
+    title,
+    text,
+  };
+};
+
+const itemTopicAffinity = (left, right) => {
+  if (!left || !right || left.category !== right.category) return 0;
+  const a = itemTopicProfile(left);
+  const b = itemTopicProfile(right);
+  if (a.noisy || b.noisy) return 0;
+
+  const sharedEntities = sharedCount(a.entities, b.entitySet);
+  const sharedTokens = sharedCount(a.tokens, b.tokenSet);
+  const overlap = overlapScore(left, right);
+  const strongNamedMatch = sharedEntities > 0;
+  const strongTokenMatch = sharedTokens >= 3 || (sharedTokens >= 2 && overlap >= 0.45);
+
+  if (!strongNamedMatch && !strongTokenMatch) return 0;
+  return sharedEntities * 0.42 + sharedTokens * 0.12 + overlap;
+};
+
+const coherentClusterItems = (items, minSources = ACTIVE_MIN_SOURCES) => {
+  const distinct = distinctBySource(items).filter((item) => !isGenericEditorialItem(item));
+  if (distinct.length < minSources) return [];
+
+  const lead = selectLeadItem(distinct);
+  const leadProfile = itemTopicProfile(lead);
+  const selected = distinct
+    .map((item) => ({
+      item,
+      affinity: item === lead ? 999 : itemTopicAffinity(lead, item),
+    }))
+    .filter(({ item, affinity }) => item === lead || affinity >= 0.58)
+    .sort((a, b) => b.affinity - a.affinity)
+    .map(({ item }) => item);
+
+  if (selected.length < minSources) return [];
+
+  const entityCounts = new Map();
+  const tokenCounts = new Map();
+  for (const item of selected) {
+    const profile = itemTopicProfile(item);
+    for (const entity of profile.entities) entityCounts.set(entity, (entityCounts.get(entity) || 0) + 1);
+    for (const token of profile.tokens) tokenCounts.set(token, (tokenCounts.get(token) || 0) + 1);
+  }
+
+  const hasSharedEntity = [...entityCounts.values()].some((count) => count >= Math.max(2, Math.ceil(selected.length * 0.34)));
+  const hasSharedTokenCore = [...tokenCounts.values()].filter((count) => count >= Math.max(2, Math.ceil(selected.length * 0.42))).length >= 2;
+  if (!hasSharedEntity && !hasSharedTokenCore && leadProfile.tokens.length < 3) return [];
+
+  return selected;
+};
 
 const FOOTBALL_CONTEXT_PATTERN =
   /\b(futebol|brasileirao|serie\s?[abcd]|copa do brasil|copa do mundo|libertadores|sul-americana|selecao|neymar|ancelotti|corinthians|flamengo|fluminense|palmeiras|sao paulo|santos|vasco|botafogo|gremio|internacional|cruzeiro|atletico|bahia|fortaleza|guarani|mirassol|santa cruz|diniz|luxemburgo|tecnico|treinador|vitoria|derrota|clube|time|estadio|rodada|classificacao|oitavas|quartas|semifinal|final)\b/i;
@@ -542,12 +716,14 @@ const distinctBySource = (items) => {
 
 const clusterItems = (items) => {
   const clusters = [];
-  const sorted = [...items].sort((a, b) => a.category.localeCompare(b.category) || a.title.localeCompare(b.title));
+  const sorted = [...items]
+    .filter((item) => !isGenericEditorialItem(item))
+    .sort((a, b) => a.category.localeCompare(b.category) || a.title.localeCompare(b.title));
 
   for (const item of sorted) {
     const match = clusters.find((cluster) => {
       if (cluster[0]?.category !== item.category) return false;
-      return cluster.some((candidate) => overlapScore(candidate, item) >= 0.3);
+      return cluster.some((candidate) => itemTopicAffinity(candidate, item) >= (STRICT_TOPIC_CLUSTERING ? 0.58 : 0.3));
     });
 
     if (match) {
@@ -557,7 +733,9 @@ const clusterItems = (items) => {
     }
   }
 
-  return clusters;
+  return clusters
+    .map((cluster) => coherentClusterItems(cluster, Math.min(ACTIVE_MIN_SOURCES, cluster.length)))
+    .filter((cluster) => cluster.length > 0);
 };
 
 const buildCategoryRadarClusters = async (items, minSources = MIN_SOURCES) => {
@@ -571,6 +749,7 @@ const buildCategoryRadarClusters = async (items, minSources = MIN_SOURCES) => {
   const clusters = [];
   for (const [, categoryItems] of byCategory.entries()) {
     const seeds = distinctBySource(categoryItems)
+      .filter((item) => !isGenericEditorialItem(item))
       .sort((a, b) => itemRelevanceScore(b, categoryItems) - itemRelevanceScore(a, categoryItems))
       .slice(0, RADAR_BATCHES_PER_CATEGORY);
     for (const seed of seeds) {
@@ -584,7 +763,10 @@ const buildCategoryRadarClusters = async (items, minSources = MIN_SOURCES) => {
           radarCluster: true,
           radarSeed: seed.title,
         }));
-      if (distinctBySource(batch).length >= minSources) clusters.push(batch);
+      const coherent = STRICT_TOPIC_CLUSTERING ? coherentClusterItems(batch, minSources) : distinctBySource(batch);
+      if (coherent.length >= minSources) {
+        clusters.push(coherent.map((item) => ({ ...item, radarCluster: true, radarSeed: seed.title })));
+      }
     }
   }
   return clusters;
@@ -598,6 +780,7 @@ const buildCategoryFloorPitches = (
   perCategoryLimit = 1,
   respectCovered = true,
 ) => {
+  if (!ENABLE_COVERAGE_FLOOR) return [];
   const covered = new Set(existingPitches.map((pitch) => pitch.category));
   const byCategory = new Map();
   for (const item of items) {
@@ -616,7 +799,7 @@ const buildCategoryFloorPitches = (
       const batchSize = Math.max(1, minSources);
       const batches = [];
       for (let index = 0; index < categoryItems.length && batches.length < perCategoryLimit; index += batchSize) {
-        const batch = categoryItems.slice(index, index + batchSize);
+        const batch = coherentClusterItems(categoryItems.slice(index, index + batchSize * 2), minSources);
         if (batch.length < minSources) continue;
         const pitch = buildPitch(batch.map((item) => ({ ...item, radarCluster: true, coverageFloor: true, lowCoverage: minSources < ACTIVE_MIN_SOURCES })));
         batches.push({
@@ -1037,7 +1220,9 @@ const main = async () => {
     return acc;
   }, {});
   console.log(`Itens brutos: ${rawItems.length}. Itens frescos (${ACTIVE_ITEM_AGE_HOURS}h): ${allItems.length}.`);
-  const topicClusters = await Promise.all(clusterItems(allItems).map(expandClusterSources));
+  const topicClusters = (await Promise.all(clusterItems(allItems).map(expandClusterSources)))
+    .map((cluster) => (STRICT_TOPIC_CLUSTERING ? coherentClusterItems(cluster, ACTIVE_MIN_SOURCES) : cluster))
+    .filter((cluster) => cluster.length >= ACTIVE_MIN_SOURCES);
   const topicPitches = topicClusters
     .map(buildPitch)
     .filter((pitch) => pitch.sourceCount >= ACTIVE_MIN_SOURCES)
