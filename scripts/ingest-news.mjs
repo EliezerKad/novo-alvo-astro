@@ -189,6 +189,9 @@ const GOOGLE_SEARCH_API_KEY = process.env.GOOGLE_SEARCH_API_KEY || '';
 const GOOGLE_SEARCH_CX = process.env.GOOGLE_SEARCH_CX || '';
 const GOOGLE_SEARCH_PAGES_PER_QUERY = Number(process.env.GOOGLE_SEARCH_PAGES_PER_QUERY || 1);
 const GOOGLE_SEARCH_QUERIES_PER_CATEGORY = Number(process.env.GOOGLE_SEARCH_QUERIES_PER_CATEGORY || 4);
+const GNEWS_API_KEY = process.env.GNEWS_API_KEY || '';
+const GNEWS_QUERIES_PER_CATEGORY = Number(process.env.GNEWS_QUERIES_PER_CATEGORY || 3);
+const GNEWS_MAX_RESULTS = Number(process.env.GNEWS_MAX_RESULTS || 10);
 const MAX_ITEMS_PER_FEED = Number(process.env.MAX_ITEMS_PER_FEED || 80);
 const MIN_SOURCES = Number(process.env.MIN_SOURCES || 8);
 const RADAR_BATCHES_PER_CATEGORY = Number(process.env.RADAR_BATCHES_PER_CATEGORY || 3);
@@ -1087,6 +1090,11 @@ const categorySearchQueries = (category) => {
 const categorySearchEntries = (categories = Object.keys(FEEDS)) =>
   categories.flatMap((category) => categorySearchQueries(category).map((query, index) => [category, query, index]));
 
+const categoryGNewsQueries = (category) => categorySearchQueries(category).slice(0, GNEWS_QUERIES_PER_CATEGORY);
+
+const categoryGNewsEntries = (categories = Object.keys(FEEDS)) =>
+  categories.flatMap((category) => categoryGNewsQueries(category).map((query, index) => [category, query, index]));
+
 const publishedFromSearchItem = (item) => {
   const meta = item?.pagemap?.metatags?.[0] || {};
   return (
@@ -1167,7 +1175,72 @@ const fetchGoogleSearchQuery = async ([category, query, queryIndex]) => {
     .slice(0, MAX_ITEMS_PER_FEED);
 };
 
+const fetchGNewsQuery = async ([category, query, queryIndex]) => {
+  if (!GNEWS_API_KEY) {
+    console.warn('[gnews] GNEWS_API_KEY ausente. Acionando fallback RSS.');
+    return [];
+  }
+
+  const url = new URL('https://gnews.io/api/v4/search');
+  url.searchParams.set('apikey', GNEWS_API_KEY);
+  url.searchParams.set('q', query);
+  url.searchParams.set('lang', 'pt');
+  url.searchParams.set('country', 'br');
+  url.searchParams.set('max', String(Math.max(1, Math.min(10, GNEWS_MAX_RESULTS))));
+  url.searchParams.set('in', 'title,description,content');
+  url.searchParams.set('sortby', 'publishedAt');
+  url.searchParams.set('from', new Date(Date.now() - ACTIVE_ITEM_AGE_HOURS * 60 * 60 * 1000).toISOString());
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        accept: 'application/json',
+        'user-agent': 'PortalNovoAlvoEditorialIngest/1.0',
+      },
+      signal: AbortSignal.timeout(12000),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data?.errors?.join('; ') || data?.message || `HTTP ${response.status}`);
+
+    return (Array.isArray(data.articles) ? data.articles : [])
+      .map((article) => {
+        const title = cleanTitle(article?.title || '');
+        const snippet = decodeEntities(article?.description || article?.content || '');
+        const source = article?.source?.name || 'GNews';
+        const finalCategory = classifyCategory(category, `${title} ${snippet}`, source);
+        return {
+          title,
+          category: finalCategory,
+          feedCategory: category,
+          link: article?.url || '',
+          googleLink: '',
+          sourceUrl: article?.source?.url || article?.url || '',
+          source,
+          snippet,
+          summary: snippet,
+          imageUrl: article?.image || '',
+          publishedAt: article?.publishedAt || new Date().toISOString(),
+          discoveryProvider: 'gnews',
+        };
+      })
+      .filter((item) => item.title && item.link)
+      .slice(0, MAX_ITEMS_PER_FEED);
+  } catch (error) {
+    console.warn(`[gnews] ${category} #${queryIndex + 1}: ${error.message}`);
+    return [];
+  }
+};
+
 const fetchDiscoveryItems = async () => {
+  if (INGEST_DISCOVERY === 'gnews') {
+    const gnewsItems = (await Promise.all(categoryGNewsEntries(ACTIVE_CATEGORIES).map(fetchGNewsQuery))).flat();
+    if (gnewsItems.length >= ACTIVE_CATEGORIES.length * 4) return gnewsItems;
+
+    console.warn(`[discovery] GNews retornou ${gnewsItems.length} itens. Acionando fallback RSS para preservar a pauta.`);
+    const rssItems = (await Promise.all((await feedEntries(ACTIVE_CATEGORIES)).map(fetchFeed))).flat();
+    return [...gnewsItems, ...rssItems];
+  }
+
   if (INGEST_DISCOVERY === 'google_search') {
     const searchItems = (await Promise.all(categorySearchEntries(ACTIVE_CATEGORIES).map(fetchGoogleSearchQuery))).flat();
     if (searchItems.length >= ACTIVE_CATEGORIES.length * 4) return searchItems;

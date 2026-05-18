@@ -31,6 +31,15 @@ on:
           - Musica
           - Cinema
           - Ocorrencias
+      discovery:
+        description: 'Motor de descoberta manual'
+        required: false
+        default: 'gnews'
+        type: choice
+        options:
+          - gnews
+          - rss
+          - google_search
 
 jobs:
   ingest-manual:
@@ -50,14 +59,17 @@ jobs:
       - name: Install dependencies
         run: npm ci --progress=false
 
-      - name: Ingest Google Search into editorial pitches
+      - name: Ingest editorial discovery into editorial pitches
         run: npm run ingest:news
         env:
           PORTAL_ORIGIN: https://portalnovoalvo.com.br
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          GNEWS_API_KEY: ${{ secrets.GNEWS_API_KEY }}
           GOOGLE_SEARCH_API_KEY: ${{ secrets.GOOGLE_SEARCH_API_KEY }}
           GOOGLE_SEARCH_CX: ${{ secrets.GOOGLE_SEARCH_CX }}
-          INGEST_DISCOVERY: google_search
+          INGEST_DISCOVERY: ${{ inputs.discovery }}
+          GNEWS_QUERIES_PER_CATEGORY: 3
+          GNEWS_MAX_RESULTS: 10
           GOOGLE_SEARCH_PAGES_PER_QUERY: 1
           GOOGLE_SEARCH_QUERIES_PER_CATEGORY: 4
           MAX_ITEMS_PER_FEED: 80
@@ -119,9 +131,12 @@ jobs:
         env:
           PORTAL_ORIGIN: https://portalnovoalvo.com.br
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          GNEWS_API_KEY: ${{ secrets.GNEWS_API_KEY }}
           GOOGLE_SEARCH_API_KEY: ${{ secrets.GOOGLE_SEARCH_API_KEY }}
           GOOGLE_SEARCH_CX: ${{ secrets.GOOGLE_SEARCH_CX }}
           INGEST_DISCOVERY: rss
+          GNEWS_QUERIES_PER_CATEGORY: 3
+          GNEWS_MAX_RESULTS: 10
           GOOGLE_SEARCH_PAGES_PER_QUERY: 1
           GOOGLE_SEARCH_QUERIES_PER_CATEGORY: 4
           MAX_ITEMS_PER_FEED: 80
