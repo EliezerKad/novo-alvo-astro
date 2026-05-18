@@ -942,6 +942,14 @@ CLASSIFICACAO PREVIA OBRIGATORIA:
 - Conflito: se houver divergencia entre governo, empresa, clube, usuarios ou mercado, exponha como ponto central.
 - Micro-persona: escolha uma das micro-personas acima e use como lente do texto.
 
+PROTOCOLO DE SERVICO PUBLICO E CONSUMO:
+- Se a pauta envolver Anvisa, Procon, Recall, suspensao de lote, proibicao, reembolso, troca, alerta sanitario, concurso, inscricao, calendario, beneficio, imposto, prazo, edital, acidente, transporte, escola, hospital ou qualquer orientacao pratica ao leitor, trate como MATERIA DE SERVICO.
+- Em materia de servico, extraia e use todos os detalhes explicitos presentes nas fontes: produto, marca, lote, validade, CNPJ quando existir, orgao responsavel, resolucao, data da decisao, cidade, estado, local, horario, prazo, telefone, email, site, WhatsApp, SAC, canal oficial, documentos exigidos, passo a passo, quem tem direito, quem fica de fora e qual risco foi apontado.
+- E proibido escrever substitutos genericos quando a fonte trouxer dado acionavel. Nao escreva "procure o SAC", "consulte o comunicado", "geralmente", "pode ser feito por estorno" ou "canais oficiais" se houver telefone, link, formulario, email, lote, data ou procedimento especifico no material.
+- Se a fonte nao trouxer o canal, lote, prazo ou documento especifico, diga isso de forma objetiva uma unica vez: "As fontes analisadas nao informam o canal especifico de reembolso" ou "A lista de lotes nao aparece nos trechos disponiveis". Nao preencha a lacuna com suposicao.
+- Para servico publico, organize o corpo com subtitulos uteis ao leitor, como <h2>O que foi decidido</h2>, <h2>Quem e afetado</h2>, <h2>Como pedir troca ou reembolso</h2>, <h2>Prazos e documentos</h2> ou equivalentes. Use <ul><li> apenas quando houver dados concretos suficientes.
+- Priorize o detalhe raro: o que uma fonte trouxe e as outras nao trouxeram deve aparecer antes de contexto generico.
+
 ESTRUTURA PADRONIZADA (OBRIGATORIA):
 1. TITULO: direto, impactante e otimizado para SEO. Maximo de 65 caracteres.
    Nunca use o prefixo "Radar" no titulo final, salvo se Radar for nome proprio do fato.
@@ -989,6 +997,8 @@ FORMATO EDITORIAL FINAL:
 - A materia precisa ter progressao: cada paragrafo acrescenta fato, contexto, tensao ou consequencia nova.
 - O texto deve ter arco editorial unico. Nao cole mini-resumos de fontes diferentes.
 - Se uma fonte trouxer apenas um titulo solto e sem contexto, use-a somente como sinal de existencia do fato, nao como base do texto.
+- Se o tema exigir servico ao leitor, o texto so esta completo quando responder, com dados explicitos quando existirem: quem, o que, quando, onde, como resolver, qual canal, qual prazo e qual documento.
+- Nao use linguagem de cartilha vazia. Cada orientacao pratica precisa estar ancorada em um dado visivel nas fontes.
 - Use <h2> para divisorias fortes e <h3> apenas quando fizer sentido.
 - Feche obrigatoriamente com <blockquote>Por que isso importa: ...</blockquote>.
 - Nao termine o texto no meio de uma frase. O content_html precisa fechar com pontuacao final clara e tags HTML completas.
