@@ -450,7 +450,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   }
 
   const existing = await db
-    .prepare('SELECT id, status, image_candidates FROM editorial_pitches WHERE cluster_key = ? LIMIT 1')
+    .prepare('SELECT id, status, source_count, score, image_candidates FROM editorial_pitches WHERE cluster_key = ? LIMIT 1')
     .bind(pitch.clusterKey)
     .first<PitchRecord>();
 
@@ -482,6 +482,10 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     pitch.imageCandidates = mergePreservedImageRoles(pitch.imageCandidates, existing.image_candidates);
   }
 
+  const shouldReopenReviewed =
+    existing?.status === 'reviewed' &&
+    (pitch.sourceCount >= Number(existing.source_count || 0) + 4 || pitch.score >= Number(existing.score || 0) + 45);
+
   await db
     .prepare(
       `INSERT INTO editorial_pitches (
@@ -499,6 +503,11 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
         keywords = excluded.keywords,
         internal_links = excluded.internal_links,
         image_candidates = excluded.image_candidates,
+        status = CASE
+          WHEN editorial_pitches.status = 'reviewed' AND ? = 1
+          THEN 'new'
+          ELSE editorial_pitches.status
+        END,
         score = excluded.score,
         expires_at = excluded.expires_at,
         updated_at = CASE
@@ -521,6 +530,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       pitch.keywords,
       pitch.internalLinks,
       pitch.imageCandidates,
+      shouldReopenReviewed ? 1 : 0,
       pitch.score,
       pitch.expiresAt,
       pitch.updatedAt,
@@ -529,7 +539,22 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
 
   await rememberPitch(db, pitch, remembered ? 'developing' : 'seen', pitch.expiresAt);
 
-  return json({ ok: true, pitch: { id: pitch.id, clusterKey: pitch.clusterKey, status: pitch.status } });
+  const stored = await db
+    .prepare('SELECT id, status, source_count, score FROM editorial_pitches WHERE cluster_key = ? LIMIT 1')
+    .bind(pitch.clusterKey)
+    .first<PitchRecord>();
+
+  return json({
+    ok: true,
+    pitch: {
+      id: stored?.id || pitch.id,
+      clusterKey: pitch.clusterKey,
+      status: stored?.status || pitch.status,
+      sourceCount: Number(stored?.source_count || pitch.sourceCount || 0),
+      score: Number(stored?.score || pitch.score || 0),
+      visibleAsNew: (stored?.status || pitch.status) === 'new' && Number(stored?.source_count || pitch.sourceCount || 0) >= 5,
+    },
+  });
 };
 
 const dismissMany = async (db: D1Database, payload: { currentStatus?: string; category?: string; minSources?: number }) => {

@@ -1371,13 +1371,19 @@ const main = async () => {
     .filter((pitch) => pitch.sourceCount >= ABSOLUTE_MIN_SOURCES);
 
   let saved = 0;
+  let updatedHidden = 0;
   const enrichedPitches = await Promise.all(pitches.map(normalizePitchAssets));
 
   await Promise.all(
     enrichedPitches.map(async (pitch) => {
       try {
         const data = await postPitch(pitch);
-        if (!data?.skipped) saved += 1;
+        if (data?.skipped) return;
+        if (data?.pitch?.visibleAsNew) {
+          saved += 1;
+        } else {
+          updatedHidden += 1;
+        }
       } catch (error) {
         console.warn(`[pitch] ${pitch.title}: ${error.message}`);
       }
@@ -1385,7 +1391,7 @@ const main = async () => {
   );
 
   await runHousekeeping();
-  const skipped = Math.max(0, pitches.length - saved);
+  const skipped = Math.max(0, pitches.length - saved - updatedHidden);
   await postIngestRun({
     id: `ingest:${startedAt}`,
     status: skipped > 0 ? 'partial' : 'success',
@@ -1394,14 +1400,14 @@ const main = async () => {
     radarClusters: radarPitches.length + coveragePitches.length,
     selectedPitches: pitches.length,
     savedPitches: saved,
-    skippedPitches: skipped,
+    skippedPitches: skipped + updatedHidden,
     feedCounts,
     startedAt,
     finishedAt: new Date().toISOString(),
-    notes: `${saved}/${pitches.length} pautas salvas`,
+    notes: `${saved}/${pitches.length} pautas novas visiveis. ${updatedHidden} atualizacao(oes) fora da aba Novas.`,
   });
   console.log(
-    `Ingestao concluida: ${saved}/${pitches.length} pautas salvas. Itens: ${allItems.length}. Clusters por assunto: ${topicPitches.length}. Radares por categoria: ${radarPitches.length}. Cobertura minima: ${coveragePitches.length}.`,
+    `Ingestao concluida: ${saved}/${pitches.length} pautas novas visiveis. ${updatedHidden} atualizacao(oes) fora da aba Novas. Itens: ${allItems.length}. Clusters por assunto: ${topicPitches.length}. Radares por categoria: ${radarPitches.length}. Cobertura minima: ${coveragePitches.length}.`,
   );
   console.log(`Itens por categoria: ${JSON.stringify(feedCounts)}`);
 };
