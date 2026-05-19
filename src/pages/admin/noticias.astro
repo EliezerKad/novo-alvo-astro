@@ -254,11 +254,46 @@ const active = viewParam === 'midia' ? 'media' : current.active;
                 <div class="flex items-center gap-2">
                   ${viewHref ? `<a href="${viewHref}" class="rounded-xl border border-zinc-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:border-red-600 hover:text-red-600 dark:border-zinc-800">Ver</a>` : ''}
                   <a href="${editHref}" class="rounded-xl bg-zinc-950 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-red-600 dark:hover:text-white">Editar</a>
+                  <button type="button" data-delete-article="${escapeHtml(article.id || article.slug || '')}" data-delete-title="${escapeHtml(article.title || '')}" class="rounded-xl border border-red-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-red-600 transition hover:bg-red-600 hover:text-white dark:border-red-950/60">Excluir</button>
                 </div>
               </article>
             `;
           })
           .join('');
+      };
+
+      const deleteArticle = async (id, title) => {
+        if (!id) return;
+        const token = getToken();
+        if (!token) return;
+
+        const confirmed = window.confirm(
+          `Excluir "${title || 'esta matéria'}"? Isso remove a matéria do banco editorial e tenta apagar o arquivo publicado no GitHub.`,
+        );
+        if (!confirmed) return;
+
+        if (listStatus) listStatus.textContent = 'Excluindo matéria...';
+        try {
+          const response = await fetch(`/api/admin/articles?id=${encodeURIComponent(id)}`, {
+            method: 'DELETE',
+            headers: { authorization: `Bearer ${token}` },
+          });
+          const data = await response.json().catch(() => ({}));
+          if (response.status === 401) {
+            try {
+              localStorage.removeItem('admin-token');
+            } catch {}
+            if (listStatus) listStatus.textContent = 'Token inválido. Atualize e tente novamente.';
+            redirectToLogin();
+            return;
+          }
+          if (!response.ok) throw new Error(data.error || 'Erro ao excluir matéria.');
+          articles = articles.filter((article) => (article.id || article.slug) !== id);
+          render();
+          if (listStatus) listStatus.textContent = 'Matéria excluída.';
+        } catch (error) {
+          if (listStatus) listStatus.textContent = error.message || 'Falha ao excluir matéria.';
+        }
       };
 
       const loadArticles = async () => {
@@ -293,6 +328,11 @@ const active = viewParam === 'midia' ? 'media' : current.active;
 
       filterInput?.addEventListener('input', render);
       refreshButton?.addEventListener('click', loadArticles);
+      list?.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-delete-article]');
+        if (!button) return;
+        deleteArticle(button.dataset.deleteArticle, button.dataset.deleteTitle || '');
+      });
       tabs.forEach((tab) => {
         tab.addEventListener('click', (event) => {
           event.preventDefault();

@@ -258,6 +258,7 @@ const aiActions = [
         </div>
         <div class="mt-5 grid gap-2">
           <button type="button" data-save-draft class="rounded-2xl bg-white/10 px-4 py-3 text-[10px] font-black uppercase tracking-widest transition hover:bg-white hover:text-zinc-950 dark:bg-zinc-100 dark:hover:bg-zinc-950 dark:hover:text-white">Salvar rascunho</button>
+          <button type="button" data-save-current class="hidden rounded-2xl border border-white/15 px-4 py-3 text-[10px] font-black uppercase tracking-widest transition hover:border-white/50 hover:bg-white hover:text-zinc-950 dark:border-zinc-200 dark:hover:bg-zinc-950 dark:hover:text-white">Salvar alteraÃ§Ãµes</button>
           <button type="button" data-publish-now class="rounded-2xl bg-[#8A1F2D] px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white transition hover:bg-[#a7273b]">Publicar agora</button>
           <label class="rounded-2xl bg-white/10 p-3 dark:bg-zinc-100">
             <span class="text-[8px] font-black uppercase tracking-widest text-white/40 dark:text-zinc-400">Agendar</span>
@@ -1120,6 +1121,9 @@ const aiActions = [
       let seoTouched = false;
       let keywordsTouched = false;
       let currentArticleId = '';
+      let currentArticleStatus = 'draft';
+      let currentPublishedAt = '';
+      let currentScheduledAt = '';
       const mediaItems = [];
       const carouselDraft = [];
       const sources = [];
@@ -1380,6 +1384,10 @@ const aiActions = [
         if (homeFeaturedInput?.checked) {
           editorialMedia.push({ type: 'editorialFlag', homeSection: 'featured' });
         }
+        const nextPublishedAt = statusValue === 'published'
+          ? (currentPublishedAt || new Date().toISOString())
+          : (currentPublishedAt || '');
+
         return {
           id: currentArticleId || (slug ? `article:${slug}` : undefined),
           slug,
@@ -1397,8 +1405,8 @@ const aiActions = [
           sources,
           media: editorialMedia,
           readingMinutes: getReadingTime(),
-          scheduledAt,
-          publishedAt: statusValue === 'published' ? new Date().toISOString() : '',
+          scheduledAt: scheduledAt || (statusValue === 'scheduled' ? currentScheduledAt : ''),
+          publishedAt: nextPublishedAt,
         };
       };
 
@@ -1439,6 +1447,10 @@ const aiActions = [
           }
 
           currentArticleId = result.article?.id || currentArticleId || payload.id || '';
+          currentArticleStatus = result.article?.status || statusValue || currentArticleStatus;
+          currentPublishedAt = result.article?.publishedAt || payload.publishedAt || currentPublishedAt || '';
+          currentScheduledAt = payload.scheduledAt || currentScheduledAt || '';
+          document.querySelector('[data-save-current]')?.classList.remove('hidden');
           const staticPublish = result.staticPublish;
           const staticPublishOk = staticPublish?.ok;
           setStatus(statusValue === 'published' ? (staticPublishOk ? 'Publicada no template Astro' : 'Salva no banco') : statusValue === 'scheduled' ? 'Agendada no banco' : 'Rascunho salvo no banco');
@@ -2322,6 +2334,10 @@ const aiActions = [
       });
 
       document.querySelector('[data-save-draft]')?.addEventListener('click', () => saveArticle('draft'));
+      document.querySelector('[data-save-current]')?.addEventListener('click', () => {
+        const statusValue = currentArticleStatus || 'draft';
+        saveArticle(statusValue, statusValue === 'scheduled' ? currentScheduledAt : '');
+      });
       document.querySelector('[data-publish-now]')?.addEventListener('click', () => saveArticle('published'));
       document.querySelector('[data-schedule-post]')?.addEventListener('click', () => {
         const scheduledAt = document.querySelector('[data-schedule-at]')?.value;
@@ -2406,6 +2422,10 @@ const aiActions = [
 
           const article = data.article;
           currentArticleId = article.id || articleId;
+          currentArticleStatus = article.status || 'draft';
+          currentPublishedAt = article.published_at || '';
+          currentScheduledAt = article.scheduled_at || '';
+          document.querySelector('[data-save-current]')?.classList.remove('hidden');
           if (titleInput) {
             titleInput.value = article.title || '';
             titleInput.dispatchEvent(new Event('input', { bubbles: true }));
@@ -2428,6 +2448,8 @@ const aiActions = [
             coverPreview.classList.remove('hidden');
             coverEmpty?.classList.add('hidden');
           }
+          const scheduleInput = document.querySelector('[data-schedule-at]');
+          if (scheduleInput && currentScheduledAt) scheduleInput.value = currentScheduledAt.slice(0, 16);
 
           const parsedMedia = parseStoredJson(article.media);
           const homeNowInput = document.querySelector('[data-home-now-input]');

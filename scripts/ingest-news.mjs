@@ -422,6 +422,18 @@ const WEAK_TOPIC_TOKENS = new Set([
   'cupom',
   'codigo',
   'indicacao',
+  'evento',
+  'eventos',
+  'edital',
+  'editais',
+  'inscricao',
+  'inscricoes',
+  'servico',
+  'servicos',
+  'programa',
+  'programas',
+  'agenda',
+  'cnpq',
   'apostas',
   'palpite',
   'palpites',
@@ -495,7 +507,21 @@ const EVENT_ACTION_TOKENS = new Set([
   'assinou',
 ]);
 
-const ENTITY_STOPWORDS = new Set(['google news', 'news', 'brasil', 'mundo', 'portal novo alvo', 'novo alvo', 'radar', 'resumo', 'agenda', 'cadastro']);
+const ENTITY_STOPWORDS = new Set([
+  'google news',
+  'news',
+  'brasil',
+  'mundo',
+  'portal novo alvo',
+  'novo alvo',
+  'radar',
+  'resumo',
+  'agenda',
+  'cadastro',
+  'cnpq',
+  'evento',
+  'programa',
+]);
 
 const tokenList = (value) =>
   normalizedText(value)
@@ -614,50 +640,18 @@ const coherentClusterItems = (items, minSources = ACTIVE_MIN_SOURCES) => {
   const hasSharedTokenCore = [...tokenCounts.values()].filter((count) => count >= Math.max(2, Math.ceil(selected.length * 0.3))).length >= 2;
   if (!hasSharedEntity && !hasSharedAction && !hasSharedTokenCore) return [];
 
+  const dominantThreshold = Math.max(3, Math.ceil(selected.length * 0.45));
+  const dominantEntities = [...entityCounts.values()].filter((count) => count >= dominantThreshold).length;
+  const dominantTokens = [...tokenCounts.values()].filter((count) => count >= dominantThreshold).length;
+  const dominantActions = [...actionCounts.values()].filter((count) => count >= dominantThreshold).length;
+  const hasDominantTopic =
+    dominantEntities >= 1 ||
+    dominantTokens >= 2 ||
+    (dominantActions >= 1 && dominantTokens >= 1);
+
+  if (!hasDominantTopic) return [];
+
   return selected;
-};
-
-const relaxedCategoryClusterItems = (items, minSources = ACTIVE_MIN_SOURCES) => {
-  const distinct = distinctBySource(items).filter((item) => !isGenericEditorialItem(item));
-  if (distinct.length < minSources) return [];
-
-  const lead = selectLeadItem(distinct);
-  const leadProfile = itemTopicProfile(lead);
-  if (!hasConcreteTopicSignal(leadProfile)) return [];
-
-  const ranked = distinct
-    .map((item) => {
-      const profile = itemTopicProfile(item);
-      const sharedEntities = sharedCount(leadProfile.entities, profile.entitySet);
-      const sharedTokens = sharedCount(leadProfile.tokens, profile.tokenSet);
-      const sharedActions = sharedCount(leadProfile.actions, profile.actionSet);
-      const overlap = overlapScore(lead, item);
-      const affinity = item === lead ? 999 : sharedEntities * 0.5 + sharedActions * 0.22 + sharedTokens * 0.12 + overlap;
-      return { item, profile, affinity, sharedEntities, sharedTokens, sharedActions, overlap };
-    })
-    .filter(({ item, sharedEntities, sharedTokens, sharedActions, overlap }) => {
-      if (item === lead) return true;
-      return sharedEntities > 0 || sharedActions > 0 || sharedTokens >= 2 || overlap >= 0.22;
-    })
-    .sort((a, b) => b.affinity - a.affinity);
-
-  if (ranked.length < minSources) return [];
-
-  const selected = ranked.slice(0, Math.max(minSources, SOURCE_EXPANSION_TARGET)).map(({ item }) => item);
-  const selectedProfiles = selected.map(itemTopicProfile);
-  const sharedEntityCount = new Map();
-  const sharedTokenCount = new Map();
-
-  for (const profile of selectedProfiles) {
-    for (const entity of profile.entities) sharedEntityCount.set(entity, (sharedEntityCount.get(entity) || 0) + 1);
-    for (const token of profile.tokens) sharedTokenCount.set(token, (sharedTokenCount.get(token) || 0) + 1);
-  }
-
-  const hasTopicAnchor =
-    [...sharedEntityCount.values()].some((count) => count >= 2) ||
-    [...sharedTokenCount.values()].filter((count) => count >= Math.max(2, Math.ceil(minSources * 0.25))).length >= 2;
-
-  return hasTopicAnchor ? selected : [];
 };
 
 const FOOTBALL_CONTEXT_PATTERN =
@@ -978,14 +972,13 @@ const buildCategoryFloorPitches = (
       for (let index = 0; index < categoryItems.length && batches.length < perCategoryLimit; index += batchSize) {
         const slice = categoryItems.slice(index, index + batchSize * 3);
         const batch = coherentClusterItems(slice, minSources);
-        const fallbackBatch = batch.length >= minSources ? batch : relaxedCategoryClusterItems(slice, minSources);
-        if (fallbackBatch.length < minSources) continue;
-        const pitch = buildPitch(fallbackBatch.map((item) => ({ ...item, radarCluster: true, coverageFloor: true, lowCoverage: minSources < ACTIVE_MIN_SOURCES })));
+        if (batch.length < minSources) continue;
+        const pitch = buildPitch(batch.map((item) => ({ ...item, radarCluster: true, coverageFloor: true, lowCoverage: minSources < ACTIVE_MIN_SOURCES })));
         batches.push({
           ...pitch,
-          clusterKey: `${slugify(category)}:coverage:${slugify(fallbackBatch[0].title)}`,
-          sourceCount: fallbackBatch.length,
-          score: Math.min(minSources < 3 ? 690 : 780, 520 + fallbackBatch.length * 35 + pitch.tags.length * 6),
+          clusterKey: `${slugify(category)}:coverage:${slugify(batch[0].title)}`,
+          sourceCount: batch.length,
+          score: Math.min(minSources < 3 ? 690 : 780, 520 + batch.length * 35 + pitch.tags.length * 6),
           summary:
             minSources < 3
               ? `Sinal inicial da editoria ${category}. A pauta ainda tem cobertura pequena, mas pode render nota curta se houver fato concreto, agente identificado e consequencia util.`

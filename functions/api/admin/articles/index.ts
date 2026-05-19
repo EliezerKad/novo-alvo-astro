@@ -378,6 +378,50 @@ const putGitHubFile = async ({
   return (await response.json()) as { commit?: { html_url?: string }; content?: { html_url?: string } };
 };
 
+const deleteGitHubFile = async ({
+  repository,
+  branch,
+  path,
+  message,
+  headers,
+}: {
+  repository: string;
+  branch: string;
+  path: string;
+  message: string;
+  headers: Record<string, string>;
+}) => {
+  const apiUrl = githubApiUrl(repository, path);
+  const existingResponse = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, { headers });
+  if (existingResponse.status === 404) {
+    return { skipped: true, reason: 'Arquivo editorial nÃ£o encontrado no GitHub.' };
+  }
+  if (!existingResponse.ok) {
+    const errorText = await existingResponse.text();
+    throw new Error(`GitHub recusou consulta de ${path}: ${errorText.slice(0, 500)}`);
+  }
+
+  const existing = (await existingResponse.json()) as { sha?: string };
+  if (!existing.sha) throw new Error(`GitHub nÃ£o retornou SHA para ${path}.`);
+
+  const response = await fetch(apiUrl, {
+    method: 'DELETE',
+    headers,
+    body: JSON.stringify({
+      branch,
+      message,
+      sha: existing.sha,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`GitHub recusou exclusÃ£o de ${path}: ${errorText.slice(0, 500)}`);
+  }
+
+  return (await response.json()) as { commit?: { html_url?: string } };
+};
+
 const createMarkdownFile = (article: ReturnType<typeof normalizePayload>, id: string, publishedAt: string) => {
   const tags = yamlStringArray(article.tags || article.keywords);
   const sources = yamlStringArray(article.sources);
@@ -557,6 +601,50 @@ const publishMarkdownToGitHub = async (
   };
 };
 
+const deleteMarkdownFromGitHub = async (env: Env, article: { slug?: string; title?: string }) => {
+  const slug = slugify(article.slug || '');
+  if (!slug) return { ok: false, skipped: true, reason: 'Slug ausente.' };
+  if (!env.GITHUB_TOKEN) {
+    return {
+      ok: false,
+      skipped: true,
+      reason: 'GITHUB_TOKEN nÃ£o configurado. A matÃ©ria foi removida do banco, mas o arquivo estÃ¡tico nÃ£o foi apagado.',
+    };
+  }
+
+  const repository = clean(env.GITHUB_REPOSITORY, 160) || 'EliezerKad/novo-alvo-astro';
+  const branch = clean(env.GITHUB_BRANCH, 80) || 'main';
+  const headers = {
+    accept: 'application/vnd.github+json',
+    authorization: `Bearer ${env.GITHUB_TOKEN}`,
+    'content-type': 'application/json',
+    'user-agent': 'portal-novo-alvo-editorial-cms',
+    'x-github-api-version': '2022-11-28',
+  };
+
+  const path = `src/content/news/${slug}.md`;
+  const result = await deleteGitHubFile({
+    repository,
+    branch,
+    path,
+    message: `remove article: ${article.title || slug}`,
+    headers,
+  });
+  const deleteResult = result as {
+    skipped?: boolean;
+    reason?: string;
+    commit?: { html_url?: string };
+  };
+
+  return {
+    ok: true,
+    skipped: Boolean(deleteResult.skipped),
+    path,
+    commitUrl: deleteResult.commit?.html_url,
+    reason: deleteResult.reason,
+  };
+};
+
 const requireAdmin = (request: Request, env: Env) => {
   if (!env.ADMIN_TOKEN) {
     return json(
@@ -692,9 +780,16 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
 
   const origin = new URL(request.url).origin;
   const article = await prepareArticleMedia(env, normalizePayload(rawPayload), origin);
-  const existing = await db.prepare('SELECT id FROM articles WHERE id = ? OR slug = ? LIMIT 1').bind(article.id, article.slug).first<{ id: string }>();
+  const existing = await db
+    .prepare('SELECT id, slug, status, published_at FROM articles WHERE id = ? OR slug = ? LIMIT 1')
+    .bind(article.id, article.slug)
+    .first<{ id: string; slug?: string; status?: string; published_at?: string }>();
   const id = existing?.id || article.id;
-  const publishedAt = article.status === 'published' ? article.publishedAt || article.updatedAt : article.publishedAt || '';
+  const previousPublishedAt = clean(existing?.published_at, 80);
+  const publishedAt =
+    article.status === 'published'
+      ? article.publishedAt || previousPublishedAt || article.updatedAt
+      : article.publishedAt || previousPublishedAt || '';
 
   await db
     .prepare(
@@ -759,7 +854,47 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       id,
       slug: article.slug,
       status: article.status,
+      publishedAt,
       updatedAt: article.updatedAt,
+    },
+  });
+};
+
+export const onRequestDelete = async ({ request, env }: { request: Request; env: Env }) => {
+  const authError = requireAdmin(request, env);
+  if (authError) return authError;
+
+  const db = getDb(env);
+  if (!db) return json({ error: 'Binding EDITORIAL_DB nÃ£o configurado.' }, { status: 503 });
+
+  const url = new URL(request.url);
+  const id = clean(url.searchParams.get('id') || url.searchParams.get('slug'), 120);
+  if (!id) return json({ error: 'Informe id ou slug da matÃ©ria.' }, { status: 400 });
+
+  const article = await db
+    .prepare('SELECT id, slug, title, status FROM articles WHERE id = ? OR slug = ? LIMIT 1')
+    .bind(id, id)
+    .first<{ id: string; slug: string; title: string; status: string }>();
+
+  if (!article) return json({ error: 'MatÃ©ria nÃ£o encontrada.' }, { status: 404 });
+
+  await db.prepare('DELETE FROM articles WHERE id = ?').bind(article.id).run();
+  const staticDelete =
+    article.slug && (article.status === 'published' || article.status === 'scheduled')
+      ? await deleteMarkdownFromGitHub(env, article).catch((error) => ({
+          ok: false,
+          skipped: false,
+          reason: error instanceof Error ? error.message : 'Falha desconhecida ao remover arquivo estÃ¡tico.',
+        }))
+      : null;
+
+  return json({
+    ok: true,
+    staticDelete,
+    deleted: {
+      id: article.id,
+      slug: article.slug,
+      status: article.status,
     },
   });
 };
