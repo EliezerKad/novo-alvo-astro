@@ -192,6 +192,8 @@ const GOOGLE_SEARCH_QUERIES_PER_CATEGORY = Number(process.env.GOOGLE_SEARCH_QUER
 const GNEWS_API_KEY = process.env.GNEWS_API_KEY || '';
 const GNEWS_QUERIES_PER_CATEGORY = Number(process.env.GNEWS_QUERIES_PER_CATEGORY || 3);
 const GNEWS_MAX_RESULTS = Number(process.env.GNEWS_MAX_RESULTS || 10);
+const GNEWS_REQUEST_DELAY_MS = Number(process.env.GNEWS_REQUEST_DELAY_MS || 1800);
+const GNEWS_RETRY_DELAY_MS = Number(process.env.GNEWS_RETRY_DELAY_MS || 12000);
 const MAX_ITEMS_PER_FEED = Number(process.env.MAX_ITEMS_PER_FEED || 80);
 const MIN_SOURCES = Number(process.env.MIN_SOURCES || 8);
 const RADAR_BATCHES_PER_CATEGORY = Number(process.env.RADAR_BATCHES_PER_CATEGORY || 3);
@@ -208,6 +210,7 @@ const ACTIVE_MIN_SOURCES = Math.max(ABSOLUTE_MIN_SOURCES, IS_CATEGORY_MODE ? Mat
 const CATEGORY_FLOOR_MIN_SOURCES = Number(process.env.CATEGORY_FLOOR_MIN_SOURCES || 8);
 const CATEGORY_MAX_ITEM_AGE_HOURS = Number(process.env.CATEGORY_MAX_ITEM_AGE_HOURS || 72);
 const ACTIVE_ITEM_AGE_HOURS = IS_CATEGORY_MODE ? Math.max(MAX_ITEM_AGE_HOURS, CATEGORY_MAX_ITEM_AGE_HOURS) : MAX_ITEM_AGE_HOURS;
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
 const ACTIVE_FLOOR_MIN_SOURCES = IS_CATEGORY_MODE ? Math.max(ABSOLUTE_MIN_SOURCES, Math.min(ACTIVE_MIN_SOURCES, CATEGORY_FLOOR_MIN_SOURCES)) : ACTIVE_MIN_SOURCES;
 const ENABLE_COVERAGE_FLOOR = String(process.env.ENABLE_COVERAGE_FLOOR || '0') === '1';
 const STRICT_TOPIC_CLUSTERING = String(process.env.STRICT_TOPIC_CLUSTERING || '1') !== '0';
@@ -1191,49 +1194,69 @@ const fetchGNewsQuery = async ([category, query, queryIndex]) => {
   url.searchParams.set('sortby', 'publishedAt');
   url.searchParams.set('from', new Date(Date.now() - ACTIVE_ITEM_AGE_HOURS * 60 * 60 * 1000).toISOString());
 
-  try {
-    const response = await fetch(url, {
-      headers: {
-        accept: 'application/json',
-        'user-agent': 'PortalNovoAlvoEditorialIngest/1.0',
-      },
-      signal: AbortSignal.timeout(12000),
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data?.errors?.join('; ') || data?.message || `HTTP ${response.status}`);
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          accept: 'application/json',
+          'user-agent': 'PortalNovoAlvoEditorialIngest/1.0',
+        },
+        signal: AbortSignal.timeout(12000),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data?.errors?.join('; ') || data?.message || `HTTP ${response.status}`);
 
-    return (Array.isArray(data.articles) ? data.articles : [])
-      .map((article) => {
-        const title = cleanTitle(article?.title || '');
-        const snippet = decodeEntities(article?.description || article?.content || '');
-        const source = article?.source?.name || 'GNews';
-        const finalCategory = classifyCategory(category, `${title} ${snippet}`, source);
-        return {
-          title,
-          category: finalCategory,
-          feedCategory: category,
-          link: article?.url || '',
-          googleLink: '',
-          sourceUrl: article?.source?.url || article?.url || '',
-          source,
-          snippet,
-          summary: snippet,
-          imageUrl: article?.image || '',
-          publishedAt: article?.publishedAt || new Date().toISOString(),
-          discoveryProvider: 'gnews',
-        };
-      })
-      .filter((item) => item.title && item.link)
-      .slice(0, MAX_ITEMS_PER_FEED);
-  } catch (error) {
-    console.warn(`[gnews] ${category} #${queryIndex + 1}: ${error.message}`);
-    return [];
+      return (Array.isArray(data.articles) ? data.articles : [])
+        .map((article) => {
+          const title = cleanTitle(article?.title || '');
+          const snippet = decodeEntities(article?.description || article?.content || '');
+          const source = article?.source?.name || 'GNews';
+          const finalCategory = classifyCategory(category, `${title} ${snippet}`, source);
+          return {
+            title,
+            category: finalCategory,
+            feedCategory: category,
+            link: article?.url || '',
+            googleLink: '',
+            sourceUrl: article?.source?.url || article?.url || '',
+            source,
+            snippet,
+            summary: snippet,
+            imageUrl: article?.image || '',
+            publishedAt: article?.publishedAt || new Date().toISOString(),
+            discoveryProvider: 'gnews',
+          };
+        })
+        .filter((item) => item.title && item.link)
+        .slice(0, MAX_ITEMS_PER_FEED);
+    } catch (error) {
+      const message = error?.message || String(error);
+      const shouldRetry = attempt === 0 && /too many requests|short period|rate|quota|429/i.test(message);
+      if (shouldRetry) {
+        console.warn(`[gnews] ${category} #${queryIndex + 1}: limite temporario; aguardando ${GNEWS_RETRY_DELAY_MS}ms.`);
+        await wait(GNEWS_RETRY_DELAY_MS);
+        continue;
+      }
+      console.warn(`[gnews] ${category} #${queryIndex + 1}: ${message}`);
+      return [];
+    }
   }
+
+  return [];
+};
+
+const fetchGNewsEntriesSequentially = async (entries) => {
+  const items = [];
+  for (const [index, entry] of entries.entries()) {
+    if (index > 0) await wait(GNEWS_REQUEST_DELAY_MS);
+    items.push(...(await fetchGNewsQuery(entry)));
+  }
+  return items;
 };
 
 const fetchDiscoveryItems = async () => {
   if (INGEST_DISCOVERY === 'gnews') {
-    const gnewsItems = (await Promise.all(categoryGNewsEntries(ACTIVE_CATEGORIES).map(fetchGNewsQuery))).flat();
+    const gnewsItems = await fetchGNewsEntriesSequentially(categoryGNewsEntries(ACTIVE_CATEGORIES));
     if (gnewsItems.length >= ACTIVE_CATEGORIES.length * 4) return gnewsItems;
 
     console.warn(`[discovery] GNews retornou ${gnewsItems.length} itens. Acionando fallback RSS para preservar a pauta.`);
@@ -1275,6 +1298,7 @@ const buildPitch = (items) => {
       title: item.title,
       url: item.link,
       publishedAt: item.publishedAt,
+      provider: item.discoveryProvider || 'rss',
     }))
     .filter((source) => {
       const key = String(source.publisher || source.url || source.title).toLowerCase();
