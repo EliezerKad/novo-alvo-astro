@@ -1334,7 +1334,9 @@ const buildPitch = (items) => {
     .map((item) => ({
       publisher: item.source,
       title: item.title,
+      summary: item.summary,
       url: item.link,
+      sourceUrl: item.sourceUrl,
       publishedAt: item.publishedAt,
       provider: item.discoveryProvider || 'rss',
     }))

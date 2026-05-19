@@ -511,8 +511,78 @@ const fetchSourceExcerpt = async (source: unknown) => {
 };
 
 const enrichSourcesWithText = async (sources: unknown[]) => {
-  const enriched = await Promise.all(sources.slice(0, 5).map((source) => fetchSourceExcerpt(source)));
-  return [...enriched, ...sources.slice(5)];
+  const enriched = await Promise.all(sources.slice(0, 8).map((source) => fetchSourceExcerpt(source)));
+  return [...enriched, ...sources.slice(8)];
+};
+
+const sourceEvidenceText = (record: Record<string, unknown>) =>
+  [
+    plain(record.excerpt, 1600),
+    plain(record.summary, 700),
+    plain(record.description, 700),
+    plain(record.content, 900),
+    plain(record.title, 240),
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+const factSignalsFrom = (value: string) => {
+  const text = decodeHtmlEntities(plain(value, 2600));
+  const numbers = [
+    ...text.matchAll(
+      /\b(?:\d{1,3}(?:[.,]\d{3})*(?:,\d+)?|\d+)\s*(?:anos?|meses?|dias?|horas?|kg|gramas?|mil[ií]metros?|calibre|mortes?|feridos?|tiros?|passagens?|ve[ií]culos?|pessoas?|%)\b/gi,
+    ),
+  ].map((match) => match[0]);
+  const money = [...text.matchAll(/R\$\s?\d[\d.,]*(?:\s?(?:mil|milh[oõ]es|bilh[oõ]es))?/gi)].map((match) => match[0]);
+  const dates = [
+    ...text.matchAll(/\b(?:segunda|ter[cç]a|quarta|quinta|sexta|s[aá]bado|domingo)\s*\(\d{1,2}\)|\b\d{1,2}\s+de\s+[a-zç]+|\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/gi),
+  ].map((match) => match[0]);
+  const names = [
+    ...text.matchAll(
+      /\b[A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇ][A-Za-zÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇáàâãéèêíïóôõöúç]{2,}(?:\s+(?:d[aeo]s?|e|do|da|dos|das|de|[A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇ][A-Za-zÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇáàâãéèêíïóôõöúç]{2,})){0,5}/g,
+    ),
+  ]
+    .map((match) => match[0])
+    .filter((name) => !/^(Segundo|Conforme|Durante|Ainda|Outro|Uma|Dois|Com|No|Na|Em|Por|Leia Tamb[eé]m)$/i.test(name));
+  return [...new Set([...names, ...numbers, ...money, ...dates])].slice(0, 18);
+};
+
+const buildFactDossier = (sources: unknown[], row: QueueRow) => {
+  const rows = sources
+    .slice(0, 12)
+    .map((source, index) => {
+      if (!source || typeof source !== 'object') return '';
+      const record = source as Record<string, unknown>;
+      const evidence = sourceEvidenceText(record);
+      const signals = factSignalsFrom(evidence);
+      const snippet = clipWholeWord(evidence, 900);
+      if (!snippet && !signals.length) return '';
+      return [
+        `Fonte ${index + 1} - ${plain(record.publisher, 80) || 'Fonte'}: ${plain(record.title, 180)}`,
+        signals.length ? `Sinais factuais detectados: ${signals.join('; ')}` : '',
+        snippet ? `Material disponivel: ${snippet}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n');
+    })
+    .filter(Boolean)
+    .join('\n\n');
+
+  const globalSignals = factSignalsFrom(
+    [
+      row.title,
+      row.summary,
+      row.keywords,
+      ...sources.map((source) => (source && typeof source === 'object' ? sourceEvidenceText(source as Record<string, unknown>) : '')),
+    ].join(' '),
+  );
+
+  return [
+    globalSignals.length ? `Sinais consolidados obrigatorios: ${globalSignals.join('; ')}` : '',
+    rows,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
 };
 
 const clipWholeWord = (value: unknown, max: number) => {
@@ -765,14 +835,17 @@ const generateArticleWithAi = async (
   const sourceCount = Number(row.source_count || sources.length || 0);
   const premiumDraft = score > 800;
   const editorialTitle = stripRadarPrefix(row.title) || clean(row.title, 220);
+  const factDossier = buildFactDossier(sources, row);
   const sourceLines = sources
     .slice(0, 20)
     .map((source) => {
       if (!source || typeof source !== 'object') return '';
       const record = source as Record<string, unknown>;
       const excerpt = plain(record.excerpt, 1200);
+      const summary = plain(record.summary || record.description || record.content, 700);
       return [
         `- ${plain(record.publisher, 80)}: ${plain(record.title, 180)} (${plain(record.url, 400)})`,
+        summary ? `  Resumo/snippet capturado na ingestao: ${summary}` : '',
         excerpt ? `  Trecho extraido da materia completa (prioritario para nomes, datas e responsaveis): ${excerpt}` : '',
       ]
         .filter(Boolean)
@@ -934,6 +1007,8 @@ MICRO-PERSONAS DE ELITE:
 CLASSIFICACAO PREVIA OBRIGATORIA:
 - Antes de escrever, leia o conjunto inteiro de fontes e identifique a noticia central mais relevante. Nao assuma que a primeira fonte e a pauta principal.
 - Use os dados como apuracao consolidada: cruze os trechos, descarte repeticao, priorize o dado exclusivo e construa uma materia inedita. Nunca explique esse processo ao leitor.
+- O bloco DOSSIE FACTUAL abaixo tem prioridade sobre o resumo operacional. Ele existe para impedir texto generico. Use nomes, numeros, idades, cidades, orgaos, datas e objetos concretos listados nele.
+- Se houver sinais factuais no dossie, a materia final deve trazer pelo menos 6 deles de forma natural no lead e no corpo. Nao substitua "Eliseu Bitencourt, 32 anos" por "um homem"; nao substitua "revolver calibre .38" por "armas"; nao substitua "Costa Rica, MS" por "interior".
 - Fato Estatico: o que aconteceu. Exemplo: "O preco subiu".
 - Agente Ativo: quem causou, decidiu, moveu, perdeu ou ganhou. De nome aos bois.
 - Regra de responsabilidade nominal: se o texto disser que alguem afirmou, declarou, publicou, admitiu, defendeu, acusou, decidiu, aprovou, negou, pediu, atacou ou causou algo, a frase deve trazer o nome da pessoa, orgao, empresa, partido, clube ou cargo oficial responsavel. Nunca escreva "um pre-candidato", "um politico", "uma autoridade", "um dirigente" ou "uma celebridade" como sujeito de acusacao, fala ou decisao.
@@ -1024,11 +1099,13 @@ DADOS DO CLUSTER:
 ${imageLines || 'Sem imagens candidatas.'}
 [TITULOS PROIBIDOS PARA COPIA]:
 ${forbiddenTitles || 'Sem titulos listados.'}
+[DOSSIE FACTUAL - PRIORIDADE ALTA]:
+${factDossier || 'Sem dossie factual estruturado. Use apenas os dados visiveis em fontes e resumo.'}
 [FONTES]:
 ${sourceLines || 'Fontes nao listadas.'}
 
 IMPORTANTE SOBRE AS FONTES:
-- Os trechos extraidos da materia completa têm prioridade sobre titulo RSS e resumo operacional.
+- Os trechos extraidos da materia completa e o dossie factual têm prioridade sobre titulo RSS e resumo operacional.
 - Quando houver nome de pessoa, orgao, clube, empresa ou cargo nesses trechos, use o nome. Nao substitua por sujeito vago.
 
 Responda exatamente neste formato, com JSON valido e sem markdown:
