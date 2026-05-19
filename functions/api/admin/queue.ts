@@ -725,7 +725,7 @@ const factSignalsFrom = (value: string) => {
 
 const buildFactDossier = (sources: unknown[], row: QueueRow) => {
   const rows = sources
-    .slice(0, 12)
+    .slice(0, 15)
     .map((source, index) => {
       if (!source || typeof source !== 'object') return '';
       const record = source as Record<string, unknown>;

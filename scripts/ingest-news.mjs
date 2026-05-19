@@ -200,6 +200,7 @@ const RADAR_BATCHES_PER_CATEGORY = Number(process.env.RADAR_BATCHES_PER_CATEGORY
 const MAX_ITEM_AGE_HOURS = Number(process.env.MAX_ITEM_AGE_HOURS || 30);
 const HOUSEKEEPING_DAYS = Number(process.env.HOUSEKEEPING_DAYS || 30);
 const SOURCE_EXPANSION_TARGET = Number(process.env.SOURCE_EXPANSION_TARGET || 12);
+const SOURCE_TEXT_TARGET = Number(process.env.SOURCE_TEXT_TARGET || 15);
 const SOURCE_EXPANSION_MIN_OVERLAP = Number(process.env.SOURCE_EXPANSION_MIN_OVERLAP || 0.34);
 const MAX_PITCHES = Number(process.env.MAX_PITCHES || 80);
 const CATEGORY_MAX_PITCHES = Number(process.env.CATEGORY_MAX_PITCHES || 8);
@@ -231,6 +232,120 @@ const decodeEntities = (value) =>
     .replace(/&#x([0-9a-f]+);/gi, (_match, code) => String.fromCharCode(Number.parseInt(code, 16)))
     .trim();
 
+const plainText = (value, max = 4000) =>
+  decodeEntities(String(value || '').replace(/<[^>]*>/g, ' '))
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, max);
+
+const clipWholeWord = (value, max) => {
+  const text = plainText(value, max + 120);
+  if (text.length <= max) return text;
+  return text.slice(0, max).replace(/\s+\S*$/, '').trim() || text.slice(0, max).trim();
+};
+
+const isGoogleNewsUrl = (value) => {
+  try {
+    const url = new URL(String(value || ''));
+    return /(^|\.)news\.google\./i.test(url.hostname) && /\/(?:rss\/)?(?:articles|read)\//i.test(url.pathname);
+  } catch {
+    return false;
+  }
+};
+
+const googleNewsArticleId = (value) => {
+  try {
+    const url = new URL(String(value || ''));
+    if (!/(^|\.)news\.google\./i.test(url.hostname)) return '';
+    return (url.pathname.split('/').filter(Boolean).pop() || '').replace(/[^A-Za-z0-9_-]/g, '');
+  } catch {
+    return '';
+  }
+};
+
+const fetchWithTimeout = async (url, options = {}, timeoutMs = 9000) => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, {
+      ...options,
+      redirect: options.redirect || 'follow',
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
+const googleNewsDecodePayload = (html) => {
+  const dataP = String(html || '').match(/<c-wiz\b[^>]*\bdata-p=["']([^"']+)["']/i)?.[1] || '';
+  if (!dataP) return '';
+  try {
+    const params = JSON.parse(decodeEntities(dataP).replace('%.@.', '["garturlreq",'));
+    if (!Array.isArray(params) || params.length < 5) return '';
+    return JSON.stringify([[['Fbv4je', JSON.stringify([params[0], params[2], params[1], params[params.length - 2], params[params.length - 1]]), 'null', 'generic']]]);
+  } catch {
+    return '';
+  }
+};
+
+const parseGoogleNewsDecodedUrl = (value) => {
+  const line = String(value || '')
+    .split('\n')
+    .map((item) => item.trim())
+    .find((item) => item.startsWith('[') && item.includes('http'));
+  if (!line) return '';
+  try {
+    const outer = JSON.parse(line);
+    const inner = JSON.parse(outer?.[0]?.[2] || '[]');
+    const decoded = inner?.[1] || inner?.[0]?.[1] || '';
+    return /^https?:\/\//i.test(decoded) ? decoded : '';
+  } catch {
+    const match = line.match(/https?:\/\/[^"\\]+/i);
+    return match ? match[0].replace(/\\u003d/g, '=').replace(/\\u0026/g, '&') : '';
+  }
+};
+
+const decodeGoogleNewsUrl = async (value) => {
+  const id = googleNewsArticleId(value);
+  if (!id) return '';
+  for (const path of [`https://news.google.com/articles/${id}`, `https://news.google.com/rss/articles/${id}`]) {
+    try {
+      const response = await fetchWithTimeout(
+        path,
+        {
+          headers: {
+            accept: 'text/html,application/xhtml+xml',
+            'accept-language': 'pt-BR,pt;q=0.9,en;q=0.6',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) PortalNovoAlvoIngest/1.0',
+          },
+        },
+        9000,
+      );
+      const payload = googleNewsDecodePayload(await response.text());
+      if (!payload) continue;
+      const decodedResponse = await fetchWithTimeout(
+        'https://news.google.com/_/DotsSplashUi/data/batchexecute?rpcids=Fbv4je',
+        {
+          method: 'POST',
+          headers: {
+            accept: '*/*',
+            'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            referer: 'https://news.google.com/',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) PortalNovoAlvoIngest/1.0',
+          },
+          body: new URLSearchParams({ 'f.req': payload }),
+        },
+        9000,
+      );
+      if (!decodedResponse.ok) continue;
+      const decoded = parseGoogleNewsDecodedUrl(await decodedResponse.text());
+      if (decoded && !isGoogleNewsUrl(decoded)) return decoded;
+    } catch {}
+  }
+  return '';
+};
+
 const textBetween = (xml, tag) => {
   const match = String(xml).match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, 'i'));
   return decodeEntities(match?.[1] || '');
@@ -239,6 +354,110 @@ const textBetween = (xml, tag) => {
 const attrBetween = (xml, tag, attr) => {
   const match = String(xml).match(new RegExp(`<${tag}[^>]*\\s${attr}=["']([^"']+)["'][^>]*>`, 'i'));
   return decodeEntities(match?.[1] || '');
+};
+
+const extractJsonLdArticleText = (html) => {
+  const blocks = String(html || '').match(/<script[^>]+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi) || [];
+  const values = [];
+  const pushArticleFields = (item) => {
+    if (!item || typeof item !== 'object') return;
+    const type = Array.isArray(item['@type']) ? item['@type'].join(' ') : String(item['@type'] || '');
+    if (/NewsArticle|Article|ReportageNewsArticle|BlogPosting/i.test(type)) {
+      values.push(plainText(item.headline, 300), plainText(item.description, 900), plainText(item.articleBody, 6000));
+    }
+    Object.values(item).forEach((nested) => {
+      if (Array.isArray(nested)) nested.forEach(pushArticleFields);
+      else if (nested && typeof nested === 'object') pushArticleFields(nested);
+    });
+  };
+
+  for (const block of blocks.slice(0, 12)) {
+    const raw = decodeEntities(block.replace(/^<script[^>]*>/i, '').replace(/<\/script>$/i, '').trim());
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) parsed.forEach(pushArticleFields);
+      else pushArticleFields(parsed);
+    } catch {}
+  }
+  return values.filter(Boolean).join(' ');
+};
+
+const extractArticleTextFromHtml = (html) => {
+  const structured = extractJsonLdArticleText(html);
+  const withoutNoise = String(html || '')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')
+    .replace(/<(?:svg|canvas|picture|video|iframe|form|button|header|footer|nav|aside)[\s\S]*?<\/(?:svg|canvas|picture|video|iframe|form|button|header|footer|nav|aside)>/gi, ' ');
+
+  const articleMatch = withoutNoise.match(/<article\b[^>]*>([\s\S]*?)<\/article>/i);
+  const mainMatch = withoutNoise.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i);
+  const classMatch = withoutNoise.match(/<div\b[^>]+class=["'][^"']*(?:post-content|entry-content|article-content|content-text|materia|noticia|news-content)[^"']*["'][^>]*>([\s\S]*?)<\/div>/i);
+  const source = articleMatch?.[1] || classMatch?.[1] || mainMatch?.[1] || withoutNoise;
+  const paragraphs = [...source.matchAll(/<(?:p|h1|h2|h3|li)\b[^>]*>([\s\S]*?)<\/(?:p|h1|h2|h3|li)>/gi)]
+    .map((match) => plainText(match[1], 1200))
+    .filter((text) => text.length > 55)
+    .filter((text) => !/(cookies?|newsletter|publicidade|assine|compartilhe|leia tamb[eé]m|todos os direitos|clique aqui)/i.test(text));
+
+  const text = [structured, paragraphs.length >= 2 ? paragraphs.join(' ') : plainText(source, 10000)]
+    .filter(Boolean)
+    .join(' ');
+  const compact = text.replace(/\s+/g, ' ').trim();
+  return compact.length >= 320 ? clipWholeWord(compact, 3000) : '';
+};
+
+const articleUrlFromSource = async (source) => {
+  const candidates = [source?.primaryUrl, source?.originalUrl, source?.url, source?.link, source?.href]
+    .map((value) => String(value || '').trim())
+    .filter((value, index, list) => /^https?:\/\//i.test(value) && list.indexOf(value) === index);
+
+  for (const url of candidates) {
+    if (isGoogleNewsUrl(url)) {
+      const decoded = await decodeGoogleNewsUrl(url);
+      if (decoded) return decoded;
+      continue;
+    }
+    return url;
+  }
+  return '';
+};
+
+const enrichSourceText = async (source, index, title) => {
+  if (!source || typeof source !== 'object') return source;
+  if (plainText(source.excerpt, 500).length >= 260) return source;
+  const resolvedUrl = await articleUrlFromSource(source);
+  if (!resolvedUrl) return { ...source, textStatus: 'missing-url' };
+
+  try {
+    const response = await fetchWithTimeout(
+      resolvedUrl,
+      {
+        headers: {
+          accept: 'text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8',
+          'accept-language': 'pt-BR,pt;q=0.9,en;q=0.6',
+          'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) PortalNovoAlvoIngest/1.0',
+        },
+      },
+      11000,
+    );
+    if (!response.ok) return { ...source, resolvedUrl, textStatus: `http-${response.status}` };
+    const contentType = response.headers.get('content-type') || '';
+    if (!/html|text/i.test(contentType)) return { ...source, resolvedUrl, textStatus: 'unsupported-content' };
+    const excerpt = extractArticleTextFromHtml(await response.text());
+    if (!excerpt) return { ...source, resolvedUrl: response.url || resolvedUrl, textStatus: 'empty-text' };
+    return {
+      ...source,
+      excerpt,
+      resolvedUrl: response.url || resolvedUrl,
+      textFetchedAt: new Date().toISOString(),
+      textStatus: 'ok',
+    };
+  } catch (error) {
+    return { ...source, resolvedUrl, textStatus: `error-${String(error?.name || error?.message || 'fetch').slice(0, 40)}` };
+  } finally {
+    if (index < SOURCE_TEXT_TARGET - 1) await wait(150);
+    if (title && index === SOURCE_TEXT_TARGET - 1) console.log(`[texts] ${title}: tentativa de ${SOURCE_TEXT_TARGET} fontes concluida.`);
+  }
 };
 
 const cleanTitle = (title) =>
@@ -1373,8 +1592,23 @@ const buildPitch = (items) => {
   };
 };
 
+const enrichPitchSources = async (pitch) => {
+  const sources = Array.isArray(pitch.sources) ? [...pitch.sources] : [];
+  const limit = Math.min(SOURCE_TEXT_TARGET, sources.length);
+  let ok = 0;
+
+  for (let index = 0; index < limit; index += 1) {
+    sources[index] = await enrichSourceText(sources[index], index, pitch.title);
+    if (plainText(sources[index]?.excerpt, 600).length >= 320) ok += 1;
+  }
+
+  if (limit) console.log(`[texts] ${pitch.title}: ${ok}/${limit} fontes com texto salvo.`);
+  return sources;
+};
+
 const normalizePitchAssets = async (pitch) => ({
   ...pitch,
+  sources: await enrichPitchSources(pitch),
   imageCandidates: Array.isArray(pitch.imageCandidates) ? pitch.imageCandidates : [],
 });
 
@@ -1515,7 +1749,10 @@ const main = async () => {
 
   let saved = 0;
   let updatedHidden = 0;
-  const enrichedPitches = await Promise.all(pitches.map(normalizePitchAssets));
+  const enrichedPitches = [];
+  for (const pitch of pitches) {
+    enrichedPitches.push(await normalizePitchAssets(pitch));
+  }
 
   await Promise.all(
     enrichedPitches.map(async (pitch) => {
