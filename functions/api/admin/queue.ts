@@ -713,6 +713,11 @@ const factSignalsFrom = (value: string) => {
   const dates = [
     ...text.matchAll(/\b(?:segunda|ter[cç]a|quarta|quinta|sexta|s[aá]bado|domingo)\s*\(\d{1,2}\)|\b\d{1,2}\s+de\s+[a-zç]+|\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/gi),
   ].map((match) => match[0]);
+  const largeValues = [
+    ...text.matchAll(/\b\d[\d.,]*\s*(?:bilh[oÃµ]es|milh[oÃµ]es|trilh[oÃµ]es)\s+de\s+(?:d[oÃó]lares|euros|reais|yuan|rublos)\b/gi),
+    ...text.matchAll(/(?:R\$|US\$|€)\s?\d[\d.,]*(?:\s?(?:mil|milh[oÃµ]es|bilh[oÃµ]es|trilh[oÃµ]es))?/gi),
+  ].map((match) => match[0]);
+  const years = [...text.matchAll(/\b20\d{2}\b/g)].map((match) => match[0]);
   const names = [
     ...text.matchAll(
       /\b[A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇ][A-Za-zÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇáàâãéèêíïóôõöúç]{2,}(?:\s+(?:d[aeo]s?|e|do|da|dos|das|de|[A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇ][A-Za-zÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇáàâãéèêíïóôõöúç]{2,})){0,5}/g,
@@ -720,7 +725,7 @@ const factSignalsFrom = (value: string) => {
   ]
     .map((match) => match[0])
     .filter((name) => !/^(Segundo|Conforme|Durante|Ainda|Outro|Uma|Dois|Com|No|Na|Em|Por|Leia Tamb[eé]m)$/i.test(name));
-  return [...new Set([...names, ...numbers, ...money, ...dates])].slice(0, 18);
+  return [...new Set([...names, ...numbers, ...money, ...largeValues, ...dates, ...years])].slice(0, 28);
 };
 
 const buildFactDossier = (sources: unknown[], row: QueueRow) => {
@@ -1185,6 +1190,8 @@ CLASSIFICACAO PREVIA OBRIGATORIA:
 - Use os dados como apuracao consolidada: cruze os trechos, descarte repeticao, priorize o dado exclusivo e construa uma materia inedita. Nunca explique esse processo ao leitor.
 - O bloco DOSSIE FACTUAL abaixo tem prioridade sobre o resumo operacional. Ele existe para impedir texto generico. Use nomes, numeros, idades, cidades, orgaos, datas e objetos concretos listados nele.
 - Se houver sinais factuais no dossie, a materia final deve trazer pelo menos 6 deles de forma natural no lead e no corpo. Nao substitua "Eliseu Bitencourt, 32 anos" por "um homem"; nao substitua "revolver calibre .38" por "armas"; nao substitua "Costa Rica, MS" por "interior".
+- Se houver valores, anos, percentuais ou quantidades no dossie, eles sao obrigatorios. Nao troque "129 bilhoes de dolares", "319 bilhoes de euros", "116 bilhoes de dolares" ou "2024" por "aumentos significativos", "volume elevado" ou "dados indicam".
+- Em economia e geopolitica, o texto deve abrir ou chegar ate o terceiro paragrafo com os numeros centrais. Materia sem os valores disponiveis deve ser considerada incompleta.
 - Fato Estatico: o que aconteceu. Exemplo: "O preco subiu".
 - Agente Ativo: quem causou, decidiu, moveu, perdeu ou ganhou. De nome aos bois.
 - Regra de responsabilidade nominal: se o texto disser que alguem afirmou, declarou, publicou, admitiu, defendeu, acusou, decidiu, aprovou, negou, pediu, atacou ou causou algo, a frase deve trazer o nome da pessoa, orgao, empresa, partido, clube ou cargo oficial responsavel. Nunca escreva "um pre-candidato", "um politico", "uma autoridade", "um dirigente" ou "uma celebridade" como sujeito de acusacao, fala ou decisao.
