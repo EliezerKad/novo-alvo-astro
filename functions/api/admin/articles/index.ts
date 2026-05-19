@@ -394,7 +394,7 @@ const deleteGitHubFile = async ({
   const apiUrl = githubApiUrl(repository, path);
   const existingResponse = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, { headers });
   if (existingResponse.status === 404) {
-    return { skipped: true, reason: 'Arquivo editorial nÃ£o encontrado no GitHub.' };
+    return { skipped: true, reason: 'Arquivo editorial não encontrado no GitHub.' };
   }
   if (!existingResponse.ok) {
     const errorText = await existingResponse.text();
@@ -402,7 +402,7 @@ const deleteGitHubFile = async ({
   }
 
   const existing = (await existingResponse.json()) as { sha?: string };
-  if (!existing.sha) throw new Error(`GitHub nÃ£o retornou SHA para ${path}.`);
+  if (!existing.sha) throw new Error(`GitHub não retornou SHA para ${path}.`);
 
   const response = await fetch(apiUrl, {
     method: 'DELETE',
@@ -416,7 +416,7 @@ const deleteGitHubFile = async ({
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`GitHub recusou exclusÃ£o de ${path}: ${errorText.slice(0, 500)}`);
+    throw new Error(`GitHub recusou exclusão de ${path}: ${errorText.slice(0, 500)}`);
   }
 
   return (await response.json()) as { commit?: { html_url?: string } };
@@ -608,7 +608,7 @@ const deleteMarkdownFromGitHub = async (env: Env, article: { slug?: string; titl
     return {
       ok: false,
       skipped: true,
-      reason: 'GITHUB_TOKEN nÃ£o configurado. A matÃ©ria foi removida do banco, mas o arquivo estÃ¡tico nÃ£o foi apagado.',
+      reason: 'GITHUB_TOKEN não configurado. A matéria foi removida do banco, mas o arquivo estático não foi apagado.',
     };
   }
 
@@ -865,18 +865,18 @@ export const onRequestDelete = async ({ request, env }: { request: Request; env:
   if (authError) return authError;
 
   const db = getDb(env);
-  if (!db) return json({ error: 'Binding EDITORIAL_DB nÃ£o configurado.' }, { status: 503 });
+  if (!db) return json({ error: 'Binding EDITORIAL_DB não configurado.' }, { status: 503 });
 
   const url = new URL(request.url);
   const id = clean(url.searchParams.get('id') || url.searchParams.get('slug'), 120);
-  if (!id) return json({ error: 'Informe id ou slug da matÃ©ria.' }, { status: 400 });
+  if (!id) return json({ error: 'Informe id ou slug da matéria.' }, { status: 400 });
 
   const article = await db
     .prepare('SELECT id, slug, title, status FROM articles WHERE id = ? OR slug = ? LIMIT 1')
     .bind(id, id)
     .first<{ id: string; slug: string; title: string; status: string }>();
 
-  if (!article) return json({ error: 'MatÃ©ria nÃ£o encontrada.' }, { status: 404 });
+  if (!article) return json({ error: 'Matéria não encontrada.' }, { status: 404 });
 
   await db.prepare('DELETE FROM articles WHERE id = ?').bind(article.id).run();
   const staticDelete =
@@ -884,7 +884,7 @@ export const onRequestDelete = async ({ request, env }: { request: Request; env:
       ? await deleteMarkdownFromGitHub(env, article).catch((error) => ({
           ok: false,
           skipped: false,
-          reason: error instanceof Error ? error.message : 'Falha desconhecida ao remover arquivo estÃ¡tico.',
+          reason: error instanceof Error ? error.message : 'Falha desconhecida ao remover arquivo estático.',
         }))
       : null;
 

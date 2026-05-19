@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TikTok Novo Alvo - Congresso</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --red: #e50914;
+        --ink: #08080a;
+        --paper: #f4f0e8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        gap: 18px;
+        padding: 24px;
+        background: #050506;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: white;
+      }
+
+      .studio {
+        display: grid;
+        grid-template-columns: minmax(260px, 390px) minmax(220px, 300px);
+        gap: 22px;
+        align-items: center;
+      }
+
+      .phone {
+        position: relative;
+        width: min(82vw, 390px);
+        aspect-ratio: 9 / 16;
+        overflow: hidden;
+        border-radius: 30px;
+        background: #111;
+        box-shadow: 0 34px 90px rgba(0, 0, 0, 0.7);
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: var(--ink);
+      }
+
+      .controls {
+        display: grid;
+        gap: 12px;
+        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 26px;
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(16px);
+      }
+
+      .controls p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .eyebrow {
+        color: var(--red);
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+      }
+
+      button,
+      a {
+        width: 100%;
+        border: 0;
+        border-radius: 999px;
+        padding: 13px 16px;
+        background: white;
+        color: #09090b;
+        font-size: 11px;
+        font-weight: 950;
+        letter-spacing: 0.12em;
+        text-align: center;
+        text-decoration: none;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+
+      button.primary {
+        background: var(--red);
+        color: white;
+      }
+
+      .log {
+        min-height: 20px;
+        color: rgba(255, 255, 255, 0.48);
+      }
+
+      @media (max-width: 760px) {
+        body {
+          padding: 0;
+        }
+
+        .studio {
+          width: 100%;
+          min-height: 100vh;
+          grid-template-columns: 1fr;
+          place-items: center;
+        }
+
+        .phone {
+          width: min(100vw, 420px);
+          border-radius: 0;
+          box-shadow: none;
+        }
+
+        .controls {
+          width: min(92vw, 390px);
+          margin-bottom: 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="studio" aria-label="Estúdio social Novo Alvo">
+      <div class="phone">
+        <canvas id="video" width="1080" height="1920"></canvas>
+      </div>
+
+      <aside class="controls">
+        <span class="eyebrow">Teste TikTok</span>
+        <p>
+          Layout minimalista inspirado em short de notícia: imagem real da matéria, selo lateral
+          e manchete forte no rodapé.
+        </p>
+        <button class="primary" id="previewBtn" type="button">Prévia com voz</button>
+        <button id="recordBtn" type="button">Exportar WebM</button>
+        <a href="./tiktok-congresso-roteiro.txt" target="_blank" rel="noreferrer">Roteiro</a>
+        <p class="log" id="log">Carregando imagem da matéria...</p>
+      </aside>
+    </section>
+
+    <script>
+      const canvas = document.querySelector("#video");
+      const ctx = canvas.getContext("2d");
+      const log = document.querySelector("#log");
+      const W = canvas.width;
+      const H = canvas.height;
+      const durationMs = 24500;
+
+      const articleImageUrl =
+        "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1600&q=82";
+
+      const scenes = [
+        {
+          start: 0,
+          end: 5200,
+          headline: "Congresso acelera pacote fiscal",
+          strap: "Política",
+          caption: "A conta pública entrou em modo pressão.",
+        },
+        {
+          start: 5200,
+          end: 11200,
+          headline: "A disputa real está no orçamento",
+          strap: "Bastidor",
+          caption: "Previsibilidade para uns. Menos margem para outros.",
+        },
+        {
+          start: 11200,
+          end: 17800,
+          headline: "Estados e municípios olham para os repasses",
+          strap: "Impacto",
+          caption: "Convênios, obras e serviços podem entrar na conta.",
+        },
+        {
+          start: 17800,
+          end: 24500,
+          headline: "Sem clareza fiscal, o ruído volta",
+          strap: "Novo Alvo",
+          caption: "Leia a análise completa no portal.",
+        },
+      ];
+
+      const narration =
+        "O Congresso colocou em modo acelerado um pacote para reorganizar gastos públicos. " +
+        "A disputa real não está no discurso. Está em quem ganha previsibilidade e quem perde margem no orçamento. " +
+        "Estados e municípios acompanham de perto, porque repasses, convênios e obras podem entrar na conta. " +
+        "Se o texto avançar sem clareza fiscal, o ruído volta para governo, mercado e serviços essenciais. " +
+        "Novo Alvo. Fatos e impacto, vinte e quatro horas por dia.";
+
+      const articleImage = new Image();
+      articleImage.crossOrigin = "anonymous";
+      articleImage.src = articleImageUrl;
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function ease(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      }
+
+      function roundRect(x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + width, y, x + width, y + height, radius);
+        ctx.arcTo(x + width, y + height, x, y + height, radius);
+        ctx.arcTo(x, y + height, x, y, radius);
+        ctx.arcTo(x, y, x + width, y, radius);
+        ctx.closePath();
+      }
+
+      function wrapText(text, maxWidth, font) {
+        ctx.font = font;
+        const words = text.split(" ");
+        const lines = [];
+        let line = "";
+        for (const word of words) {
+          const test = line ? `${line} ${word}` : word;
+          if (ctx.measureText(test).width > maxWidth && line) {
+            lines.push(line);
+            line = word;
+          } else {
+            line = test;
+          }
+        }
+        lines.push(line);
+        return lines;
+      }
+
+      function drawCoverImage(ms) {
+        if (!articleImage.complete || !articleImage.naturalWidth) {
+          const gradient = ctx.createLinearGradient(0, 0, W, H);
+          gradient.addColorStop(0, "#311");
+          gradient.addColorStop(1, "#050506");
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, W, H);
+          return;
+        }
+
+        const scale = Math.max(W / articleImage.naturalWidth, H / articleImage.naturalHeight);
+        const zoom = 1.08 + Math.sin(ms / durationMs * Math.PI) * 0.08;
+        const drawW = articleImage.naturalWidth * scale * zoom;
+        const drawH = articleImage.naturalHeight * scale * zoom;
+        const panX = Math.sin(ms / 5200) * 34;
+        const panY = Math.cos(ms / 6800) * 26;
+        ctx.drawImage(articleImage, (W - drawW) / 2 + panX, (H - drawH) / 2 + panY, drawW, drawH);
+      }
+
+      function drawLogoMark(x, y, size) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.strokeStyle = "#e50914";
+        ctx.lineWidth = size * 0.08;
+        ctx.beginPath();
+        ctx.arc(0, 0, size * 0.42, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = "#e50914";
+        ctx.fillRect(-size * 0.035, -size * 0.56, size * 0.07, size * 0.22);
+        ctx.fillRect(-size * 0.035, size * 0.34, size * 0.07, size * 0.22);
+        ctx.fillRect(-size * 0.56, -size * 0.035, size * 0.22, size * 0.07);
+        ctx.fillRect(size * 0.34, -size * 0.035, size * 0.22, size * 0.07);
+        ctx.rotate(-Math.PI / 4);
+        ctx.fillRect(-size * 0.04, -size * 0.18, size * 0.08, size * 0.55);
+        ctx.restore();
+      }
+
+      function drawFrame(ms) {
+        const scene = scenes.find((item) => ms >= item.start && ms < item.end) ?? scenes.at(-1);
+        const local = clamp((ms - scene.start) / (scene.end - scene.start), 0, 1);
+        const reveal = ease(clamp(local * 1.4, 0, 1));
+        const pulse = Math.sin(ms / 520) * 0.5 + 0.5;
+
+        ctx.clearRect(0, 0, W, H);
+        drawCoverImage(ms);
+
+        const topShade = ctx.createLinearGradient(0, 0, 0, H);
+        topShade.addColorStop(0, "rgba(0,0,0,0.34)");
+        topShade.addColorStop(0.36, "rgba(0,0,0,0.05)");
+        topShade.addColorStop(0.74, "rgba(0,0,0,0.38)");
+        topShade.addColorStop(1, "rgba(0,0,0,0.92)");
+        ctx.fillStyle = topShade;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.fillStyle = "rgba(0,0,0,0.16)";
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.save();
+        ctx.translate(76, 62);
+        ctx.fillStyle = "rgba(125, 0, 10, 0.72)";
+        roundRect(0, 0, 58, 238, 7);
+        ctx.fill();
+        ctx.translate(42, 218);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillStyle = "white";
+        ctx.font = "700 28px Arial";
+        ctx.fillText("NovoAlvo News", 0, 0);
+        ctx.restore();
+
+        ctx.save();
+        ctx.globalAlpha = 0.45;
+        ctx.strokeStyle = "#e50914";
+        ctx.lineWidth = 3;
+        for (let i = 0; i < 5; i++) {
+          ctx.beginPath();
+          ctx.arc(126, 94, 54 + i * 28 + pulse * 6, Math.PI * 1.08, Math.PI * 1.94);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        drawLogoMark(84, 336, 48);
+        ctx.fillStyle = "rgba(229,9,20,0.92)";
+        ctx.font = "900 34px Arial";
+        ctx.fillText("@novoalvo", 128, 348);
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "900 51px Arial";
+        const titleLines = wrapText(scene.headline, 930, ctx.font).slice(0, 5);
+        const baseY = 1390 + (1 - reveal) * 42;
+        titleLines.forEach((line, index) => {
+          ctx.fillText(line, 58, baseY + index * 57);
+        });
+
+        ctx.fillStyle = "rgba(255,255,255,0.82)";
+        ctx.font = "700 28px Arial";
+        wrapText(scene.caption, 890, ctx.font)
+          .slice(0, 2)
+          .forEach((line, index) => {
+            ctx.fillText(line, 58, baseY + titleLines.length * 57 + 36 + index * 38);
+          });
+
+        ctx.fillStyle = "rgba(255,255,255,0.22)";
+        roundRect(58, 1800, 760, 8, 4);
+        ctx.fill();
+        ctx.fillStyle = "#e50914";
+        roundRect(58, 1800, 760 * (ms / durationMs), 8, 4);
+        ctx.fill();
+
+        ctx.fillStyle = "rgba(255,255,255,0.74)";
+        ctx.font = "900 18px Arial";
+        ctx.fillText(`${scene.strap.toUpperCase()} • PORTALNOVOALVO.COM.BR`, 58, 1844);
+      }
+
+      let raf;
+      function preview() {
+        cancelAnimationFrame(raf);
+        const start = performance.now();
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(narration);
+          utterance.lang = "pt-BR";
+          utterance.rate = 1.05;
+          utterance.pitch = 0.92;
+          window.speechSynthesis.speak(utterance);
+        }
+        function tick(now) {
+          drawFrame((now - start) % durationMs);
+          raf = requestAnimationFrame(tick);
+        }
+        raf = requestAnimationFrame(tick);
+        log.textContent = "Prévia rodando com narração do navegador.";
+      }
+
+      function record() {
+        cancelAnimationFrame(raf);
+        if (!("MediaRecorder" in window)) {
+          log.textContent = "Este navegador não suporta exportação por MediaRecorder.";
+          return;
+        }
+
+        const stream = canvas.captureStream(30);
+        const chunks = [];
+        const recorder = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9" });
+        recorder.ondataavailable = (event) => event.data.size && chunks.push(event.data);
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: "video/webm" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "novo-alvo-short-congresso.webm";
+          link.click();
+          URL.revokeObjectURL(url);
+          log.textContent = "WebM exportado. Para publicar no TikTok, converta para MP4 se necessário.";
+        };
+
+        recorder.start();
+        const start = performance.now();
+        log.textContent = "Gravando WebM visual...";
+        function tick(now) {
+          const ms = now - start;
+          drawFrame(Math.min(ms, durationMs - 1));
+          if (ms < durationMs) {
+            raf = requestAnimationFrame(tick);
+          } else {
+            recorder.stop();
+          }
+        }
+        raf = requestAnimationFrame(tick);
+      }
+
+      articleImage.onload = () => {
+        drawFrame(0);
+        log.textContent = "Imagem real da matéria carregada.";
+      };
+      articleImage.onerror = () => {
+        drawFrame(0);
+        log.textContent = "Imagem externa não carregou; usando fundo visual de segurança.";
+      };
+
+      document.querySelector("#previewBtn").addEventListener("click", preview);
+      document.querySelector("#recordBtn").addEventListener("click", record);
+      drawFrame(0);
+    </script>
+  </body>
+</html>

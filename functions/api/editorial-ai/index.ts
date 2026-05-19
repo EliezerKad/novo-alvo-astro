@@ -1,5 +1,5 @@
-import { DEFAULT_GEMINI_MODEL, runGeminiJson } from '../lib/gemini';
-import { DEFAULT_GROQ_MODEL, runGroqJson } from '../lib/groq';
+import { DEFAULT_GEMINI_MODEL, runGeminiJson } from '../../lib/gemini';
+import { DEFAULT_GROQ_MODEL, runGroqJson } from '../../lib/groq';
 
 const WORKERS_AI_MODEL = '@cf/meta/llama-3.1-8b-instruct';
 
