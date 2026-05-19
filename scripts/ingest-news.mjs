@@ -212,7 +212,7 @@ const CATEGORY_MAX_ITEM_AGE_HOURS = Number(process.env.CATEGORY_MAX_ITEM_AGE_HOU
 const ACTIVE_ITEM_AGE_HOURS = IS_CATEGORY_MODE ? Math.max(MAX_ITEM_AGE_HOURS, CATEGORY_MAX_ITEM_AGE_HOURS) : MAX_ITEM_AGE_HOURS;
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
 const ACTIVE_FLOOR_MIN_SOURCES = IS_CATEGORY_MODE ? Math.max(ABSOLUTE_MIN_SOURCES, Math.min(ACTIVE_MIN_SOURCES, CATEGORY_FLOOR_MIN_SOURCES)) : ACTIVE_MIN_SOURCES;
-const ENABLE_COVERAGE_FLOOR = String(process.env.ENABLE_COVERAGE_FLOOR || '0') === '1';
+const ENABLE_COVERAGE_FLOOR = String(process.env.ENABLE_COVERAGE_FLOOR || (IS_CATEGORY_MODE ? '1' : '0')) === '1';
 const STRICT_TOPIC_CLUSTERING = String(process.env.STRICT_TOPIC_CLUSTERING || '1') !== '0';
 const GOOGLE_SEARCH_FATAL_PATTERNS =
   /does not have the access to custom search json api|accessnotconfigured|api has not been used|disabled|permission denied/i;
@@ -617,6 +617,49 @@ const coherentClusterItems = (items, minSources = ACTIVE_MIN_SOURCES) => {
   return selected;
 };
 
+const relaxedCategoryClusterItems = (items, minSources = ACTIVE_MIN_SOURCES) => {
+  const distinct = distinctBySource(items).filter((item) => !isGenericEditorialItem(item));
+  if (distinct.length < minSources) return [];
+
+  const lead = selectLeadItem(distinct);
+  const leadProfile = itemTopicProfile(lead);
+  if (!hasConcreteTopicSignal(leadProfile)) return [];
+
+  const ranked = distinct
+    .map((item) => {
+      const profile = itemTopicProfile(item);
+      const sharedEntities = sharedCount(leadProfile.entities, profile.entitySet);
+      const sharedTokens = sharedCount(leadProfile.tokens, profile.tokenSet);
+      const sharedActions = sharedCount(leadProfile.actions, profile.actionSet);
+      const overlap = overlapScore(lead, item);
+      const affinity = item === lead ? 999 : sharedEntities * 0.5 + sharedActions * 0.22 + sharedTokens * 0.12 + overlap;
+      return { item, profile, affinity, sharedEntities, sharedTokens, sharedActions, overlap };
+    })
+    .filter(({ item, sharedEntities, sharedTokens, sharedActions, overlap }) => {
+      if (item === lead) return true;
+      return sharedEntities > 0 || sharedActions > 0 || sharedTokens >= 2 || overlap >= 0.22;
+    })
+    .sort((a, b) => b.affinity - a.affinity);
+
+  if (ranked.length < minSources) return [];
+
+  const selected = ranked.slice(0, Math.max(minSources, SOURCE_EXPANSION_TARGET)).map(({ item }) => item);
+  const selectedProfiles = selected.map(itemTopicProfile);
+  const sharedEntityCount = new Map();
+  const sharedTokenCount = new Map();
+
+  for (const profile of selectedProfiles) {
+    for (const entity of profile.entities) sharedEntityCount.set(entity, (sharedEntityCount.get(entity) || 0) + 1);
+    for (const token of profile.tokens) sharedTokenCount.set(token, (sharedTokenCount.get(token) || 0) + 1);
+  }
+
+  const hasTopicAnchor =
+    [...sharedEntityCount.values()].some((count) => count >= 2) ||
+    [...sharedTokenCount.values()].filter((count) => count >= Math.max(2, Math.ceil(minSources * 0.25))).length >= 2;
+
+  return hasTopicAnchor ? selected : [];
+};
+
 const FOOTBALL_CONTEXT_PATTERN =
   /\b(futebol|brasileirao|serie\s?[abcd]|copa do brasil|copa do mundo|libertadores|sul-americana|selecao|neymar|ancelotti|corinthians|flamengo|fluminense|palmeiras|sao paulo|santos|vasco|botafogo|gremio|internacional|cruzeiro|atletico|bahia|fortaleza|guarani|mirassol|santa cruz|diniz|luxemburgo|tecnico|treinador|vitoria|derrota|clube|time|estadio|rodada|classificacao|oitavas|quartas|semifinal|final)\b/i;
 
@@ -933,14 +976,16 @@ const buildCategoryFloorPitches = (
       const batchSize = Math.max(1, minSources);
       const batches = [];
       for (let index = 0; index < categoryItems.length && batches.length < perCategoryLimit; index += batchSize) {
-        const batch = coherentClusterItems(categoryItems.slice(index, index + batchSize * 2), minSources);
-        if (batch.length < minSources) continue;
-        const pitch = buildPitch(batch.map((item) => ({ ...item, radarCluster: true, coverageFloor: true, lowCoverage: minSources < ACTIVE_MIN_SOURCES })));
+        const slice = categoryItems.slice(index, index + batchSize * 3);
+        const batch = coherentClusterItems(slice, minSources);
+        const fallbackBatch = batch.length >= minSources ? batch : relaxedCategoryClusterItems(slice, minSources);
+        if (fallbackBatch.length < minSources) continue;
+        const pitch = buildPitch(fallbackBatch.map((item) => ({ ...item, radarCluster: true, coverageFloor: true, lowCoverage: minSources < ACTIVE_MIN_SOURCES })));
         batches.push({
           ...pitch,
-          clusterKey: `${slugify(category)}:coverage:${slugify(batch[0].title)}`,
-          sourceCount: batch.length,
-          score: Math.min(minSources < 3 ? 690 : 780, 520 + batch.length * 35 + pitch.tags.length * 6),
+          clusterKey: `${slugify(category)}:coverage:${slugify(fallbackBatch[0].title)}`,
+          sourceCount: fallbackBatch.length,
+          score: Math.min(minSources < 3 ? 690 : 780, 520 + fallbackBatch.length * 35 + pitch.tags.length * 6),
           summary:
             minSources < 3
               ? `Sinal inicial da editoria ${category}. A pauta ainda tem cobertura pequena, mas pode render nota curta se houver fato concreto, agente identificado e consequencia util.`
