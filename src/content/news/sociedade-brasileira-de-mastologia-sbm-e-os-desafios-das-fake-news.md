@@ -7,11 +7,11 @@ category: "Brasil"
 author: "Redação Novo Alvo"
 sources: ["CartaCapital", "o progresso", "Estadão", "Francês News", "A Hora do Sul", "ABC Repórter", "Âncora 1", "radiomaringa.com.br", "MidiaNews", "O NORTÃO", "LUSA", "Fala Regional", "Saiba Mais", "O Globo"]
 publishedAt: "2026-05-18T02:34:44.189Z"
-updatedAt: "2026-05-18T02:34:44.201Z"
+updatedAt: "2026-05-19T23:35:15.440Z"
 featured: false
 isFeatured: false
 urgent: false
-homeSection: "now"
+homeSection: ""
 views: 0
 cover:
   src: "https://portalnovoalvo.com.br/uploads/news/sociedade-brasileira-de-mastologia-sbm-e-os-desafios-das-fake-news-cover.avif"
