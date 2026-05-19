@@ -2,12 +2,12 @@
 title: "Google Gemini Omni revoluciona edição de vídeos com IA conversacional"
 slug: "google-anuncia-gemini-omni-para-criacao-e-edicao-de-videos"
 summary: "Nova ferramenta Gemini Omni do Google permite criar e editar vídeos através de comandos de voz, prometendo transformar a produção de conteúdo audiovisual."
-seoDescription: "Economia: Nova ferramenta Gemini Omni do Google permite criar e editar vídeos através de comandos de voz, prometendo transformar a produção de conteúdo…"
-category: "Economia"
+seoDescription: "Tecnologia: Nova ferramenta Gemini Omni do Google permite criar e editar vídeos através de comandos de voz, prometendo transformar a produção de conteúdo…"
+category: "Tecnologia"
 author: "Redação Novo Alvo"
 sources: ["News Rondônia", "Termômetro da Política", "Terra", "Estadão", "Valor Econômico", "G1", "CNN Brasil", "InvestNews", "O Globo", "Mix Vale", "Canaltech"]
 publishedAt: "2026-05-19T22:21:28.819Z"
-updatedAt: "2026-05-19T22:21:29.012Z"
+updatedAt: "2026-05-19T23:42:53.105Z"
 featured: false
 isFeatured: false
 urgent: false
