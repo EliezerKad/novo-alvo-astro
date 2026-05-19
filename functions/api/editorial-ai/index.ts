@@ -254,61 +254,75 @@ export const onRequestPost = async ({
 
   try {
     let model = env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
-    let rawResult: Record<string, unknown>;
+    let rawResult: Record<string, unknown> | null = null;
     const provider = clip(env.EDITORIAL_AI_PROVIDER, 24).toLowerCase();
+    const errors: string[] = [];
 
-  if (provider === 'groq' && env.GROQ_API_KEY) {
-    const groq = await runGroqJson({
-      apiKey: env.GROQ_API_KEY,
-      model: env.GROQ_MODEL || DEFAULT_GROQ_MODEL,
-      system:
-        'Voce e um editor-chefe de um portal de noticias brasileiro. Escreva sempre em portugues do Brasil, com acentos, cedilha e pontuacao corretos. Responda somente JSON valido.',
-      prompt: buildPrompt(payload),
-      maxOutputTokens: 900,
-      temperature: 0.42,
-    });
-    model = groq.model;
-    rawResult = groq.result;
-  } else if (env.GEMINI_API_KEY) {
-    const gemini = await runGeminiJson({
-      apiKey: env.GEMINI_API_KEY,
-      model,
-      system:
-        'Você é um editor-chefe de um portal de notícias brasileiro. Escreva sempre em português do Brasil, com acentos, cedilha e pontuação corretos. Responda somente JSON válido.',
-      prompt: buildPrompt(payload),
-      maxOutputTokens: 800,
-      temperature: 0.45,
-    });
-    model = gemini.model;
-    rawResult = gemini.result;
-  } else if (env.GROQ_API_KEY) {
-    const groq = await runGroqJson({
-      apiKey: env.GROQ_API_KEY,
-      model: env.GROQ_MODEL || DEFAULT_GROQ_MODEL,
-      system:
-        'Voce e um editor-chefe de um portal de noticias brasileiro. Escreva sempre em portugues do Brasil, com acentos, cedilha e pontuacao corretos. Responda somente JSON valido.',
-      prompt: buildPrompt(payload),
-      maxOutputTokens: 900,
-      temperature: 0.42,
-    });
-    model = groq.model;
-    rawResult = groq.result;
-  } else {
-    const response = await env.AI!.run(WORKERS_AI_MODEL, {
-      messages: [
-        {
-          role: 'system',
-          content:
-            'Você é um editor-chefe de um portal de notícias brasileiro. Escreva sempre em português do Brasil, com acentos, cedilha e pontuação corretos. Responda somente JSON válido.',
-        },
-        { role: 'user', content: buildPrompt(payload) },
-      ],
-      max_tokens: 650,
-      temperature: 0.45,
-    });
-    model = WORKERS_AI_MODEL;
-    rawResult = parseModelJson(extractText(response));
-  }
+    const runGroq = async () => {
+      const groq = await runGroqJson({
+        apiKey: env.GROQ_API_KEY,
+        model: env.GROQ_MODEL || DEFAULT_GROQ_MODEL,
+        system:
+          'Voce e um editor-chefe de um portal de noticias brasileiro. Escreva sempre em portugues do Brasil, com acentos, cedilha e pontuacao corretos. Responda somente JSON valido.',
+        prompt: buildPrompt(payload),
+        maxOutputTokens: 900,
+        temperature: 0.42,
+        timeoutMs: 12000,
+      });
+      model = groq.model;
+      rawResult = groq.result;
+    };
+
+    const runGemini = async () => {
+      const gemini = await runGeminiJson({
+        apiKey: env.GEMINI_API_KEY,
+        model,
+        system:
+          'Você é um editor-chefe de um portal de notícias brasileiro. Escreva sempre em português do Brasil, com acentos, cedilha e pontuação corretos. Responda somente JSON válido.',
+        prompt: buildPrompt(payload),
+        maxOutputTokens: 800,
+        temperature: 0.45,
+        timeoutMs: 12000,
+      });
+      model = gemini.model;
+      rawResult = gemini.result;
+    };
+
+    const runWorkersAi = async () => {
+      const response = await env.AI!.run(WORKERS_AI_MODEL, {
+        messages: [
+          {
+            role: 'system',
+            content:
+              'Você é um editor-chefe de um portal de notícias brasileiro. Escreva sempre em português do Brasil, com acentos, cedilha e pontuação corretos. Responda somente JSON válido.',
+          },
+          { role: 'user', content: buildPrompt(payload) },
+        ],
+        max_tokens: 650,
+        temperature: 0.45,
+      });
+      model = WORKERS_AI_MODEL;
+      rawResult = parseModelJson(extractText(response));
+    };
+
+    const attempt = async (name: string, runner: () => Promise<void>) => {
+      if (rawResult) return;
+      try {
+        await runner();
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'falha desconhecida';
+        errors.push(`${name}: ${message}`);
+      }
+    };
+
+    if (provider === 'groq' && env.GROQ_API_KEY) await attempt('groq', runGroq);
+    if (env.GEMINI_API_KEY) await attempt('gemini', runGemini);
+    if (provider !== 'groq' && env.GROQ_API_KEY) await attempt('groq', runGroq);
+    if (env.AI) await attempt('workers-ai', runWorkersAi);
+
+    if (!rawResult) {
+      throw new Error(errors.join(' | ') || 'Nenhum provedor de IA retornou resultado.');
+    }
 
     return json({
       action: payload.action,

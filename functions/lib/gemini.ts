@@ -46,6 +46,7 @@ export async function runGeminiJson({
   prompt,
   maxOutputTokens = 900,
   temperature = 0.35,
+  timeoutMs = 15000,
 }: {
   apiKey?: string;
   model?: string;
@@ -53,6 +54,7 @@ export async function runGeminiJson({
   prompt: string;
   maxOutputTokens?: number;
   temperature?: number;
+  timeoutMs?: number;
 }) {
   const key = String(apiKey || '').trim();
   if (!key) throw new Error('GEMINI_API_KEY nao configurada.');
@@ -62,32 +64,46 @@ export async function runGeminiJson({
 
   let lastError = '';
   for (const modelName of models) {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelName)}:generateContent`,
-      {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'x-goog-api-key': key,
-        },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: system }],
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    let response: Response;
+    try {
+      response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelName)}:generateContent`,
+        {
+          method: 'POST',
+          signal: controller.signal,
+          headers: {
+            'content-type': 'application/json',
+            'x-goog-api-key': key,
           },
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: prompt }],
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: system }],
             },
-          ],
-          generationConfig: {
-            temperature,
-            maxOutputTokens,
-            responseMimeType: 'application/json',
-          },
-        }),
-      },
-    );
+            contents: [
+              {
+                role: 'user',
+                parts: [{ text: prompt }],
+              },
+            ],
+            generationConfig: {
+              temperature,
+              maxOutputTokens,
+              responseMimeType: 'application/json',
+            },
+          }),
+        },
+      );
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        lastError = `${modelName} excedeu ${Math.round(timeoutMs / 1000)}s.`;
+        continue;
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
 
     const data = (await response.json().catch(() => ({}))) as GeminiResponse;
     if (!response.ok) {
