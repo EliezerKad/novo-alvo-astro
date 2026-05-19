@@ -1,13 +1,13 @@
 ---
 title: "Impasse: Irã responde EUA, Trump rejeita proposta de paz"
 slug: "ira-apresenta-resposta-a-proposta-mais-recente-dos-eua-sobre-a-guerra"
-summary: "O Irã apresentou sua resposta à proposta dos Estados Unidos para desescalar tensões, mas o governo de Donald Trump rejeitou o plano, aprofundando o impasse diplomático."
-seoDescription: "Mundo: O Irã apresentou sua resposta à proposta dos Estados Unidos para desescalar tensões, mas o governo de Donald Trump rejeitou o plano, aprofundando o…"
+summary: ""
+seoDescription: "Mundo: O Irã entregou sua resposta formal à proposta mais recente dos Estados Unidos, visando a desescalada das tensões."
 category: "Mundo"
 author: "Redação Novo Alvo"
 sources: ["CartaCapital", "band.com.br", "SpaceMoney", "G1", "Agência Brasil", "CBN", "noticiasdoplanalto.com.br", "Opera Mundi", "Gazeta do Povo"]
-publishedAt: "2026-05-19T00:07:46.794Z"
-updatedAt: "2026-05-19T00:07:46.958Z"
+publishedAt: "2026-05-19T01:39:57.708Z"
+updatedAt: "2026-05-19T01:39:58.008Z"
 featured: true
 isFeatured: false
 urgent: false
