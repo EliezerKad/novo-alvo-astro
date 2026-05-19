@@ -458,7 +458,143 @@ const decodeHtmlEntities = (value: string) =>
 const textFromHtmlFragment = (value: unknown, max = 2000) =>
   decodeHtmlEntities(plain(value, max));
 
+const isGoogleNewsUrl = (value: unknown) => {
+  try {
+    const url = new URL(clean(value, 1400));
+    return /(^|\.)news\.google\./i.test(url.hostname) && /\/(?:rss\/)?(?:articles|read)\//i.test(url.pathname);
+  } catch {
+    return false;
+  }
+};
+
+const googleNewsArticleId = (value: unknown) => {
+  try {
+    const url = new URL(clean(value, 1400));
+    if (!/(^|\.)news\.google\./i.test(url.hostname)) return '';
+    return (url.pathname.split('/').filter(Boolean).pop() || '').replace(/[^A-Za-z0-9_-]/g, '');
+  } catch {
+    return '';
+  }
+};
+
+const fetchTextWithTimeout = async (url: string, options: RequestInit = {}, timeoutMs = 6500) => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, {
+      ...options,
+      redirect: options.redirect || 'follow',
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
+const googleNewsDecodePayload = (html: string) => {
+  const dataP = html.match(/<c-wiz\b[^>]*\bdata-p=["']([^"']+)["']/i)?.[1] || '';
+  if (!dataP) return '';
+  try {
+    const params = JSON.parse(decodeHtmlEntities(dataP).replace('%.@.', '["garturlreq",'));
+    if (!Array.isArray(params) || params.length < 5) return '';
+    return JSON.stringify([[['Fbv4je', JSON.stringify([params[0], params[2], params[1], params[params.length - 2], params[params.length - 1]]), 'null', 'generic']]]);
+  } catch {
+    return '';
+  }
+};
+
+const parseGoogleNewsDecodedUrl = (value: string) => {
+  const line = value
+    .split('\n')
+    .map((item) => item.trim())
+    .find((item) => item.startsWith('[') && item.includes('http'));
+  if (!line) return '';
+  try {
+    const outer = JSON.parse(line);
+    const inner = JSON.parse(outer?.[0]?.[2] || '[]');
+    const decoded = inner?.[1] || inner?.[0]?.[1] || '';
+    return /^https?:\/\//i.test(decoded) ? decoded : '';
+  } catch {
+    const match = line.match(/https?:\/\/[^"\\]+/i);
+    return match ? match[0].replace(/\\u003d/g, '=').replace(/\\u0026/g, '&') : '';
+  }
+};
+
+const decodeGoogleNewsUrl = async (value: string) => {
+  const id = googleNewsArticleId(value);
+  if (!id) return '';
+
+  for (const path of [`https://news.google.com/articles/${id}`, `https://news.google.com/rss/articles/${id}`]) {
+    try {
+      const response = await fetchTextWithTimeout(
+        path,
+        {
+          headers: {
+            accept: 'text/html,application/xhtml+xml',
+            'accept-language': 'pt-BR,pt;q=0.9,en;q=0.6',
+            'user-agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) PortalNovoAlvo/1.0 Safari/537.36',
+          },
+        },
+        6500,
+      );
+      const payload = googleNewsDecodePayload(await response.text());
+      if (!payload) continue;
+
+      const decodedResponse = await fetchTextWithTimeout(
+        'https://news.google.com/_/DotsSplashUi/data/batchexecute?rpcids=Fbv4je',
+        {
+          method: 'POST',
+          headers: {
+            accept: '*/*',
+            'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            referer: 'https://news.google.com/',
+            'user-agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) PortalNovoAlvo/1.0 Safari/537.36',
+          },
+          body: new URLSearchParams({ 'f.req': payload }),
+        },
+        6500,
+      );
+      if (!decodedResponse.ok) continue;
+      const decoded = parseGoogleNewsDecodedUrl(await decodedResponse.text());
+      if (decoded && !isGoogleNewsUrl(decoded)) return decoded;
+    } catch {}
+  }
+
+  return '';
+};
+
+const extractJsonLdArticleText = (html: string) => {
+  const blocks = html.match(/<script[^>]+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi) || [];
+  const values: string[] = [];
+  const pushArticleFields = (item: unknown) => {
+    if (!item || typeof item !== 'object') return;
+    const record = item as Record<string, unknown>;
+    const type = Array.isArray(record['@type']) ? record['@type'].join(' ') : String(record['@type'] || '');
+    if (/NewsArticle|Article|ReportageNewsArticle|BlogPosting/i.test(type)) {
+      values.push(plain(record.headline, 300), plain(record.description, 900), plain(record.articleBody, 5000));
+    }
+    for (const nested of Object.values(record)) {
+      if (Array.isArray(nested)) nested.forEach(pushArticleFields);
+      else if (nested && typeof nested === 'object') pushArticleFields(nested);
+    }
+  };
+
+  for (const block of blocks.slice(0, 12)) {
+    const raw = decodeHtmlEntities(block.replace(/^<script[^>]*>/i, '').replace(/<\/script>$/i, '').trim());
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) parsed.forEach(pushArticleFields);
+      else pushArticleFields(parsed);
+    } catch {}
+  }
+
+  return values.filter(Boolean).join(' ');
+};
+
 const extractArticleTextFromHtml = (html: string) => {
+  const structured = extractJsonLdArticleText(html);
   const withoutNoise = html
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style>/gi, ' ')
@@ -467,47 +603,73 @@ const extractArticleTextFromHtml = (html: string) => {
 
   const articleMatch = withoutNoise.match(/<article\b[^>]*>([\s\S]*?)<\/article>/i);
   const mainMatch = withoutNoise.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i);
-  const source = articleMatch?.[1] || mainMatch?.[1] || withoutNoise;
+  const classMatch = withoutNoise.match(/<div\b[^>]+class=["'][^"']*(?:post-content|entry-content|article-content|content-text|materia|noticia|news-content)[^"']*["'][^>]*>([\s\S]*?)<\/div>/i);
+  const source = articleMatch?.[1] || classMatch?.[1] || mainMatch?.[1] || withoutNoise;
   const paragraphs = [...source.matchAll(/<(?:p|h1|h2|h3|li)\b[^>]*>([\s\S]*?)<\/(?:p|h1|h2|h3|li)>/gi)]
     .map((match) => decodeHtmlEntities(plain(match[1], 1200)))
     .filter((text) => text.length > 55)
     .filter((text) => !/(cookies?|newsletter|publicidade|assine|compartilhe|leia tamb[eé]m|todos os direitos|clique aqui)/i.test(text));
 
-  const text = paragraphs.length >= 2 ? paragraphs.join(' ') : decodeHtmlEntities(plain(source, 9000));
+  const text = [structured, paragraphs.length >= 2 ? paragraphs.join(' ') : decodeHtmlEntities(plain(source, 9000))]
+    .filter(Boolean)
+    .join(' ');
   const compact = text.replace(/\s+/g, ' ').trim();
-  return compact.length >= 320 ? clipWholeWord(compact, 1800) : '';
+  return compact.length >= 320 ? clipWholeWord(compact, 2800) : '';
+};
+
+const sourceArticleUrls = async (record: Record<string, unknown>) => {
+  const rawUrls = [record.primaryUrl, record.originalUrl, record.url, record.link, record.href, record.sourceUrl]
+    .map((value) => clean(value, 1400))
+    .filter((value, index, list) => /^https?:\/\//i.test(value) && list.indexOf(value) === index);
+
+  const urls: string[] = [];
+  for (const url of rawUrls) {
+    if (isGoogleNewsUrl(url)) {
+      const decoded = await decodeGoogleNewsUrl(url);
+      if (decoded) urls.push(decoded);
+    }
+    urls.push(url);
+  }
+  return urls.filter((url, index, list) => list.indexOf(url) === index);
 };
 
 const fetchSourceExcerpt = async (source: unknown) => {
   if (!source || typeof source !== 'object') return source;
   const record = source as Record<string, unknown>;
   if (plain(record.excerpt, 400).length >= 260) return record;
-  const url = clean(record.sourceUrl || record.url, 1200);
-  if (!/^https?:\/\//i.test(url)) return record;
+  const urls = await sourceArticleUrls(record);
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5500);
-  try {
-    const response = await fetch(url, {
-      redirect: 'follow',
-      signal: controller.signal,
-      headers: {
-        accept: 'text/html,application/xhtml+xml',
-        'user-agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) PortalNovoAlvo/1.0 Safari/537.36',
-      },
-    });
-    if (!response.ok) return record;
-    const contentType = response.headers.get('content-type') || '';
-    if (!/html|text/i.test(contentType)) return record;
-    const html = await response.text();
-    const excerpt = extractArticleTextFromHtml(html);
-    return excerpt ? { ...record, excerpt } : record;
-  } catch {
-    return record;
-  } finally {
-    clearTimeout(timeout);
+  for (const url of urls) {
+    if (isGoogleNewsUrl(url)) continue;
+    try {
+      const response = await fetchTextWithTimeout(
+        url,
+        {
+          headers: {
+            accept: 'text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8',
+            'accept-language': 'pt-BR,pt;q=0.9,en;q=0.6',
+            'user-agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) PortalNovoAlvo/1.0 Safari/537.36',
+          },
+        },
+        8000,
+      );
+      if (!response.ok) continue;
+      const contentType = response.headers.get('content-type') || '';
+      if (!/html|text/i.test(contentType)) continue;
+      const html = await response.text();
+      const excerpt = extractArticleTextFromHtml(html);
+      if (excerpt) {
+        return {
+          ...record,
+          excerpt,
+          resolvedUrl: response.url && !isGoogleNewsUrl(response.url) ? response.url : url,
+        };
+      }
+    } catch {}
   }
+
+  return record;
 };
 
 const enrichSourcesWithText = async (sources: unknown[]) => {
