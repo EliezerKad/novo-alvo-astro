@@ -6,19 +6,19 @@ seoDescription: "Games: MARVEL Cosmic Invasion recebe um novo DLC com os persona
 category: "Games"
 author: "Redação Novo Alvo"
 sources: ["Pizza Fria", "MeuPlayStation", "Última Ficha", "GameVicio", "Universo Nintendo", "Gamers & Games", "gamehall.com.br", "Portal Tela", "Terra", "Adrenaline"]
-publishedAt: "2026-05-19T02:27:25.505Z"
-updatedAt: "2026-05-19T02:27:25.785Z"
+publishedAt: "2026-05-19T02:32:08.975Z"
+updatedAt: "2026-05-19T02:32:09.351Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/marvel-cosmic-invasion-recebe-novo-dlc-com-ciclope-e-o-coisa-cover.jpg"
+  src: "https://www.portalnovoalvo.com.br/media/news/marvel-cosmic-invasion-recebe-novo-dlc-com-ciclope-e-o-coisa-cover.webp"
   alt: "MARVEL Cosmic Invasion recebe novo DLC com Ciclope e O Coisa"
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/marvel-cosmic-invasion-recebe-novo-dlc-com-ciclope-e-o-coisa-cover.jpg"
+ogImage: "https://www.portalnovoalvo.com.br/media/news/marvel-cosmic-invasion-recebe-novo-dlc-com-ciclope-e-o-coisa-cover.webp"
 tags: ["games", "marvel", "cosmic", "invasion", "recebe", "novo", "ciclope", "coisa"]
 ---
 
