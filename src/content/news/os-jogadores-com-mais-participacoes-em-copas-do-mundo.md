@@ -7,11 +7,11 @@ category: "Futebol"
 author: "Redação Novo Alvo"
 sources: ["Revista PLACAR", "Lance!", "band.com.br", "Diário do Comércio", "SBT Sports", "O POVO", "UOL", "O Liberal"]
 publishedAt: "2026-05-17T04:44:47.964Z"
-updatedAt: "2026-05-17T04:44:48.353Z"
+updatedAt: "2026-05-19T23:35:37.856Z"
 featured: false
 isFeatured: false
 urgent: false
-homeSection: "now"
+homeSection: ""
 views: 0
 cover:
   src: "https://www.portalnovoalvo.com.br/media/news/os-jogadores-com-mais-participacoes-em-copas-do-mundo-cover.jpg"
