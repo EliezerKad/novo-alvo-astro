@@ -618,7 +618,7 @@ const extractArticleTextFromHtml = (html: string) => {
 };
 
 const sourceArticleUrls = async (record: Record<string, unknown>) => {
-  const rawUrls = [record.primaryUrl, record.originalUrl, record.url, record.link, record.href, record.sourceUrl]
+  const rawUrls = [record.primaryUrl, record.originalUrl, record.url, record.link, record.href]
     .map((value) => clean(value, 1400))
     .filter((value, index, list) => /^https?:\/\//i.test(value) && list.indexOf(value) === index);
 
@@ -626,11 +626,12 @@ const sourceArticleUrls = async (record: Record<string, unknown>) => {
   for (const url of rawUrls) {
     if (isGoogleNewsUrl(url)) {
       const decoded = await decodeGoogleNewsUrl(url);
-      if (decoded) urls.push(decoded);
+      if (decoded) return [decoded];
+      continue;
     }
-    urls.push(url);
+    return [url];
   }
-  return urls.filter((url, index, list) => list.indexOf(url) === index);
+  return urls;
 };
 
 const fetchSourceExcerpt = async (source: unknown) => {
@@ -672,9 +673,22 @@ const fetchSourceExcerpt = async (source: unknown) => {
   return record;
 };
 
+const hasUsefulExcerpt = (source: unknown) =>
+  !!source &&
+  typeof source === 'object' &&
+  plain((source as Record<string, unknown>).excerpt, 1200).length >= 500;
+
 const enrichSourcesWithText = async (sources: unknown[]) => {
-  const enriched = await Promise.all(sources.slice(0, 8).map((source) => fetchSourceExcerpt(source)));
-  return [...enriched, ...sources.slice(8)];
+  const enriched = [...sources];
+  let usefulExcerpts = 0;
+
+  for (let index = 0; index < Math.min(4, sources.length); index += 1) {
+    enriched[index] = await fetchSourceExcerpt(sources[index]);
+    if (hasUsefulExcerpt(enriched[index])) usefulExcerpts += 1;
+    if (usefulExcerpts >= 3) break;
+  }
+
+  return enriched;
 };
 
 const sourceEvidenceText = (record: Record<string, unknown>) =>
