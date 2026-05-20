@@ -535,10 +535,10 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       pitch.keywords,
       pitch.internalLinks,
       pitch.imageCandidates,
-      shouldReopenReviewed ? 1 : 0,
       pitch.score,
       pitch.expiresAt,
       pitch.updatedAt,
+      shouldReopenReviewed ? 1 : 0,
     )
       .run();
 
