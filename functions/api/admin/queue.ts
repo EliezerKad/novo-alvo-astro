@@ -800,10 +800,14 @@ const requiredNamesFromSources = (sources: unknown[], row: QueueRow) => {
     const start = Math.max(0, match.index - 180);
     const end = Math.min(text.length, match.index + name.length + 220);
     const context = text.slice(start, end);
+    const normalizedContext = normalizeForPresence(context);
     let score = 0;
     if (new RegExp(`${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*,\\s*\\d{1,3}\\b`).test(context)) score += 6;
     if (/\b(morreu|morta|morto|vitima|vítima|jovem|filha|mae|mãe|atingida|atropelad[ao]s?|ferid[ao]s?)\b/i.test(context)) score += 4;
     if (/\b(investiga|policia|polícia|acidente|van|cal[cç]ada|hospital|sepultamento)\b/i.test(context)) score += 1;
+    if (/\b(?:atriz|ator|artista|elenco|papel|personagem|interpreta|interpretava|vive|vivia|serie|temporada|hbo|harry potter|gina weasley)\b/i.test(normalizedContext)) score += 5;
+    if (/\b(?:deixou|saiu|substituida|substituido|retornar|gravacoes|producao|emissora|variety)\b/i.test(normalizedContext)) score += 2;
+    if (/\b(?:atriz|ator|jovem|mirim)\b.{0,80}\b\d{1,2}\b|\b\d{1,2}\b.{0,80}\b(?:atriz|ator|jovem|mirim)\b/i.test(normalizedContext)) score += 3;
     if (/\b(rua|ruas|avenida|esquina|bairro|zona sul)\b/i.test(context)) score -= 4;
     if (score < 5) continue;
     const current = scored.get(key);
@@ -910,6 +914,20 @@ const hasUnknownCentralEntity = (value: unknown) =>
   /\b(?:atriz|ator|jogador|jogadora|cantor|cantora|influenciador|influenciadora|empres[aá]rio|empres[aá]ria|pol[ií]tico|pol[ií]tica|v[ií]tima|suspeito|suspeita|homem|mulher|jovem|adolescente|crian[cç]a)\s+n[aã]o\s+identificad[ao]s?\b/i.test(
     plain(value, 9000),
   );
+
+const hasEntityIdentityGap = (value: unknown) => {
+  const text = ` ${normalizeForPresence(plain(value, 12000))} `;
+  const entity =
+    '(?:atriz|ator|artista|jogador|jogadora|cantor|cantora|influenciador|influenciadora|empresario|empresaria|politico|politica|vitima|suspeito|suspeita|homem|mulher|jovem|adolescente|crianca|pessoa|personagem)';
+  const unknown =
+    '(?:nao\\s+(?:identificad[ao]s?|nomead[ao]s?|divulgad[ao]s?|informad[ao]s?|revelad[ao]s?|citad[ao]s?)|sem\\s+nome)';
+  const direct = new RegExp(`\\b${entity}\\s*(?:central\\s*)?${unknown}\\b`, 'i');
+  const after = new RegExp(`\\b${entity}\\b[^.!?]{0,120}\\b(?:nome\\s+)?${unknown}\\b`, 'i');
+  const possessive = /\bcujo\s+nome\s+nao\s+(?:foi\s+)?(?:divulgado|informado|revelado|citado|nomeado)\b/i;
+  const sourceGap =
+    /\bnome\s+nao\s+(?:foi\s+)?(?:divulgado|informado|revelado|citado|nomeado)\s+(?:pelas|nas|entre\s+as)\s+fontes\b/i;
+  return direct.test(text) || after.test(text) || possessive.test(text) || sourceGap.test(text);
+};
 
 const publicEditorialSummary = (title: string, category: string) => {
   const cleanTitle = stripRadarPrefix(title) || clean(title, 220);
@@ -1095,6 +1113,7 @@ const hasEditorialBody = (html: string) => {
   if (/fontes monitoradas|entrou na fila editorial|resumo editorial|cluster de dados/i.test(text)) return false;
   if (hasInternalLeak(text)) return false;
   if (hasUnnamedActiveAgent(text)) return false;
+  if (hasEntityIdentityGap(text)) return false;
   return true;
 };
 
@@ -1424,6 +1443,10 @@ IMPORTANTE SOBRE AS FONTES:
 
 - Se houver nomes proprios obrigatorios listados, a materia final precisa citar esses nomes no titulo, lide ou primeiros paragrafos quando forem vitimas, investigados, autoridades, atletas, empresas ou personagens centrais. Omitir nome obrigatorio torna a materia invalida.
 
+REGRA ANTI-LACUNA NOMINAL:
+- E proibido escrever "atriz nao identificada", "nao nomeada nas fontes", "nome nao divulgado pelas fontes" ou variacoes. Se a pessoa central nao estiver nomeada nos trechos, nao gere materia final: prefira falhar a publicar texto generico.
+- Em Famosos, Cinema e Entretenimento, nomes de atores, atrizes, personagens, emissoras, series, filmes, temporadas e idades presentes nos trechos sao dados obrigatorios, mesmo que nao aparecam no titulo RSS.
+
 Responda exatamente neste formato, com JSON valido e sem markdown:
 {"title":"...","slug":"...","meta_description":"...","fact_static":"...","active_agent":"...","latent_cause":"...","conflict_point":"...","micro_persona":"...","featured_image_url":"...","secondary_image_url":"...","image_alt":"...","image_credit":"...","content_html":"..."}
 `;
@@ -1454,7 +1477,7 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
     if (hasInternalLeak(result.title) || hasInternalLeak(result.summary || result.meta_description)) {
       throw new Error('Gemini vazou instrucoes internas no titulo ou resumo.');
     }
-    if (hasUnknownCentralEntity([result.title, result.summary, result.meta_description, generatedBody].join(' '))) {
+    if (hasUnknownCentralEntity([result.title, result.summary, result.meta_description, generatedBody].join(' ')) || hasEntityIdentityGap([result.title, result.summary, result.meta_description, generatedBody].join(' '))) {
       throw new Error('Gemini usou entidade central nao identificada apesar das fontes.');
     }
     let missingNames = missingRequiredNames(result, generatedBody, requiredNames);
@@ -1473,7 +1496,7 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       if (hasInternalLeak(result.title) || hasInternalLeak(result.summary || result.meta_description)) {
         throw new Error('Gemini vazou instrucoes internas no titulo ou resumo.');
       }
-      if (hasUnknownCentralEntity([result.title, result.summary, result.meta_description, generatedBody].join(' '))) {
+      if (hasUnknownCentralEntity([result.title, result.summary, result.meta_description, generatedBody].join(' ')) || hasEntityIdentityGap([result.title, result.summary, result.meta_description, generatedBody].join(' '))) {
         throw new Error('Gemini manteve entidade central nao identificada apesar das fontes.');
       }
       missingNames = missingRequiredNames(result, generatedBody, requiredNames);
