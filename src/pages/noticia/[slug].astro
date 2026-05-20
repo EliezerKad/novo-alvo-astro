@@ -408,6 +408,91 @@ const schema = {
       margin: 2.5rem 0;
     }
 
+    .article-content [data-editor-media="carousel"] {
+      clear: both;
+      margin: 2.75rem 0;
+      border-radius: 1.75rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(244, 244, 245, 0.78));
+      padding: clamp(0.85rem, 2vw, 1.25rem);
+      box-shadow: 0 24px 70px rgba(16, 16, 16, 0.08);
+    }
+
+    .article-content [data-editor-media="carousel"] .media-controls {
+      display: none;
+    }
+
+    .article-content .carousel-shell {
+      position: relative;
+    }
+
+    .article-content .carousel-track {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      padding-bottom: 0.75rem;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .article-content .carousel-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .article-content .carousel-slide {
+      flex: 0 0 min(88%, 720px);
+      margin: 0;
+      overflow: hidden;
+      border-radius: 1.35rem;
+      background: #ebe8df;
+      scroll-snap-align: center;
+    }
+
+    .article-content .carousel-slide img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+    }
+
+    .article-content .carousel-slide figcaption {
+      margin: 0;
+      padding: 0.8rem 1rem 1rem;
+      color: rgb(113 113 122);
+      font-size: 0.78rem;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .article-content .carousel-nav {
+      align-items: center;
+      background: rgba(9, 9, 11, 0.68);
+      border-radius: 999px;
+      color: white;
+      display: flex;
+      font-size: 1.35rem;
+      font-weight: 900;
+      height: 2.55rem;
+      justify-content: center;
+      position: absolute;
+      top: 42%;
+      transform: translateY(-50%);
+      width: 2.55rem;
+      z-index: 4;
+    }
+
+    .article-content .carousel-nav:hover {
+      background: #8A1F2D;
+    }
+
+    .article-content .carousel-nav[data-carousel-action="prev"] {
+      left: 0.75rem;
+    }
+
+    .article-content .carousel-nav[data-carousel-action="next"] {
+      right: 0.75rem;
+    }
+
     @media (max-width: 767px) {
       .article-content .editorial-inline-image,
       .article-content .editorial-inline-image--left,
@@ -447,5 +532,24 @@ const schema = {
       background: rgba(138, 31, 45, 0.18);
       color: rgb(244 244 245);
     }
+
+    .dark .article-content [data-editor-media="carousel"],
+    .dark .article-content .carousel-slide {
+      background: rgb(24 24 27);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.18);
+    }
   </style>
+
+  <script is:inline>
+    document.querySelectorAll('[data-editor-media="carousel"]').forEach((carousel) => {
+      const track = carousel.querySelector('.carousel-track');
+      if (!track) return;
+      carousel.querySelectorAll('[data-carousel-action]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const direction = button.dataset.carouselAction === 'next' ? 1 : -1;
+          track.scrollBy({ left: direction * track.clientWidth * 0.86, behavior: 'smooth' });
+        });
+      });
+    });
+  </script>
 </BaseLayout>
