@@ -29,6 +29,7 @@ type PitchPayload = {
   imageCandidates?: unknown[];
   score?: number;
   expiresAt?: string;
+  forceUpdate?: boolean;
 };
 
 type PitchRecord = {
@@ -415,11 +416,13 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   }
 
   const pitch = normalizePitch(rawPayload);
+  const forceUpdate = rawPayload.forceUpdate === true;
   const subjectKey = memorySubjectKey(pitch);
   const remembered = await readMemory(db, subjectKey);
   const memoryExpiresAt = remembered?.expires_at ? Date.parse(remembered.expires_at) : 0;
   const memoryExpired = Boolean(memoryExpiresAt && memoryExpiresAt < Date.now());
-  if (remembered && !memoryExpired) {
+  const sameRememberedPitch = Boolean(forceUpdate && remembered?.last_pitch_id === pitch.id);
+  if (remembered && !memoryExpired && !sameRememberedPitch) {
     if (remembered.status === 'dismissed') {
       return json({
         ok: true,

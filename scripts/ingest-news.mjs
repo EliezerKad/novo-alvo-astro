@@ -194,6 +194,7 @@ const GNEWS_QUERIES_PER_CATEGORY = Number(process.env.GNEWS_QUERIES_PER_CATEGORY
 const GNEWS_MAX_RESULTS = Number(process.env.GNEWS_MAX_RESULTS || 10);
 const GNEWS_REQUEST_DELAY_MS = Number(process.env.GNEWS_REQUEST_DELAY_MS || 1800);
 const GNEWS_RETRY_DELAY_MS = Number(process.env.GNEWS_RETRY_DELAY_MS || 12000);
+const ENRICH_ONLY_VISIBLE = String(process.env.ENRICH_ONLY_VISIBLE || (INGEST_DISCOVERY === 'gnews' ? '1' : '0')) === '1';
 const MAX_ITEMS_PER_FEED = Number(process.env.MAX_ITEMS_PER_FEED || 80);
 const MIN_SOURCES = Number(process.env.MIN_SOURCES || 8);
 const RADAR_BATCHES_PER_CATEGORY = Number(process.env.RADAR_BATCHES_PER_CATEGORY || 3);
@@ -1749,26 +1750,56 @@ const main = async () => {
 
   let saved = 0;
   let updatedHidden = 0;
-  const enrichedPitches = [];
-  for (const pitch of pitches) {
-    enrichedPitches.push(await normalizePitchAssets(pitch));
-  }
-
-  await Promise.all(
-    enrichedPitches.map(async (pitch) => {
-      try {
-        const data = await postPitch(pitch);
-        if (data?.skipped) return;
-        if (data?.pitch?.visibleAsNew) {
-          saved += 1;
-        } else {
-          updatedHidden += 1;
-        }
-      } catch (error) {
-        console.warn(`[pitch] ${pitch.title}: ${error.message}`);
+  const savePitch = async (pitch) => {
+    try {
+      const data = await postPitch(pitch);
+      if (data?.skipped) {
+        console.log(`[pitch-skip] ${pitch.title}: ${data.reason || 'sem motivo informado'}`);
+        return;
       }
-    }),
-  );
+      if (data?.pitch?.visibleAsNew) {
+        saved += 1;
+        if (ENRICH_ONLY_VISIBLE) {
+          const enriched = await normalizePitchAssets(pitch);
+          await postPitch({ ...enriched, forceUpdate: true });
+        }
+      } else {
+        updatedHidden += 1;
+      }
+    } catch (error) {
+      console.warn(`[pitch] ${pitch.title}: ${error.message}`);
+    }
+  };
+
+  if (ENRICH_ONLY_VISIBLE) {
+    for (const pitch of pitches) {
+      await savePitch(pitch);
+    }
+  } else {
+    const enrichedPitches = [];
+    for (const pitch of pitches) {
+      enrichedPitches.push(await normalizePitchAssets(pitch));
+    }
+
+    await Promise.all(
+      enrichedPitches.map(async (pitch) => {
+        try {
+          const data = await postPitch(pitch);
+          if (data?.skipped) {
+            console.log(`[pitch-skip] ${pitch.title}: ${data.reason || 'sem motivo informado'}`);
+            return;
+          }
+          if (data?.pitch?.visibleAsNew) {
+            saved += 1;
+          } else {
+            updatedHidden += 1;
+          }
+        } catch (error) {
+          console.warn(`[pitch] ${pitch.title}: ${error.message}`);
+        }
+      }),
+    );
+  }
 
   await runHousekeeping();
   const skipped = Math.max(0, pitches.length - saved - updatedHidden);

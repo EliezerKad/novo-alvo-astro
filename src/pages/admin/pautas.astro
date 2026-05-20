@@ -1473,7 +1473,7 @@ const categories = [
         });
       });
 
-      list?.addEventListener('click', (event) => {
+      const handlePitchListClick = (event) => {
         const previewButton = event.target.closest('[data-pitch-preview]');
         if (previewButton) {
           openPitchPreview(previewButton.dataset.pitchPreview || '');
@@ -1495,7 +1495,10 @@ const categories = [
         const button = event.target.closest('[data-pitch-action]');
         if (!button) return;
         updatePitchStatus(button, button.dataset.pitchId || '', button.dataset.pitchAction || 'reviewed', button.dataset.pitchCluster || '');
-      });
+      };
+
+      list?.addEventListener('click', handlePitchListClick);
+      gnewsList?.addEventListener('click', handlePitchListClick);
 
       modalClose?.addEventListener('click', closePitchPreview);
       modal?.addEventListener('click', (event) => {
