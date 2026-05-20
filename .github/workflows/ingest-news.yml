@@ -68,9 +68,9 @@ jobs:
           GOOGLE_SEARCH_API_KEY: ${{ secrets.GOOGLE_SEARCH_API_KEY }}
           GOOGLE_SEARCH_CX: ${{ secrets.GOOGLE_SEARCH_CX }}
           INGEST_DISCOVERY: ${{ inputs.discovery }}
-          GNEWS_QUERIES_PER_CATEGORY: 3
+          GNEWS_QUERIES_PER_CATEGORY: 2
           GNEWS_MAX_RESULTS: 10
-          GNEWS_REQUEST_DELAY_MS: 1800
+          GNEWS_REQUEST_DELAY_MS: 900
           GNEWS_RETRY_DELAY_MS: 12000
           GOOGLE_SEARCH_PAGES_PER_QUERY: 1
           GOOGLE_SEARCH_QUERIES_PER_CATEGORY: 4
@@ -85,6 +85,7 @@ jobs:
           MAX_ITEM_AGE_HOURS: 48
           RADAR_BATCHES_PER_CATEGORY: 5
           SOURCE_EXPANSION_TARGET: 16
+          SOURCE_TEXT_TARGET: 15
           HOUSEKEEPING_DAYS: 30
 
   ingest-scheduled:

@@ -30,6 +30,7 @@ type PitchPayload = {
   score?: number;
   expiresAt?: string;
   forceUpdate?: boolean;
+  bypassMemory?: boolean;
 };
 
 type PitchRecord = {
@@ -417,12 +418,13 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
 
   const pitch = normalizePitch(rawPayload);
   const forceUpdate = rawPayload.forceUpdate === true;
+  const bypassMemory = rawPayload.bypassMemory === true;
   const subjectKey = memorySubjectKey(pitch);
   const remembered = await readMemory(db, subjectKey);
   const memoryExpiresAt = remembered?.expires_at ? Date.parse(remembered.expires_at) : 0;
   const memoryExpired = Boolean(memoryExpiresAt && memoryExpiresAt < Date.now());
   const sameRememberedPitch = Boolean(forceUpdate && remembered?.last_pitch_id === pitch.id);
-  if (remembered && !memoryExpired && !sameRememberedPitch) {
+  if (remembered && !memoryExpired && !sameRememberedPitch && !bypassMemory) {
     if (remembered.status === 'dismissed') {
       return json({
         ok: true,
@@ -457,11 +459,11 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     .bind(pitch.clusterKey)
     .first<PitchRecord>();
 
-  if (existing?.status === 'dismissed') {
+  if (existing?.status === 'dismissed' && !bypassMemory) {
     return json({ ok: true, skipped: true, reason: 'Pauta descartada preservada.', pitch: { id: existing.id, clusterKey: pitch.clusterKey, status: existing.status } });
   }
 
-  if (!existing) {
+  if (!existing && !bypassMemory) {
     const duplicate = await findRecentDuplicate(db, pitch);
     if (duplicate?.status === 'dismissed') {
       return json({
