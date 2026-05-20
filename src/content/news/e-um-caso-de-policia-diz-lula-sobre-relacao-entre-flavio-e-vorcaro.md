@@ -7,18 +7,18 @@ category: "Politica"
 author: "Redação Novo Alvo"
 sources: ["Mossoró Hoje", "DOL", "Transmissão Política", "Jornal Diário do Povo", "Portal O Dia", "Panorama da Bahia", "Studio Notícias", "Acorda Cidade", "Jornal de Brasília", "Brasil 247", "Jornal Extra de Alagoas", "G1"]
 publishedAt: "2026-05-15T20:21:39.438Z"
-updatedAt: "2026-05-20T16:45:58.970Z"
+updatedAt: "2026-05-20T16:48:44.266Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/e-um-caso-de-policia-diz-lula-sobre-relacao-entre-flavio-e-vorcaro-cover.jpg"
+  src: "https://portalnovoalvo.com.br/media/news/e-um-caso-de-policia-diz-lula-sobre-relacao-entre-flavio-e-vorcaro-cover.webp"
   alt: "Senador Flávio Bolsonaro"
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/e-um-caso-de-policia-diz-lula-sobre-relacao-entre-flavio-e-vorcaro-cover.jpg"
+ogImage: "https://portalnovoalvo.com.br/media/news/e-um-caso-de-policia-diz-lula-sobre-relacao-entre-flavio-e-vorcaro-cover.webp"
 tags: ["politica", "caso", "policia", "lula", "relacao", "flavio", "vorcaro"]
 ---
 
