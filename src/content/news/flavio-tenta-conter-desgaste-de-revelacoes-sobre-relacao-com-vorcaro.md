@@ -2,12 +2,12 @@
 title: "Flávio Bolsonaro tenta frear desgaste com revelações sobre encontro com Vorcaro"
 slug: "flavio-tenta-conter-desgaste-de-revelacoes-sobre-relacao-com-vorcaro"
 summary: "Após novas revelações sobre encontros com empresário, Flávio Bolsonaro busca conter crise política e o impacto nas pesquisas eleitorais."
-seoDescription: "Economia: Após novas revelações sobre encontros com empresário, Flávio Bolsonaro busca conter crise política e o impacto nas pesquisas eleitorais."
-category: "Economia"
+seoDescription: "Politica: Após novas revelações sobre encontros com empresário, Flávio Bolsonaro busca conter crise política e o impacto nas pesquisas eleitorais."
+category: "Politica"
 author: "Redação Novo Alvo"
 sources: ["Folha PE", "Tribuna do Sertão", "O Globo", "portalofato.com.br", "correiodamanha.com.br", "O Cafezinho", "Tribuna da Bahia", "InfoMoney", "Metrópoles", "Exame", "Portal do Holanda"]
 publishedAt: "2026-05-20T20:53:59.536Z"
-updatedAt: "2026-05-20T21:21:57.857Z"
+updatedAt: "2026-05-20T21:22:39.952Z"
 featured: false
 isFeatured: false
 urgent: false
