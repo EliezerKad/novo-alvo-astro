@@ -792,10 +792,17 @@ const requiredNamesFromSources = (sources: unknown[], row: QueueRow) => {
   ];
   const scored = new Map<string, { name: string; score: number }>();
   const stop = /^(Policia Civil|Rio de Janeiro|Zona Sul|Ipanema|Vinicius de Moraes|Visconde de Piraja|Jornal de Brasilia|Portal Novo Alvo|Leia Tambem)$/i;
+  const nameNoise =
+    /^(?:VIP|Atriz|Ator|Artista|Serie|S[eÃ©]rie|Elenco|Filme|Cinema|Famosos|Personagem|Temporada|Saiba|Veja|Entenda)\b|\b(?:de|da|do|das|dos|e|em|para|por|com|sobre|VIP|Atriz|Ator|Artista|Serie|S[eÃ©]rie|Elenco|Filme|Cinema|Famosos|Personagem|Temporada)$/i;
+  const meaningfulNameParts = (value: string) =>
+    value
+      .split(/\s+/)
+      .filter((part) => /^[A-ZÃÃ€Ã‚ÃƒÃ‰ÃˆÃŠÃÃÃ“Ã”Ã•Ã–ÃšÃ‡][A-Za-zÃÃ€Ã‚ÃƒÃ‰ÃˆÃŠÃÃÃ“Ã”Ã•Ã–ÃšÃ‡Ã¡Ã Ã¢Ã£Ã©Ã¨ÃªÃ­Ã¯Ã³Ã´ÃµÃ¶ÃºÃ§]{2,}$/.test(part))
+      .filter((part) => !/^(?:VIP|Atriz|Ator|Artista|Serie|S[eÃ©]rie|Elenco|Filme|Cinema|Famosos|Personagem|Temporada|Saiba|Veja|Entenda)$/i.test(part));
   for (const match of matches) {
     const name = plain(match[0], 120).replace(/\s+/g, ' ').trim();
     const key = normalizeForPresence(name);
-    if (!key || publisherNames.has(key) || stop.test(name)) continue;
+    if (!key || publisherNames.has(key) || stop.test(name) || nameNoise.test(name) || meaningfulNameParts(name).length < 2) continue;
     const start = Math.max(0, match.index - 180);
     const end = Math.min(text.length, match.index + name.length + 220);
     const context = text.slice(start, end);
