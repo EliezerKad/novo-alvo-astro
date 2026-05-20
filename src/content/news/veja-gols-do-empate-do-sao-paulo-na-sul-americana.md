@@ -7,18 +7,18 @@ category: "Futebol"
 author: "Redação Novo Alvo"
 sources: ["Lance!", "365Scores", "Gazeta Esportiva", "Jogada 10", "ESPN Brasil", "Somos Fanáticos", "Estadão", "band.com.br", "Bolavip Brasil", "Rádio Itatiaia"]
 publishedAt: "2026-05-20T16:16:13.132Z"
-updatedAt: "2026-05-20T16:44:31.825Z"
+updatedAt: "2026-05-20T16:53:50.920Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/veja-gols-do-empate-do-sao-paulo-na-sul-americana-cover.jpg"
+  src: "https://portalnovoalvo.com.br/media/news/veja-gols-do-empate-do-sao-paulo-na-sul-americana-cover.webp"
   alt: "Veja gols do empate do São Paulo na Sul-Americana"
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/veja-gols-do-empate-do-sao-paulo-na-sul-americana-cover.jpg"
+ogImage: "https://portalnovoalvo.com.br/media/news/veja-gols-do-empate-do-sao-paulo-na-sul-americana-cover.webp"
 tags: ["futebol", "gols", "empate", "paulo", "americana"]
 ---
 
