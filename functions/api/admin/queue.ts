@@ -1490,6 +1490,45 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
 {"title":"...","slug":"...","meta_description":"...","fact_static":"...","active_agent":"...","latent_cause":"...","conflict_point":"...","micro_persona":"...","featured_image_url":"...","secondary_image_url":"...","image_alt":"...","image_credit":"...","content_html":"..."}
 `;
 
+  const compactPrompt = `
+Voce e um redator jornalistico. Gere uma materia completa e publicavel em portugues do Brasil usando TODAS as fontes abaixo como apuracao, sem citar portais concorrentes e sem expor processo interno.
+
+REGRAS INVIOLAVEIS:
+- Responda somente JSON valido.
+- O campo content_html e obrigatorio e deve conter a materia completa com 7 a 11 paragrafos, subtitulos <h2> e fechamento em <blockquote>Por que isso importa: ...</blockquote>.
+- Use os 15 trechos de fontes como base da sintese inedita. Nao faca resumo curto.
+- Antes de escrever, extraia WHO/WHAT/WHEN/WHERE/WHY/HOW. Se WHO tiver nome proprio, use esse nome no titulo, lide ou segundo paragrafo.
+- Nunca escreva "nao identificada", "nao nomeada nas fontes", "nome nao divulgado" ou equivalentes para pessoa central.
+- Se um nome, idade, papel, personagem, cidade, data, orgao, valor ou quantidade aparecer nos trechos, trate como dado prioritario.
+- Nao copie titulo de fonte. Crie titulo autoral, maximo 65 caracteres.
+- Use apenas HTML limpo em content_html: <p>, <h2>, <h3>, <strong>, <em>, <ul>, <ol>, <li>, <blockquote>.
+
+DADOS:
+Categoria: ${row.category}
+Pauta: ${editorialTitle}
+Resumo operacional: ${row.summary}
+Score: ${score}
+Fontes consolidadas: ${sourceCount}
+
+FICHA DE IDENTIDADES CENTRAIS:
+${identityLedger}
+
+NOMES OBRIGATORIOS:
+${requiredNames.length ? requiredNames.map((name) => `- ${name}`).join('\n') : 'Sem nomes obrigatorios detectados.'}
+
+DOSSIE FACTUAL:
+${aiFactDossier.text || factDossier || 'Sem dossie factual estruturado.'}
+
+FONTES E TRECHOS:
+${sourceLines || 'Fontes nao listadas.'}
+
+IMAGENS CANDIDATAS:
+${imageLines || 'Sem imagens candidatas.'}
+
+FORMATO EXATO:
+{"title":"...","slug":"...","meta_description":"...","fact_static":"...","active_agent":"...","latent_cause":"...","conflict_point":"...","micro_persona":"...","featured_image_url":"...","secondary_image_url":"...","image_alt":"...","image_credit":"...","content_html":"..."}
+`;
+
   try {
     const runArticleGeneration = (extraInstruction = '') =>
       runGeminiJson({
@@ -1502,6 +1541,17 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       timeoutMs: premiumDraft ? 38000 : 30000,
       fallbackModels,
     });
+    const runCompactArticleGeneration = (extraInstruction = '') =>
+      runGeminiJson({
+        apiKey: geminiApiKeys,
+        model: finalModel,
+        system,
+        prompt: extraInstruction ? `${compactPrompt}\n\nCORRECAO OBRIGATORIA:\n${extraInstruction}` : compactPrompt,
+        maxOutputTokens: premiumDraft ? 7600 : 6200,
+        temperature: premiumDraft ? 0.2 : 0.25,
+        timeoutMs: premiumDraft ? 45000 : 36000,
+        fallbackModels,
+      });
 
     let gemini = await runArticleGeneration();
     let generationModel = aiFactDossier.model ? `${gemini.model}+dossier:${aiFactDossier.model}` : gemini.model;
@@ -1511,7 +1561,17 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       result.content_html || result.bodyHtml || result.contentHtml || result.content || result.article || result.text,
     );
     if (!hasEditorialBody(generatedBody)) {
-      throw new Error('Gemini respondeu sem uma materia editorial completa em content_html.');
+      gemini = await runCompactArticleGeneration(
+        'A resposta anterior nao trouxe content_html completo. Gere agora a materia completa no campo content_html, usando os trechos longos das fontes e os nomes obrigatorios.',
+      );
+      generationModel = aiFactDossier.model ? `${gemini.model}+dossier:${aiFactDossier.model}` : gemini.model;
+      result = gemini.result;
+      generatedBody = htmlFromModelField(
+        result.content_html || result.bodyHtml || result.contentHtml || result.content || result.article || result.text,
+      );
+      if (!hasEditorialBody(generatedBody)) {
+        throw new Error('Gemini respondeu sem uma materia editorial completa em content_html.');
+      }
     }
     if (hasInternalLeak(result.title) || hasInternalLeak(result.summary || result.meta_description)) {
       throw new Error('Gemini vazou instrucoes internas no titulo ou resumo.');
@@ -1530,7 +1590,17 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
         result.content_html || result.bodyHtml || result.contentHtml || result.content || result.article || result.text,
       );
       if (!hasEditorialBody(generatedBody)) {
-        throw new Error('Gemini respondeu sem uma materia editorial completa em content_html.');
+        gemini = await runCompactArticleGeneration(
+          `A resposta anterior ainda omitiu corpo completo ou nomes centrais. Gere a materia completa em content_html e cite estes nomes quando forem centrais: ${missingNames.join(', ') || requiredNames.join(', ')}.`,
+        );
+        generationModel = aiFactDossier.model ? `${gemini.model}+dossier:${aiFactDossier.model}` : gemini.model;
+        result = gemini.result;
+        generatedBody = htmlFromModelField(
+          result.content_html || result.bodyHtml || result.contentHtml || result.content || result.article || result.text,
+        );
+        if (!hasEditorialBody(generatedBody)) {
+          throw new Error('Gemini respondeu sem uma materia editorial completa em content_html.');
+        }
       }
       if (hasInternalLeak(result.title) || hasInternalLeak(result.summary || result.meta_description)) {
         throw new Error('Gemini vazou instrucoes internas no titulo ou resumo.');
