@@ -291,6 +291,20 @@ const googleNewsDecodePayload = (html) => {
   }
 };
 
+const googleNewsSignaturePayload = (html, articleId) => {
+  const signature = String(html || '').match(/\bdata-n-a-sg=["']([^"']+)["']/i)?.[1] || '';
+  const timestamp = String(html || '').match(/\bdata-n-a-ts=["']([^"']+)["']/i)?.[1] || '';
+  if (!signature || !timestamp || !articleId) return '';
+
+  const request = [
+    'Fbv4je',
+    `["garturlreq",[["X","X",["X","X"],null,null,1,1,"BR:pt",null,1,null,null,null,null,null,0,1],"pt-BR","BR",1,[1,1,1],1,1,null,0,0,null,0],"${articleId}",${timestamp},"${signature}"]`,
+    null,
+    'generic',
+  ];
+  return JSON.stringify([[request]]);
+};
+
 const parseGoogleNewsDecodedUrl = (value) => {
   const line = String(value || '')
     .split('\n')
@@ -324,7 +338,8 @@ const decodeGoogleNewsUrl = async (value) => {
         },
         9000,
       );
-      const payload = googleNewsDecodePayload(await response.text());
+      const html = await response.text();
+      const payload = googleNewsDecodePayload(html) || googleNewsSignaturePayload(html, id);
       if (!payload) continue;
       const decodedResponse = await fetchWithTimeout(
         'https://news.google.com/_/DotsSplashUi/data/batchexecute?rpcids=Fbv4je',

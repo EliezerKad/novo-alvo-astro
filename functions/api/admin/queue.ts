@@ -505,6 +505,20 @@ const googleNewsDecodePayload = (html: string) => {
   }
 };
 
+const googleNewsSignaturePayload = (html: string, articleId: string) => {
+  const signature = html.match(/\bdata-n-a-sg=["']([^"']+)["']/i)?.[1] || '';
+  const timestamp = html.match(/\bdata-n-a-ts=["']([^"']+)["']/i)?.[1] || '';
+  if (!signature || !timestamp || !articleId) return '';
+
+  const request = [
+    'Fbv4je',
+    `["garturlreq",[["X","X",["X","X"],null,null,1,1,"BR:pt",null,1,null,null,null,null,null,0,1],"pt-BR","BR",1,[1,1,1],1,1,null,0,0,null,0],"${articleId}",${timestamp},"${signature}"]`,
+    null,
+    'generic',
+  ];
+  return JSON.stringify([[request]]);
+};
+
 const parseGoogleNewsDecodedUrl = (value: string) => {
   const line = value
     .split('\n')
@@ -540,7 +554,8 @@ const decodeGoogleNewsUrl = async (value: string) => {
         },
         6500,
       );
-      const payload = googleNewsDecodePayload(await response.text());
+      const html = await response.text();
+      const payload = googleNewsDecodePayload(html) || googleNewsSignaturePayload(html, id);
       if (!payload) continue;
 
       const decodedResponse = await fetchTextWithTimeout(
@@ -684,10 +699,10 @@ const enrichSourcesWithText = async (sources: unknown[]) => {
   const enriched = [...sources];
   let usefulExcerpts = 0;
 
-  for (let index = 0; index < Math.min(4, sources.length); index += 1) {
+  for (let index = 0; index < Math.min(12, sources.length); index += 1) {
     enriched[index] = await fetchSourceExcerpt(sources[index]);
     if (hasUsefulExcerpt(enriched[index])) usefulExcerpts += 1;
-    if (usefulExcerpts >= 3) break;
+    if (usefulExcerpts >= 6) break;
   }
 
   return enriched;
@@ -890,6 +905,11 @@ const hasUnnamedActiveAgent = (value: unknown) => {
     /\b(?:foi|foram)\s+(?:afirmado|dito|declarado|admitido|confirmado|anunciado)\s+por\s+(?:um|uma)\s+(?:pr[eé]-?candidato|candidato|candidata|pol[ií]tico|pol[ií]tica|parlamentar|autoridade|dirigente|executivo|executiva)\b/i;
   return vagueActor.test(text) || passiveVagueActor.test(text);
 };
+
+const hasUnknownCentralEntity = (value: unknown) =>
+  /\b(?:atriz|ator|jogador|jogadora|cantor|cantora|influenciador|influenciadora|empres[aá]rio|empres[aá]ria|pol[ií]tico|pol[ií]tica|v[ií]tima|suspeito|suspeita|homem|mulher|jovem|adolescente|crian[cç]a)\s+n[aã]o\s+identificad[ao]s?\b/i.test(
+    plain(value, 9000),
+  );
 
 const publicEditorialSummary = (title: string, category: string) => {
   const cleanTitle = stripRadarPrefix(title) || clean(title, 220);
@@ -1129,13 +1149,13 @@ const generateArticleWithAi = async (
       const record = source as Record<string, unknown>;
       const evidence = sourceEvidenceText(record);
       const signals = factSignalsFrom(evidence).slice(0, 12);
-      const excerpt = clipWholeWord(record.excerpt, 420);
+      const excerpt = clipWholeWord(record.excerpt, 900);
       const summary = clipWholeWord(record.summary || record.description || record.content, 300);
       return [
         `- ${plain(record.publisher, 80)}: ${plain(record.title, 180)} (${plain(record.url, 400)})`,
         signals.length ? `  Sinais obrigatorios: ${signals.join('; ')}` : '',
-        summary ? `  Resumo da ingestao: ${summary}` : '',
         excerpt ? `  Trecho extraido: ${excerpt}` : '',
+        summary ? `  Resumo da ingestao: ${summary}` : '',
       ]
         .filter(Boolean)
         .join('\n');
@@ -1434,6 +1454,9 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
     if (hasInternalLeak(result.title) || hasInternalLeak(result.summary || result.meta_description)) {
       throw new Error('Gemini vazou instrucoes internas no titulo ou resumo.');
     }
+    if (hasUnknownCentralEntity([result.title, result.summary, result.meta_description, generatedBody].join(' '))) {
+      throw new Error('Gemini usou entidade central nao identificada apesar das fontes.');
+    }
     let missingNames = missingRequiredNames(result, generatedBody, requiredNames);
     if (missingNames.length) {
       gemini = await runArticleGeneration(
@@ -1449,6 +1472,9 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       }
       if (hasInternalLeak(result.title) || hasInternalLeak(result.summary || result.meta_description)) {
         throw new Error('Gemini vazou instrucoes internas no titulo ou resumo.');
+      }
+      if (hasUnknownCentralEntity([result.title, result.summary, result.meta_description, generatedBody].join(' '))) {
+        throw new Error('Gemini manteve entidade central nao identificada apesar das fontes.');
       }
       missingNames = missingRequiredNames(result, generatedBody, requiredNames);
       if (missingNames.length) {
