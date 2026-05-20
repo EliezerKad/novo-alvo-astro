@@ -1074,6 +1074,16 @@ const categories = [
                 : ''
             }
             <div class="mt-5 grid gap-3 rounded-[1.25rem] border border-zinc-100 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950 md:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
+              <label class="grid gap-2 text-[9px] font-black uppercase tracking-[0.22em] text-zinc-400 md:col-span-2">
+                Categoria para a fila
+                <select data-generated-category class="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs font-bold normal-case tracking-normal text-zinc-700 outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
+                  ${[...document.querySelectorAll('[data-category-filter] option')]
+                    .map((option) => option.value)
+                    .filter(Boolean)
+                    .map((category) => `<option value="${escapeHtml(category)}" ${category === String(article.category || pitch.category || '') ? 'selected' : ''}>${escapeHtml(category)}</option>`)
+                    .join('')}
+                </select>
+              </label>
               <label class="grid gap-2 text-[9px] font-black uppercase tracking-[0.22em] text-zinc-400">
                 URL da capa
                 <input data-generated-cover-url value="${escapeHtml(article.coverUrl || '')}" class="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs font-bold normal-case tracking-normal text-zinc-700 outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200" placeholder="Cole uma URL de imagem para a capa" />
@@ -1123,6 +1133,7 @@ const categories = [
         const editedBody = document.querySelector(`[data-generated-editor="${CSS.escape(String(id || ''))}"] [data-generated-body-edit]`)?.innerHTML;
         const editedCoverUrl = document.querySelector('[data-generated-cover-url]')?.value.trim();
         const editedCoverAlt = document.querySelector('[data-generated-cover-alt]')?.value.trim();
+        const editedCategory = document.querySelector('[data-generated-category]')?.value.trim();
         const featuredHomeInput = document.querySelector('[data-generated-featured-home]');
         const editorialMedia = (Array.isArray(article.media) ? article.media : []).filter((item) => item?.type !== 'editorialFlag');
         if (featuredHomeInput?.checked) {
@@ -1157,7 +1168,7 @@ const categories = [
               title: article.title || pitch.title,
               summary: article.summary || pitch.summary || '',
               bodyHtml: editedBody || article.bodyHtml || '<p></p>',
-              category: article.category || pitch.category || 'Politica',
+              category: editedCategory || article.category || pitch.category || 'Politica',
               author: article.author || 'Redacao Novo Alvo',
               status: 'draft',
               coverUrl: editedCoverUrl || article.coverUrl || '',
@@ -1248,13 +1259,14 @@ const categories = [
         if (statusNode) statusNode.textContent = nextStatus === 'reviewed' ? 'Marcando pauta como revisada...' : nextStatus === 'queued' ? 'Aprovando pauta para a fila editorial...' : 'Atualizando pauta...';
 
         try {
+          const categoryOverride = nextStatus === 'queued' ? String(document.querySelector('[data-generated-category]')?.value || '').trim() : '';
           const response = await fetch('/api/admin/pitches', {
             method: 'PATCH',
             headers: {
               'content-type': 'application/json',
               authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ id, clusterKey, status: nextStatus }),
+            body: JSON.stringify({ id, clusterKey, status: nextStatus, category: categoryOverride || undefined }),
           });
           const data = await response.json().catch(() => ({}));
           if (response.status === 401) {

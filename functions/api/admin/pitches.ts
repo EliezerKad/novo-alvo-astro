@@ -655,6 +655,7 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
   const id = clean(payload.id, 120);
   const clusterKey = clean(payload.clusterKey, 180);
   const status = clean(payload.status, 24);
+  const requestedCategory = clean(payload.category, 80);
   const imageRole = clean(payload.imageRole, 24);
   const selectedImageUrl = clean(payload.imageUrl, 1200);
   if (!id && !clusterKey) return json({ error: 'ID ausente.' }, { status: 400 });
@@ -696,26 +697,28 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
     return json({ ok: true, imageCandidates: nextCandidates });
   }
 
+  const nextCategory = requestedCategory || existing.category || 'Brasil';
+  const existingForMemory = { ...existing, category: nextCategory };
   const tombstoneExpiresAt = status === 'dismissed' ? new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString() : '';
   if (status === 'dismissed') {
     await db
-      .prepare('UPDATE editorial_pitches SET status = ?, expires_at = ?, updated_at = ? WHERE id = ? OR cluster_key = ?')
-      .bind(status, tombstoneExpiresAt, now, existing.id, lookupKey)
+      .prepare('UPDATE editorial_pitches SET status = ?, category = ?, expires_at = ?, updated_at = ? WHERE id = ? OR cluster_key = ?')
+      .bind(status, nextCategory, tombstoneExpiresAt, now, existing.id, lookupKey)
       .run();
-    await rememberExistingPitch(db, existing, status, tombstoneExpiresAt);
+    await rememberExistingPitch(db, existingForMemory, status, tombstoneExpiresAt);
   } else {
     await db
-      .prepare('UPDATE editorial_pitches SET status = ?, updated_at = ? WHERE id = ? OR cluster_key = ?')
-      .bind(status, now, existing.id, lookupKey)
+      .prepare('UPDATE editorial_pitches SET status = ?, category = ?, updated_at = ? WHERE id = ? OR cluster_key = ?')
+      .bind(status, nextCategory, now, existing.id, lookupKey)
       .run();
-    await rememberExistingPitch(db, existing, status);
+    await rememberExistingPitch(db, existingForMemory, status);
   }
 
   let queue = null;
   if (status === 'queued') {
     const queueId = `queue:${existing.id}`;
     const gapMinutes = 40 + Math.floor(Math.random() * 51);
-    const category = existing.category || 'Brasil';
+    const category = nextCategory;
     const lastQueued = await db
       .prepare(
         `SELECT publish_after FROM editorial_queue
