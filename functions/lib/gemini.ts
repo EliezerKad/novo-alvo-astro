@@ -47,6 +47,7 @@ export async function runGeminiJson({
   maxOutputTokens = 900,
   temperature = 0.35,
   timeoutMs = 15000,
+  fallbackModels,
 }: {
   apiKey?: string;
   model?: string;
@@ -55,12 +56,20 @@ export async function runGeminiJson({
   maxOutputTokens?: number;
   temperature?: number;
   timeoutMs?: number;
+  fallbackModels?: string[];
 }) {
   const key = String(apiKey || '').trim();
   if (!key) throw new Error('GEMINI_API_KEY nao configurada.');
 
   const preferredModel = normalizeGeminiModel(String(model || DEFAULT_GEMINI_MODEL));
-  const models = [...new Set([preferredModel, DEFAULT_GEMINI_MODEL, 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest'])];
+  const models = [
+    ...new Set(
+      (fallbackModels?.length
+        ? fallbackModels
+        : [preferredModel, DEFAULT_GEMINI_MODEL, 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest']
+      ).map(normalizeGeminiModel),
+    ),
+  ];
 
   let lastError = '';
   for (const modelName of models) {

@@ -766,6 +766,117 @@ const buildFactDossier = (sources: unknown[], row: QueueRow) => {
     .join('\n\n');
 };
 
+const dossierList = (value: unknown, maxItems = 10, maxChars = 160) => {
+  const items = Array.isArray(value) ? value : typeof value === 'string' ? value.split(/\n|;/) : [];
+  return items
+    .map((item) => clipWholeWord(item, maxChars))
+    .filter(Boolean)
+    .slice(0, maxItems);
+};
+
+const formatDossierSection = (label: string, items: string[]) =>
+  items.length ? `${label}:\n${items.map((item) => `- ${item}`).join('\n')}` : '';
+
+const buildSourceDossierInput = (sources: unknown[], row: QueueRow) => {
+  const rows = sources
+    .slice(0, 15)
+    .map((source, index) => {
+      if (!source || typeof source !== 'object') return '';
+      const record = source as Record<string, unknown>;
+      const evidence = sourceEvidenceText(record);
+      const signals = factSignalsFrom(evidence).slice(0, 18);
+      const excerpt = clipWholeWord(evidence, 850);
+      return [
+        `Fonte ${index + 1}`,
+        `Veiculo: ${plain(record.publisher, 80) || 'nao informado'}`,
+        `Titulo: ${plain(record.title, 180)}`,
+        `URL: ${plain(record.resolvedUrl || record.originalUrl || record.primaryUrl || record.url, 420)}`,
+        signals.length ? `Fatos e numeros detectados: ${signals.join('; ')}` : '',
+        excerpt ? `Trecho: ${excerpt}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n');
+    })
+    .filter(Boolean)
+    .join('\n\n');
+
+  return [
+    `Categoria: ${row.category}`,
+    `Pauta: ${stripRadarPrefix(row.title) || row.title}`,
+    `Resumo operacional: ${row.summary}`,
+    `Palavras-chave: ${row.keywords}`,
+    rows,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+};
+
+const buildAiFactDossier = async (
+  sources: unknown[],
+  row: QueueRow,
+  env: Env,
+  deterministicDossier: string,
+): Promise<{ text: string; model: string }> => {
+  if (!env.GEMINI_API_KEY) return { text: deterministicDossier, model: '' };
+
+  const prompt = `
+Leia as fontes abaixo como editor de apuracao. Nao escreva materia.
+Extraia apenas fatos verificaveis que aparecem no material. Preserve nomes proprios, cargos, cidades, datas, valores, idades, objetos, orgaos, empresas, clubes, lotes, prazos e numeros.
+Nao generalize. Se um numero existe, copie o numero. Se uma fonte nao identifica alguem, registre a lacuna.
+
+FONTES:
+${buildSourceDossierInput(sources, row)}
+
+Responda somente JSON valido:
+{
+  "central_fact": "...",
+  "required_facts": ["..."],
+  "named_actors": ["..."],
+  "numbers_and_dates": ["..."],
+  "locations": ["..."],
+  "timeline": ["..."],
+  "service_details": ["..."],
+  "contradictions_or_gaps": ["..."],
+  "source_notes": ["..."]
+}
+`;
+
+  try {
+    const response = await runGeminiJson({
+      apiKey: env.GEMINI_API_KEY,
+      model: 'gemini-2.5-flash-lite',
+      system:
+        'Voce e um editor de apuracao factual. Sua saida e um dossie compacto para outro redator. Nao escreva prosa jornalistica, nao invente e nao omita numeros relevantes.',
+      prompt,
+      maxOutputTokens: 1400,
+      temperature: 0.05,
+      timeoutMs: 8000,
+      fallbackModels: ['gemini-2.5-flash-lite'],
+    });
+    const result = response.result;
+    const sections = [
+      `Fato central: ${clipWholeWord(result.central_fact, 260)}`,
+      formatDossierSection('Fatos obrigatorios', dossierList(result.required_facts, 12, 190)),
+      formatDossierSection('Agentes nomeados', dossierList(result.named_actors, 12, 150)),
+      formatDossierSection('Numeros e datas obrigatorios', dossierList(result.numbers_and_dates, 14, 150)),
+      formatDossierSection('Locais', dossierList(result.locations, 8, 130)),
+      formatDossierSection('Linha do tempo', dossierList(result.timeline, 8, 170)),
+      formatDossierSection('Servico ao leitor', dossierList(result.service_details, 10, 180)),
+      formatDossierSection('Lacunas ou contradicoes', dossierList(result.contradictions_or_gaps, 8, 180)),
+      formatDossierSection('Notas por fonte', dossierList(result.source_notes, 12, 180)),
+    ]
+      .filter((section) => plain(section, 300).replace(/^Fato central:\s*$/i, ''))
+      .join('\n\n');
+
+    const text = [sections, deterministicDossier ? `Sinais locais de apoio:\n${deterministicDossier}` : '']
+      .filter(Boolean)
+      .join('\n\n');
+    return { text: text || deterministicDossier, model: response.model };
+  } catch {
+    return { text: deterministicDossier, model: '' };
+  }
+};
+
 const clipWholeWord = (value: unknown, max: number) => {
   const text = plain(value, max + 80);
   if (text.length <= max) return text;
@@ -1017,17 +1128,21 @@ const generateArticleWithAi = async (
   const premiumDraft = score > 800;
   const editorialTitle = stripRadarPrefix(row.title) || clean(row.title, 220);
   const factDossier = buildFactDossier(sources, row);
+  const aiFactDossier = await buildAiFactDossier(sources, row, env, factDossier);
   const sourceLines = sources
-    .slice(0, 20)
+    .slice(0, 15)
     .map((source) => {
       if (!source || typeof source !== 'object') return '';
       const record = source as Record<string, unknown>;
-      const excerpt = plain(record.excerpt, 1200);
-      const summary = plain(record.summary || record.description || record.content, 700);
+      const evidence = sourceEvidenceText(record);
+      const signals = factSignalsFrom(evidence).slice(0, 12);
+      const excerpt = clipWholeWord(record.excerpt, 420);
+      const summary = clipWholeWord(record.summary || record.description || record.content, 300);
       return [
         `- ${plain(record.publisher, 80)}: ${plain(record.title, 180)} (${plain(record.url, 400)})`,
-        summary ? `  Resumo/snippet capturado na ingestao: ${summary}` : '',
-        excerpt ? `  Trecho extraido da materia completa (prioritario para nomes, datas e responsaveis): ${excerpt}` : '',
+        signals.length ? `  Sinais obrigatorios: ${signals.join('; ')}` : '',
+        summary ? `  Resumo da ingestao: ${summary}` : '',
+        excerpt ? `  Trecho extraido: ${excerpt}` : '',
       ]
         .filter(Boolean)
         .join('\n');
@@ -1046,6 +1161,7 @@ const generateArticleWithAi = async (
     'Voce e um jornalista redator profissional de alto nivel. Sua tarefa e entregar uma materia pronta para publicacao, nao um briefing, nao um clipping e nao um relatorio tecnico. Raciocine como uma mini-redacao: editor de pauta, checador, reporter, redator e editor final. Essas funcoes sao internas e nunca devem aparecer no texto. Nunca cite marca do portal, IA, prompt, modelo, cluster, Geracao X, Millennials, Gen Z, publico-alvo, fontes consolidadas, checklist, apuracao interna ou processo editorial no texto publicado. Escreva em portugues do Brasil, com acentos corretos. Cada editoria deve ter vocabulario proprio: nao transforme toda noticia em analise economica. Comece a resposta imediatamente com JSON puro e valido.';
   const imageCandidates = uniqueImageCandidates(parseArray(row.image_candidates)).slice(0, 10);
   const selectedImage = chooseBestImage(imageCandidates, editorialTitle, row.category);
+  const finalModel = premiumDraft ? DEFAULT_GEMINI_MODEL : env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
   const imageLines = imageCandidates
     .map((candidate, index) => `${index + 1}. ${candidate.url} | pauta: ${plain(candidate.sourceTitle, 160)} | origem: ${plain(candidate.sourcePublisher, 80)}`)
     .join('\n');
@@ -1188,7 +1304,7 @@ MICRO-PERSONAS DE ELITE:
 CLASSIFICACAO PREVIA OBRIGATORIA:
 - Antes de escrever, leia o conjunto inteiro de fontes e identifique a noticia central mais relevante. Nao assuma que a primeira fonte e a pauta principal.
 - Use os dados como apuracao consolidada: cruze os trechos, descarte repeticao, priorize o dado exclusivo e construa uma materia inedita. Nunca explique esse processo ao leitor.
-- O bloco DOSSIE FACTUAL abaixo tem prioridade sobre o resumo operacional. Ele existe para impedir texto generico. Use nomes, numeros, idades, cidades, orgaos, datas e objetos concretos listados nele.
+- O bloco DOSSIE FACTUAL VERIFICADO abaixo tem prioridade maxima sobre o resumo operacional e sobre titulos RSS. Ele existe para impedir texto generico. Use nomes, numeros, idades, cidades, orgaos, datas e objetos concretos listados nele.
 - Se houver sinais factuais no dossie, a materia final deve trazer pelo menos 6 deles de forma natural no lead e no corpo. Nao substitua "Eliseu Bitencourt, 32 anos" por "um homem"; nao substitua "revolver calibre .38" por "armas"; nao substitua "Costa Rica, MS" por "interior".
 - Se houver valores, anos, percentuais ou quantidades no dossie, eles sao obrigatorios. Nao troque "129 bilhoes de dolares", "319 bilhoes de euros", "116 bilhoes de dolares" ou "2024" por "aumentos significativos", "volume elevado" ou "dados indicam".
 - Em economia e geopolitica, o texto deve abrir ou chegar ate o terceiro paragrafo com os numeros centrais. Materia sem os valores disponiveis deve ser considerada incompleta.
@@ -1282,8 +1398,8 @@ DADOS DO CLUSTER:
 ${imageLines || 'Sem imagens candidatas.'}
 [TITULOS PROIBIDOS PARA COPIA]:
 ${forbiddenTitles || 'Sem titulos listados.'}
-[DOSSIE FACTUAL - PRIORIDADE ALTA]:
-${factDossier || 'Sem dossie factual estruturado. Use apenas os dados visiveis em fontes e resumo.'}
+[DOSSIE FACTUAL VERIFICADO - PRIORIDADE MAXIMA]:
+${aiFactDossier.text || 'Sem dossie factual estruturado. Use apenas os dados visiveis em fontes e resumo.'}
 [FONTES]:
 ${sourceLines || 'Fontes nao listadas.'}
 
@@ -1298,13 +1414,15 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
   try {
     const gemini = await runGeminiJson({
       apiKey: env.GEMINI_API_KEY,
-      model: premiumDraft ? DEFAULT_GEMINI_MODEL : env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
+      model: finalModel,
       system,
       prompt,
-      maxOutputTokens: premiumDraft ? 7600 : 6200,
+      maxOutputTokens: premiumDraft ? 6800 : 5600,
       temperature: premiumDraft ? 0.28 : 0.35,
+      timeoutMs: premiumDraft ? 22000 : 20000,
+      fallbackModels: [...new Set([finalModel, DEFAULT_GEMINI_MODEL, 'gemini-2.5-flash-lite'])],
     });
-    const generationModel = gemini.model;
+    const generationModel = aiFactDossier.model ? `${gemini.model}+dossier:${aiFactDossier.model}` : gemini.model;
     const result = gemini.result;
 
     const generatedBody = htmlFromModelField(
