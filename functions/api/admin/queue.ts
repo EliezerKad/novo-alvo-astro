@@ -729,6 +729,81 @@ const factSignalsFrom = (value: string) => {
   return [...new Set([...names, ...numbers, ...money, ...largeValues, ...dates, ...years])].slice(0, 28);
 };
 
+const normalizeForPresence = (value: unknown) =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const containsName = (text: string, name: string) => {
+  const normalizedText = ` ${normalizeForPresence(text)} `;
+  const normalizedName = normalizeForPresence(name);
+  if (!normalizedName) return true;
+  if (normalizedText.includes(` ${normalizedName} `)) return true;
+  const parts = normalizedName.split(' ').filter((part) => part.length > 2);
+  if (parts.length >= 3) {
+    const shortName = parts.slice(0, 2).join(' ');
+    const familyName = parts.slice(-2).join(' ');
+    return normalizedText.includes(` ${shortName} `) || normalizedText.includes(` ${familyName} `);
+  }
+  return false;
+};
+
+const requiredNamesFromSources = (sources: unknown[], row: QueueRow) => {
+  const publisherNames = new Set(
+    sources
+      .map((source) => (source && typeof source === 'object' ? plain((source as Record<string, unknown>).publisher, 120) : ''))
+      .filter(Boolean)
+      .map(normalizeForPresence),
+  );
+  const text = decodeHtmlEntities(
+    plain(
+      [
+        row.title,
+        row.summary,
+        row.keywords,
+        ...sources.map((source) => (source && typeof source === 'object' ? sourceEvidenceText(source as Record<string, unknown>) : '')),
+      ].join(' '),
+      18000,
+    ),
+  );
+  const matches = [
+    ...text.matchAll(
+      /\b[A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇ][A-Za-zÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇáàâãéèêíïóôõöúç]{2,}(?:\s+(?:d[aeo]s?|e|do|da|dos|das|de|[A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇ][A-Za-zÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇáàâãéèêíïóôõöúç]{2,})){1,5}/g,
+    ),
+  ];
+  const scored = new Map<string, { name: string; score: number }>();
+  const stop = /^(Policia Civil|Rio de Janeiro|Zona Sul|Ipanema|Vinicius de Moraes|Visconde de Piraja|Jornal de Brasilia|Portal Novo Alvo|Leia Tambem)$/i;
+  for (const match of matches) {
+    const name = plain(match[0], 120).replace(/\s+/g, ' ').trim();
+    const key = normalizeForPresence(name);
+    if (!key || publisherNames.has(key) || stop.test(name)) continue;
+    const start = Math.max(0, match.index - 180);
+    const end = Math.min(text.length, match.index + name.length + 220);
+    const context = text.slice(start, end);
+    let score = 0;
+    if (new RegExp(`${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*,\\s*\\d{1,3}\\b`).test(context)) score += 6;
+    if (/\b(morreu|morta|morto|vitima|vítima|jovem|filha|mae|mãe|atingida|atropelad[ao]s?|ferid[ao]s?)\b/i.test(context)) score += 4;
+    if (/\b(investiga|policia|polícia|acidente|van|cal[cç]ada|hospital|sepultamento)\b/i.test(context)) score += 1;
+    if (/\b(rua|ruas|avenida|esquina|bairro|zona sul)\b/i.test(context)) score -= 4;
+    if (score < 5) continue;
+    const current = scored.get(key);
+    if (!current || score > current.score) scored.set(key, { name, score });
+  }
+  return [...scored.values()]
+    .sort((a, b) => b.score - a.score)
+    .map((item) => item.name)
+    .slice(0, 6);
+};
+
+const missingRequiredNames = (article: Record<string, unknown>, bodyHtml: string, requiredNames: string[]) => {
+  const text = [article.title, article.summary, article.meta_description, bodyHtml].join(' ');
+  return requiredNames.filter((name) => !containsName(text, name));
+};
+
 const buildFactDossier = (sources: unknown[], row: QueueRow) => {
   const rows = sources
     .slice(0, 15)
@@ -1028,6 +1103,7 @@ const generateArticleWithAi = async (
   const premiumDraft = score > 800;
   const editorialTitle = stripRadarPrefix(row.title) || clean(row.title, 220);
   const factDossier = buildFactDossier(sources, row);
+  const requiredNames = requiredNamesFromSources(sources, row);
   const aiFactDossier = await buildAiFactDossier(sources, row, env, factDossier);
   const sourceLines = sources
     .slice(0, 15)
@@ -1300,6 +1376,8 @@ ${imageLines || 'Sem imagens candidatas.'}
 ${forbiddenTitles || 'Sem titulos listados.'}
 [DOSSIE FACTUAL VERIFICADO - PRIORIDADE MAXIMA]:
 ${aiFactDossier.text || 'Sem dossie factual estruturado. Use apenas os dados visiveis em fontes e resumo.'}
+[NOMES PROPRIOS OBRIGATORIOS]:
+${requiredNames.length ? requiredNames.map((name) => `- ${name}`).join('\n') : 'Sem nomes obrigatorios detectados.'}
 [FONTES]:
 ${sourceLines || 'Fontes nao listadas.'}
 
@@ -1307,25 +1385,30 @@ IMPORTANTE SOBRE AS FONTES:
 - Os trechos extraidos da materia completa e o dossie factual têm prioridade sobre titulo RSS e resumo operacional.
 - Quando houver nome de pessoa, orgao, clube, empresa ou cargo nesses trechos, use o nome. Nao substitua por sujeito vago.
 
+- Se houver nomes proprios obrigatorios listados, a materia final precisa citar esses nomes no titulo, lide ou primeiros paragrafos quando forem vitimas, investigados, autoridades, atletas, empresas ou personagens centrais. Omitir nome obrigatorio torna a materia invalida.
+
 Responda exatamente neste formato, com JSON valido e sem markdown:
 {"title":"...","slug":"...","meta_description":"...","fact_static":"...","active_agent":"...","latent_cause":"...","conflict_point":"...","micro_persona":"...","featured_image_url":"...","secondary_image_url":"...","image_alt":"...","image_credit":"...","content_html":"..."}
 `;
 
   try {
-    const gemini = await runGeminiJson({
+    const runArticleGeneration = (extraInstruction = '') =>
+      runGeminiJson({
       apiKey: geminiApiKeys,
       model: finalModel,
       system,
-      prompt,
+      prompt: extraInstruction ? `${prompt}\n\nVALIDACAO EDITORIAL OBRIGATORIA:\n${extraInstruction}` : prompt,
       maxOutputTokens: premiumDraft ? 6800 : 5600,
       temperature: premiumDraft ? 0.28 : 0.35,
       timeoutMs: premiumDraft ? 38000 : 30000,
       fallbackModels: [finalModel, DEFAULT_GEMINI_MODEL],
     });
-    const generationModel = aiFactDossier.model ? `${gemini.model}+dossier:${aiFactDossier.model}` : gemini.model;
-    const result = gemini.result;
 
-    const generatedBody = htmlFromModelField(
+    let gemini = await runArticleGeneration();
+    let generationModel = aiFactDossier.model ? `${gemini.model}+dossier:${aiFactDossier.model}` : gemini.model;
+    let result = gemini.result;
+
+    let generatedBody = htmlFromModelField(
       result.content_html || result.bodyHtml || result.contentHtml || result.content || result.article || result.text,
     );
     if (!hasEditorialBody(generatedBody)) {
@@ -1333,6 +1416,27 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
     }
     if (hasInternalLeak(result.title) || hasInternalLeak(result.summary || result.meta_description)) {
       throw new Error('Gemini vazou instrucoes internas no titulo ou resumo.');
+    }
+    let missingNames = missingRequiredNames(result, generatedBody, requiredNames);
+    if (missingNames.length) {
+      gemini = await runArticleGeneration(
+        `A resposta anterior omitiu nomes centrais extraidos das fontes: ${missingNames.join(', ')}. Reescreva a materia completa citando esses nomes no titulo, lide ou primeiros paragrafos, sem inventar dados e sem substituir por "jovem", "filha", "vitima", "homem" ou "mulher" quando o nome existir.`,
+      );
+      generationModel = aiFactDossier.model ? `${gemini.model}+dossier:${aiFactDossier.model}` : gemini.model;
+      result = gemini.result;
+      generatedBody = htmlFromModelField(
+        result.content_html || result.bodyHtml || result.contentHtml || result.content || result.article || result.text,
+      );
+      if (!hasEditorialBody(generatedBody)) {
+        throw new Error('Gemini respondeu sem uma materia editorial completa em content_html.');
+      }
+      if (hasInternalLeak(result.title) || hasInternalLeak(result.summary || result.meta_description)) {
+        throw new Error('Gemini vazou instrucoes internas no titulo ou resumo.');
+      }
+      missingNames = missingRequiredNames(result, generatedBody, requiredNames);
+      if (missingNames.length) {
+        throw new Error(`Gemini omitiu nomes obrigatorios das fontes: ${missingNames.join(', ')}.`);
+      }
     }
 
     const featuredImageUrl = pickCandidateImage(
