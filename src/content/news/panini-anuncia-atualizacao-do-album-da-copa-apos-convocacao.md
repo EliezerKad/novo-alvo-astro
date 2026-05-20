@@ -7,7 +7,7 @@ category: "Esportes"
 author: "Redação Novo Alvo"
 sources: ["Portal UMBU", "Folha do Leste", "Paranaíba Mais", "Meio e Mensagem", "BOL", "Independente", "Portal GO 020", "Estadão", "Omelete", "98fmNews", "Nova Era News", "Correio Sudoeste", "GCMais", "Revista Let's Go Bahia", "Terra", "Conectado News"]
 publishedAt: "2026-05-20T18:25:15.542Z"
-updatedAt: "2026-05-20T18:25:16.564Z"
+updatedAt: "2026-05-20T18:25:52.399Z"
 featured: false
 isFeatured: false
 urgent: false
