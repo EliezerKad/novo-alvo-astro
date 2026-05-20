@@ -824,6 +824,41 @@ const missingRequiredNames = (article: Record<string, unknown>, bodyHtml: string
   return requiredNames.filter((name) => !containsName(text, name));
 };
 
+const buildIdentityLedger = (sources: unknown[], row: QueueRow, requiredNames: string[]) => {
+  const records = requiredNames
+    .map((name) => {
+      const evidence = [
+        row.title,
+        row.summary,
+        row.keywords,
+        ...sources.map((source) => (source && typeof source === 'object' ? sourceEvidenceText(source as Record<string, unknown>) : '')),
+      ].join(' ');
+      const normalizedEvidence = normalizeForPresence(evidence);
+      const normalizedName = normalizeForPresence(name);
+      const index = normalizedEvidence.indexOf(normalizedName);
+      const rawIndex = evidence.toLowerCase().indexOf(name.toLowerCase());
+      const start = Math.max(0, rawIndex >= 0 ? rawIndex - 220 : index - 220);
+      const context = clipWholeWord(evidence.slice(start, start + 560), 520);
+      const signals = [
+        /\b(?:atriz|ator|artista|elenco|papel|personagem|interpreta|interpretava|vive|vivia|serie|temporada|hbo|cinema|filme)\b/i.test(normalizeForPresence(context))
+          ? 'pessoa/personagem de entretenimento'
+          : '',
+        /\b(?:vitima|vítima|morreu|morta|morto|ferid|atingid|atropelad|suspeit|investigad)\b/i.test(context)
+          ? 'pessoa central de ocorrencia'
+          : '',
+        /\b\d{1,3}\s+anos?\b/i.test(context) ? 'idade citada' : '',
+        /\b(?:deixou|saiu|substituida|substituido|retornar|gravacoes|producao|emissora|confirmada|confirmado)\b/i.test(normalizeForPresence(context))
+          ? 'acao ou desdobramento atribuido'
+          : '',
+      ].filter(Boolean);
+      return `- ${name}${signals.length ? ` (${signals.join(', ')})` : ''}: ${context || 'nome detectado nas fontes.'}`;
+    })
+    .filter(Boolean);
+
+  if (!records.length) return 'Nenhuma identidade central obrigatoria detectada automaticamente.';
+  return records.join('\n');
+};
+
 const geminiModelFallbacks = (env: Env, finalModel: string) => [
   ...new Set(
     [
@@ -1160,6 +1195,7 @@ const generateArticleWithAi = async (
   const fallbackModels = geminiModelFallbacks(env, env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL);
   const factDossier = buildFactDossier(sources, row);
   const requiredNames = requiredNamesFromSources(sources, row);
+  const identityLedger = buildIdentityLedger(sources, row, requiredNames);
   const aiFactDossier = await buildAiFactDossier(sources, row, env, factDossier);
   const sourceLines = sources
     .slice(0, 15)
@@ -1432,6 +1468,8 @@ ${imageLines || 'Sem imagens candidatas.'}
 ${forbiddenTitles || 'Sem titulos listados.'}
 [DOSSIE FACTUAL VERIFICADO - PRIORIDADE MAXIMA]:
 ${aiFactDossier.text || 'Sem dossie factual estruturado. Use apenas os dados visiveis em fontes e resumo.'}
+[FICHA DE IDENTIDADES CENTRAIS - PRIORIDADE MAXIMA]:
+${identityLedger}
 [NOMES PROPRIOS OBRIGATORIOS]:
 ${requiredNames.length ? requiredNames.map((name) => `- ${name}`).join('\n') : 'Sem nomes obrigatorios detectados.'}
 [FONTES]:
@@ -1446,6 +1484,8 @@ IMPORTANTE SOBRE AS FONTES:
 REGRA ANTI-LACUNA NOMINAL:
 - E proibido escrever "atriz nao identificada", "nao nomeada nas fontes", "nome nao divulgado pelas fontes" ou variacoes. Se a pessoa central nao estiver nomeada nos trechos, nao gere materia final: prefira falhar a publicar texto generico.
 - Em Famosos, Cinema e Entretenimento, nomes de atores, atrizes, personagens, emissoras, series, filmes, temporadas e idades presentes nos trechos sao dados obrigatorios, mesmo que nao aparecam no titulo RSS.
+- Antes de escrever, monte mentalmente uma tabela WHO/WHAT/WHEN/WHERE/WHY/HOW. O WHO deve sair da FICHA DE IDENTIDADES CENTRAIS e dos trechos extraidos. Se WHO tiver nome proprio, o titulo, lide ou segundo paragrafo deve usar esse nome.
+- A materia so e valida se cada pessoa central mencionada no titulo/lide estiver ligada a pelo menos um detalhe verificavel da ficha: idade, papel, cargo, personagem, local, data, acao, orgao ou consequencia.
 
 Responda exatamente neste formato, com JSON valido e sem markdown:
 {"title":"...","slug":"...","meta_description":"...","fact_static":"...","active_agent":"...","latent_cause":"...","conflict_point":"...","micro_persona":"...","featured_image_url":"...","secondary_image_url":"...","image_alt":"...","image_credit":"...","content_html":"..."}
