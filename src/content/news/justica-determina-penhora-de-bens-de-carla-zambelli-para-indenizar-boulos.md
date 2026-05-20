@@ -1,14 +1,14 @@
 ---
 title: "Justiça determina penhora de bens de Carla Zambelli para indenizar Boulos"
 slug: "justica-determina-penhora-de-bens-de-carla-zambelli-para-indenizar-boulos"
-summary: "Decisão judicial determina a apreensão de bens da deputada Carla Zambelli para pagamento de indenização por uso irregular de imagem do deputado Guilherme Boulos."
-seoDescription: "Politica: Decisão judicial determina a apreensão de bens da deputada Carla Zambelli para pagamento de indenização por uso irregular de imagem do deputado…"
+summary: "A Justiça de SP determinou a penhora de bens de Carla Zambelli para indenizar Guilherme Boulos em R$ 17,7 mil. A decisão, que atende a uma ação de 2020, ocorre após a deputada não pagar voluntariamente pela condenação por uso indevido da imagem de Boulos em redes sociais. O caso reforça a importância do respeito aos di"
+seoDescription: "Politica: A Justiça de SP determinou a penhora de bens de Carla Zambelli para indenizar Guilherme Boulos em R$ 17,7 mil. A decisão, que atende a uma ação de…"
 category: "Politica"
 author: "Redação Novo Alvo"
 sources: ["Revista Oeste", "CNN Brasil", "band.com.br", "Gazeta do Povo", "Vero Notícias", "Brasil 247", "Rondônia Dinâmica", "Folha de S.Paulo", "Revista Fórum", "Diário do Centro do Mundo", "Tribuna do Norte", "DW.com", "CartaCapital", "BBC"]
 publishedAt: "2026-05-20T16:09:53.471Z"
-updatedAt: "2026-05-20T16:09:54.289Z"
-featured: false
+updatedAt: "2026-05-20T16:10:57.455Z"
+featured: true
 isFeatured: false
 urgent: false
 homeSection: ""
