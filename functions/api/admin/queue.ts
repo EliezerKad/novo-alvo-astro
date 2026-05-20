@@ -696,12 +696,16 @@ const hasUsefulExcerpt = (source: unknown) =>
 
 const enrichSourcesWithText = async (sources: unknown[]) => {
   const enriched = [...sources];
-  let usefulExcerpts = 0;
+  let usefulExcerpts = enriched.filter(hasUsefulExcerpt).length;
+  if (usefulExcerpts >= 3) return enriched;
 
-  for (let index = 0; index < Math.min(12, sources.length); index += 1) {
+  let liveAttempts = 0;
+  for (let index = 0; index < Math.min(5, sources.length); index += 1) {
+    if (hasUsefulExcerpt(enriched[index])) continue;
+    liveAttempts += 1;
     enriched[index] = await fetchSourceExcerpt(sources[index]);
     if (hasUsefulExcerpt(enriched[index])) usefulExcerpts += 1;
-    if (usefulExcerpts >= 6) break;
+    if (usefulExcerpts >= 3 || liveAttempts >= 2) break;
   }
 
   return enriched;
