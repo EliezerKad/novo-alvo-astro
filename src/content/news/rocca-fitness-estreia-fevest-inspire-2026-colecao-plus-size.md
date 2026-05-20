@@ -6,11 +6,12 @@ seoDescription: "Rocca Fitness estreia na Fevest Inspire 2026 com coleção Plus
 category: "Moda"
 author: "Redação Novo Alvo"
 sources: ["Rocca Fitness", "Fevest Inspire 2026"]
-publishedAt: "2026-05-20T20:00:00.000Z"
-updatedAt: "2026-05-20T20:00:00.000Z"
+publishedAt: "2026-05-20T23:24:13.000Z"
+updatedAt: "2026-05-20T23:24:13.000Z"
 featured: false
 isFeatured: false
 urgent: false
+homeSection: "now"
 views: 0
 cover:
   src: "https://portalnovoalvo.com.br/uploads/news/rocca-fitness-fevest-2026-cover.jpeg"
