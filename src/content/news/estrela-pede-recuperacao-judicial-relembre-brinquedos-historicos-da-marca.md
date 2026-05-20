@@ -2,23 +2,23 @@
 title: "Estrela pede recuperação judicial e relembra brinquedos icônicos"
 slug: "estrela-pede-recuperacao-judicial-relembre-brinquedos-historicos-da-marca"
 summary: "A tradicional fabricante de brinquedos Estrela entrou com pedido de recuperação judicial. A notícia traz à tona a nostalgia de clássicos como Susi, Banco Imobiliário e Ferrorama."
-seoDescription: "A tradicional fabricante de brinquedos Estrela entrou com pedido de recuperação judicial. A notícia traz à tona a nostalgia de clássicos como Susi, Banco"
+seoDescription: "Brasil: A tradicional fabricante de brinquedos Estrela entrou com pedido de recuperação judicial. A notícia traz à tona a nostalgia de clássicos como Susi…"
 category: "Brasil"
 author: "Redação Novo Alvo"
 sources: ["Terra", "BBC", "Folha PE", "O Globo", "Money Times", "O TEMPO", "Campo Grande News", "Portal do Holanda", "NSC Total"]
 publishedAt: "2026-05-20T18:37:36.430Z"
-updatedAt: "2026-05-20T18:38:12.734Z"
+updatedAt: "2026-05-20T19:10:59.424Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/estrela-pede-recuperacao-judicial-relembre-brinquedos-historicos-da-marca-cover.png"
+  src: "https://portalnovoalvo.com.br/media/news/estrela-pede-recuperacao-judicial-relembre-brinquedos-historicos-da-marca-cover.jpg"
   alt: "Bandeira do Brasil"
-  caption: "Wikimedia Commons"
+  caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/estrela-pede-recuperacao-judicial-relembre-brinquedos-historicos-da-marca-cover.png"
+ogImage: "https://portalnovoalvo.com.br/media/news/estrela-pede-recuperacao-judicial-relembre-brinquedos-historicos-da-marca-cover.jpg"
 tags: ["brasil", "estrela", "pede", "recuperacao", "judicial", "relembre", "brinquedos", "historicos", "marca"]
 ---
 
