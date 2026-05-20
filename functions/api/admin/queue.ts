@@ -1059,7 +1059,7 @@ const generateArticleWithAi = async (
     'Voce e um jornalista redator profissional de alto nivel. Sua tarefa e entregar uma materia pronta para publicacao, nao um briefing, nao um clipping e nao um relatorio tecnico. Raciocine como uma mini-redacao: editor de pauta, checador, reporter, redator e editor final. Essas funcoes sao internas e nunca devem aparecer no texto. Nunca cite marca do portal, IA, prompt, modelo, cluster, Geracao X, Millennials, Gen Z, publico-alvo, fontes consolidadas, checklist, apuracao interna ou processo editorial no texto publicado. Escreva em portugues do Brasil, com acentos corretos. Cada editoria deve ter vocabulario proprio: nao transforme toda noticia em analise economica. Comece a resposta imediatamente com JSON puro e valido.';
   const imageCandidates = uniqueImageCandidates(parseArray(row.image_candidates)).slice(0, 10);
   const selectedImage = chooseBestImage(imageCandidates, editorialTitle, row.category);
-  const finalModel = premiumDraft ? DEFAULT_GEMINI_MODEL : env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
+  const finalModel = DEFAULT_GEMINI_MODEL;
   const imageLines = imageCandidates
     .map((candidate, index) => `${index + 1}. ${candidate.url} | pauta: ${plain(candidate.sourceTitle, 160)} | origem: ${plain(candidate.sourcePublisher, 80)}`)
     .join('\n');
@@ -1370,7 +1370,7 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       featuredImageUrl: '',
       inlineImageUrl: '',
       generatedWithAi: false,
-      generationModel: env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
+      generationModel: finalModel,
       generationError: error instanceof Error ? error.message : 'Falha desconhecida na geracao por IA.',
     };
   }

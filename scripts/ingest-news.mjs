@@ -190,7 +190,7 @@ const GOOGLE_SEARCH_CX = process.env.GOOGLE_SEARCH_CX || '';
 const GOOGLE_SEARCH_PAGES_PER_QUERY = Number(process.env.GOOGLE_SEARCH_PAGES_PER_QUERY || 1);
 const GOOGLE_SEARCH_QUERIES_PER_CATEGORY = Number(process.env.GOOGLE_SEARCH_QUERIES_PER_CATEGORY || 4);
 const GNEWS_API_KEY = process.env.GNEWS_API_KEY || '';
-const GNEWS_QUERIES_PER_CATEGORY = Number(process.env.GNEWS_QUERIES_PER_CATEGORY || 3);
+const GNEWS_QUERIES_PER_CATEGORY = Number(process.env.GNEWS_QUERIES_PER_CATEGORY || 1);
 const GNEWS_MAX_RESULTS = Number(process.env.GNEWS_MAX_RESULTS || 10);
 const GNEWS_REQUEST_DELAY_MS = Number(process.env.GNEWS_REQUEST_DELAY_MS || 1800);
 const GNEWS_RETRY_DELAY_MS = Number(process.env.GNEWS_RETRY_DELAY_MS || 12000);
@@ -1106,16 +1106,6 @@ const distinctBySource = (items) => {
   });
 };
 
-const distinctByArticle = (items) => {
-  const seen = new Set();
-  return items.filter((item) => {
-    const key = String(item.link || item.title).toLowerCase().split('?')[0];
-    if (!key || seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-};
-
 const clusterItems = (items) => {
   const clusters = [];
   const sorted = [...items]
@@ -1217,54 +1207,6 @@ const buildCategoryFloorPitches = (
         });
       }
       return batches;
-    })
-    .filter(Boolean);
-};
-
-const buildGNewsCategoryDigestPitches = (items, categories = Object.keys(FEEDS), targetSources = SOURCE_TEXT_TARGET) => {
-  const byCategory = new Map();
-  for (const item of items) {
-    if (!categories.includes(item.category)) continue;
-    if (!byCategory.has(item.category)) byCategory.set(item.category, []);
-    byCategory.get(item.category).push(item);
-  }
-
-  const dayKey = new Date().toISOString().slice(0, 10);
-  return categories
-    .map((category) => {
-      const categoryItems = distinctByArticle(byCategory.get(category) || [])
-        .sort((a, b) => itemRelevanceScore(b, byCategory.get(category) || []) - itemRelevanceScore(a, byCategory.get(category) || []))
-        .slice(0, Math.max(ACTIVE_MIN_SOURCES, targetSources));
-      if (categoryItems.length < ACTIVE_MIN_SOURCES) return null;
-
-      const pitch = buildPitch(
-        categoryItems.map((item) => ({
-          ...item,
-          category,
-          radarCluster: true,
-          gnewsDigest: true,
-        })),
-      );
-      const themes = extractKeywords(
-        categoryItems
-          .slice(0, targetSources)
-          .map((item) => item.title)
-          .join(' '),
-        category,
-      ).slice(0, 4);
-
-      return {
-        ...pitch,
-        clusterKey: `${slugify(category)}:gnews-digest:${dayKey}`,
-        title: `Radar ${category}: ${themes.length ? themes.join(', ') : cleanPitchTitle(categoryItems[0].title)}`,
-        summary: `Sintese editorial da categoria ${category} com ${Math.min(targetSources, categoryItems.length)} materias recentes. A materia final deve cruzar as fontes, escolher os fatos mais concretos, preservar numeros, nomes, datas e explicar o que mudou para o leitor.`,
-        sourceCount: categoryItems.length,
-        score: Math.min(1000, 760 + Math.min(20, categoryItems.length) * 10 + themes.length * 8),
-        tags: [...new Set([category, 'Radar GNews', ...themes])],
-        keywords: [...new Set([category, 'Radar GNews', ...themes])].join(', '),
-        expiresAt: new Date(Date.now() + 20 * 60 * 60 * 1000).toISOString(),
-        bypassMemory: true,
-      };
     })
     .filter(Boolean);
 };
@@ -1410,7 +1352,12 @@ const categorySearchQueries = (category) => {
 const categorySearchEntries = (categories = Object.keys(FEEDS)) =>
   categories.flatMap((category) => categorySearchQueries(category).map((query, index) => [category, query, index]));
 
-const categoryGNewsQueries = (category) => categorySearchQueries(category).slice(0, GNEWS_QUERIES_PER_CATEGORY);
+const categoryGNewsQueries = (category) =>
+  [
+    `ultimas noticias sobre ${category} Brasil`,
+    `${category} noticias de ultima hora Brasil`,
+    ...categorySearchQueries(category),
+  ].slice(0, GNEWS_QUERIES_PER_CATEGORY);
 
 const categoryGNewsEntries = (categories = Object.keys(FEEDS)) =>
   categories.flatMap((category) => categoryGNewsQueries(category).map((query, index) => [category, query, index]));
@@ -1811,21 +1758,15 @@ const main = async () => {
     .map(buildPitch)
     .filter((pitch) => pitch.sourceCount >= ACTIVE_MIN_SOURCES && !topicPitches.some((existing) => existing.clusterKey === pitch.clusterKey))
     .sort((a, b) => b.score - a.score);
-  const gnewsDigestPitches =
-    INGEST_DISCOVERY === 'gnews'
-      ? buildGNewsCategoryDigestPitches(allItems, ACTIVE_CATEGORIES, SOURCE_TEXT_TARGET).sort((a, b) => b.score - a.score)
-      : [];
   const coveragePitches = buildCategoryFloorPitches(
     allItems,
-    IS_CATEGORY_MODE ? [] : [...topicPitches, ...radarPitches, ...gnewsDigestPitches],
+    IS_CATEGORY_MODE ? [] : [...topicPitches, ...radarPitches],
     ACTIVE_CATEGORIES,
     ACTIVE_FLOOR_MIN_SOURCES,
     IS_CATEGORY_MODE ? pitchLimit : 1,
     !IS_CATEGORY_MODE,
   );
-  const pitches = (INGEST_DISCOVERY === 'gnews'
-    ? balancePitches([], gnewsDigestPitches, coveragePitches, pitchLimit, ACTIVE_CATEGORIES)
-    : balancePitches(topicPitches, radarPitches, coveragePitches, pitchLimit, ACTIVE_CATEGORIES))
+  const pitches = balancePitches(topicPitches, radarPitches, coveragePitches, pitchLimit, ACTIVE_CATEGORIES)
     .filter((pitch) => pitch.sourceCount >= ABSOLUTE_MIN_SOURCES);
 
   let saved = 0;
@@ -1895,10 +1836,10 @@ const main = async () => {
     feedCounts,
     startedAt,
     finishedAt: new Date().toISOString(),
-    notes: `${saved}/${pitches.length} pautas novas visiveis. ${updatedHidden} atualizacao(oes) fora da aba Novas.${INGEST_DISCOVERY === 'gnews' ? ` Digests GNews por categoria: ${gnewsDigestPitches.length}.` : ''}`,
+    notes: `${saved}/${pitches.length} pautas novas visiveis. ${updatedHidden} atualizacao(oes) fora da aba Novas.${INGEST_DISCOVERY === 'gnews' ? ' GNews agrupado por assunto, sem digest solto por categoria.' : ''}`,
   });
   console.log(
-    `Ingestao concluida: ${saved}/${pitches.length} pautas novas visiveis. ${updatedHidden} atualizacao(oes) fora da aba Novas. Itens: ${allItems.length}. Clusters por assunto: ${topicPitches.length}. Radares por categoria: ${radarPitches.length}. Digests GNews: ${gnewsDigestPitches.length}. Cobertura minima: ${coveragePitches.length}.`,
+    `Ingestao concluida: ${saved}/${pitches.length} pautas novas visiveis. ${updatedHidden} atualizacao(oes) fora da aba Novas. Itens: ${allItems.length}. Clusters por assunto: ${topicPitches.length}. Radares por categoria: ${radarPitches.length}. Cobertura minima: ${coveragePitches.length}.`,
   );
   console.log(`Itens por categoria: ${JSON.stringify(feedCounts)}`);
 };
