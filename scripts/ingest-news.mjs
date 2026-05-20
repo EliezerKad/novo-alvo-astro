@@ -296,24 +296,24 @@ const googleNewsSignaturePayload = (html, articleId) => {
   const timestamp = String(html || '').match(/\bdata-n-a-ts=["']([^"']+)["']/i)?.[1] || '';
   if (!signature || !timestamp || !articleId) return '';
 
-  const request = [
-    'Fbv4je',
-    `["garturlreq",[["X","X",["X","X"],null,null,1,1,"BR:pt",null,1,null,null,null,null,null,0,1],"pt-BR","BR",1,[1,1,1],1,1,null,0,0,null,0],"${articleId}",${timestamp},"${signature}"]`,
-    null,
-    'generic',
-  ];
-  return JSON.stringify([[request]]);
+  const request = `["garturlreq",[["X","X",["X","X"],null,null,1,1,"US:en",null,1,null,null,null,null,null,0,1],"X","X",1,[1,1,1],1,1,null,0,0,null,0],"${articleId}",${timestamp},"${signature}"]`;
+  return JSON.stringify([[['Fbv4je', request]]]);
 };
 
 const parseGoogleNewsDecodedUrl = (value) => {
-  const line = String(value || '')
-    .split('\n')
-    .map((item) => item.trim())
-    .find((item) => item.startsWith('[') && item.includes('http'));
+  const raw = String(value || '');
+  const block = raw.split('\n\n').find((item) => item.trim().startsWith('[') && item.includes('http')) || '';
+  const line =
+    block ||
+    raw
+      .split('\n')
+      .map((item) => item.trim())
+      .find((item) => item.startsWith('[') && item.includes('http'));
   if (!line) return '';
   try {
     const outer = JSON.parse(line);
-    const inner = JSON.parse(outer?.[0]?.[2] || '[]');
+    const parsed = Array.isArray(outer) ? outer.slice(0, -2) : outer;
+    const inner = JSON.parse(parsed?.[0]?.[2] || outer?.[0]?.[2] || '[]');
     const decoded = inner?.[1] || inner?.[0]?.[1] || '';
     return /^https?:\/\//i.test(decoded) ? decoded : '';
   } catch {
