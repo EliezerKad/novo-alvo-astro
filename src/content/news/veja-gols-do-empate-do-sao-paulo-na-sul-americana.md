@@ -2,12 +2,12 @@
 title: "Dorival Jr. reestreia com empate amargo do São Paulo na Sul-Americana"
 slug: "veja-gols-do-empate-do-sao-paulo-na-sul-americana"
 summary: "Na reestreia de Dorival Júnior, São Paulo empata em 1 a 1 com o Millonarios no MorumBis pela Sul-Americana, adiando a classificação e gerando frustração."
-seoDescription: "Na reestreia de Dorival Júnior, São Paulo empata em 1 a 1 com o Millonarios no MorumBis pela Sul-Americana, adiando a classificação e gerando frustração."
+seoDescription: "Futebol: Na reestreia de Dorival Júnior, São Paulo empata em 1 a 1 com o Millonarios no MorumBis pela Sul-Americana, adiando a classificação e gerando…"
 category: "Futebol"
 author: "Redação Novo Alvo"
 sources: ["Lance!", "365Scores", "Gazeta Esportiva", "Jogada 10", "ESPN Brasil", "Somos Fanáticos", "Estadão", "band.com.br", "Bolavip Brasil", "Rádio Itatiaia"]
 publishedAt: "2026-05-20T16:16:13.132Z"
-updatedAt: "2026-05-20T16:16:32.823Z"
+updatedAt: "2026-05-20T16:44:31.825Z"
 featured: false
 isFeatured: false
 urgent: false
@@ -24,7 +24,19 @@ tags: ["futebol", "gols", "empate", "paulo", "americana"]
 
 <p>O São Paulo empatou em 1 a 1 com o Millonarios, da Colômbia, na noite desta terça-feira (19/5), no MorumBis, pela quinta rodada da Copa Sul-Americana.</p><p>A reestreia do técnico Dorival Júnior no comando do Tricolor foi marcada por um gol de Luciano e um erro defensivo que permitiu o empate de Jorge Hurtado . O resultado adia a classificação antecipada da equipe paulista no torneio continental.</p>
 <h2>Reestreia e Expectativa no MorumBis</h2>
-<p>A volta de Dorival Júnior ao São Paulo gerou grande expectativa entre a torcida e a diretoria.</p><figure class="editorial-inline-image editorial-inline-image--right"><img src="/media/news/veja-gols-do-empate-do-sao-paulo-na-sul-americana-1.jpg" alt="Veja gols do empate do São Paulo na Sul-Americana" loading="lazy" referrerpolicy="no-referrer" /></figure><p>O objetivo principal era garantir a classificação para a próxima fase da Sul-Americana com uma vitória em casa, consolidando a liderança do Grupo C e dando tranquilidade ao novo trabalho.</p>
+<p>A volta de Dorival Júnior ao São Paulo gerou grande expectativa entre a torcida e a diretoria.</p><figure data-editor-media="image" data-align="right" data-media-size="medium" data-credit="" contenteditable="false">
+        <div class="media-controls">
+          <button type="button" data-media-action="caption">Legenda</button>
+          <button type="button" data-media-action="credit">Crédito</button>
+          <button type="button" data-media-action="left">Esq.</button>
+          <button type="button" data-media-action="center">Centro</button>
+          <button type="button" data-media-action="right">Dir.</button>
+          <button type="button" data-media-action="small">P</button>
+          <button type="button" data-media-action="medium">M</button>
+          <button type="button" data-media-action="large">Full</button>
+          <button type="button" data-media-action="remove">Remover</button>
+        </div>
+      <img src="/media/news/veja-gols-do-empate-do-sao-paulo-na-sul-americana-1.jpg" alt="Veja gols do empate do São Paulo na Sul-Americana"><figcaption><span data-caption="">Veja gols do empate do São Paulo na Sul-Americana</span><span class="media-credit" data-credit-label=""></span></figcaption></figure><p><br></p><p>O objetivo principal era garantir a classificação para a próxima fase da Sul-Americana com uma vitória em casa, consolidando a liderança do Grupo C e dando tranquilidade ao novo trabalho.</p>
 <p>O Tricolor Paulista começou bem a partida. Aos nove minutos do primeiro tempo, Luciano abriu o placar, aproveitando uma falha do goleiro Diego Novoa , do Millonarios. O São Paulo dominou boa parte do jogo, criando diversas oportunidades para ampliar a vantagem e selar a vitória.</p>
 <h2>Falhas Defensivas Custam a Vitória</h2>
 <p>Apesar do domínio e das chances criadas, a equipe não conseguiu converter as oportunidades em gols. A ineficiência ofensiva somou-se a problemas na defesa.</p><p>Já na reta final da partida, um erro defensivo, com destaque para o zagueiro Dória , abriu caminho para Jorge Hurtado igualar o marcador para o Millonarios.</p>
