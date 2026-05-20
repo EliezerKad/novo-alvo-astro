@@ -1506,6 +1506,20 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   const staleCutoff = new Date(Date.now() - maxQueueAgeHours * 60 * 60 * 1000).toISOString();
   await db
     .prepare(
+      `UPDATE editorial_pitches
+       SET status = 'reviewed',
+           updated_at = ?
+       WHERE id IN (
+         SELECT pitch_id
+         FROM editorial_queue
+         WHERE status = 'queued'
+           AND publish_after < ?
+       )`,
+    )
+    .bind(now, staleCutoff)
+    .run();
+  await db
+    .prepare(
       `UPDATE editorial_queue
        SET status = 'failed',
            error = ?,
@@ -1563,6 +1577,10 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       await markMemoryPublished(db, item, article.slug);
       published.push({ queueId: item.id, slug: article.slug, title: article.title, staticPublish: (data as { staticPublish?: unknown }).staticPublish });
     } catch (error) {
+      await db
+        .prepare("UPDATE editorial_pitches SET status = 'reviewed', updated_at = ? WHERE id = ?")
+        .bind(new Date().toISOString(), item.pitch_id)
+        .run();
       await db
         .prepare("UPDATE editorial_queue SET status = 'failed', error = ?, updated_at = ? WHERE id = ?")
         .bind(error instanceof Error ? error.message : 'Falha desconhecida', new Date().toISOString(), item.id)
