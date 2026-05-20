@@ -1,8 +1,8 @@
 ---
-title: "Lula classifica relação de Flávio Bolsonaro com banqueiro como 'caso de polícia"
+title: "Lula classifica relação de Flávio Bolsonaro com banqueiro como 'caso de polícia'"
 slug: "lula-classifica-relacao-de-flavio-bolsonaro-com-banqueiro-como-caso-de-policia"
 summary: "Presidente Luiz Inácio Lula da Silva comentou a relação entre o senador Flávio Bolsonaro e o banqueiro Daniel Vorcaro, classificando-a como um 'caso de polícia'."
-seoDescription: "Politica: Presidente Luiz Inácio Lula da Silva comentou a relação entre o senador Flávio Bolsonaro e o banqueiro Daniel Vorcaro, classificando-a como um…"
+seoDescription: "Lula classificou a relação entre Flávio Bolsonaro e o banqueiro Daniel Vorcaro como caso de polícia após a divulgação de áudios."
 category: "Politica"
 author: "Redação Novo Alvo"
 sources: ["Mossoró Hoje", "DOL", "Transmissão Política", "Jornal Diário do Povo", "Portal O Dia", "Panorama da Bahia", "Studio Notícias", "Acorda Cidade", "Jornal de Brasília", "Brasil 247", "Jornal Extra de Alagoas", "G1"]

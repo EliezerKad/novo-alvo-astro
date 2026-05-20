@@ -60,6 +60,21 @@ type ArticlePayload = {
   publishedAt?: string;
 };
 
+type ExistingArticleRecord = {
+  id: string;
+  slug?: string;
+  status?: string;
+  published_at?: string;
+};
+
+type StaticPublishResult = Awaited<ReturnType<typeof publishMarkdownToGitHub>> & {
+  replaced?: Awaited<ReturnType<typeof deleteMarkdownFromGitHub>> | {
+    ok: false;
+    skipped: false;
+    reason: string;
+  };
+};
+
 const json = (body: unknown, init: ResponseInit = {}) =>
   new Response(JSON.stringify(body), {
     ...init,
@@ -780,11 +795,33 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
 
   const origin = new URL(request.url).origin;
   const article = await prepareArticleMedia(env, normalizePayload(rawPayload), origin);
-  const existing = await db
-    .prepare('SELECT id, slug, status, published_at FROM articles WHERE id = ? OR slug = ? LIMIT 1')
-    .bind(article.id, article.slug)
-    .first<{ id: string; slug?: string; status?: string; published_at?: string }>();
+  const requestedId = clean(rawPayload.id, 80);
+  const existingById = requestedId
+    ? await db
+        .prepare('SELECT id, slug, status, published_at FROM articles WHERE id = ? LIMIT 1')
+        .bind(requestedId)
+        .first<ExistingArticleRecord>()
+    : null;
+  const existingBySlug = article.slug
+    ? await db
+        .prepare('SELECT id, slug, status, published_at FROM articles WHERE slug = ? LIMIT 1')
+        .bind(article.slug)
+        .first<ExistingArticleRecord>()
+    : null;
+
+  if (existingById && existingBySlug && existingBySlug.id !== existingById.id) {
+    return json(
+      {
+        error:
+          'Este slug ja esta em uso por outra materia. Ajuste o slug antes de salvar para evitar publicacao duplicada.',
+      },
+      { status: 409 },
+    );
+  }
+
+  const existing = existingById || existingBySlug;
   const id = existing?.id || article.id;
+  const previousSlug = clean(existing?.slug, 160);
   const previousPublishedAt = clean(existing?.published_at, 80);
   const publishedAt =
     article.status === 'published'
@@ -840,12 +877,28 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     )
     .run();
 
-  const staticPublish =
+  const staticPublish: StaticPublishResult | null =
     article.status === 'published' ? await publishMarkdownToGitHub(env, article, id, publishedAt).catch((error) => ({
       ok: false,
       skipped: false,
       reason: error instanceof Error ? error.message : 'Falha desconhecida ao publicar no GitHub.',
     })) : null;
+
+  if (
+    staticPublish?.ok &&
+    previousSlug &&
+    previousSlug !== article.slug &&
+    (existing?.status === 'published' || previousPublishedAt)
+  ) {
+    staticPublish.replaced = await deleteMarkdownFromGitHub(env, {
+      slug: previousSlug,
+      title: existing?.slug || previousSlug,
+    }).catch((error) => ({
+      ok: false,
+      skipped: false,
+      reason: error instanceof Error ? error.message : 'Falha desconhecida ao remover arquivo antigo.',
+    }));
+  }
 
   return json({
     ok: true,
