@@ -2,12 +2,12 @@
 title: "Panini lança atualização para álbum da Copa 2026 após lista de Ancelotti"
 slug: "panini-anuncia-atualizacao-do-album-da-copa-apos-convocacao"
 summary: "A Panini confirmou o lançamento de um pacote de atualização para o álbum da Copa do Mundo de 2026."
-seoDescription: "Esportes: A Panini confirmou o lançamento de um pacote de atualização para o álbum da Copa do Mundo de 2026."
-category: "Esportes"
+seoDescription: "Entretenimento: A Panini confirmou o lançamento de um pacote de atualização para o álbum da Copa do Mundo de 2026."
+category: "Entretenimento"
 author: "Redação Novo Alvo"
 sources: ["Portal UMBU", "Folha do Leste", "Paranaíba Mais", "Meio e Mensagem", "BOL", "Independente", "Portal GO 020", "Estadão", "Omelete", "98fmNews", "Nova Era News", "Correio Sudoeste", "GCMais", "Revista Let's Go Bahia", "Terra", "Conectado News"]
 publishedAt: "2026-05-20T18:25:15.542Z"
-updatedAt: "2026-05-20T18:26:34.497Z"
+updatedAt: "2026-05-20T19:11:28.944Z"
 featured: false
 isFeatured: false
 urgent: false
