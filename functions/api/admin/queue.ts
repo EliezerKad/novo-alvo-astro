@@ -1318,7 +1318,7 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       maxOutputTokens: premiumDraft ? 6800 : 5600,
       temperature: premiumDraft ? 0.28 : 0.35,
       timeoutMs: premiumDraft ? 22000 : 20000,
-      fallbackModels: [finalModel],
+      fallbackModels: [finalModel, 'gemini-2.0-flash-lite'],
     });
     const generationModel = aiFactDossier.model ? `${gemini.model}+dossier:${aiFactDossier.model}` : gemini.model;
     const result = gemini.result;

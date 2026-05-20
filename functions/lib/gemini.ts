@@ -1,8 +1,8 @@
-export const DEFAULT_GEMINI_MODEL = 'gemini-1.5-flash';
+export const DEFAULT_GEMINI_MODEL = 'gemini-2.0-flash';
 
 const normalizeGeminiModel = (model: string) => {
   const clean = model.trim();
-  if (clean === 'gemini-1.5-flash-latest') return 'gemini-1.5-flash';
+  if (clean === 'gemini-1.5-flash' || clean === 'gemini-1.5-flash-latest') return DEFAULT_GEMINI_MODEL;
   return clean;
 };
 
@@ -66,7 +66,7 @@ export async function runGeminiJson({
     ...new Set(
       (fallbackModels?.length
         ? fallbackModels
-        : [preferredModel, DEFAULT_GEMINI_MODEL, 'gemini-1.5-flash', 'gemini-2.0-flash']
+        : [preferredModel, DEFAULT_GEMINI_MODEL, 'gemini-2.0-flash-lite']
       ).map(normalizeGeminiModel),
     ),
   ];
