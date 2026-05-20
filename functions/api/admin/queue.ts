@@ -19,6 +19,7 @@ type Env = {
   GEMINI_API_KEY?: string;
   GEMINI_API_KEYS?: string;
   GEMINI_MODEL?: string;
+  GEMINI_FALLBACK_MODELS?: string;
   BING_IMAGE_SEARCH_KEY?: string;
   BING_IMAGE_SEARCH_ENDPOINT?: string;
   BING_IMAGE_LICENSE?: string;
@@ -804,6 +805,21 @@ const missingRequiredNames = (article: Record<string, unknown>, bodyHtml: string
   return requiredNames.filter((name) => !containsName(text, name));
 };
 
+const geminiModelFallbacks = (env: Env, finalModel: string) => [
+  ...new Set(
+    [
+      finalModel,
+      DEFAULT_GEMINI_MODEL,
+      ...(env.GEMINI_FALLBACK_MODELS
+        ? String(env.GEMINI_FALLBACK_MODELS)
+            .split(/[\s,;]+/)
+            .map((model) => model.trim())
+            .filter(Boolean)
+        : ['gemini-2.5-flash-lite']),
+    ].filter(Boolean),
+  ),
+];
+
 const buildFactDossier = (sources: unknown[], row: QueueRow) => {
   const rows = sources
     .slice(0, 15)
@@ -1102,6 +1118,7 @@ const generateArticleWithAi = async (
   const sourceCount = Number(row.source_count || sources.length || 0);
   const premiumDraft = score > 800;
   const editorialTitle = stripRadarPrefix(row.title) || clean(row.title, 220);
+  const fallbackModels = geminiModelFallbacks(env, env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL);
   const factDossier = buildFactDossier(sources, row);
   const requiredNames = requiredNamesFromSources(sources, row);
   const aiFactDossier = await buildAiFactDossier(sources, row, env, factDossier);
@@ -1401,7 +1418,7 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       maxOutputTokens: premiumDraft ? 6800 : 5600,
       temperature: premiumDraft ? 0.28 : 0.35,
       timeoutMs: premiumDraft ? 38000 : 30000,
-      fallbackModels: [finalModel, DEFAULT_GEMINI_MODEL],
+      fallbackModels,
     });
 
     let gemini = await runArticleGeneration();
