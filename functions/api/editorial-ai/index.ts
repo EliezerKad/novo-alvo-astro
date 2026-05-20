@@ -31,12 +31,13 @@ const json = (body: unknown, init: ResponseInit = {}) =>
 const resolveProvider = (env: {
   AI?: AiBinding;
   GEMINI_API_KEY?: string;
+  GEMINI_API_KEYS?: string;
   GROQ_API_KEY?: string;
   EDITORIAL_AI_PROVIDER?: string;
 }) => {
   const provider = clip(env.EDITORIAL_AI_PROVIDER, 24).toLowerCase();
   if (provider === 'groq' && env.GROQ_API_KEY) return 'groq';
-  if (env.GEMINI_API_KEY) return 'gemini';
+  if (env.GEMINI_API_KEY || env.GEMINI_API_KEYS) return 'gemini';
   if (env.GROQ_API_KEY) return 'groq';
   if (env.AI) return 'workers-ai';
   return 'unconfigured';
@@ -174,6 +175,7 @@ export const onRequestGet = async ({
   env: {
     AI?: AiBinding;
     GEMINI_API_KEY?: string;
+    GEMINI_API_KEYS?: string;
     GEMINI_MODEL?: string;
     GROQ_API_KEY?: string;
     GROQ_MODEL?: string;
@@ -193,7 +195,7 @@ export const onRequestGet = async ({
             ? WORKERS_AI_MODEL
             : null,
     configured: {
-      gemini: Boolean(env.GEMINI_API_KEY),
+      gemini: Boolean(env.GEMINI_API_KEY || env.GEMINI_API_KEYS),
       groq: Boolean(env.GROQ_API_KEY),
       workersAi: Boolean(env.AI),
     },
@@ -208,6 +210,7 @@ export const onRequestPost = async ({
     AI?: AiBinding;
     ADMIN_TOKEN?: string;
     GEMINI_API_KEY?: string;
+    GEMINI_API_KEYS?: string;
     GEMINI_MODEL?: string;
     GROQ_API_KEY?: string;
     GROQ_MODEL?: string;
@@ -222,11 +225,12 @@ export const onRequestPost = async ({
     return json({ error: 'Token editorial invalido.' }, { status: 401 });
   }
 
-  if (!env.GEMINI_API_KEY && !env.GROQ_API_KEY && !env.AI) {
+  const geminiApiKeys = [env.GEMINI_API_KEY, env.GEMINI_API_KEYS].filter(Boolean).join(',');
+  if (!geminiApiKeys && !env.GROQ_API_KEY && !env.AI) {
     return json(
       {
         error:
-          'IA editorial nao configurada. Adicione GEMINI_API_KEY ou GROQ_API_KEY nos segredos do Cloudflare Pages, ou mantenha o binding Workers AI.',
+          'IA editorial nao configurada. Adicione GEMINI_API_KEY, GEMINI_API_KEYS ou GROQ_API_KEY nos segredos do Cloudflare Pages, ou mantenha o binding Workers AI.',
       },
       { status: 503 },
     );
@@ -275,7 +279,7 @@ export const onRequestPost = async ({
 
     const runGemini = async () => {
       const gemini = await runGeminiJson({
-        apiKey: env.GEMINI_API_KEY,
+        apiKey: geminiApiKeys,
         model,
         system:
           'Você é um editor-chefe de um portal de notícias brasileiro. Escreva sempre em português do Brasil, com acentos, cedilha e pontuação corretos. Responda somente JSON válido.',
@@ -316,7 +320,7 @@ export const onRequestPost = async ({
     };
 
     if (provider === 'groq' && env.GROQ_API_KEY) await attempt('groq', runGroq);
-    if (env.GEMINI_API_KEY) await attempt('gemini', runGemini);
+    if (geminiApiKeys) await attempt('gemini', runGemini);
     if (provider !== 'groq' && env.GROQ_API_KEY) await attempt('groq', runGroq);
     if (env.AI) await attempt('workers-ai', runWorkersAi);
 

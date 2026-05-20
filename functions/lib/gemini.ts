@@ -5,6 +5,15 @@ const normalizeGeminiModel = (model: string) => {
   return clean;
 };
 
+const parseGeminiKeys = (apiKey?: string) => [
+  ...new Set(
+    String(apiKey || '')
+      .split(/[\s,;]+/)
+      .map((key) => key.trim())
+      .filter(Boolean),
+  ),
+];
+
 type GeminiPart = {
   text?: string;
 };
@@ -57,8 +66,8 @@ export async function runGeminiJson({
   timeoutMs?: number;
   fallbackModels?: string[];
 }) {
-  const key = String(apiKey || '').trim();
-  if (!key) throw new Error('GEMINI_API_KEY nao configurada.');
+  const keys = parseGeminiKeys(apiKey);
+  if (!keys.length) throw new Error('GEMINI_API_KEY nao configurada.');
 
   const preferredModel = normalizeGeminiModel(String(model || DEFAULT_GEMINI_MODEL));
   const models = [
@@ -71,65 +80,67 @@ export async function runGeminiJson({
   ];
 
   let lastError = '';
-  for (const modelName of models) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
-    let response: Response;
-    try {
-      response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelName)}:generateContent`,
-        {
-          method: 'POST',
-          signal: controller.signal,
-          headers: {
-            'content-type': 'application/json',
-            'x-goog-api-key': key,
-          },
-          body: JSON.stringify({
-            systemInstruction: {
-              parts: [{ text: system }],
+  for (let keyIndex = 0; keyIndex < keys.length; keyIndex += 1) {
+    for (const modelName of models) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      let response: Response;
+      try {
+        response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelName)}:generateContent`,
+          {
+            method: 'POST',
+            signal: controller.signal,
+            headers: {
+              'content-type': 'application/json',
+              'x-goog-api-key': keys[keyIndex],
             },
-            contents: [
-              {
-                role: 'user',
-                parts: [{ text: prompt }],
+            body: JSON.stringify({
+              systemInstruction: {
+                parts: [{ text: system }],
               },
-            ],
-            generationConfig: {
-              temperature,
-              maxOutputTokens,
-              responseMimeType: 'application/json',
-            },
-          }),
-        },
-      );
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        lastError = `${modelName} excedeu ${Math.round(timeoutMs / 1000)}s.`;
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: prompt }],
+                },
+              ],
+              generationConfig: {
+                temperature,
+                maxOutputTokens,
+                responseMimeType: 'application/json',
+              },
+            }),
+          },
+        );
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          lastError = `${modelName} excedeu ${Math.round(timeoutMs / 1000)}s.`;
+          continue;
+        }
+        throw error;
+      } finally {
+        clearTimeout(timeout);
+      }
+
+      const data = (await response.json().catch(() => ({}))) as GeminiResponse;
+      if (!response.ok) {
+        lastError = data.error?.message || `Gemini HTTP ${response.status}`;
         continue;
       }
-      throw error;
-    } finally {
-      clearTimeout(timeout);
-    }
 
-    const data = (await response.json().catch(() => ({}))) as GeminiResponse;
-    if (!response.ok) {
-      lastError = data.error?.message || `Gemini HTTP ${response.status}`;
-      continue;
-    }
+      const text = extractGeminiText(data);
+      if (!text) {
+        lastError = 'Gemini nao retornou texto.';
+        continue;
+      }
 
-    const text = extractGeminiText(data);
-    if (!text) {
-      lastError = 'Gemini nao retornou texto.';
-      continue;
+      return {
+        model: modelName,
+        result: parseJsonText(text),
+        rawText: text,
+      };
     }
-
-    return {
-      model: modelName,
-      result: parseJsonText(text),
-      rawText: text,
-    };
   }
 
   throw new Error(lastError || 'Falha ao chamar Gemini.');

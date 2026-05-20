@@ -20,6 +20,7 @@ type Env = {
   ADMIN_TOKEN?: string;
   AI?: AiBinding;
   GEMINI_API_KEY?: string;
+  GEMINI_API_KEYS?: string;
   GEMINI_MODEL?: string;
 };
 
@@ -111,8 +112,8 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
 
   return json({
     ok: true,
-    model: (article as { generationModel?: string }).generationModel || (env.GEMINI_API_KEY ? env.GEMINI_MODEL || MODEL : env.AI ? 'workers-ai-fallback' : 'fallback-editorial-template'),
-    aiEnabled: Boolean(env.GEMINI_API_KEY || env.AI),
+    model: (article as { generationModel?: string }).generationModel || (env.GEMINI_API_KEY || env.GEMINI_API_KEYS ? env.GEMINI_MODEL || MODEL : env.AI ? 'workers-ai-fallback' : 'fallback-editorial-template'),
+    aiEnabled: Boolean(env.GEMINI_API_KEY || env.GEMINI_API_KEYS || env.AI),
     generatedWithAi: Boolean((article as { generatedWithAi?: boolean }).generatedWithAi),
     generationError: (article as { generationError?: string }).generationError || '',
     article,

@@ -17,6 +17,7 @@ type Env = {
   EDITORIAL_DB?: D1Database;
   ADMIN_TOKEN?: string;
   GEMINI_API_KEY?: string;
+  GEMINI_API_KEYS?: string;
   GEMINI_MODEL?: string;
   BING_IMAGE_SEARCH_KEY?: string;
   BING_IMAGE_SEARCH_ENDPOINT?: string;
@@ -1007,7 +1008,8 @@ const generateArticleWithAi = async (
   },
   env: Env,
 ) => {
-  if (!env.GEMINI_API_KEY) {
+  const geminiApiKeys = [env.GEMINI_API_KEY, env.GEMINI_API_KEYS].filter(Boolean).join(',');
+  if (!geminiApiKeys) {
     return {
       ...fallback,
       imageAlt: fallback.imageAlt || fallback.title,
@@ -1311,7 +1313,7 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
 
   try {
     const gemini = await runGeminiJson({
-      apiKey: env.GEMINI_API_KEY,
+      apiKey: geminiApiKeys,
       model: finalModel,
       system,
       prompt,
