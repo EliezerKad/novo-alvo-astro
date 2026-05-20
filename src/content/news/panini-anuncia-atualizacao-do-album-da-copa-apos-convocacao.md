@@ -7,18 +7,18 @@ category: "Esportes"
 author: "Redação Novo Alvo"
 sources: ["Portal UMBU", "Folha do Leste", "Paranaíba Mais", "Meio e Mensagem", "BOL", "Independente", "Portal GO 020", "Estadão", "Omelete", "98fmNews", "Nova Era News", "Correio Sudoeste", "GCMais", "Revista Let's Go Bahia", "Terra", "Conectado News"]
 publishedAt: "2026-05-20T18:25:15.542Z"
-updatedAt: "2026-05-20T18:25:52.399Z"
+updatedAt: "2026-05-20T18:26:34.497Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/panini-anuncia-atualizacao-do-album-da-copa-apos-convocacao-cover.jpg"
+  src: "https://panini.com.br/media/catalog/product/0/3/03_fwc26_-_box_envelope_bancas.jpg?optimize=medium&bg-color=255,255,255&fit=bounds&height=897&width=960&canvas=960:897"
   alt: "Philippe Coutinho em jogo da Seleção Brasileira."
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/panini-anuncia-atualizacao-do-album-da-copa-apos-convocacao-cover.jpg"
+ogImage: "https://panini.com.br/media/catalog/product/0/3/03_fwc26_-_box_envelope_bancas.jpg?optimize=medium&bg-color=255,255,255&fit=bounds&height=897&width=960&canvas=960:897"
 tags: ["musica", "panini", "anuncia", "atualizacao", "album", "copa", "convocacao"]
 ---
 
