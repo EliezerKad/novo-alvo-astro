@@ -766,115 +766,13 @@ const buildFactDossier = (sources: unknown[], row: QueueRow) => {
     .join('\n\n');
 };
 
-const dossierList = (value: unknown, maxItems = 10, maxChars = 160) => {
-  const items = Array.isArray(value) ? value : typeof value === 'string' ? value.split(/\n|;/) : [];
-  return items
-    .map((item) => clipWholeWord(item, maxChars))
-    .filter(Boolean)
-    .slice(0, maxItems);
-};
-
-const formatDossierSection = (label: string, items: string[]) =>
-  items.length ? `${label}:\n${items.map((item) => `- ${item}`).join('\n')}` : '';
-
-const buildSourceDossierInput = (sources: unknown[], row: QueueRow) => {
-  const rows = sources
-    .slice(0, 15)
-    .map((source, index) => {
-      if (!source || typeof source !== 'object') return '';
-      const record = source as Record<string, unknown>;
-      const evidence = sourceEvidenceText(record);
-      const signals = factSignalsFrom(evidence).slice(0, 18);
-      const excerpt = clipWholeWord(evidence, 850);
-      return [
-        `Fonte ${index + 1}`,
-        `Veiculo: ${plain(record.publisher, 80) || 'nao informado'}`,
-        `Titulo: ${plain(record.title, 180)}`,
-        `URL: ${plain(record.resolvedUrl || record.originalUrl || record.primaryUrl || record.url, 420)}`,
-        signals.length ? `Fatos e numeros detectados: ${signals.join('; ')}` : '',
-        excerpt ? `Trecho: ${excerpt}` : '',
-      ]
-        .filter(Boolean)
-        .join('\n');
-    })
-    .filter(Boolean)
-    .join('\n\n');
-
-  return [
-    `Categoria: ${row.category}`,
-    `Pauta: ${stripRadarPrefix(row.title) || row.title}`,
-    `Resumo operacional: ${row.summary}`,
-    `Palavras-chave: ${row.keywords}`,
-    rows,
-  ]
-    .filter(Boolean)
-    .join('\n\n');
-};
-
 const buildAiFactDossier = async (
-  sources: unknown[],
-  row: QueueRow,
-  env: Env,
+  _sources: unknown[],
+  _row: QueueRow,
+  _env: Env,
   deterministicDossier: string,
 ): Promise<{ text: string; model: string }> => {
-  if (!env.GEMINI_API_KEY) return { text: deterministicDossier, model: '' };
-
-  const prompt = `
-Leia as fontes abaixo como editor de apuracao. Nao escreva materia.
-Extraia apenas fatos verificaveis que aparecem no material. Preserve nomes proprios, cargos, cidades, datas, valores, idades, objetos, orgaos, empresas, clubes, lotes, prazos e numeros.
-Nao generalize. Se um numero existe, copie o numero. Se uma fonte nao identifica alguem, registre a lacuna.
-
-FONTES:
-${buildSourceDossierInput(sources, row)}
-
-Responda somente JSON valido:
-{
-  "central_fact": "...",
-  "required_facts": ["..."],
-  "named_actors": ["..."],
-  "numbers_and_dates": ["..."],
-  "locations": ["..."],
-  "timeline": ["..."],
-  "service_details": ["..."],
-  "contradictions_or_gaps": ["..."],
-  "source_notes": ["..."]
-}
-`;
-
-  try {
-    const response = await runGeminiJson({
-      apiKey: env.GEMINI_API_KEY,
-      model: 'gemini-2.5-flash-lite',
-      system:
-        'Voce e um editor de apuracao factual. Sua saida e um dossie compacto para outro redator. Nao escreva prosa jornalistica, nao invente e nao omita numeros relevantes.',
-      prompt,
-      maxOutputTokens: 1400,
-      temperature: 0.05,
-      timeoutMs: 8000,
-      fallbackModels: ['gemini-2.5-flash-lite'],
-    });
-    const result = response.result;
-    const sections = [
-      `Fato central: ${clipWholeWord(result.central_fact, 260)}`,
-      formatDossierSection('Fatos obrigatorios', dossierList(result.required_facts, 12, 190)),
-      formatDossierSection('Agentes nomeados', dossierList(result.named_actors, 12, 150)),
-      formatDossierSection('Numeros e datas obrigatorios', dossierList(result.numbers_and_dates, 14, 150)),
-      formatDossierSection('Locais', dossierList(result.locations, 8, 130)),
-      formatDossierSection('Linha do tempo', dossierList(result.timeline, 8, 170)),
-      formatDossierSection('Servico ao leitor', dossierList(result.service_details, 10, 180)),
-      formatDossierSection('Lacunas ou contradicoes', dossierList(result.contradictions_or_gaps, 8, 180)),
-      formatDossierSection('Notas por fonte', dossierList(result.source_notes, 12, 180)),
-    ]
-      .filter((section) => plain(section, 300).replace(/^Fato central:\s*$/i, ''))
-      .join('\n\n');
-
-    const text = [sections, deterministicDossier ? `Sinais locais de apoio:\n${deterministicDossier}` : '']
-      .filter(Boolean)
-      .join('\n\n');
-    return { text: text || deterministicDossier, model: response.model };
-  } catch {
-    return { text: deterministicDossier, model: '' };
-  }
+  return { text: deterministicDossier, model: '' };
 };
 
 const clipWholeWord = (value: unknown, max: number) => {
@@ -1420,7 +1318,7 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       maxOutputTokens: premiumDraft ? 6800 : 5600,
       temperature: premiumDraft ? 0.28 : 0.35,
       timeoutMs: premiumDraft ? 22000 : 20000,
-      fallbackModels: [...new Set([finalModel, DEFAULT_GEMINI_MODEL, 'gemini-2.5-flash-lite'])],
+      fallbackModels: [finalModel],
     });
     const generationModel = aiFactDossier.model ? `${gemini.model}+dossier:${aiFactDossier.model}` : gemini.model;
     const result = gemini.result;
