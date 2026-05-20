@@ -7,11 +7,11 @@ category: "Tecnologia"
 author: "Redação Novo Alvo"
 sources: ["News Rondônia", "Termômetro da Política", "Terra", "Estadão", "Valor Econômico", "G1", "CNN Brasil", "InvestNews", "O Globo", "Mix Vale", "Canaltech"]
 publishedAt: "2026-05-19T22:21:28.819Z"
-updatedAt: "2026-05-19T23:42:53.105Z"
+updatedAt: "2026-05-20T19:15:52.114Z"
 featured: false
 isFeatured: false
 urgent: false
-homeSection: "now"
+homeSection: ""
 views: 0
 cover:
   src: "https://portalnovoalvo.com.br/media/news/google-anuncia-gemini-omni-para-criacao-e-edicao-de-videos-cover.jpg"
