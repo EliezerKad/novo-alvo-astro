@@ -1059,7 +1059,7 @@ const generateArticleWithAi = async (
     'Voce e um jornalista redator profissional de alto nivel. Sua tarefa e entregar uma materia pronta para publicacao, nao um briefing, nao um clipping e nao um relatorio tecnico. Raciocine como uma mini-redacao: editor de pauta, checador, reporter, redator e editor final. Essas funcoes sao internas e nunca devem aparecer no texto. Nunca cite marca do portal, IA, prompt, modelo, cluster, Geracao X, Millennials, Gen Z, publico-alvo, fontes consolidadas, checklist, apuracao interna ou processo editorial no texto publicado. Escreva em portugues do Brasil, com acentos corretos. Cada editoria deve ter vocabulario proprio: nao transforme toda noticia em analise economica. Comece a resposta imediatamente com JSON puro e valido.';
   const imageCandidates = uniqueImageCandidates(parseArray(row.image_candidates)).slice(0, 10);
   const selectedImage = chooseBestImage(imageCandidates, editorialTitle, row.category);
-  const finalModel = DEFAULT_GEMINI_MODEL;
+  const finalModel = env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
   const imageLines = imageCandidates
     .map((candidate, index) => `${index + 1}. ${candidate.url} | pauta: ${plain(candidate.sourceTitle, 160)} | origem: ${plain(candidate.sourcePublisher, 80)}`)
     .join('\n');
@@ -1317,8 +1317,8 @@ Responda exatamente neste formato, com JSON valido e sem markdown:
       prompt,
       maxOutputTokens: premiumDraft ? 6800 : 5600,
       temperature: premiumDraft ? 0.28 : 0.35,
-      timeoutMs: premiumDraft ? 22000 : 20000,
-      fallbackModels: [finalModel, 'gemini-2.0-flash-lite'],
+      timeoutMs: premiumDraft ? 38000 : 30000,
+      fallbackModels: [finalModel, DEFAULT_GEMINI_MODEL],
     });
     const generationModel = aiFactDossier.model ? `${gemini.model}+dossier:${aiFactDossier.model}` : gemini.model;
     const result = gemini.result;
