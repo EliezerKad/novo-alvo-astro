@@ -7,11 +7,11 @@ category: "Mundo"
 author: "Redação Novo Alvo"
 sources: ["DW.com", "UOL Notícias", "Opera Mundi", "Área VIP", "CNN Brasil", "Portal Tela", "Terra", "Valor Econômico", "Folha PE", "O Globo", "segundabase.com.br", "Tribuna do Sertão", "BBC"]
 publishedAt: "2026-05-20T00:09:48.043Z"
-updatedAt: "2026-05-20T00:09:48.231Z"
+updatedAt: "2026-05-20T21:24:42.539Z"
 featured: false
 isFeatured: false
 urgent: false
-homeSection: "now"
+homeSection: ""
 views: 0
 cover:
   src: "https://portalnovoalvo.com.br/media/news/chefe-da-oms-se-diz-preocupado-com-rapidez-do-surto-de-ebola-cover.webp"
