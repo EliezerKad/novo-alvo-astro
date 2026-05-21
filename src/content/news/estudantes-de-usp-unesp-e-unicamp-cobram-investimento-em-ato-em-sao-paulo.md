@@ -2,24 +2,24 @@
 title: "Estudantes de USP, Unesp e Unicamp cobram investimento em ato em São Paulo"
 slug: "estudantes-de-usp-unesp-e-unicamp-cobram-investimento-em-ato-em-sao-paulo"
 summary: "Mobilização reuniu estudantes das universidades estaduais paulistas e levou reivindicações sobre permanência, contratação de professores e estrutura de ensino ao governo estadual."
-seoDescription: "Estudantes de USP, Unesp e Unicamp realizam ato em São Paulo por permanência estudantil, professores e investimento nas universidades."
+seoDescription: "Educacao: Mobilização reuniu estudantes das universidades estaduais paulistas e levou reivindicações sobre permanência, contratação de professores e…"
 category: "Educacao"
 author: "Redação Novo Alvo"
-sources: ["Agência Brasil", "Secretaria de Ciência, Tecnologia e Inovação de SP"]
+sources: []
 publishedAt: "2026-05-20T23:46:00.000Z"
-updatedAt: "2026-05-20T23:46:00.000Z"
+updatedAt: "2026-05-21T01:36:09.784Z"
 featured: false
 isFeatured: false
 urgent: false
-homeSection: "now"
+homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/audiencia-para-discutir-correcao-do-enem-e-cancelada-cover.avif"
-  alt: "Estudantes em ambiente universitário"
-  caption: "Mobilização estudantil cobrou investimento e permanência nas universidades estaduais paulistas"
+  src: "https://portalnovoalvo.com.br/media/news/estudantes-de-usp-unesp-e-unicamp-cobram-investimento-em-ato-em-sao-paulo-cover.jpg"
+  alt: "Estudantes de USP, Unesp e Unicamp cobram investimento em ato em São Paulo"
+  caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/audiencia-para-discutir-correcao-do-enem-e-cancelada-cover.avif"
-tags: ["educação", "universidades", "USP", "Unesp", "Unicamp", "São Paulo"]
+ogImage: "https://portalnovoalvo.com.br/media/news/estudantes-de-usp-unesp-e-unicamp-cobram-investimento-em-ato-em-sao-paulo-cover.jpg"
+tags: []
 ---
 
 <p>Estudantes de USP, Unesp e Unicamp realizaram um ato na zona oeste de São Paulo para cobrar melhores condições nas universidades estaduais paulistas. A mobilização partiu do Largo da Batata, em Pinheiros, e seguiu em direção ao Palácio dos Bandeirantes.</p>
