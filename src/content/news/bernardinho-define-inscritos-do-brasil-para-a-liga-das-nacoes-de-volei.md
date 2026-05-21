@@ -2,24 +2,24 @@
 title: "Bernardinho define inscritos do Brasil para a Liga das Nações de Vôlei"
 slug: "bernardinho-define-inscritos-do-brasil-para-a-liga-das-nacoes-de-volei"
 summary: "Seleção masculina estreia contra o Irã em 10 de junho, em Brasília, e terá lista ampliada de 30 atletas para a primeira fase da VNL."
-seoDescription: "Bernardinho anuncia 30 inscritos do Brasil para a Liga das Nações de Vôlei, com estreia contra o Irã em Brasília."
+seoDescription: "Esportes: Seleção masculina estreia contra o Irã em 10 de junho, em Brasília, e terá lista ampliada de 30 atletas para a primeira fase da VNL."
 category: "Esportes"
 author: "Redação Novo Alvo"
-sources: ["Agência Brasil", "CBV", "Volleyball World"]
+sources: []
 publishedAt: "2026-05-20T23:43:00.000Z"
-updatedAt: "2026-05-20T23:43:00.000Z"
+updatedAt: "2026-05-21T00:55:55.382Z"
 featured: false
 isFeatured: false
 urgent: false
-homeSection: "now"
+homeSection: ""
 views: 0
 cover:
-  src: "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?auto=format&fit=crop&w=1600&q=80"
-  alt: "Bola de vôlei sobre quadra"
-  caption: "Imagem ilustrativa de vôlei; Brasil estreia na VNL masculina em Brasília"
+  src: "https://portalnovoalvo.com.br/media/news/bernardinho-define-inscritos-do-brasil-para-a-liga-das-nacoes-de-volei-cover.jpg"
+  alt: "Bernardinho define inscritos do Brasil para a Liga das Nações de Vôlei"
+  caption: ""
   layout: "full"
-ogImage: "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?auto=format&fit=crop&w=1600&q=80"
-tags: ["vôlei", "Brasil", "Liga das Nações", "Bernardinho", "VNL"]
+ogImage: "https://portalnovoalvo.com.br/media/news/bernardinho-define-inscritos-do-brasil-para-a-liga-das-nacoes-de-volei-cover.jpg"
+tags: []
 ---
 
 <p>A seleção brasileira masculina de vôlei já tem a lista de inscritos para a Liga das Nações de 2026. A Confederação Brasileira de Voleibol anunciou 30 nomes para a competição, que reúne as principais seleções do ranking mundial.</p>
