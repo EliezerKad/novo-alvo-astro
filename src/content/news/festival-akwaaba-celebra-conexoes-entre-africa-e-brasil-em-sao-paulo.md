@@ -2,24 +2,24 @@
 title: "Festival Akwaaba celebra conexões entre África e Brasil em São Paulo"
 slug: "festival-akwaaba-celebra-conexoes-entre-africa-e-brasil-em-sao-paulo"
 summary: "Evento gratuito reúne artistas, pesquisadores, lideranças e feira de afroempreendedorismo entre 22 e 28 de maio."
-seoDescription: "Festival Akwaaba acontece em São Paulo com programação gratuita sobre memória, ancestralidade, cultura e cooperação entre África e Brasil."
+seoDescription: "Cultura: Evento gratuito reúne artistas, pesquisadores, lideranças e feira de afroempreendedorismo entre 22 e 28 de maio."
 category: "Cultura"
 author: "Redação Novo Alvo"
-sources: ["Agência Brasil", "Fundação Cultural Palmares"]
+sources: []
 publishedAt: "2026-05-20T23:47:00.000Z"
-updatedAt: "2026-05-20T23:47:00.000Z"
+updatedAt: "2026-05-21T00:53:37.668Z"
 featured: false
 isFeatured: false
 urgent: false
-homeSection: "now"
+homeSection: ""
 views: 0
 cover:
-  src: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1600&q=80"
-  alt: "Público em apresentação cultural"
-  caption: "Imagem ilustrativa de evento cultural; Festival Akwaaba terá programação gratuita em São Paulo"
+  src: "https://portalnovoalvo.com.br/media/news/festival-akwaaba-celebra-conexoes-entre-africa-e-brasil-em-sao-paulo-cover.jpg"
+  alt: "Festival Akwaaba celebra conexões entre África e Brasil em São Paulo"
+  caption: ""
   layout: "full"
-ogImage: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1600&q=80"
-tags: ["cultura", "Festival Akwaaba", "África", "Brasil", "São Paulo"]
+ogImage: "https://portalnovoalvo.com.br/media/news/festival-akwaaba-celebra-conexoes-entre-africa-e-brasil-em-sao-paulo-cover.jpg"
+tags: []
 ---
 
 <p>O Festival Akwaaba será realizado em São Paulo entre 22 e 28 de maio com a proposta de fortalecer conexões culturais, históricas e institucionais entre África e Brasil.</p>
