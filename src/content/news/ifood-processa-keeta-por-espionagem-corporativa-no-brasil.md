@@ -2,23 +2,23 @@
 title: "iFood: O iFood acusa a Keeta de obter informações confidenciais por meio de"
 slug: "ifood-processa-keeta-por-espionagem-corporativa-no-brasil"
 summary: "Aplicativo de entrega de comida alega que rival chinesa Keeta utilizou ex-funcionários para obter informações sigilosas e obter vantagem competitiva no mercado brasileiro."
-seoDescription: "Aplicativo de entrega de comida alega que rival chinesa Keeta utilizou ex-funcionários para obter informações sigilosas e obter vantagem competitiva no"
+seoDescription: "Brasil: Aplicativo de entrega de comida alega que rival chinesa Keeta utilizou ex-funcionários para obter informações sigilosas e obter vantagem competitiva…"
 category: "Brasil"
 author: "Redação Novo Alvo"
 sources: ["SBT News", "Olhar Digital", "Blog do Dina", "pipelinevalor", "O Globo", "O POVO", "Correio Braziliense", "Folha do Estado"]
 publishedAt: "2026-05-21T08:07:01.051Z"
-updatedAt: "2026-05-21T08:07:27.925Z"
+updatedAt: "2026-05-21T12:38:05.325Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://source.unsplash.com/1600x900/?ifood%2Cprocessa%2Ckeeta%2Cespionagem%2Ccorporativa%2Cbrasil%2Cbrazil%2Ccity%2Cpeople"
+  src: "https://portalnovoalvo.com.br/media/news/ifood-processa-keeta-por-espionagem-corporativa-no-brasil-cover.webp"
   alt: "Logos do iFood e Keeta com elementos que remetem a espionagem e ao Brasil."
-  caption: "Unsplash"
+  caption: "Credito: Unsplash"
   layout: "full"
-ogImage: "https://source.unsplash.com/1600x900/?ifood%2Cprocessa%2Ckeeta%2Cespionagem%2Ccorporativa%2Cbrasil%2Cbrazil%2Ccity%2Cpeople"
+ogImage: "https://portalnovoalvo.com.br/media/news/ifood-processa-keeta-por-espionagem-corporativa-no-brasil-cover.webp"
 tags: ["brasil", "ifood", "processa", "keeta", "espionagem", "corporativa"]
 ---
 
