@@ -34,6 +34,7 @@ export const categoryLabels: Record<string, string> = {
   Moda: 'Moda',
   Musica: 'Musica',
   Futebol: 'Futebol',
+  Ocorrencias: 'Ocorrencias',
   Geral: 'Geral',
 };
 
@@ -47,6 +48,7 @@ export const subCategoriesList = [
   'Moda',
   'Musica',
   'Futebol',
+  'Ocorrencias',
 ];
 
 export function sortNewsByDate(entries: NewsEntry[]): NewsEntry[] {
@@ -97,6 +99,15 @@ export function featuredNews(entries: NewsEntry[]): NewsEntry[] {
 }
 
 export function urgentNews(entries: NewsEntry[]): NewsEntry[] {
+  const occurrencePattern = /\b(acidente|morte|mortes|ferido|feridos|incendio|colisao|tiroteio|desabamento|explosao|resgate|policia|prisao|crime|ocorrencia|ocorrencias)\b/i;
+  const occurrences = entries.filter((entry) => {
+    const category = categorySlug(entry.data.category);
+    const tags = entry.data.tags.join(' ');
+    const text = `${entry.data.title} ${entry.data.summary} ${tags}`;
+    return category === 'ocorrencias' || /\bocorrencias?\b/i.test(tags) || occurrencePattern.test(text);
+  });
+  if (occurrences.length > 0) return occurrences.slice(0, 10);
+
   const urgent = entries.filter((entry) => entry.data.urgent || entry.data.breakingSummary);
   return urgent.length > 0 ? urgent : featuredNews(entries);
 }

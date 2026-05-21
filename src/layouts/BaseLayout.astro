@@ -119,5 +119,57 @@ const breadcrumbSchema = breadcrumbs.length > 0
   <body>
     <slot />
     <Footer />
+    <div
+      class="fixed inset-x-3 bottom-3 z-[80] hidden rounded-[1.35rem] border border-black/10 bg-white/95 p-4 text-[#101010] shadow-[0_24px_80px_rgba(16,16,16,0.18)] backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95 dark:text-zinc-50 md:inset-x-auto md:right-5 md:bottom-5 md:max-w-[430px] md:rounded-[1.7rem] md:p-5"
+      data-cookie-notice
+      role="dialog"
+      aria-live="polite"
+      aria-label="Aviso de cookies"
+    >
+      <div class="flex items-start gap-3">
+        <div class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#8A1F2D] shadow-[0_0_0_5px_rgba(138,31,45,0.12)]"></div>
+        <div class="min-w-0">
+          <h2 class="text-xs font-black uppercase tracking-[0.18em] text-[#8A1F2D]">Aviso de cookies</h2>
+          <p class="mt-2 text-sm font-semibold leading-6 text-zinc-600 dark:text-zinc-300">
+            Usamos cookies essenciais, preferências de navegação e tecnologias de publicidade para manter o portal funcionando, medir audiência e melhorar sua experiência.
+          </p>
+          <div class="mt-4 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              class="rounded-full bg-[#8A1F2D] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_12px_26px_rgba(138,31,45,0.22)] transition hover:-translate-y-0.5 hover:bg-[#6f1723]"
+              data-cookie-accept
+            >
+              Aceitar
+            </button>
+            <a
+              href="/politica-de-privacidade/"
+              class="rounded-full border border-black/10 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:-translate-y-0.5 hover:border-[#8A1F2D]/30 hover:text-[#8A1F2D] dark:border-white/10 dark:text-zinc-400"
+            >
+              Saiba mais
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script is:inline>
+      (() => {
+        const key = 'novo_alvo_cookie_notice_v1';
+        const notice = document.querySelector('[data-cookie-notice]');
+        const accept = document.querySelector('[data-cookie-accept]');
+        if (!notice || !accept) return;
+
+        try {
+          if (localStorage.getItem(key) === 'accepted') return;
+        } catch {}
+
+        notice.classList.remove('hidden');
+        accept.addEventListener('click', () => {
+          try {
+            localStorage.setItem(key, 'accepted');
+          } catch {}
+          notice.classList.add('hidden');
+        });
+      })();
+    </script>
   </body>
 </html>

@@ -65,6 +65,7 @@ const tickerPayload = articles.map((article) => ({
     const weather = document.querySelector('[data-live-weather]');
 
     let index = 0;
+    let liveTimezone = 'America/Sao_Paulo';
 
     const updateTicker = () => {
       if (!link || !title || items.length < 2) return;
@@ -80,20 +81,20 @@ const tickerPayload = articles.map((article) => ({
       clock.textContent = new Intl.DateTimeFormat('pt-BR', {
         hour: '2-digit',
         minute: '2-digit',
-        timeZone: 'America/Sao_Paulo',
+        timeZone: liveTimezone,
       }).format(new Date());
     };
 
     const updateWeather = async () => {
       if (!weather) return;
       try {
-        const response = await fetch(
-          'https://api.open-meteo.com/v1/forecast?latitude=-23.55&longitude=-46.63&current=temperature_2m&timezone=America%2FSao_Paulo',
-          { cache: 'no-store' }
-        );
+        const response = await fetch('/api/location-weather', { cache: 'no-store' });
         const data = await response.json();
-        const temp = Math.round(Number(data?.current?.temperature_2m));
-        if (Number.isFinite(temp)) weather.textContent = `São Paulo ${temp}°C`;
+        const temp = Math.round(Number(data?.temperature));
+        const label = String(data?.label || '').trim() || 'Seu estado';
+        if (data?.timezone) liveTimezone = String(data.timezone);
+        updateClock();
+        weather.textContent = Number.isFinite(temp) ? `${label} ${temp}°C` : label;
       } catch {
         weather.textContent = 'Tempo ao vivo';
       }
