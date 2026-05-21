@@ -2,24 +2,24 @@
 title: "Turismo em parques nacionais movimenta R$ 20 bilhões e reforça busca por natureza"
 slug: "turismo-em-parques-nacionais-movimenta-r-20-bilhoes-e-reforca-busca-por-natureza"
 summary: "Visitação em unidades de conservação federais gerou impacto bilionário no PIB e sustentou mais de 332 mil postos de trabalho no país."
-seoDescription: "Turismo em unidades de conservação federais movimentou R$ 20,3 bilhões no PIB e reforça tendência de viagens ligadas à natureza no Brasil."
+seoDescription: "Lifestyle: Visitação em unidades de conservação federais gerou impacto bilionário no PIB e sustentou mais de 332 mil postos de trabalho no país."
 category: "Lifestyle"
 author: "Redação Novo Alvo"
-sources: ["Agência Brasil", "ICMBio", "Ministério do Turismo"]
+sources: []
 publishedAt: "2026-05-20T23:48:00.000Z"
-updatedAt: "2026-05-20T23:48:00.000Z"
+updatedAt: "2026-05-21T01:30:32.307Z"
 featured: false
 isFeatured: false
 urgent: false
-homeSection: "now"
+homeSection: ""
 views: 0
 cover:
-  src: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1600&q=80"
-  alt: "Pessoa caminhando em trilha de natureza"
-  caption: "Imagem ilustrativa de turismo de natureza; parques nacionais impulsionam economia e viagens no Brasil"
+  src: "https://portalnovoalvo.com.br/media/news/turismo-em-parques-nacionais-movimenta-r-20-bilhoes-e-reforca-busca-por-natureza-cover.png"
+  alt: "Turismo em parques nacionais movimenta R$ 20 bilhões e reforça busca por natureza"
+  caption: ""
   layout: "full"
-ogImage: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1600&q=80"
-tags: ["lifestyle", "turismo", "parques nacionais", "natureza", "viagem"]
+ogImage: "https://portalnovoalvo.com.br/media/news/turismo-em-parques-nacionais-movimenta-r-20-bilhoes-e-reforca-busca-por-natureza-cover.png"
+tags: []
 ---
 
 <p>O turismo em unidades de conservação federais ganhou novo peso econômico no Brasil. A visitação em parques e áreas protegidas movimentou R$ 40,7 bilhões em vendas, gerou R$ 20,3 bilhões para o PIB e sustentou mais de 332,5 mil postos de trabalho.</p>
