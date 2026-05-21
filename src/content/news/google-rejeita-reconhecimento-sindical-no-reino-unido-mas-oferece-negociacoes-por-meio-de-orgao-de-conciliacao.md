@@ -2,12 +2,12 @@
 title: "Google rejeita sindicato no Reino Unido, mas propõe negociação via órgão oficial"
 slug: "google-rejeita-reconhecimento-sindical-no-reino-unido-mas-oferece-negociacoes-por-meio-de-orgao-de-conciliacao"
 summary: "Gigante da tecnologia recusa reconhecimento voluntário de sindicatos na unidade DeepMind, mas se abre a negociações mediadas pelo ACAS, serviço de conciliação do governo britânico."
-seoDescription: "Economia: Gigante da tecnologia recusa reconhecimento voluntário de sindicatos na unidade DeepMind, mas se abre a negociações mediadas pelo ACAS, serviço de…"
-category: "Economia"
+seoDescription: "Mundo: Gigante da tecnologia recusa reconhecimento voluntário de sindicatos na unidade DeepMind, mas se abre a negociações mediadas pelo ACAS, serviço de…"
+category: "Mundo"
 author: "Redação Novo Alvo"
 sources: ["Valor Econômico", "Trading Economics", "G1", "O TEMPO", "Gazeta do Povo", "O Globo", "Canaltech", "CoinDesk"]
 publishedAt: "2026-05-21T04:18:40.868Z"
-updatedAt: "2026-05-21T12:39:01.318Z"
+updatedAt: "2026-05-21T12:40:42.782Z"
 featured: false
 isFeatured: false
 urgent: false
