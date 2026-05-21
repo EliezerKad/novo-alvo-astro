@@ -2,24 +2,24 @@
 title: "O Mandaloriano e Grogu chega aos cinemas brasileiros nesta semana"
 slug: "o-mandaloriano-e-grogu-chega-aos-cinemas-brasileiros-nesta-semana"
 summary: "Novo filme de Star Wars estreia no Brasil em 21 de maio e leva Din Djarin e Grogu para a primeira aventura da dupla nos cinemas."
-seoDescription: "O Mandaloriano e Grogu estreia nos cinemas do Brasil em 21 de maio de 2026, marcando o retorno de Star Wars às telonas."
+seoDescription: "Cinema: Novo filme de Star Wars estreia no Brasil em 21 de maio e leva Din Djarin e Grogu para a primeira aventura da dupla nos cinemas."
 category: "Cinema"
 author: "Redação Novo Alvo"
-sources: ["Disney+", "VEJA", "CinePOP"]
+sources: []
 publishedAt: "2026-05-20T23:44:00.000Z"
-updatedAt: "2026-05-20T23:44:00.000Z"
+updatedAt: "2026-05-21T00:56:51.474Z"
 featured: false
 isFeatured: false
 urgent: false
-homeSection: "now"
+homeSection: ""
 views: 0
 cover:
-  src: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80"
-  alt: "Sala de cinema iluminada antes da sessão"
-  caption: "Imagem ilustrativa de sala de cinema; novo filme de Star Wars estreia no Brasil em 21 de maio"
+  src: "https://portalnovoalvo.com.br/media/news/o-mandaloriano-e-grogu-chega-aos-cinemas-brasileiros-nesta-semana-cover.webp"
+  alt: "O Mandaloriano e Grogu chega aos cinemas brasileiros nesta semana"
+  caption: ""
   layout: "full"
-ogImage: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80"
-tags: ["cinema", "Star Wars", "O Mandaloriano e Grogu", "Disney", "estreia"]
+ogImage: "https://portalnovoalvo.com.br/media/news/o-mandaloriano-e-grogu-chega-aos-cinemas-brasileiros-nesta-semana-cover.webp"
+tags: []
 ---
 
 <p><em>O Mandaloriano e Grogu</em> estreia nos cinemas brasileiros nesta quinta-feira, 21 de maio, levando para a tela grande a dupla que se tornou um dos maiores fenômenos recentes de <em>Star Wars</em>.</p>
