@@ -2,26 +2,27 @@
 title: "\"Mortal Kombat 2\" Acerta em Cheio: Galhofa, Violência e o Que os Fãs Queriam"
 slug: "mortal-kombat-2-abraca-a-galhofa-a-violencia-exagerada-e-entende-o-que-os-fas-queriam"
 summary: "O novo \"Mortal Kombat 2\" mergulha de cabeça na violência exagerada e no humor ácido, entregando exatamente o que a base de fãs esperava do universo do game."
-seoDescription: "O novo \"Mortal Kombat 2\" mergulha de cabeça na violência exagerada e no humor ácido, entregando exatamente o que a base de fãs esperava do universo do game"
+seoDescription: "Cinema: O novo \"Mortal Kombat 2\" mergulha de cabeça na violência exagerada e no humor ácido, entregando exatamente o que a base de fãs esperava do universo…"
 category: "Cinema"
 author: "Redação Novo Alvo"
 sources: ["Folha Vitória", "TecMundo", "Canguru News", "UOL", "JC", "CLAUDIA - o sentido feminino", "A Crítica", "A TARDE", "Cinema e Afins", "Jornal do Comércio", "miscelana.com", "diário do estado", "Imirante.com", "Guia Folha", "Jornal Correio", "ES Brasil", "A Tribuna", "Metrópoles", "TudoCelular.com", "O TEMPO", "Rádio Itatiaia", "CenárioMT", "Recreio", "Tribuna do Planalto", "Gshow", "Alpha FM", "Exame", "CinePOP Cinema", "Vertentes do Cinema", "Correio do Povo", "Grupo Pilau", "GPS Brasília", "Folha BV", "A Redação", "Abordagem Notícias", "Mix Vale", "Pipoca Moderna", "Super Rádio Tupi", "O POVO", "SB Notícias", "Moda 20"]
 publishedAt: "2026-05-10T19:37:02.092Z"
-updatedAt: "2026-05-10T19:37:06.619Z"
+updatedAt: "2026-05-21T13:13:16.684Z"
 featured: false
 isFeatured: false
 urgent: false
+homeSection: ""
 views: 0
 cover:
-  src: "https://picsum.photos/seed/article:mortal-kombat-2-abraca-a-galhofa-a-violencia-exagerada-e-entende-o-que-o/1600/900"
+  src: "https://portalnovoalvo.com.br/media/news/mortal-kombat-2-abraca-a-galhofa-a-violencia-exagerada-e-entende-o-que-os-fas-queriam-cover.jpg"
   alt: "Cena de ação intensa de Mortal Kombat 2 com personagens icônicos."
-  caption: "Cena de ação intensa de Mortal Kombat 2 com personagens icônicos."
-  layout: "none"
-ogImage: "https://picsum.photos/seed/article:mortal-kombat-2-abraca-a-galhofa-a-violencia-exagerada-e-entende-o-que-o/1600/900"
+  caption: ""
+  layout: "full"
+ogImage: "https://portalnovoalvo.com.br/media/news/mortal-kombat-2-abraca-a-galhofa-a-violencia-exagerada-e-entende-o-que-os-fas-queriam-cover.jpg"
 tags: ["cinema", "mortal", "kombat", "abraca", "galhofa", "violencia", "exagerada", "entende", "queriam"]
 ---
 
-<p>Esqueça a sutileza. &quot;Mortal Kombat 2&quot; chegou com a missão clara de abraçar a galhofa e a violência sem pedir desculpas. A produção parece ter ouvido atentamente os murmúrios da comunidade, entregando uma experiência que ressoa com a essência dos jogos.</p>
+<p>Esqueça a sutileza. "Mortal Kombat 2" chegou com a missão clara de abraçar a galhofa e a violência sem pedir desculpas. A produção parece ter ouvido atentamente os murmúrios da comunidade, entregando uma experiência que ressoa com a essência dos jogos.</p>
 <h2>A Violência Como Linguagem</h2>
 <p>O filme não economiza nos golpes brutais e nas mortes criativas, elementos que definem a franquia. A execução dessas cenas é visceral, buscando um impacto direto no espectador que acompanha a saga há anos.</p>
 <h3>O Humor Negro que Conecta</h3>
@@ -31,4 +32,4 @@ tags: ["cinema", "mortal", "kombat", "abraca", "galhofa", "violencia", "exagerad
 <p>Personagens icônicos ganham espaço para mostrar suas peculiaridades, e as lutas são coreografadas com um espetáculo visual que remete diretamente às arenas virtuais.</p>
 <p>A sensação é de que a equipe de produção entendeu o que torna Mortal Kombat especial: a ousadia em ser excessivo e, ao mesmo tempo, divertido.</p>
 <p>O resultado é um filme que, ao invés de tentar reinventar a roda, foca em aprimorar a fórmula que já conquistou milhões.</p>
-<p>&quot;Mortal Kombat 2&quot; se consolida como uma entrega que prioriza a fidelidade ao espírito original, com uma boa dose de adrenalina e diversão.</p>
+<p>"Mortal Kombat 2" se consolida como uma entrega que prioriza a fidelidade ao espírito original, com uma boa dose de adrenalina e diversão.</p>
