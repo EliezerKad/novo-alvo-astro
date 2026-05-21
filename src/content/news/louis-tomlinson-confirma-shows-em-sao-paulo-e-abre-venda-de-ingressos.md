@@ -2,24 +2,24 @@
 title: "Louis Tomlinson confirma shows em São Paulo e abre venda de ingressos"
 slug: "louis-tomlinson-confirma-shows-em-sao-paulo-e-abre-venda-de-ingressos"
 summary: "Cantor britânico levará a turnê How Did We Get Here? ao Suhai Music Hall, em São Paulo, com apresentações marcadas para abril de 2027."
-seoDescription: "Louis Tomlinson confirma shows em São Paulo pela turnê How Did We Get Here? e inicia venda de ingressos pela Live Nation."
+seoDescription: "Musica: Cantor britânico levará a turnê How Did We Get Here? ao Suhai Music Hall, em São Paulo, com apresentações marcadas para abril de 2027."
 category: "Musica"
 author: "Redação Novo Alvo"
-sources: ["Live Nation Brasil", "Site oficial de Louis Tomlinson"]
+sources: []
 publishedAt: "2026-05-20T23:49:00.000Z"
-updatedAt: "2026-05-20T23:49:00.000Z"
+updatedAt: "2026-05-21T00:53:02.126Z"
 featured: false
 isFeatured: false
 urgent: false
-homeSection: "now"
+homeSection: ""
 views: 0
 cover:
-  src: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1600&q=80"
-  alt: "Público em show com luzes de palco"
-  caption: "Imagem ilustrativa de show; Louis Tomlinson tem datas marcadas em São Paulo"
+  src: "https://portalnovoalvo.com.br/media/news/louis-tomlinson-confirma-shows-em-sao-paulo-e-abre-venda-de-ingressos-cover.jpg"
+  alt: "Louis Tomlinson confirma shows em São Paulo e abre venda de ingressos"
+  caption: ""
   layout: "full"
-ogImage: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1600&q=80"
-tags: ["Louis Tomlinson", "shows", "São Paulo", "música", "Live Nation"]
+ogImage: "https://portalnovoalvo.com.br/media/news/louis-tomlinson-confirma-shows-em-sao-paulo-e-abre-venda-de-ingressos-cover.jpg"
+tags: []
 ---
 
 <p>Louis Tomlinson incluiu São Paulo na rota da turnê <em>How Did We Get Here?</em>. Segundo a Live Nation Brasil e o site oficial do cantor, as apresentações estão marcadas para o Suhai Music Hall, nos dias 6 e 7 de abril de 2027.</p>
