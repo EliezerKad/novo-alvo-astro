@@ -7,18 +7,18 @@ category: "Cultura"
 author: "Redação Novo Alvo"
 sources: []
 publishedAt: "2026-05-20T23:47:00.000Z"
-updatedAt: "2026-05-21T00:53:37.668Z"
+updatedAt: "2026-05-21T00:54:10.496Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/festival-akwaaba-celebra-conexoes-entre-africa-e-brasil-em-sao-paulo-cover.jpg"
+  src: "https://portalnovoalvo.com.br/media/news/festival-akwaaba-celebra-conexoes-entre-africa-e-brasil-em-sao-paulo-cover.png"
   alt: "Festival Akwaaba celebra conexões entre África e Brasil em São Paulo"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/festival-akwaaba-celebra-conexoes-entre-africa-e-brasil-em-sao-paulo-cover.jpg"
+ogImage: "https://portalnovoalvo.com.br/media/news/festival-akwaaba-celebra-conexoes-entre-africa-e-brasil-em-sao-paulo-cover.png"
 tags: []
 ---
 
