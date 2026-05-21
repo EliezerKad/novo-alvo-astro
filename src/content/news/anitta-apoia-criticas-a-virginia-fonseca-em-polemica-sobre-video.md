@@ -7,11 +7,11 @@ category: "Famosos"
 author: "Redação Novo Alvo"
 sources: ["CNN Brasil", "Metrópoles", "NaTelinha", "pagina1news.com.br", "Banda B", "contigo.com.br", "Portal do Holanda", "Portal 96FM", "O Hoje", "Portal UAI"]
 publishedAt: "2026-05-20T21:18:21.463Z"
-updatedAt: "2026-05-20T21:24:26.157Z"
+updatedAt: "2026-05-21T12:45:46.074Z"
 featured: false
 isFeatured: false
 urgent: false
-homeSection: "now"
+homeSection: ""
 views: 0
 cover:
   src: "https://portalnovoalvo.com.br/media/news/anitta-curte-video-contra-virginia-apos-polemica-de-racismo-com-vini-jr-cover.jpg"
