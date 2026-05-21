@@ -10,6 +10,7 @@ import { getCollection } from 'astro:content';
 import {
   categoriesList,
   categoryUrl,
+  displayCategory,
   newsEntryToArticle,
   sortNewsByDate,
   subCategoriesList,
@@ -30,6 +31,7 @@ interface Props {
 }
 
 const { category } = Astro.props;
+const categoryLabel = displayCategory(category);
 const newsEntries = sortNewsByDate(await getCollection('news'));
 const articles = newsEntries.map(newsEntryToArticle);
 const categoryArticles = articles.filter((article) => article.category === category);
@@ -42,13 +44,13 @@ const tickerArticles = urgentNews(newsEntries).map(newsEntryToArticle);
 const canonical = new URL(categoryUrl(category), Astro.site ?? Astro.url.origin).href;
 const breadcrumbs = [
   { name: 'Inicio', url: new URL('/', Astro.site ?? Astro.url.origin).href },
-  { name: category, url: canonical },
+  { name: categoryLabel, url: canonical },
 ];
 ---
 
 <BaseLayout
-  title={`${category} | Novo Alvo`}
-  description={`Noticias de ${category} no Novo Alvo, com cobertura editorial, contexto e fatos relevantes.`}
+  title={`${categoryLabel} | Novo Alvo`}
+  description={`Notícias de ${categoryLabel} no Novo Alvo, com cobertura editorial, contexto e fatos relevantes.`}
   canonical={canonical}
   breadcrumbs={breadcrumbs}
 >
@@ -63,7 +65,7 @@ const breadcrumbs = [
             <div class="flex items-center gap-4">
               <div class="h-11 w-1.5 rounded-full bg-[#8A1F2D] shadow-[0_0_26px_rgba(138,31,45,0.22)]"></div>
               <h1 class="font-sans text-[clamp(2.6rem,8vw,5.25rem)] font-black uppercase leading-[0.9] tracking-[-0.082em] text-[#101010] dark:text-zinc-50">
-                {category}
+                {categoryLabel}
               </h1>
             </div>
             <p class="ml-5 mt-4 max-w-2xl text-[10px] font-black uppercase leading-5 tracking-[0.36em] text-zinc-400 md:ml-6">
@@ -91,7 +93,7 @@ const breadcrumbs = [
               <div class="mb-4 flex items-center gap-3 border-b-2 border-[#8A1F2D] pb-3">
                 <Icon name="trending" class="h-5 w-5 text-[#8A1F2D]" />
                 <h3 class="font-sans text-xs font-black uppercase italic tracking-[0.22em] text-zinc-950 dark:text-zinc-50">
-                  Mais acessadas em {category}
+                  Mais acessadas em {categoryLabel}
                 </h3>
               </div>
               <div class="space-y-4">
@@ -119,7 +121,7 @@ const breadcrumbs = [
                     </div>
                     <div class="min-w-0">
                       <span class="mb-1 block w-fit rounded-md bg-[#8A1F2D]/10 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-widest text-[#8A1F2D]">
-                        {article.category}
+                        {displayCategory(article.category)}
                       </span>
                       <h4 class="line-clamp-2 font-sans text-sm font-black leading-[1.1] tracking-[-0.045em] text-zinc-950 transition-colors hover:text-[#8A1F2D] dark:text-zinc-100">
                         {article.title}

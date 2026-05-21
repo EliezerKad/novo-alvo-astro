@@ -1,5 +1,6 @@
 ---
 import type { Article } from '../types';
+import { displayCategory } from '../lib/news';
 import { getCategoryColor } from '../lib/utils';
 import Icon from './Icon.astro';
 import AdsenseBlock from './AdsenseBlock.astro';
@@ -23,7 +24,7 @@ const carouselArticles = articles.length > 1 ? [...articles, ...articles] : arti
           </div>
           <div class="min-w-0">
             <h3 class="text-2xl font-serif font-black tracking-tighter italic dark:text-zinc-50">Giro de Notícias</h3>
-            <p class="text-zinc-400 text-[9px] font-black uppercase tracking-[0.3em] dark:text-zinc-500">Mais em {current.category}</p>
+            <p class="text-zinc-400 text-[9px] font-black uppercase tracking-[0.3em] dark:text-zinc-500">Mais em {displayCategory(current.category)}</p>
           </div>
         </div>
         <div class="flex items-center gap-2 flex-shrink-0">
@@ -80,7 +81,7 @@ const carouselArticles = articles.length > 1 ? [...articles, ...articles] : arti
                 )}
                 <div class="absolute top-3 left-3">
                   <span class={`text-white px-2 py-0.5 text-[7px] font-black uppercase tracking-widest rounded-md ${getCategoryColor(rel.category)}`}>
-                    {rel.category}
+                    {displayCategory(rel.category)}
                   </span>
                 </div>
               </div>

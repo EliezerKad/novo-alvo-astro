@@ -16,25 +16,25 @@ export const categoriesList = [
 ];
 
 export const categoryLabels: Record<string, string> = {
-  Politica: 'Politica',
+  Politica: 'Política',
   Economia: 'Economia',
   Brasil: 'Brasil',
   Mundo: 'Mundo',
-  Saude: 'Saude',
+  Saude: 'Saúde',
   Tecnologia: 'Tecnologia',
   Esportes: 'Esportes',
   Famosos: 'Famosos',
   Cinema: 'Cinema',
   Entretenimento: 'Entretenimento',
-  Ciencia: 'Ciencia',
-  Educacao: 'Educacao',
+  Ciencia: 'Ciência',
+  Educacao: 'Educação',
   Cultura: 'Cultura',
   Lifestyle: 'Lifestyle',
   Games: 'Games',
   Moda: 'Moda',
-  Musica: 'Musica',
+  Musica: 'Música',
   Futebol: 'Futebol',
-  Ocorrencias: 'Ocorrencias',
+  Ocorrencias: 'Ocorrências',
   Geral: 'Geral',
 };
 
@@ -92,6 +92,11 @@ export function categoryFromSlug(slug: string, categories = [...categoriesList, 
 
 export function categoryUrl(category: string): string {
   return `/categoria/${categorySlug(category)}/`;
+}
+
+export function displayCategory(category?: string): string {
+  if (!category) return '';
+  return categoryLabels[category] || category;
 }
 
 export function featuredNews(entries: NewsEntry[]): NewsEntry[] {

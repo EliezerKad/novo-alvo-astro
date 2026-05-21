@@ -6,7 +6,7 @@ import Icon from '../../components/Icon.astro';
 import NewsletterBlock from '../../components/NewsletterBlock.astro';
 import { getCollection, render } from 'astro:content';
 import type { NewsEntry } from '../../lib/news';
-import { relatedNews, sortNewsByDate } from '../../lib/news';
+import { displayCategory, relatedNews, sortNewsByDate } from '../../lib/news';
 import {
   formatEditorialDate,
   getReadingTime,
@@ -37,6 +37,7 @@ const related = relatedNews(article, newsEntries);
 const sideArticles = related.slice(0, 3);
 const coverCaption = article.data.cover.caption?.trim() || '';
 const visibleCoverCredit = coverCaption && coverCaption !== article.data.cover.alt.trim() ? coverCaption : '';
+const articleCategoryLabel = displayCategory(article.data.category);
 const title = `${article.data.title} | Novo Alvo`;
 const author = article.data.author;
 const publishedIso = article.data.publishedAt.toISOString();
@@ -45,7 +46,7 @@ const encodedTitle = encodeURIComponent(article.data.title);
 const encodedUrl = encodeURIComponent(canonicalUrl);
 const breadcrumbs = [
   { name: 'Inicio', url: new URL('/', Astro.site ?? Astro.url.origin).href },
-  { name: article.data.category, url: new URL(`/?category=${encodeURIComponent(article.data.category)}`, Astro.site ?? Astro.url.origin).href },
+  { name: articleCategoryLabel, url: new URL(`/?category=${encodeURIComponent(article.data.category)}`, Astro.site ?? Astro.url.origin).href },
   { name: article.data.title, url: canonicalUrl },
 ];
 const schema = {
@@ -117,7 +118,7 @@ const schema = {
       <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-11">
         <div>
           <span class="mb-4 inline-flex h-8 items-center rounded-full bg-[#8A1F2D]/10 px-3.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#8A1F2D] md:mb-5 md:h-9 md:px-4 md:text-xs">
-            {article.data.category}
+            {articleCategoryLabel}
           </span>
 
           <h1 class="max-w-5xl text-[clamp(2.65rem,15vw,5.875rem)] font-sans font-black leading-[0.9] tracking-[-0.088em] text-[#101010] dark:text-zinc-50 sm:text-[clamp(3.35rem,11vw,5.875rem)]">
@@ -257,7 +258,7 @@ const schema = {
                     </div>
                     <div>
                       <h3 class="text-sm font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50">{rel.title}</h3>
-                      <p class="mt-1 text-[11px] font-bold text-zinc-400">{rel.category} • {rel.views || 0} acessos</p>
+                      <p class="mt-1 text-[11px] font-bold text-zinc-400">{displayCategory(rel.category)} • {rel.views || 0} acessos</p>
                     </div>
                   </a>
                 ))}

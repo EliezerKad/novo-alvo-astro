@@ -1,27 +1,37 @@
 import React, { useState } from 'react';
 
 const categoriesList = [
-  'Política',
-  'Economia',
-  'Brasil',
-  'Mundo',
-  'Saúde',
-  'Tecnologia',
-  'Esportes',
-  'Famosos',
+  ['Politica', 'Política'],
+  ['Economia', 'Economia'],
+  ['Brasil', 'Brasil'],
+  ['Mundo', 'Mundo'],
+  ['Saude', 'Saúde'],
+  ['Tecnologia', 'Tecnologia'],
+  ['Esportes', 'Esportes'],
+  ['Famosos', 'Famosos'],
 ];
 
 const subCategoriesList = [
-  'Entretenimento',
-  'Ciência',
-  'Educação',
-  'Cultura',
-  'Lifestyle',
-  'Games',
-  'Moda',
-  'Música',
-  'Futebol',
+  ['Entretenimento', 'Entretenimento'],
+  ['Ciencia', 'Ciência'],
+  ['Educacao', 'Educação'],
+  ['Cultura', 'Cultura'],
+  ['Lifestyle', 'Lifestyle'],
+  ['Games', 'Games'],
+  ['Moda', 'Moda'],
+  ['Musica', 'Música'],
+  ['Futebol', 'Futebol'],
+  ['Ocorrencias', 'Ocorrências'],
 ];
+
+function categorySlug(category: string) {
+  return category
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
 
 function MenuIcon({ className }: { className: string }) {
   return (
@@ -86,28 +96,28 @@ export default function NavbarControls({ category }: Props) {
             <div className="space-y-8">
               <nav className="space-y-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Categorias</p>
-                {categoriesList.map((cat) => (
+                {categoriesList.map(([value, label]) => (
                   <a
-                    key={cat}
-                    href={`/categoria/${cat.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}/`}
+                    key={value}
+                    href={`/categoria/${categorySlug(value)}/`}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`block uppercase text-sm font-black tracking-widest ${category === cat ? 'text-red-600' : 'text-zinc-800 dark:text-zinc-200'}`}
+                    className={`block uppercase text-sm font-black tracking-widest ${category === value ? 'text-red-600' : 'text-zinc-800 dark:text-zinc-200'}`}
                   >
-                    {cat}
+                    {label}
                   </a>
                 ))}
               </nav>
 
               <nav className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
                 <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Sub-Categorias</p>
-                {subCategoriesList.map((cat) => (
+                {subCategoriesList.map(([value, label]) => (
                   <a
-                    key={cat}
-                    href={`/categoria/${cat.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}/`}
+                    key={value}
+                    href={`/categoria/${categorySlug(value)}/`}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`block uppercase text-xs font-bold tracking-widest ${category === cat ? 'text-red-600' : 'text-zinc-500 dark:text-zinc-400'}`}
+                    className={`block uppercase text-xs font-bold tracking-widest ${category === value ? 'text-red-600' : 'text-zinc-500 dark:text-zinc-400'}`}
                   >
-                    {cat}
+                    {label}
                   </a>
                 ))}
               </nav>

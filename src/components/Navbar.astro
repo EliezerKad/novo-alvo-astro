@@ -6,7 +6,7 @@ import NavbarSearch from './NavbarSearch.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import TopTicker from './TopTicker.astro';
 import VisitorCounter from './VisitorCounter.astro';
-import { categoryUrl } from '../lib/news';
+import { categoryUrl, displayCategory } from '../lib/news';
 import type { Article } from '../types';
 
 interface Props {
@@ -58,7 +58,7 @@ const { tickerArticles = [], category, categories, subCategories } = Astro.props
                   href={categoryUrl(cat)}
                   class={`uppercase text-[11px] font-black tracking-widest transition-colors flex-shrink-0 ${category === cat ? 'text-[#8A1F2D]' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'}`}
                 >
-                  {cat}
+                  {displayCategory(cat)}
                 </a>
               ))}
             </nav>
@@ -68,7 +68,7 @@ const { tickerArticles = [], category, categories, subCategories } = Astro.props
                   href={categoryUrl(cat)}
                   class={`uppercase text-[9px] font-black tracking-widest transition-colors flex-shrink-0 ${category === cat ? 'text-[#8A1F2D]' : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'}`}
                 >
-                  {cat}
+                  {displayCategory(cat)}
                 </a>
               ))}
             </nav>

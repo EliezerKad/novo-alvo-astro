@@ -1,6 +1,7 @@
 ---
 import Icon from './Icon.astro';
 import type { Article } from '../types';
+import { displayCategory } from '../lib/news';
 import { formatRelativeDate, getCategoryColor } from '../lib/utils';
 
 interface Props {
@@ -31,7 +32,7 @@ const href = article.slug === '#' ? '#' : `/noticia/${article.slug}`;
               DESTAQUES
             </span>
             <span class={`${getCategoryColor(article.category)} rounded-full px-3 py-1.5 text-[8px] font-black uppercase tracking-widest text-white shadow-lg md:px-4 md:text-[10px]`}>
-              {article.category}
+              {displayCategory(article.category)}
             </span>
           </div>
           <h2 class="mb-3 max-w-[860px] break-words text-[clamp(1.95rem,9.8vw,3.15rem)] font-sans font-black leading-[0.98] tracking-[-0.065em] text-white drop-shadow-2xl transition-colors group-hover:text-[#f4c8cf] sm:text-[clamp(2.55rem,7.4vw,4rem)] md:mb-4 md:leading-[0.94] md:tracking-[-0.075em]">
@@ -151,7 +152,7 @@ const href = article.slug === '#' ? '#' : `/noticia/${article.slug}`;
       </div>
       <div class="space-y-1 min-w-0">
         <span class={`text-[7px] font-black text-white px-1.5 py-0.5 rounded-sm uppercase tracking-widest block w-fit mb-1 ${getCategoryColor(article.category)}`}>
-          {article.category}
+          {displayCategory(article.category)}
         </span>
         <h4 class="font-sans font-black text-sm leading-[1.12] tracking-[-0.045em] group-hover:text-[#8A1F2D] transition-colors dark:text-zinc-200 dark:group-hover:text-red-400 line-clamp-2">
           {article.title}

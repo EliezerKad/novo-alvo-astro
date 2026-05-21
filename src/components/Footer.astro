@@ -1,18 +1,18 @@
 ---
 import LogoSymbol from './LogoSymbol.astro';
 import VisitorCounter from './VisitorCounter.astro';
-import { categoryUrl } from '../lib/news';
+import { categoryUrl, displayCategory } from '../lib/news';
 
 const categories = [
   'Brasil',
   'Esportes',
-  'Música',
+  'Musica',
   'Moda',
   'Famosos',
   'Games',
   'Tecnologia',
-  'Educação',
-  'Política',
+  'Educacao',
+  'Politica',
   'Economia',
   'Geral',
 ];
@@ -43,7 +43,7 @@ const year = new Date().getFullYear();
           <nav class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px] font-bold text-white/58">
             {categories.slice(0, 8).map((category) => (
               <a href={categoryUrl(category)} class="transition-colors hover:text-white">
-                {category}
+                {displayCategory(category)}
               </a>
             ))}
           </nav>
