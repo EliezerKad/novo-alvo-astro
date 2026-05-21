@@ -2,23 +2,23 @@
 title: "Google rejeita sindicato no Reino Unido, mas propõe negociação via órgão oficial"
 slug: "google-rejeita-reconhecimento-sindical-no-reino-unido-mas-oferece-negociacoes-por-meio-de-orgao-de-conciliacao"
 summary: "Gigante da tecnologia recusa reconhecimento voluntário de sindicatos na unidade DeepMind, mas se abre a negociações mediadas pelo ACAS, serviço de conciliação do governo britânico."
-seoDescription: "Gigante da tecnologia recusa reconhecimento voluntário de sindicatos na unidade DeepMind, mas se abre a negociações mediadas pelo ACAS, serviço de"
+seoDescription: "Economia: Gigante da tecnologia recusa reconhecimento voluntário de sindicatos na unidade DeepMind, mas se abre a negociações mediadas pelo ACAS, serviço de…"
 category: "Economia"
 author: "Redação Novo Alvo"
 sources: ["Valor Econômico", "Trading Economics", "G1", "O TEMPO", "Gazeta do Povo", "O Globo", "Canaltech", "CoinDesk"]
 publishedAt: "2026-05-21T04:18:40.868Z"
-updatedAt: "2026-05-21T04:18:48.750Z"
+updatedAt: "2026-05-21T12:39:01.318Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://source.unsplash.com/1600x900/?google%2Crejeita%2Creconhecimento%2Csindical%2Creino%2Cunido%2Cbusiness%2Cfinance%2Cmarket"
+  src: "https://portalnovoalvo.com.br/media/news/google-rejeita-reconhecimento-sindical-no-reino-unido-mas-oferece-negociacoes-por-meio-de-orgao-de-conciliacao-cover.jpg"
   alt: "Sede do Google com bandeira do Reino Unido ao fundo, simbolizando a disputa sindical."
-  caption: "Unsplash"
+  caption: "Credito: Unsplash"
   layout: "full"
-ogImage: "https://source.unsplash.com/1600x900/?google%2Crejeita%2Creconhecimento%2Csindical%2Creino%2Cunido%2Cbusiness%2Cfinance%2Cmarket"
+ogImage: "https://portalnovoalvo.com.br/media/news/google-rejeita-reconhecimento-sindical-no-reino-unido-mas-oferece-negociacoes-por-meio-de-orgao-de-conciliacao-cover.jpg"
 tags: ["economia", "google", "rejeita", "reconhecimento", "sindical", "reino", "unido", "oferece", "negociacoes", "meio"]
 ---
 
