@@ -19,6 +19,7 @@ import { formatRelativeDate, getCategoryColor } from '../lib/utils';
 
 const newsEntries = sortNewsByDate(await getCollection('news'));
 const articles = newsEntries.map(newsEntryToArticle);
+const staticArticleSlugs = articles.map((article) => article.slug);
 const category = Astro.url.searchParams.get('category') || undefined;
 const filteredArticles = articles.filter((article) => {
   if (category && category !== 'Início' && article.category !== category) return false;
@@ -110,7 +111,7 @@ const isCategoryView = !!category && category !== 'Início';
                           Agora
                         </span>
                       </div>
-                      <div class="px-4 py-1 md:px-6" data-live-pulse-list>
+                      <div class="px-4 py-1 md:px-6" data-live-pulse-list data-static-slugs={JSON.stringify(staticArticleSlugs)}>
                         {pulseArticles.map((article) => (
                           <a href={`/noticia/${article.slug}`} class="group -mx-2 grid grid-cols-[58px_1fr] gap-3 rounded-2xl border-b border-black/10 px-2 py-3.5 transition-all duration-300 last:border-b-0 hover:-translate-y-0.5 hover:bg-[#f5f3ee] hover:shadow-[0_16px_38px_rgba(16,16,16,0.07)] dark:border-zinc-800 dark:hover:bg-zinc-800/60 md:grid-cols-[64px_1fr] md:py-4">
                             <div class="h-14 w-[58px] overflow-hidden rounded-xl bg-[#ebe8df] shadow-sm transition-all duration-300 group-hover:shadow-md dark:bg-zinc-800 md:w-16 md:rounded-2xl">
@@ -255,6 +256,7 @@ const isCategoryView = !!category && category !== 'Início';
 
                     const pulseList = document.querySelector('[data-live-pulse-list]');
                     if (!pulseList) return;
+                    const staticSlugs = new Set(JSON.parse(pulseList.dataset.staticSlugs || '[]'));
                     const categoryColors = {
                       Brasil: 'bg-emerald-600',
                       Mundo: 'bg-blue-900',
@@ -305,7 +307,9 @@ const isCategoryView = !!category && category !== 'Início';
                     fetch('/api/public/articles?limit=4')
                       .then((response) => (response.ok ? response.json() : { articles: [] }))
                       .then((data) => {
-                        const articles = Array.isArray(data.articles) ? data.articles : [];
+                        const articles = Array.isArray(data.articles)
+                          ? data.articles.filter((article) => article?.slug && !staticSlugs.has(article.slug))
+                          : [];
                         if (!articles.length) return;
                         pulseList.innerHTML = articles.slice(0, 3)
                           .map((article) => {
