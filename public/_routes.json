@@ -1,5 +1,5 @@
 {
   "version": 1,
-  "include": ["/*"],
-  "exclude": ["/assets/*"]
+  "include": ["/api/*", "/admin/*", "/media/*", "/noticia/*"],
+  "exclude": ["/_astro/*", "/assets/*", "/uploads/*", "/favicon.svg", "/og-default.svg", "/ads.txt"]
 }
