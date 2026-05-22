@@ -41,7 +41,7 @@ export async function GET(context: APIContext) {
           length: 0,
           type: 'image/jpeg',
         },
-        customData: `<media:content url="${escapedImageUrl}" medium="image" type="image/jpeg"><media:title>${escapedImageAlt}</media:title></media:content><media:thumbnail url="${escapedImageUrl}" />`,
+        customData: `<image>${escapedImageUrl}</image><image_alttext>${escapedImageAlt}</image_alttext><media:content url="${escapedImageUrl}" medium="image" type="image/jpeg"><media:title>${escapedImageAlt}</media:title></media:content><media:thumbnail url="${escapedImageUrl}" />`,
       };
     }),
     customData: '<language>pt-BR</language>',
