@@ -2,23 +2,23 @@
 title: "Kevin Warsh assume comando do Fed com aval de Trump"
 slug: "quem-e-kevin-warsh-indicado-por-trump-e-que-assume-o-comando-do-fed-nesta-sexta"
 summary: "Indicado pelo presidente Donald Trump, Kevin Warsh assume nesta sexta-feira a presidência do Federal Reserve em um cenário de inflação persistente."
-seoDescription: "Indicado pelo presidente Donald Trump, Kevin Warsh assume nesta sexta-feira a presidência do Federal Reserve em um cenário de inflação persistente."
+seoDescription: "Economia: Indicado pelo presidente Donald Trump, Kevin Warsh assume nesta sexta-feira a presidência do Federal Reserve em um cenário de inflação persistente."
 category: "Economia"
 author: "Redação Novo Alvo"
 sources: ["G1", "Canal Rural", "Tribuna do Agreste", "Times Brasil | CNBC", "CNN Brasil · RSS direto", "CartaCapital", "O TEMPO", "Gazeta do Povo"]
 publishedAt: "2026-05-22T15:28:09.609Z"
-updatedAt: "2026-05-22T15:28:48.547Z"
+updatedAt: "2026-05-22T21:06:17.454Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://source.unsplash.com/1600x900/?quem%2Ckevin%2Cwarsh%2Cindicado%2Ctrump%2Cassume%2Cbusiness%2Cfinance%2Cmarket"
+  src: "https://portalnovoalvo.com.br/media/news/quem-e-kevin-warsh-indicado-por-trump-e-que-assume-o-comando-do-fed-nesta-sexta-cover-20260522210617.webp"
   alt: "Kevin Warsh, indicado por Trump, assume o comando do Federal Reserve."
-  caption: "Unsplash"
+  caption: "Credito: Unsplash"
   layout: "full"
-ogImage: "https://source.unsplash.com/1600x900/?quem%2Ckevin%2Cwarsh%2Cindicado%2Ctrump%2Cassume%2Cbusiness%2Cfinance%2Cmarket"
+ogImage: "https://portalnovoalvo.com.br/media/news/quem-e-kevin-warsh-indicado-por-trump-e-que-assume-o-comando-do-fed-nesta-sexta-cover-20260522210617.webp"
 tags: ["economia", "quem", "kevin", "warsh", "indicado", "trump", "assume", "comando", "nesta", "sexta"]
 ---
 
