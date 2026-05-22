@@ -7,7 +7,7 @@ category: "Brasil"
 author: "Redação Novo Alvo"
 sources: ["diaadiaes.com.br", "O Globo", "UOL Notícias", "portaldozacarias.com.br", "Agora No Vale", "O TEMPO", "Muita Informação", "Metrópoles"]
 publishedAt: "2026-05-22T01:35:16.236Z"
-updatedAt: "2026-05-22T01:35:17.859Z"
+updatedAt: "2026-05-22T02:17:28.004Z"
 featured: false
 isFeatured: false
 urgent: false
