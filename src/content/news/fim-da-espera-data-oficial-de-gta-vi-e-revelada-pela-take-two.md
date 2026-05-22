@@ -7,8 +7,8 @@ category: "Games"
 author: "Redação Novo Alvo"
 sources: ["Xbox Power", "Máquina Nerd", "Exame", "Última Ficha", "Omelete", "Manual dos Games", "Portal Tela", "MeuPlayStation", "O TEMPO", "EGW.News", "levelupnews.com.br", "GameVicio", "flowgames.gg"]
 publishedAt: "2026-05-22T12:36:21.444Z"
-updatedAt: "2026-05-22T12:40:24.339Z"
-featured: false
+updatedAt: "2026-05-22T12:50:00.816Z"
+featured: true
 isFeatured: false
 urgent: false
 homeSection: ""
