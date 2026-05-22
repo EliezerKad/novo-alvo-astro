@@ -7,18 +7,18 @@ category: "Brasil"
 author: "Redação Novo Alvo"
 sources: ["diaadiaes.com.br", "O Globo", "UOL Notícias", "portaldozacarias.com.br", "Agora No Vale", "O TEMPO", "Muita Informação", "Metrópoles"]
 publishedAt: "2026-05-22T01:35:16.236Z"
-updatedAt: "2026-05-22T02:22:16.355Z"
+updatedAt: "2026-05-22T02:24:56.767Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/brasil-reduz-casos-de-nascimentos-e-obitos-sem-registro-aponta-ibge-cover.jpg"
+  src: "https://portalnovoalvo.com.br/media/news/brasil-reduz-casos-de-nascimentos-e-obitos-sem-registro-aponta-ibge-cover.webp"
   alt: "Arara-azul, símbolo da fauna brasileira, representando o Brasil."
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/brasil-reduz-casos-de-nascimentos-e-obitos-sem-registro-aponta-ibge-cover.jpg"
+ogImage: "https://portalnovoalvo.com.br/media/news/brasil-reduz-casos-de-nascimentos-e-obitos-sem-registro-aponta-ibge-cover.webp"
 tags: ["brasil", "reduz", "casos", "nascimentos", "obitos", "registro", "aponta", "ibge"]
 ---
 
