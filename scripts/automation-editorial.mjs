@@ -1,9 +1,17 @@
+import { execFileSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 const PORTAL_ORIGIN = process.env.PORTAL_ORIGIN || 'https://portalnovoalvo.com.br';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
+const D1_DATABASE = process.env.AUTOMATION_D1_DATABASE || 'novo-alvo-editorial';
 const MIN_SOURCES = Number(process.env.AUTOMATION_MIN_SOURCES || 8);
 const MIN_SCORE = Number(process.env.AUTOMATION_MIN_SCORE || 900);
-const MAX_QUEUE_PER_RUN = Number(process.env.AUTOMATION_MAX_QUEUE_PER_RUN || 2);
+const MAX_QUEUE_PER_RUN = Number(process.env.AUTOMATION_MAX_QUEUE_PER_RUN || 1);
+const MAX_OPEN_QUEUE = Number(process.env.AUTOMATION_MAX_OPEN_QUEUE || 2);
 const RECENT_CATEGORY_HOURS = Number(process.env.AUTOMATION_RECENT_CATEGORY_HOURS || 8);
+const bundledNpm = resolve('..', '.tools', 'node-v24.15.0-win-x64', process.platform === 'win32' ? 'npm.cmd' : 'bin/npm');
+const npmCommand = process.env.NPM_CMD || (existsSync(bundledNpm) ? bundledNpm : process.platform === 'win32' ? 'npm.cmd' : 'npm');
 
 const requestJson = async (path, options = {}) => {
   const response = await fetch(new URL(path, PORTAL_ORIGIN), {
@@ -31,6 +39,32 @@ const parseDate = (value) => {
   return Number.isFinite(time) ? time : 0;
 };
 
+const sqlString = (value) => `'${String(value || '').replace(/'/g, "''")}'`;
+
+const d1 = (command) => {
+  const env = { ...process.env, npm_config_cache: process.env.npm_config_cache || resolve('..', '.npm-cache') };
+  const normalizedCommand = command.replace(/\s+/g, ' ').trim();
+  const psCommand = `& '${npmCommand.replace(/'/g, "''")}' exec wrangler -- d1 execute ${D1_DATABASE} --remote --json --command @'
+${normalizedCommand}
+'@`;
+  const output =
+    process.platform === 'win32'
+      ? execFileSync(
+          'powershell.exe',
+          ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', psCommand],
+          { encoding: 'utf8', env },
+        )
+      : execFileSync(
+          npmCommand,
+          ['exec', 'wrangler', '--', 'd1', 'execute', D1_DATABASE, '--remote', '--json', '--command', normalizedCommand],
+          { encoding: 'utf8', env },
+        );
+  const jsonStart = output.indexOf('[');
+  const jsonText = jsonStart >= 0 ? output.slice(jsonStart) : output;
+  const chunks = JSON.parse(jsonText);
+  return chunks.flatMap((chunk) => chunk?.results || []);
+};
+
 const sourcePublishers = (pitch) => {
   try {
     const sources = JSON.parse(pitch.sources || '[]');
@@ -45,7 +79,7 @@ const sourcePublishers = (pitch) => {
 };
 
 const buildCategoryRecency = async () => {
-  const data = await publicJson('/api/public/articles?limit=30');
+  const data = await publicJson('/api/public/articles?limit=30').catch(() => ({ articles: [] }));
   const recency = new Map();
   for (const article of data.articles || []) {
     const category = String(article.category || '').trim();
@@ -55,6 +89,27 @@ const buildCategoryRecency = async () => {
   }
   return recency;
 };
+
+const listQueued = () =>
+  d1(
+    `SELECT q.id, q.status, q.category, q.publish_after, p.title, p.score, p.source_count
+     FROM editorial_queue q
+     JOIN editorial_pitches p ON p.id = q.pitch_id
+     WHERE q.status = 'queued'
+     ORDER BY q.publish_after ASC`,
+  );
+
+const listNewPitchesFromD1 = () =>
+  d1(
+    `SELECT id, cluster_key, category, title, sources, score, source_count, updated_at
+     FROM editorial_pitches
+     WHERE status = 'new'
+       AND source_count >= ${Math.max(1, Math.floor(MIN_SOURCES))}
+       AND score >= ${Math.max(0, Math.floor(MIN_SCORE))}
+       AND (expires_at IS NULL OR expires_at = '' OR expires_at >= ${sqlString(new Date().toISOString())})
+     ORDER BY score DESC, source_count DESC, updated_at DESC
+     LIMIT 100`,
+  );
 
 const rankPitches = (pitches, recency) => {
   const recentCutoff = Date.now() - RECENT_CATEGORY_HOURS * 60 * 60 * 1000;
@@ -75,6 +130,7 @@ const rankPitches = (pitches, recency) => {
 };
 
 const pulseQueue = async () => {
+  if (!ADMIN_TOKEN) return [];
   const data = await requestJson('/api/admin/queue?limit=2', { method: 'POST' });
   return data.published || [];
 };
@@ -93,30 +149,64 @@ const fetchImages = async (pitch) => {
 };
 
 const enqueuePitch = async (pitch) => {
-  const data = await requestJson('/api/admin/pitches', {
-    method: 'PATCH',
-    body: JSON.stringify({
-      id: pitch.id,
-      clusterKey: pitch.cluster_key,
-      status: 'queued',
-      category: pitch.category,
-    }),
-  });
-  return data.queue;
+  if (ADMIN_TOKEN) {
+    const data = await requestJson('/api/admin/pitches', {
+      method: 'PATCH',
+      body: JSON.stringify({
+        id: pitch.id,
+        clusterKey: pitch.cluster_key,
+        status: 'queued',
+        category: pitch.category,
+      }),
+    });
+    return data.queue;
+  }
+
+  const now = new Date().toISOString();
+  const lastQueued = listQueued()
+    .filter((item) => item.category === pitch.category)
+    .map((item) => parseDate(item.publish_after))
+    .sort((a, b) => b - a)[0] || 0;
+  const baseTime = Math.max(Date.now(), lastQueued);
+  const gapMinutes = 40 + Math.floor(Math.random() * 51);
+  const publishAfter = new Date(baseTime + gapMinutes * 60 * 1000).toISOString();
+  const queueId = `queue:${pitch.id}`;
+
+  d1(
+    `UPDATE editorial_pitches
+     SET status = 'queued', updated_at = ${sqlString(now)}
+     WHERE id = ${sqlString(pitch.id)};
+     INSERT INTO editorial_queue (id, pitch_id, category, status, publish_after, updated_at)
+     VALUES (${sqlString(queueId)}, ${sqlString(pitch.id)}, ${sqlString(pitch.category)}, 'queued', ${sqlString(publishAfter)}, ${sqlString(now)})
+     ON CONFLICT(pitch_id) DO UPDATE SET
+       category = excluded.category,
+       status = 'queued',
+       publish_after = excluded.publish_after,
+       error = '',
+       updated_at = excluded.updated_at`,
+  );
+  return { id: queueId, publishAfter, gapMinutes, mode: 'd1-fallback' };
 };
 
 const main = async () => {
-  if (!ADMIN_TOKEN) throw new Error('ADMIN_TOKEN ausente.');
-
   const published = await pulseQueue();
+  const existingQueued = listQueued();
+  if (existingQueued.length >= MAX_OPEN_QUEUE) {
+    console.log(JSON.stringify({ ok: true, published, queued: [], existingQueued, skipped: 'queue-cap-reached' }, null, 2));
+    return;
+  }
+
   const recency = await buildCategoryRecency();
-  const pitchData = await requestJson(`/api/admin/pitches?status=new&minSources=${MIN_SOURCES}&limit=100`);
+  const pitchData = ADMIN_TOKEN
+    ? await requestJson(`/api/admin/pitches?status=new&minSources=${MIN_SOURCES}&limit=100`)
+    : { pitches: listNewPitchesFromD1() };
   const candidates = rankPitches(pitchData.pitches || [], recency);
-  const selected = candidates.slice(0, Math.max(1, Math.min(3, MAX_QUEUE_PER_RUN)));
+  const openSlots = Math.max(0, MAX_OPEN_QUEUE - existingQueued.length);
+  const selected = candidates.slice(0, Math.max(0, Math.min(MAX_QUEUE_PER_RUN, openSlots)));
 
   const queued = [];
   for (const pitch of selected) {
-    const imageCount = await fetchImages(pitch);
+    const imageCount = ADMIN_TOKEN ? await fetchImages(pitch) : 0;
     const queue = await enqueuePitch(pitch);
     queued.push({
       id: pitch.id,
@@ -129,7 +219,21 @@ const main = async () => {
     });
   }
 
-  console.log(JSON.stringify({ ok: true, published, queued, candidates: candidates.length }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        mode: ADMIN_TOKEN ? 'api' : 'd1-fallback-without-admin-token',
+        published,
+        queued,
+        candidates: candidates.length,
+        existingQueued,
+        note: ADMIN_TOKEN ? '' : 'Sem ADMIN_TOKEN: enfileira pelo D1, mas nao pulsa/publica nem busca imagens pela API.',
+      },
+      null,
+      2,
+    ),
+  );
 };
 
 main().catch((error) => {
