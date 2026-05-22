@@ -11,7 +11,7 @@ updatedAt: "2026-05-20T23:42:00.000Z"
 featured: false
 isFeatured: false
 urgent: false
-homeSection: "now"
+homeSection: ""
 views: 0
 cover:
   src: "https://portalnovoalvo.com.br/uploads/news/oms-declara-emergencia-internacional-por-surto-de-ebola-no-congo-cover.avif"

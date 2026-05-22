@@ -11,7 +11,7 @@ updatedAt: "2026-05-20T23:24:13.000Z"
 featured: false
 isFeatured: false
 urgent: false
-homeSection: "now"
+homeSection: ""
 views: 0
 cover:
   src: "https://portalnovoalvo.com.br/uploads/news/rocca-fitness-fevest-2026-cover.jpeg"
