@@ -16,6 +16,10 @@
 }
 
 @layer base {
+  :root {
+    --novo-alvo-asset-revision: "2026-05-22";
+  }
+
   body {
     @apply antialiased font-sans selection:bg-[#8A1F2D] selection:text-white dark:bg-[#080809] dark:text-zinc-50;
     background: #f5f3ee;
