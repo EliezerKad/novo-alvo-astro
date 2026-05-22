@@ -343,7 +343,7 @@ const isCategoryView = !!category && category !== 'Início';
                         Ranking
                       </span>
                     </div>
-                    <div class="px-6 py-1">
+                    <div class="px-6 py-1" data-real-most-read-list>
                       {mostRead.map((article, index) => (
                         <a href={`/noticia/${article.slug}`} class="grid grid-cols-[34px_1fr_auto] gap-3 border-b border-black/10 py-4 last:border-b-0 dark:border-zinc-800">
                           <div class="text-2xl font-black leading-none tracking-tighter text-[#8A1F2D]">{index + 1}</div>
@@ -360,6 +360,43 @@ const isCategoryView = !!category && category !== 'Início';
                     </div>
                   </aside>
                 </section>
+
+                <script is:inline>
+                  (() => {
+                    const list = document.querySelector('[data-real-most-read-list]');
+                    if (!list) return;
+                    const escapeHtml = (value) =>
+                      String(value || '')
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#039;');
+
+                    fetch('/api/public/articles?limit=5&sort=views')
+                      .then((response) => (response.ok ? response.json() : { articles: [] }))
+                      .then((data) => {
+                        const ranked = Array.isArray(data.articles)
+                          ? data.articles.filter((article) => article?.slug && Number(article.views || 0) > 0)
+                          : [];
+                        if (!ranked.length) return;
+                        list.innerHTML = ranked
+                          .slice(0, 5)
+                          .map((article, index) => {
+                            const views = Number(article.views || 0);
+                            return `
+                              <a href="/noticia/${encodeURIComponent(article.slug)}/" class="grid grid-cols-[34px_1fr_auto] gap-3 border-b border-black/10 py-4 last:border-b-0 dark:border-zinc-800">
+                                <div class="text-2xl font-black leading-none tracking-tighter text-[#8A1F2D]">${index + 1}</div>
+                                <h3 class="text-[15px] font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors hover:text-[#8A1F2D] dark:text-zinc-50">${escapeHtml(article.title)}</h3>
+                                <div class="text-xs font-black text-zinc-400">${views}</div>
+                              </a>
+                            `;
+                          })
+                          .join('');
+                      })
+                      .catch(() => {});
+                  })();
+                </script>
               </>
             )
           }

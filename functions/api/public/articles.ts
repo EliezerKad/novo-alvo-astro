@@ -121,29 +121,40 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
   const url = new URL(request.url);
   const limit = Math.max(1, Math.min(30, Number(url.searchParams.get('limit') || 12)));
   const category = clean(url.searchParams.get('category'), 80);
+  const sort = clean(url.searchParams.get('sort'), 30);
   const now = new Date().toISOString();
   await publishDueScheduled(request, env, now).catch(() => {});
   const safeScheduledPublishedAt = new Date(Date.now() - 2 * 60 * 1000).toISOString();
 
+  const selectFields = `a.id, a.slug, a.title, a.summary, a.category, a.author, a.status, a.cover_url, a.cover_alt,
+       a.reading_minutes, a.scheduled_at, a.published_at, a.created_at, a.updated_at,
+       COALESCE(v.total_views, 0) AS views`;
+  const orderBy =
+    sort === 'views'
+      ? `ORDER BY COALESCE(v.total_views, 0) DESC, COALESCE(NULLIF(a.published_at, ''), a.scheduled_at, a.updated_at) DESC`
+      : `ORDER BY COALESCE(NULLIF(a.published_at, ''), a.scheduled_at, a.updated_at) DESC`;
+
   const query = category
-    ? `SELECT id, slug, title, summary, category, author, status, cover_url, cover_alt, reading_minutes, scheduled_at, published_at, created_at, updated_at
-       FROM articles
+    ? `SELECT ${selectFields}
+       FROM articles a
+       LEFT JOIN article_views v ON v.slug = a.slug
        WHERE category = ?
          AND status = 'published'
          AND (
-           COALESCE(NULLIF(scheduled_at, ''), '') = ''
-           OR COALESCE(NULLIF(published_at, ''), updated_at) <= ?
+           COALESCE(NULLIF(a.scheduled_at, ''), '') = ''
+           OR COALESCE(NULLIF(a.published_at, ''), a.updated_at) <= ?
          )
-       ORDER BY COALESCE(NULLIF(published_at, ''), scheduled_at, updated_at) DESC
+       ${orderBy}
        LIMIT ?`
-    : `SELECT id, slug, title, summary, category, author, status, cover_url, cover_alt, reading_minutes, scheduled_at, published_at, created_at, updated_at
-       FROM articles
+    : `SELECT ${selectFields}
+       FROM articles a
+       LEFT JOIN article_views v ON v.slug = a.slug
        WHERE status = 'published'
          AND (
-           COALESCE(NULLIF(scheduled_at, ''), '') = ''
-           OR COALESCE(NULLIF(published_at, ''), updated_at) <= ?
+           COALESCE(NULLIF(a.scheduled_at, ''), '') = ''
+           OR COALESCE(NULLIF(a.published_at, ''), a.updated_at) <= ?
          )
-       ORDER BY COALESCE(NULLIF(published_at, ''), scheduled_at, updated_at) DESC
+       ${orderBy}
        LIMIT ?`;
 
   const result = category

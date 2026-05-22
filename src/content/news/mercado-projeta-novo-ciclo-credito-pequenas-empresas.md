@@ -1,4 +1,4 @@
----
+﻿---
 title: "Mercado projeta novo ciclo de credito para pequenas empresas"
 slug: "mercado-projeta-novo-ciclo-credito-pequenas-empresas"
 summary: "Bancos e fintechs ampliam linhas para capital de giro em setores de servicos e comercio."
@@ -15,7 +15,7 @@ updatedAt: "2026-05-01T08:45:00-03:00"
 featured: false
 isFeatured: false
 urgent: true
-views: 19620
+views: 0
 cover:
   src: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1400&q=80"
   alt: "Documentos financeiros em mesa de trabalho"

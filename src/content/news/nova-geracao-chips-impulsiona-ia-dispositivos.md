@@ -1,4 +1,4 @@
----
+﻿---
 title: "Nova geracao de chips impulsiona servicos de IA em dispositivos pessoais"
 slug: "nova-geracao-chips-impulsiona-ia-dispositivos"
 summary: "Fabricantes apostam em processamento local para reduzir latencia e ampliar privacidade."
@@ -14,7 +14,7 @@ updatedAt: "2026-04-30T16:00:00-03:00"
 featured: true
 isFeatured: true
 urgent: false
-views: 22105
+views: 0
 cover:
   src: "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&fit=crop&w=1400&q=80"
   alt: "Circuitos eletronicos em placa"

@@ -1,4 +1,4 @@
----
+﻿---
 title: "Hospitais testam triagem digital para reduzir filas no atendimento"
 slug: "hospitais-testam-triagem-digital-reduzir-filas"
 summary: "Ferramentas de prioridade clinica prometem acelerar encaminhamentos sem substituir avaliacao medica."
@@ -12,7 +12,7 @@ sources:
 publishedAt: "2026-04-30T20:10:00-03:00"
 updatedAt: "2026-04-30T20:10:00-03:00"
 isFeatured: false
-views: 12450
+views: 0
 cover:
   src: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1400&q=80"
   alt: "Profissionais de saude em ambiente hospitalar"

@@ -101,7 +101,7 @@ const { class: className = '' } = Astro.props;
     };
 
     readCachedPayload();
-    window.setTimeout(ping, 5000);
+    window.setTimeout(ping, 1500);
     window.setInterval(ping, pingInterval);
     document.addEventListener('visibilitychange', ping);
     window.addEventListener('storage', (event) => {

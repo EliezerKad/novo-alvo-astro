@@ -372,6 +372,23 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
       </main>
       <footer>Portal Novo Alvo - Notícias, fatos e impacto</footer>
     </div>
+    <script>
+      (() => {
+        try {
+          const key = 'novo-alvo-visitor-id';
+          const existing = localStorage.getItem(key);
+          const visitorId = existing || (crypto.randomUUID ? crypto.randomUUID() : 'fallback-' + Date.now() + '-' + Math.random());
+          if (!existing) localStorage.setItem(key, visitorId);
+          window.setTimeout(() => {
+            fetch('/api/visits', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ visitorId, path: window.location.pathname }),
+            }).catch(() => {});
+          }, 1500);
+        } catch {}
+      })();
+    </script>
   </body>
 </html>`;
 

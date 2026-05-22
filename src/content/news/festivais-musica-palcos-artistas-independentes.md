@@ -1,4 +1,4 @@
----
+﻿---
 title: "Festivais de musica anunciam palcos voltados a artistas independentes"
 slug: "festivais-musica-palcos-artistas-independentes"
 summary: "Curadorias regionais ganham espaco em eventos de grande porte no segundo semestre."
@@ -12,7 +12,7 @@ sources:
 publishedAt: "2026-04-30T13:20:00-03:00"
 updatedAt: "2026-04-30T13:20:00-03:00"
 isFeatured: false
-views: 9088
+views: 0
 cover:
   src: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1400&q=80"
   alt: "Publico em festival de musica"

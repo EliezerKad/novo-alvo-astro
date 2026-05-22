@@ -1,4 +1,4 @@
----
+﻿---
 title: "Congresso acelera pacote de medidas para reorganizar gastos publicos"
 slug: "congresso-acelera-pacote-medidas-gastos-publicos"
 summary: "Liderancas avaliam impacto fiscal e cobram previsibilidade para estados e municipios."
@@ -16,7 +16,7 @@ updatedAt: "2026-05-01T10:00:00-03:00"
 featured: true
 isFeatured: true
 urgent: true
-views: 28490
+views: 0
 cover:
   src: "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1600&q=80"
   alt: "Plenario legislativo durante sessao"
