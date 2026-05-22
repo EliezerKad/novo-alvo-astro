@@ -6,8 +6,8 @@ seoDescription: "Games: A Epic Games Store está oferecendo Tomb Raider I-III Re
 category: "Games"
 author: "Redação Novo Alvo"
 sources: ["gamehall.com.br", "einerd.com", "EGW.News", "Pichau Arena", "Eurogamer.pt", "GameVicio", "Adrenaline", "Folha do Leste", "TecMundo", "Portal E7", "Drops de Jogos"]
-publishedAt: "2026-05-22T15:32:16.883Z"
-updatedAt: "2026-05-22T15:32:17.066Z"
+publishedAt: "2026-05-22T15:32:41.712Z"
+updatedAt: "2026-05-22T15:32:41.860Z"
 featured: false
 isFeatured: false
 urgent: false
