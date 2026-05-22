@@ -258,6 +258,11 @@ const isCategoryView = !!category && category !== 'Início';
                     const pulseList = document.querySelector('[data-live-pulse-list]');
                     if (!pulseList) return;
                     const staticSlugs = new Set(JSON.parse(pulseList.dataset.staticSlugs || '[]'));
+                    const initialPulseItems = Array.from(pulseList.querySelectorAll('a[href]')).map((item) => {
+                      const href = item.getAttribute('href') || '';
+                      const slug = decodeURIComponent(href.replace(/^\/noticia\//, '').replace(/\/$/, ''));
+                      return { slug, html: item.outerHTML };
+                    });
                     const categoryColors = {
                       Brasil: 'bg-emerald-600',
                       Mundo: 'bg-blue-900',
@@ -312,8 +317,9 @@ const isCategoryView = !!category && category !== 'Início';
                           ? data.articles.filter((article) => article?.slug && !staticSlugs.has(article.slug))
                           : [];
                         if (!articles.length) return;
-                        pulseList.innerHTML = articles.slice(0, 3)
-                          .map((article) => {
+                        const seen = new Set();
+                        const liveItems = articles.slice(0, 3).map((article) => {
+                            seen.add(article.slug);
                             const url = `/noticia/${encodeURIComponent(article.slug)}/`;
                             return `
                               <a href="${url}" class="group grid min-h-[92px] grid-cols-[64px_minmax(0,1fr)] items-center gap-3 rounded-2xl border-b border-black/10 px-2 py-4 transition-colors duration-300 last:border-b-0 hover:bg-[#f5f3ee] hover:shadow-[inset_3px_0_0_#8A1F2D] dark:border-zinc-800 dark:hover:bg-zinc-800/60">
@@ -326,8 +332,11 @@ const isCategoryView = !!category && category !== 'Início';
                                 </div>
                               </a>
                             `;
-                          })
-                          .join('');
+                          });
+                        const fallbackItems = initialPulseItems
+                          .filter((item) => item.slug && !seen.has(item.slug))
+                          .map((item) => item.html);
+                        pulseList.innerHTML = [...liveItems, ...fallbackItems].slice(0, 3).join('');
                       })
                       .catch(() => {});
                   })();
