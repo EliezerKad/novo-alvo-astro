@@ -7,8 +7,8 @@ category: "Politica"
 author: "Redação Novo Alvo"
 sources: ["Revista Oeste", "CNN Brasil", "band.com.br", "Gazeta do Povo", "Vero Notícias", "Brasil 247", "Rondônia Dinâmica", "Folha de S.Paulo", "Revista Fórum", "Diário do Centro do Mundo", "Tribuna do Norte", "DW.com", "CartaCapital", "BBC"]
 publishedAt: "2026-05-20T16:09:53.471Z"
-updatedAt: "2026-05-20T16:10:57.455Z"
-featured: true
+updatedAt: "2026-05-22T12:50:32.744Z"
+featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
