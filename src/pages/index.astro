@@ -114,8 +114,8 @@ const isCategoryView = !!category && category !== 'Início';
                       </div>
                       <div class="px-4 py-1 md:px-6" data-live-pulse-list data-static-slugs={JSON.stringify(staticArticleSlugs)}>
                         {pulseArticles.map((article) => (
-                          <a href={`/noticia/${article.slug}`} class="group -mx-2 grid grid-cols-[58px_1fr] gap-3 rounded-2xl border-b border-black/10 px-2 py-3.5 transition-all duration-300 last:border-b-0 hover:-translate-y-0.5 hover:bg-[#f5f3ee] hover:shadow-[0_16px_38px_rgba(16,16,16,0.07)] dark:border-zinc-800 dark:hover:bg-zinc-800/60 md:grid-cols-[64px_1fr] md:py-4">
-                            <div class="h-14 w-[58px] overflow-hidden rounded-xl bg-[#ebe8df] shadow-sm transition-all duration-300 group-hover:shadow-md dark:bg-zinc-800 md:w-16 md:rounded-2xl">
+                          <a href={`/noticia/${article.slug}`} class="group grid min-h-[84px] grid-cols-[58px_minmax(0,1fr)] items-center gap-3 rounded-2xl border-b border-black/10 px-2 py-3.5 transition-colors duration-300 last:border-b-0 hover:bg-[#f5f3ee] hover:shadow-[inset_3px_0_0_#8A1F2D] dark:border-zinc-800 dark:hover:bg-zinc-800/60 md:min-h-[92px] md:grid-cols-[64px_minmax(0,1fr)] md:py-4">
+                            <div class="h-14 w-[58px] overflow-hidden rounded-xl bg-[#ebe8df] shadow-sm transition-shadow duration-300 group-hover:shadow-md dark:bg-zinc-800 md:w-16 md:rounded-2xl">
                               {article.imageUrl ? (
                                 <img src={article.imageUrl} alt={article.title} class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
                               ) : (
@@ -124,8 +124,8 @@ const isCategoryView = !!category && category !== 'Início';
                                 </div>
                               )}
                             </div>
-                            <div>
-                              <h3 class="text-sm font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50 md:text-[15px]">
+                            <div class="min-w-0">
+                              <h3 class="line-clamp-3 text-sm font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50 md:text-[15px]">
                                 {article.title}
                               </h3>
                               <p class="mt-1 text-xs font-bold text-zinc-400">{formatRelativeDate(article.publishedAt)} • {article.views || 0} acessos</p>
@@ -316,12 +316,12 @@ const isCategoryView = !!category && category !== 'Início';
                           .map((article) => {
                             const url = `/noticia/${encodeURIComponent(article.slug)}/`;
                             return `
-                              <a href="${url}" class="group -mx-2 grid grid-cols-[64px_1fr] gap-3 rounded-2xl border-b border-black/10 px-2 py-4 transition-all duration-300 last:border-b-0 hover:-translate-y-0.5 hover:bg-[#f5f3ee] hover:shadow-[0_16px_38px_rgba(16,16,16,0.07)] dark:border-zinc-800 dark:hover:bg-zinc-800/60">
-                                <div class="h-14 w-16 overflow-hidden rounded-2xl bg-[#ebe8df] shadow-sm transition-all duration-300 group-hover:shadow-md dark:bg-zinc-800">
+                              <a href="${url}" class="group grid min-h-[92px] grid-cols-[64px_minmax(0,1fr)] items-center gap-3 rounded-2xl border-b border-black/10 px-2 py-4 transition-colors duration-300 last:border-b-0 hover:bg-[#f5f3ee] hover:shadow-[inset_3px_0_0_#8A1F2D] dark:border-zinc-800 dark:hover:bg-zinc-800/60">
+                                <div class="h-14 w-16 overflow-hidden rounded-2xl bg-[#ebe8df] shadow-sm transition-shadow duration-300 group-hover:shadow-md dark:bg-zinc-800">
                                   ${article.cover_url ? `<img src="${escapeHtml(article.cover_url)}" alt="${escapeHtml(article.cover_alt || article.title)}" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />` : ''}
                                 </div>
-                                <div>
-                                  <h3 class="text-[15px] font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50">${escapeHtml(article.title)}</h3>
+                                <div class="min-w-0">
+                                  <h3 class="line-clamp-3 text-[15px] font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50">${escapeHtml(article.title)}</h3>
                                   <p class="mt-1 text-xs font-bold text-zinc-400">${formatDate(article.published_at || article.scheduled_at || article.updated_at)} • ${Number(article.views || 0)} acessos</p>
                                 </div>
                               </a>
