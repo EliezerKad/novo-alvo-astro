@@ -2284,7 +2284,23 @@ const aiActions = [
           event.preventDefault();
           zone.classList.remove('border-red-600');
           const files = Array.from(event.dataTransfer?.files || []).filter((file) => file.type.startsWith('image/'));
-          for (const file of files) await compressImage(file);
+          const isCoverDrop = zone.matches('[data-cover-drop]');
+          for (const file of files) {
+            const item = await compressImage(file);
+            if (!isCoverDrop) continue;
+            const coverUrl = document.querySelector('[data-cover-url]');
+            const coverAlt = document.querySelector('[data-cover-alt]');
+            const preview = document.querySelector('[data-cover-preview]');
+            const empty = document.querySelector('[data-cover-empty]');
+            if (coverUrl) coverUrl.value = item.url;
+            if (coverAlt && !coverAlt.value) coverAlt.value = item.alt || file.name.replace(/\.[^.]+$/, '');
+            if (preview) {
+              preview.src = item.url;
+              preview.classList.remove('hidden');
+            }
+            empty?.classList.add('hidden');
+            break;
+          }
         });
       });
 

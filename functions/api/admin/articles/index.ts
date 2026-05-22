@@ -172,6 +172,11 @@ const mediaHomeSection = (mediaJson: string) => (hasEditorialFlag(mediaJson, 'no
 
 const mediaFeatured = (mediaJson: string) => hasEditorialFlag(mediaJson, 'featured');
 
+const coverKeyBaseFor = (article: { slug: string; updatedAt?: string }) => {
+  const version = clean(article.updatedAt, 40).replace(/[^0-9]/g, '').slice(0, 14) || String(Date.now());
+  return `news/${article.slug}-cover-${version}`;
+};
+
 const toBase64 = (value: string) => {
   const bytes = new TextEncoder().encode(value);
   let binary = '';
@@ -331,7 +336,7 @@ const prepareArticleMedia = async (env: Env, article: ReturnType<typeof normaliz
   const coverUpload = dataImageToUpload(article.coverUrl);
   if (coverUpload || !isRemoteImageUrl(article.coverUrl)) return article;
 
-  const uploadedCover = await uploadRemoteImageToR2(env, article.coverUrl, `news/${article.slug}-cover`);
+  const uploadedCover = await uploadRemoteImageToR2(env, article.coverUrl, coverKeyBaseFor(article));
   if (!uploadedCover) return article;
 
   const publicCoverUrl = `${origin}${uploadedCover.publicPath}`;
@@ -501,12 +506,12 @@ const publishMarkdownToGitHub = async (
   const uploadedAssets: string[] = [];
   const coverUpload = dataImageToUpload(articleForMarkdown.coverUrl);
   if (coverUpload) {
-    const r2Cover = await uploadDataImageToR2(env, articleForMarkdown.coverUrl, `news/${article.slug}-cover`);
+    const r2Cover = await uploadDataImageToR2(env, articleForMarkdown.coverUrl, coverKeyBaseFor(article));
     if (r2Cover) {
       articleForMarkdown.coverUrl = r2Cover.publicPath;
       uploadedAssets.push(r2Cover.key);
     } else {
-      const assetPath = `public/uploads/news/${article.slug}-cover.${coverUpload.extension}`;
+      const assetPath = `public/uploads/news/${article.slug}-cover-${clean(article.updatedAt, 40).replace(/[^0-9]/g, '').slice(0, 14) || Date.now()}.${coverUpload.extension}`;
       await putGitHubFile({
         repository,
         branch,
@@ -519,14 +524,14 @@ const publishMarkdownToGitHub = async (
       uploadedAssets.push(assetPath);
     }
   } else {
-    const r2Cover = await uploadRemoteImageToR2(env, articleForMarkdown.coverUrl, `news/${article.slug}-cover`);
+    const r2Cover = await uploadRemoteImageToR2(env, articleForMarkdown.coverUrl, coverKeyBaseFor(article));
     if (r2Cover) {
       articleForMarkdown.coverUrl = r2Cover.publicPath;
       uploadedAssets.push(r2Cover.key);
     } else {
       const remoteCoverUpload = await remoteImageToUpload(articleForMarkdown.coverUrl);
       if (remoteCoverUpload) {
-        const assetPath = `public/uploads/news/${article.slug}-cover.${remoteCoverUpload.extension}`;
+        const assetPath = `public/uploads/news/${article.slug}-cover-${clean(article.updatedAt, 40).replace(/[^0-9]/g, '').slice(0, 14) || Date.now()}.${remoteCoverUpload.extension}`;
         await putGitHubFile({
           repository,
           branch,
