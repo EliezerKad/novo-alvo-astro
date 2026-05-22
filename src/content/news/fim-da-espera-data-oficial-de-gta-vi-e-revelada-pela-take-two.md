@@ -1,13 +1,13 @@
 ---
 title: "Fim da espera: Data oficial de GTA VI é revelada pela Take-Two"
 slug: "fim-da-espera-data-oficial-de-gta-vi-e-revelada-pela-take-two"
-summary: "A Take-Two Interactive confirmou a data de lançamento de Grand Theft Auto VI para 19 de novembro de 2026, projetando faturamento bilionário."
-seoDescription: "Games: A Take-Two Interactive confirmou a data de lançamento de Grand Theft Auto VI para 19 de novembro de 2026, projetando faturamento bilionário."
+summary: "A Take-Two Interactive confirmou a data oficial de lançamento de Grand Theft Auto VI (GTA VI)"
+seoDescription: "Games: A Take-Two Interactive confirmou a data oficial de lançamento de Grand Theft Auto VI (GTA VI)"
 category: "Games"
 author: "Redação Novo Alvo"
 sources: ["Xbox Power", "Máquina Nerd", "Exame", "Última Ficha", "Omelete", "Manual dos Games", "Portal Tela", "MeuPlayStation", "O TEMPO", "EGW.News", "levelupnews.com.br", "GameVicio", "flowgames.gg"]
 publishedAt: "2026-05-22T12:36:21.444Z"
-updatedAt: "2026-05-22T12:36:21.862Z"
+updatedAt: "2026-05-22T12:40:24.339Z"
 featured: false
 isFeatured: false
 urgent: false
