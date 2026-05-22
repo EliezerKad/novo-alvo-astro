@@ -88,12 +88,20 @@ const fallbackToAssets = async (request: Request, env: Env) => {
   return response;
 };
 
-const formatPublished = (value: string) =>
-  new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-    timeZone: 'America/Sao_Paulo',
-  }).format(new Date(value));
+const formatPublished = (value: string) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+
+  try {
+    return new Intl.DateTimeFormat('pt-BR', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+      timeZone: 'America/Sao_Paulo',
+    }).format(date);
+  } catch {
+    return date.toISOString();
+  }
+};
 
 export const onRequestGet = async ({ request, env, params }: { request: Request; env: Env; params: { slug: string } }) => {
   const staticPage = await fallbackToAssets(request, env);
@@ -118,30 +126,25 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
     .first<CmsArticle>();
 
   if (!article) return fallbackToAssets(request, env);
-  if (request.headers.get('x-render-d1-fallback') !== '1') {
-    return new Response('Publicação registrada. A página final será exibida após o próximo deploy do Astro.', {
-      status: 503,
-      headers: {
-        'content-type': 'text/plain; charset=utf-8',
-        'cache-control': 'no-store',
-      },
-    });
+  let related: Partial<CmsArticle>[] = [];
+  try {
+    const relatedResult = await db
+      .prepare(
+        `SELECT id, slug, title, summary, category, cover_url, cover_alt, published_at, scheduled_at, updated_at
+         FROM articles
+         WHERE slug != ?
+           AND category = ?
+           AND (status = 'published' OR (status = 'scheduled' AND scheduled_at <= ?))
+         ORDER BY COALESCE(NULLIF(published_at, ''), scheduled_at, updated_at) DESC
+         LIMIT 8`,
+      )
+      .bind(slug, article.category, now)
+      .all<Partial<CmsArticle>>();
+
+    related = relatedResult.results || [];
+  } catch {
+    related = [];
   }
-
-  const relatedResult = await db
-    .prepare(
-      `SELECT id, slug, title, summary, category, cover_url, cover_alt, published_at, scheduled_at, updated_at
-       FROM articles
-       WHERE slug != ?
-         AND category = ?
-         AND (status = 'published' OR (status = 'scheduled' AND scheduled_at <= ?))
-       ORDER BY COALESCE(NULLIF(published_at, ''), scheduled_at, updated_at) DESC
-       LIMIT 8`,
-    )
-    .bind(slug, article.category, now)
-    .all<Partial<CmsArticle>>();
-
-  const related = relatedResult.results || [];
   const url = new URL(request.url);
   const canonical = `${url.origin}/noticia/${encodeURIComponent(article.slug)}/`;
   const published = article.published_at || article.scheduled_at || article.created_at || article.updated_at;

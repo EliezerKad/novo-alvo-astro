@@ -1,8 +1,8 @@
 ---
-title: "Após recuo, Fazenda de Lula sinaliza volta da 'taxa das blusinhas"
+title: "Após recuo, Fazenda de Lula sinaliza volta da taxa das blusinhas"
 slug: "apos-recuo-fazenda-de-lula-sinaliza-volta-da-taxa-das-blusinhas"
-summary: "O Ministério da Fazenda, sob o Governo Lula, admite a reavaliação e o possível retorno da 'taxa das blusinhas', imposto sobre compras internacionais de baixo valor, após recuo anterior."
-seoDescription: "Brasil: O Ministério da Fazenda, sob o Governo Lula, admite a reavaliação e o possível retorno da 'taxa das blusinhas', imposto sobre compras internacionais…"
+summary: "O Ministério da Fazenda, sob o Governo Lula, admite a reavaliação e o possível retorno da taxa das blusinhas, imposto sobre compras internacionais de baixo valor, após recuo anterior."
+seoDescription: "Ministério da Fazenda sinaliza que pode retomar a taxação de compras internacionais de baixo valor após recuo anterior."
 category: "Brasil"
 author: "Redação Novo Alvo"
 sources: ["O Antagonista", "Blog do Gustavo Negreiros", "Terra Brasil Notícias", "Gazeta do Povo", "Tribuna do Sertão", "Conexão Tocantins", "Tecnoblog", "Revista Oeste"]
