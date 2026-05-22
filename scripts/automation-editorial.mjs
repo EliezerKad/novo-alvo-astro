@@ -1,6 +1,20 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+
+const loadLocalEnv = (filePath) => {
+  if (!existsSync(filePath)) return;
+  const lines = readFileSync(filePath, 'utf8').split(/\r?\n/);
+  for (const line of lines) {
+    const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
+    if (!match || process.env[match[1]]) continue;
+    const value = match[2].replace(/^['"]|['"]$/g, '');
+    process.env[match[1]] = value;
+  }
+};
+
+loadLocalEnv(resolve('.env.automation.local'));
+loadLocalEnv(resolve('.env.local'));
 
 const PORTAL_ORIGIN = process.env.PORTAL_ORIGIN || 'https://portalnovoalvo.com.br';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
