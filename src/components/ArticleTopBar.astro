@@ -1,6 +1,7 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
 import Icon from './Icon.astro';
+import LogoSymbol from './LogoSymbol.astro';
 
 interface Props {
   title: string;
@@ -24,8 +25,11 @@ const encodedTitle = encodeURIComponent(title);
       <span class="hidden md:block font-black uppercase tracking-widest text-[10px]">Voltar</span>
     </a>
 
-    <a href="/" class="text-2xl font-serif font-black tracking-tighter italic relative text-zinc-900 dark:text-zinc-50">
-      NOVO ALVO
+    <a href="/" class="group flex items-center gap-2 text-zinc-900 dark:text-zinc-50" aria-label="Portal Novo Alvo">
+      <LogoSymbol class="h-8 w-8 text-[#8A1F2D] transition-colors group-hover:text-[#501620] md:h-9 md:w-9" />
+      <span class="text-2xl font-serif font-black tracking-tighter leading-none transition-colors group-hover:text-[#501620] md:text-[1.7rem]">
+        NOVO ALVO
+      </span>
     </a>
 
     <div class="flex items-center gap-2">
