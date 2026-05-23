@@ -104,14 +104,29 @@ const formatPublished = (value: string) => {
 };
 
 export const onRequestGet = async ({ request, env, params }: { request: Request; env: Env; params: { slug: string } }) => {
+  const db = env.EDITORIAL_DB;
+  const slug = String(params.slug || '').trim();
+  const now = new Date().toISOString();
+
+  if (db && slug) {
+    const gate = await db
+      .prepare('SELECT status, scheduled_at FROM articles WHERE slug = ? LIMIT 1')
+      .bind(slug)
+      .first<Pick<CmsArticle, 'status' | 'scheduled_at'>>();
+    const isPublic = gate?.status === 'published' || (gate?.status === 'scheduled' && String(gate.scheduled_at || '') <= now);
+    if (gate && !isPublic) {
+      return new Response('Not found', {
+        status: 404,
+        headers: { 'Cache-Control': 'no-store' },
+      });
+    }
+  }
+
   const staticPage = await fallbackToAssets(request, env);
   if (staticPage.status !== 404) return staticPage;
 
-  const db = env.EDITORIAL_DB;
   if (!db) return fallbackToAssets(request, env);
 
-  const slug = String(params.slug || '').trim();
-  const now = new Date().toISOString();
   const article = await db
     .prepare(
       `SELECT
