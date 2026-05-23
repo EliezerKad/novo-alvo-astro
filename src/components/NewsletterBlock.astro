@@ -26,7 +26,7 @@ const { compact = false, class: className = '' } = Astro.props;
       )}
     </div>
 
-    <form class="relative" action="/newsletter" method="get">
+    <form class="relative" data-newsletter-form>
       <input
         type="email"
         required
@@ -41,5 +41,42 @@ const { compact = false, class: className = '' } = Astro.props;
         Entrar
       </button>
     </form>
+    <p class="hidden text-xs font-bold text-white/65" data-newsletter-status></p>
   </div>
 </section>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('[data-newsletter-form]').forEach((form) => {
+    const status = form.parentElement?.querySelector<HTMLElement>('[data-newsletter-status]');
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const email = String(new FormData(form).get('email') || '').trim();
+      const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (button) button.disabled = true;
+      if (status) {
+        status.classList.remove('hidden');
+        status.textContent = 'Salvando sua inscricao...';
+      }
+
+      try {
+        const response = await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email, sourcePath: window.location.pathname }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.ok) throw new Error(data.error || 'Nao foi possivel assinar agora.');
+        form.reset();
+        if (status) {
+          status.textContent = data.emailSent
+            ? 'Inscricao confirmada. Enviamos uma mensagem de boas-vindas.'
+            : 'Inscricao confirmada. A mensagem de boas-vindas sera ativada em breve.';
+        }
+      } catch (error) {
+        if (status) status.textContent = error instanceof Error ? error.message : 'Nao foi possivel assinar agora.';
+      } finally {
+        if (button) button.disabled = false;
+      }
+    });
+  });
+</script>
