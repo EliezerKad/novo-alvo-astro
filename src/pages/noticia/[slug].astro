@@ -133,7 +133,7 @@ const schema = {
             <span class="inline-flex min-h-9 items-center rounded-full border border-black/10 bg-white px-3.5 text-[11px] font-extrabold text-zinc-600 shadow-[0_8px_24px_rgba(16,16,16,0.035)] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 md:min-h-10 md:px-4 md:text-xs">
               <strong class="mr-1 text-zinc-950 dark:text-zinc-50">{formatEditorialDate(article.data.publishedAt.toISOString())}</strong>
             </span>
-            <span class="inline-flex min-h-9 items-center rounded-full border border-black/10 bg-white px-3.5 text-[11px] font-extrabold text-zinc-600 shadow-[0_8px_24px_rgba(16,16,16,0.035)] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 md:min-h-10 md:px-4 md:text-xs">
+            <span data-live-view-count={article.data.slug} class="inline-flex min-h-9 items-center rounded-full border border-black/10 bg-white px-3.5 text-[11px] font-extrabold text-zinc-600 shadow-[0_8px_24px_rgba(16,16,16,0.035)] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 md:min-h-10 md:px-4 md:text-xs">
               {article.data.views || 0} acessos
             </span>
             <span class="inline-flex min-h-9 items-center rounded-full border border-black/10 bg-white px-3.5 text-[11px] font-extrabold text-zinc-600 shadow-[0_8px_24px_rgba(16,16,16,0.035)] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 md:min-h-10 md:px-4 md:text-xs">
@@ -258,7 +258,7 @@ const schema = {
                     </div>
                     <div>
                       <h3 class="text-sm font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50">{rel.title}</h3>
-                      <p class="mt-1 text-[11px] font-bold text-zinc-400">{displayCategory(rel.category)} • {rel.views || 0} acessos</p>
+                      <p class="mt-1 text-[11px] font-bold text-zinc-400">{displayCategory(rel.category)} • <span data-live-view-count={rel.slug}>{rel.views || 0} acessos</span></p>
                     </div>
                   </a>
                 ))}

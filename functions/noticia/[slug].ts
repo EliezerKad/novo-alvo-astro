@@ -364,6 +364,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
           <div class="meta">
             <span class="cat">${escapeHtml(article.category)}</span>
             <span>${escapeHtml(formatPublished(published))}</span>
+            <span data-live-view-count="${escapeHtml(article.slug)}">0 acessos</span>
             <span>${escapeHtml(String(article.reading_minutes || 1))} min de leitura</span>
           </div>
           <h1>${escapeHtml(article.title)}</h1>
@@ -387,6 +388,24 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
       </main>
       <footer>Portal Novo Alvo - Notícias, fatos e impacto</footer>
     </div>
+    <script>
+      (() => {
+        const nodes = Array.from(document.querySelectorAll('[data-live-view-count]'));
+        const slugs = [...new Set(nodes.map((node) => node.getAttribute('data-live-view-count')).filter(Boolean))];
+        if (!slugs.length) return;
+        fetch('/api/public/views?slugs=' + encodeURIComponent(slugs.join(',')))
+          .then((response) => response.ok ? response.json() : { views: {} })
+          .then((data) => {
+            const views = data && typeof data.views === 'object' ? data.views : {};
+            nodes.forEach((node) => {
+              const slug = node.getAttribute('data-live-view-count');
+              const value = Number(views[slug] || 0);
+              node.textContent = value + ' acessos';
+            });
+          })
+          .catch(() => {});
+      })();
+    </script>
     <script>
       (() => {
         try {
