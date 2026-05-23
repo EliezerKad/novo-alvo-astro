@@ -128,7 +128,7 @@ const breadcrumbs = [
                       </h4>
                       <div class="mt-1.5 flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-zinc-400">
                         <Icon name="eye" class="h-2.5 w-2.5" />
-                        {article.views || 0} acessos
+                        <span data-live-view-count={article.slug}>{article.views || 0} acessos</span>
                         <span class="text-zinc-300">/</span>
                         {formatRelativeDate(article.publishedAt)}
                       </div>

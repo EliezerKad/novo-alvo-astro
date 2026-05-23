@@ -171,5 +171,30 @@ const breadcrumbSchema = breadcrumbs.length > 0
         });
       })();
     </script>
+    <script is:inline>
+      (() => {
+        if (!window.__novoAlvoHydrateViews) {
+          window.__novoAlvoHydrateViews = async (root = document) => {
+            const nodes = Array.from(root.querySelectorAll('[data-live-view-count]'));
+            const slugs = [...new Set(nodes.map((node) => node.dataset.liveViewCount).filter(Boolean))];
+            if (!slugs.length) return;
+
+            try {
+              const response = await fetch(`/api/public/views?slugs=${encodeURIComponent(slugs.join(','))}`);
+              if (!response.ok) return;
+              const data = await response.json();
+              const views = data && typeof data.views === 'object' ? data.views : {};
+              nodes.forEach((node) => {
+                const slug = node.dataset.liveViewCount || '';
+                const value = Number(views[slug] || 0);
+                node.textContent = node.dataset.viewFormat === 'number' ? String(value) : `${value} acessos`;
+              });
+            } catch {}
+          };
+        }
+
+        void window.__novoAlvoHydrateViews();
+      })();
+    </script>
   </body>
 </html>
