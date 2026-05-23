@@ -26,6 +26,11 @@ const { compact = false, class: className = '' } = Astro.props;
       )}
     </div>
 
+    <div class="hidden rounded-[1.15rem] border border-emerald-300/25 bg-emerald-400/10 p-4 text-sm font-bold leading-6 text-emerald-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]" data-newsletter-confirmation>
+      <span class="block text-[9px] font-black uppercase tracking-[0.22em] text-emerald-200">Inscricao confirmada</span>
+      <span class="mt-1 block" data-newsletter-confirmation-message>Voce esta na lista. Enviamos uma mensagem de boas-vindas.</span>
+    </div>
+
     <form class="relative" data-newsletter-form>
       <input
         type="email"
@@ -38,21 +43,25 @@ const { compact = false, class: className = '' } = Astro.props;
         type="submit"
         class="absolute bottom-1.5 right-1.5 top-1.5 inline-flex items-center justify-center rounded-full bg-[#8A1F2D] px-4 text-[9px] font-black uppercase tracking-[0.12em] text-white transition-all hover:bg-white hover:text-[#8A1F2D]"
       >
-        Entrar
+        Assinar
       </button>
     </form>
-    <p class="hidden text-xs font-bold text-white/65" data-newsletter-status></p>
+    <p class="hidden text-xs font-bold text-white/65" data-newsletter-status aria-live="polite"></p>
   </div>
 </section>
 
 <script>
   document.querySelectorAll<HTMLFormElement>('[data-newsletter-form]').forEach((form) => {
-    const status = form.parentElement?.querySelector<HTMLElement>('[data-newsletter-status]');
+    const wrapper = form.parentElement;
+    const status = wrapper?.querySelector<HTMLElement>('[data-newsletter-status]');
+    const confirmation = wrapper?.querySelector<HTMLElement>('[data-newsletter-confirmation]');
+    const confirmationMessage = wrapper?.querySelector<HTMLElement>('[data-newsletter-confirmation-message]');
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       const email = String(new FormData(form).get('email') || '').trim();
       const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
       if (button) button.disabled = true;
+      confirmation?.classList.add('hidden');
       if (status) {
         status.classList.remove('hidden');
         status.textContent = 'Salvando sua inscricao...';
@@ -67,10 +76,18 @@ const { compact = false, class: className = '' } = Astro.props;
         const data = await response.json().catch(() => ({}));
         if (!response.ok || !data.ok) throw new Error(data.error || 'Nao foi possivel assinar agora.');
         form.reset();
+        form.classList.add('hidden');
         if (status) {
-          status.textContent = data.emailSent
-            ? 'Inscricao confirmada. Enviamos uma mensagem de boas-vindas.'
-            : 'Inscricao confirmada. A mensagem de boas-vindas sera ativada em breve.';
+          status.classList.add('hidden');
+          status.textContent = '';
+        }
+        if (confirmation) {
+          confirmation.classList.remove('hidden');
+          if (confirmationMessage) {
+            confirmationMessage.textContent = data.emailSent
+              ? 'Voce esta na lista. Enviamos uma mensagem de boas-vindas para seu e-mail.'
+              : 'Voce esta na lista. A mensagem de boas-vindas sera enviada em breve.';
+          }
         }
       } catch (error) {
         if (status) status.textContent = error instanceof Error ? error.message : 'Nao foi possivel assinar agora.';

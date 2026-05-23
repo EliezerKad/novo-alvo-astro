@@ -47,7 +47,7 @@ const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(value);
 
 const welcomeHtml = (origin: string, token: string) => `
   <div style="font-family:Arial,sans-serif;color:#18181b;line-height:1.55;max-width:620px;margin:0 auto;padding:24px">
-    <h1 style="font-size:28px;line-height:1.05;margin:0 0 16px">Bem-vindo ao Novo Alvo</h1>
+    <h1 style="font-size:28px;line-height:1.05;margin:0 0 16px">Bem-vindo ao Portal Novo Alvo</h1>
     <p>Obrigado por assinar a newsletter do Portal Novo Alvo.</p>
     <p>A ideia aqui e simples: um briefing curto, direto e editorialmente cuidado, com os fatos que merecem sua atencao antes do ruido tomar conta.</p>
     <p>Enquanto ajustamos a cadencia, voce ja esta na lista.</p>
@@ -77,7 +77,7 @@ const sendWelcomeEmail = async (env: Env, origin: string, subscriber: Subscriber
       from,
       to: subscriber.email,
       reply_to: replyTo,
-      subject: 'Bem-vindo ao Novo Alvo',
+      subject: 'Bem-vindo ao Portal Novo Alvo',
       html: welcomeHtml(origin, subscriber.unsub_token),
       text:
         'Obrigado por assinar a newsletter do Portal Novo Alvo. Voce ja esta na lista. ' +
