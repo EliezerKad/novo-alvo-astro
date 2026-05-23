@@ -25,7 +25,7 @@ const MAX_QUEUE_PER_RUN = Number(process.env.AUTOMATION_MAX_QUEUE_PER_RUN || 1);
 const MAX_OPEN_QUEUE = Number(process.env.AUTOMATION_MAX_OPEN_QUEUE || 2);
 const RECENT_CATEGORY_HOURS = Number(process.env.AUTOMATION_RECENT_CATEGORY_HOURS || 8);
 const FETCH_TIMEOUT_MS = Number(process.env.AUTOMATION_FETCH_TIMEOUT_MS || 20000);
-const D1_TIMEOUT_MS = Number(process.env.AUTOMATION_D1_TIMEOUT_MS || 60000);
+const D1_TIMEOUT_MS = Number(process.env.AUTOMATION_D1_TIMEOUT_MS || 180000);
 const bundledNpm = resolve('..', '.tools', 'node-v24.15.0-win-x64', process.platform === 'win32' ? 'npm.cmd' : 'bin/npm');
 const npmCommand = process.env.NPM_CMD || (existsSync(bundledNpm) ? bundledNpm : process.platform === 'win32' ? 'npm.cmd' : 'npm');
 
