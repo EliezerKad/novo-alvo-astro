@@ -2,12 +2,12 @@
 title: "Jessie J celebra remissão completa do câncer de mama um ano após diagnóstico"
 slug: "jessie-j-celebra-remissao-completa-do-cancer-de-mama-um-ano-apos-diagnostico"
 summary: "A cantora britânica Jessie J usou as redes sociais para anunciar que está livre do câncer de mama, um ano após o diagnóstico. A artista compartilhou a notícia com seus fãs, expressando grande alívio e emoção."
-seoDescription: "Saude: A cantora britânica Jessie J usou as redes sociais para anunciar que está livre do câncer de mama, um ano após o diagnóstico. A artista compartilhou…"
-category: "Saude"
+seoDescription: "Famosos: A cantora britânica Jessie J usou as redes sociais para anunciar que está livre do câncer de mama, um ano após o diagnóstico. A artista…"
+category: "Famosos"
 author: "Redação Novo Alvo"
 sources: ["GPS Brasília Portal de Notícias do DF", "The Music Journal Brazil", "Terra", "Gshow", "OFuxico", "Bahia Notícias", "Globo", "Vagalume", "papelpop"]
 publishedAt: "2026-05-22T23:36:19.327Z"
-updatedAt: "2026-05-23T01:13:38.580Z"
+updatedAt: "2026-05-23T01:14:11.186Z"
 featured: false
 isFeatured: false
 urgent: false
