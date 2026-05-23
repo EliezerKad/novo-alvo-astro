@@ -2,23 +2,23 @@
 title: "Brazilcore, beleza natural e bem-estar ditam o lifestyle de 2026"
 slug: "brazilcore-beleza-natural-e-bem-estar-puxam-o-lifestyle-de-2026"
 summary: "Tendências de moda, beleza e consumo para 2026 convergem para a brasilidade, pele natural e foco no bem-estar, impulsionadas por eventos como a Copa do Mundo e o Rio Fashion Week."
-seoDescription: "Tendências de moda, beleza e consumo para 2026 convergem para a brasilidade, pele natural e foco no bem-estar, impulsionadas por eventos como a Copa do"
+seoDescription: "Lifestyle: Tendências de moda, beleza e consumo para 2026 convergem para a brasilidade, pele natural e foco no bem-estar, impulsionadas por eventos como a…"
 category: "Lifestyle"
 author: "Redação Novo Alvo"
 sources: ["O Tempo", "Times Brasil CNBC", "Band Lifestyle", "Gshow", "Di?rio da Manh?", "Estado de Minas", "EBM"]
 publishedAt: "2026-05-23T01:26:19.111Z"
-updatedAt: "2026-05-23T01:26:37.445Z"
+updatedAt: "2026-05-23T01:33:10.360Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://source.unsplash.com/1600x900/?brazilcore%2Cbeleza%2Cnatural%2Cestar%2Cpuxam%2Clifestyle%2CLifestyle"
+  src: "https://portalnovoalvo.com.br/media/news/brazilcore-beleza-natural-e-bem-estar-puxam-o-lifestyle-de-2026-cover-20260523013310.webp"
   alt: "Modelo com maquiagem natural e roupas inspiradas no Brazilcore, refletindo tendências de 2026."
-  caption: "Unsplash"
+  caption: "Credito: Unsplash"
   layout: "full"
-ogImage: "https://source.unsplash.com/1600x900/?brazilcore%2Cbeleza%2Cnatural%2Cestar%2Cpuxam%2Clifestyle%2CLifestyle"
+ogImage: "https://portalnovoalvo.com.br/media/news/brazilcore-beleza-natural-e-bem-estar-puxam-o-lifestyle-de-2026-cover-20260523013310.webp"
 tags: ["Brazilcore", "lifestyle", "beleza", "bem-estar", "moda", "consumo"]
 ---
 
