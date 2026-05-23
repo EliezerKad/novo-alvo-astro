@@ -55,6 +55,65 @@ const parseDate = (value) => {
 
 const sqlString = (value) => `'${String(value || '').replace(/'/g, "''")}'`;
 
+const STOP_WORDS = new Set([
+  'a',
+  'ao',
+  'aos',
+  'as',
+  'com',
+  'como',
+  'contra',
+  'da',
+  'das',
+  'de',
+  'do',
+  'dos',
+  'e',
+  'em',
+  'entre',
+  'na',
+  'nas',
+  'no',
+  'nos',
+  'o',
+  'os',
+  'para',
+  'por',
+  'que',
+  'se',
+  'sem',
+  'sob',
+  'sobre',
+  'sua',
+  'suas',
+  'seu',
+  'seus',
+  'um',
+  'uma',
+]);
+
+const subjectTokens = (value) =>
+  new Set(
+    String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/\bdjoko\b/g, 'djokovic')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .split(/\s+/)
+      .map((token) => token.trim())
+      .filter((token) => token.length >= 3 && !STOP_WORDS.has(token)),
+  );
+
+const overlapScore = (left, right) => {
+  if (!left.size || !right.size) return { overlap: 0, ratio: 0 };
+  let overlap = 0;
+  for (const token of left) {
+    if (right.has(token)) overlap += 1;
+  }
+  return { overlap, ratio: overlap / Math.min(left.size, right.size) };
+};
+
 const d1 = (command) => {
   const env = { ...process.env, npm_config_cache: process.env.npm_config_cache || resolve('..', '.npm-cache') };
   const normalizedCommand = command.replace(/\s+/g, ' ').trim();
@@ -115,7 +174,7 @@ const listQueued = () =>
 
 const listNewPitchesFromD1 = () =>
   d1(
-    `SELECT id, cluster_key, category, title, sources, score, source_count, updated_at
+    `SELECT id, cluster_key, category, title, summary, keywords, tags, sources, score, source_count, updated_at
      FROM editorial_pitches
      WHERE status = 'new'
        AND source_count >= ${Math.max(1, Math.floor(MIN_SOURCES))}
@@ -124,6 +183,53 @@ const listNewPitchesFromD1 = () =>
      ORDER BY score DESC, source_count DESC, updated_at DESC
      LIMIT 100`,
   );
+
+const listPublishedSubjects = () =>
+  d1(
+    `SELECT slug, title, summary, category, published_at, updated_at
+     FROM articles
+     WHERE status = 'published'
+     ORDER BY COALESCE(NULLIF(published_at, ''), updated_at) DESC
+     LIMIT 400`,
+  ).map((article) => ({
+    ...article,
+    tokens: subjectTokens(`${article.category || ''} ${article.title || ''} ${article.summary || ''}`),
+  }));
+
+const duplicateForPitch = (pitch, publishedSubjects) => {
+  const pitchTokens = subjectTokens(
+    `${pitch.category || ''} ${pitch.cluster_key || ''} ${pitch.title || ''} ${pitch.summary || ''} ${pitch.keywords || ''} ${pitch.tags || ''}`,
+  );
+  for (const article of publishedSubjects) {
+    const score = overlapScore(pitchTokens, article.tokens);
+    if (score.overlap >= 5 && score.ratio >= 0.55) return { article, score };
+  }
+  return null;
+};
+
+const markDuplicatePitch = async (pitch, duplicate) => {
+  const note = `Duplicada de materia ja publicada: ${duplicate.article.slug}`;
+  if (ADMIN_TOKEN) {
+    await requestJson('/api/admin/pitches', {
+      method: 'PATCH',
+      body: JSON.stringify({
+        id: pitch.id,
+        clusterKey: pitch.cluster_key,
+        status: 'dismissed',
+      }),
+    }).catch((error) => console.warn(`[duplicate] falha ao dispensar ${pitch.id}: ${error.message}`));
+  }
+
+  d1(
+    `UPDATE editorial_pitches
+     SET status = 'dismissed', updated_at = ${sqlString(new Date().toISOString())}
+     WHERE id = ${sqlString(pitch.id)};
+     UPDATE editorial_memory
+     SET status = 'published', article_slug = ${sqlString(duplicate.article.slug)}, last_seen_at = ${sqlString(new Date().toISOString())}
+     WHERE last_pitch_id = ${sqlString(pitch.id)} OR subject_key = ${sqlString(pitch.cluster_key || '')}`,
+  );
+  console.warn(`[duplicate] ${pitch.title} -> ${duplicate.article.slug} (${note})`);
+};
 
 const rankPitches = (pitches, recency) => {
   const recentCutoff = Date.now() - RECENT_CATEGORY_HOURS * 60 * 60 * 1000;
@@ -214,7 +320,39 @@ const main = async () => {
   const pitchData = ADMIN_TOKEN
     ? await requestJson(`/api/admin/pitches?status=new&minSources=${MIN_SOURCES}&limit=100`)
     : { pitches: listNewPitchesFromD1() };
-  const candidates = rankPitches(pitchData.pitches || [], recency);
+  const publishedSubjects = listPublishedSubjects();
+  const duplicates = [];
+  const uniquePitches = [];
+  const categoryBackfill = [];
+  const wantedCategories = new Set();
+  for (const pitch of pitchData.pitches || []) {
+    const duplicate = duplicateForPitch(pitch, publishedSubjects);
+    if (duplicate) {
+      wantedCategories.add(pitch.category);
+      duplicates.push({
+        id: pitch.id,
+        title: pitch.title,
+        duplicateOf: duplicate.article.slug,
+        overlap: duplicate.score.overlap,
+        ratio: Number(duplicate.score.ratio.toFixed(2)),
+      });
+      await markDuplicatePitch(pitch, duplicate);
+      continue;
+    }
+    uniquePitches.push(pitch);
+  }
+  const rankedUnique = rankPitches(uniquePitches, recency);
+  for (const category of wantedCategories) {
+    const replacement = rankedUnique.find(
+      (pitch) => pitch.category === category && !categoryBackfill.some((item) => item.id === pitch.id),
+    );
+    if (replacement) categoryBackfill.push(replacement);
+  }
+  const replacementIds = new Set(categoryBackfill.map((pitch) => pitch.id));
+  const candidates = [
+    ...categoryBackfill,
+    ...rankedUnique.filter((pitch) => !replacementIds.has(pitch.id)),
+  ];
   const openSlots = Math.max(0, MAX_OPEN_QUEUE - existingQueued.length);
   const selected = candidates.slice(0, Math.max(0, Math.min(MAX_QUEUE_PER_RUN, openSlots)));
 
@@ -240,6 +378,7 @@ const main = async () => {
         mode: ADMIN_TOKEN ? 'api' : 'd1-fallback-without-admin-token',
         published,
         queued,
+        duplicates,
         candidates: candidates.length,
         existingQueued,
         note: ADMIN_TOKEN ? '' : 'Sem ADMIN_TOKEN: enfileira pelo D1, mas nao pulsa/publica nem busca imagens pela API.',
