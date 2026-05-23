@@ -24,11 +24,28 @@ const MIN_SCORE = Number(process.env.AUTOMATION_MIN_SCORE || 900);
 const MAX_QUEUE_PER_RUN = Number(process.env.AUTOMATION_MAX_QUEUE_PER_RUN || 1);
 const MAX_OPEN_QUEUE = Number(process.env.AUTOMATION_MAX_OPEN_QUEUE || 2);
 const RECENT_CATEGORY_HOURS = Number(process.env.AUTOMATION_RECENT_CATEGORY_HOURS || 8);
+const FETCH_TIMEOUT_MS = Number(process.env.AUTOMATION_FETCH_TIMEOUT_MS || 20000);
+const D1_TIMEOUT_MS = Number(process.env.AUTOMATION_D1_TIMEOUT_MS || 60000);
 const bundledNpm = resolve('..', '.tools', 'node-v24.15.0-win-x64', process.platform === 'win32' ? 'npm.cmd' : 'bin/npm');
 const npmCommand = process.env.NPM_CMD || (existsSync(bundledNpm) ? bundledNpm : process.platform === 'win32' ? 'npm.cmd' : 'npm');
 
+const fetchWithTimeout = async (url, options = {}) => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(new Error(`timeout apos ${FETCH_TIMEOUT_MS}ms`)), FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
+const isNetworkError = (error) =>
+  error?.name === 'AbortError' ||
+  String(error?.message || '').includes('fetch failed') ||
+  String(error?.cause?.code || '').includes('EACCES');
+
 const requestJson = async (path, options = {}) => {
-  const response = await fetch(new URL(path, PORTAL_ORIGIN), {
+  const response = await fetchWithTimeout(new URL(path, PORTAL_ORIGIN), {
     ...options,
     headers: {
       authorization: `Bearer ${ADMIN_TOKEN}`,
@@ -42,7 +59,7 @@ const requestJson = async (path, options = {}) => {
 };
 
 const publicJson = async (path) => {
-  const response = await fetch(new URL(path, PORTAL_ORIGIN));
+  const response = await fetchWithTimeout(new URL(path, PORTAL_ORIGIN));
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `${path} respondeu ${response.status}`);
   return data;
@@ -125,12 +142,12 @@ ${normalizedCommand}
       ? execFileSync(
           'powershell.exe',
           ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', psCommand],
-          { encoding: 'utf8', env },
+          { encoding: 'utf8', env, timeout: D1_TIMEOUT_MS },
         )
       : execFileSync(
           npmCommand,
           ['exec', 'wrangler', '--', 'd1', 'execute', D1_DATABASE, '--remote', '--json', '--command', normalizedCommand],
-          { encoding: 'utf8', env },
+          { encoding: 'utf8', env, timeout: D1_TIMEOUT_MS },
         );
   const jsonStart = output.indexOf('[');
   const jsonText = jsonStart >= 0 ? output.slice(jsonStart) : output;
@@ -207,9 +224,9 @@ const duplicateForPitch = (pitch, publishedSubjects) => {
   return null;
 };
 
-const markDuplicatePitch = async (pitch, duplicate) => {
+const markDuplicatePitch = async (pitch, duplicate, apiAvailable) => {
   const note = `Duplicada de materia ja publicada: ${duplicate.article.slug}`;
-  if (ADMIN_TOKEN) {
+  if (apiAvailable) {
     await requestJson('/api/admin/pitches', {
       method: 'PATCH',
       body: JSON.stringify({
@@ -268,8 +285,8 @@ const fetchImages = async (pitch) => {
   }
 };
 
-const enqueuePitch = async (pitch) => {
-  if (ADMIN_TOKEN) {
+const enqueuePitch = async (pitch, apiAvailable) => {
+  if (apiAvailable) {
     const data = await requestJson('/api/admin/pitches', {
       method: 'PATCH',
       body: JSON.stringify({
@@ -309,7 +326,15 @@ const enqueuePitch = async (pitch) => {
 };
 
 const main = async () => {
-  const published = await pulseQueue();
+  let apiAvailable = Boolean(ADMIN_TOKEN);
+  const published = apiAvailable
+    ? await pulseQueue().catch((error) => {
+        if (!isNetworkError(error)) throw error;
+        apiAvailable = false;
+        console.warn(`[api] ${error.message}. Continuando em modo D1 fallback sem pulsar/publicar nesta rodada.`);
+        return [];
+      })
+    : [];
   const existingQueued = listQueued();
   if (existingQueued.length >= MAX_OPEN_QUEUE) {
     console.log(JSON.stringify({ ok: true, published, queued: [], existingQueued, skipped: 'queue-cap-reached' }, null, 2));
@@ -317,8 +342,13 @@ const main = async () => {
   }
 
   const recency = await buildCategoryRecency();
-  const pitchData = ADMIN_TOKEN
-    ? await requestJson(`/api/admin/pitches?status=new&minSources=${MIN_SOURCES}&limit=100`)
+  const pitchData = apiAvailable
+    ? await requestJson(`/api/admin/pitches?status=new&minSources=${MIN_SOURCES}&limit=100`).catch((error) => {
+        if (!isNetworkError(error)) throw error;
+        apiAvailable = false;
+        console.warn(`[api] ${error.message}. Buscando pautas diretamente no D1.`);
+        return { pitches: listNewPitchesFromD1() };
+      })
     : { pitches: listNewPitchesFromD1() };
   const publishedSubjects = listPublishedSubjects();
   const duplicates = [];
@@ -336,7 +366,7 @@ const main = async () => {
         overlap: duplicate.score.overlap,
         ratio: Number(duplicate.score.ratio.toFixed(2)),
       });
-      await markDuplicatePitch(pitch, duplicate);
+      await markDuplicatePitch(pitch, duplicate, apiAvailable);
       continue;
     }
     uniquePitches.push(pitch);
@@ -358,8 +388,8 @@ const main = async () => {
 
   const queued = [];
   for (const pitch of selected) {
-    const imageCount = ADMIN_TOKEN ? await fetchImages(pitch) : 0;
-    const queue = await enqueuePitch(pitch);
+    const imageCount = apiAvailable ? await fetchImages(pitch) : 0;
+    const queue = await enqueuePitch(pitch, apiAvailable);
     queued.push({
       id: pitch.id,
       title: pitch.title,
@@ -375,13 +405,17 @@ const main = async () => {
     JSON.stringify(
       {
         ok: true,
-        mode: ADMIN_TOKEN ? 'api' : 'd1-fallback-without-admin-token',
+        mode: apiAvailable ? 'api' : ADMIN_TOKEN ? 'd1-fallback-api-unavailable' : 'd1-fallback-without-admin-token',
         published,
         queued,
         duplicates,
         candidates: candidates.length,
         existingQueued,
-        note: ADMIN_TOKEN ? '' : 'Sem ADMIN_TOKEN: enfileira pelo D1, mas nao pulsa/publica nem busca imagens pela API.',
+        note: apiAvailable
+          ? ''
+          : ADMIN_TOKEN
+            ? 'ADMIN_TOKEN configurado, mas API indisponivel nesta rodada: enfileira pelo D1 e nao publica direto.'
+            : 'Sem ADMIN_TOKEN: enfileira pelo D1, mas nao pulsa/publica nem busca imagens pela API.',
       },
       null,
       2,

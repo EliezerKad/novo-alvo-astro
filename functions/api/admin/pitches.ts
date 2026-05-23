@@ -639,6 +639,8 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
     minSources?: number;
     imageUrl?: string;
     imageRole?: string;
+    draftArticleId?: string;
+    articleId?: string;
   };
   try {
     payload = await request.json();
@@ -656,6 +658,7 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
   const clusterKey = clean(payload.clusterKey, 180);
   const status = clean(payload.status, 24);
   const requestedCategory = clean(payload.category, 80);
+  const draftArticleId = clean(payload.draftArticleId || payload.articleId, 120);
   const imageRole = clean(payload.imageRole, 24);
   const selectedImageUrl = clean(payload.imageUrl, 1200);
   if (!id && !clusterKey) return json({ error: 'ID ausente.' }, { status: 400 });
@@ -746,18 +749,19 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
 
     await db
       .prepare(
-        `INSERT INTO editorial_queue (id, pitch_id, category, status, publish_after, updated_at)
-         VALUES (?, ?, ?, 'queued', ?, ?)
+        `INSERT INTO editorial_queue (id, pitch_id, category, status, publish_after, draft_article_id, updated_at)
+         VALUES (?, ?, ?, 'queued', ?, ?, ?)
          ON CONFLICT(pitch_id) DO UPDATE SET
            category = excluded.category,
            status = 'queued',
            publish_after = excluded.publish_after,
+           draft_article_id = COALESCE(NULLIF(excluded.draft_article_id, ''), editorial_queue.draft_article_id),
            error = '',
            updated_at = excluded.updated_at`,
       )
-      .bind(queueId, existing.id, category, publishAfter, new Date().toISOString())
+      .bind(queueId, existing.id, category, publishAfter, draftArticleId, new Date().toISOString())
       .run();
-    queue = { id: queueId, publishAfter, gapMinutes };
+    queue = { id: queueId, publishAfter, gapMinutes, draftArticleId };
   }
 
   return json({ ok: true, queue });

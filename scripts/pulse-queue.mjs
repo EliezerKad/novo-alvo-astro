@@ -16,11 +16,22 @@ loadLocalEnv(resolve('.env.local'));
 const PORTAL_ORIGIN = process.env.PORTAL_ORIGIN || 'https://portalnovoalvo.com.br';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
 const LIMIT = Number(process.env.PULSE_LIMIT || 2);
+const FETCH_TIMEOUT_MS = Number(process.env.PULSE_FETCH_TIMEOUT_MS || 20000);
+
+const fetchWithTimeout = async (url, options = {}) => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(new Error(`timeout apos ${FETCH_TIMEOUT_MS}ms`)), FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+};
 
 const main = async () => {
   if (!ADMIN_TOKEN) throw new Error('ADMIN_TOKEN ausente.');
 
-  const response = await fetch(`${PORTAL_ORIGIN}/api/admin/queue?limit=${LIMIT}`, {
+  const response = await fetchWithTimeout(`${PORTAL_ORIGIN}/api/admin/queue?limit=${LIMIT}`, {
     method: 'POST',
     headers: {
       authorization: `Bearer ${ADMIN_TOKEN}`,

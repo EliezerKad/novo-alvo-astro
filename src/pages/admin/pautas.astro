@@ -1075,6 +1075,10 @@ const categories = [
             }
             <div class="mt-5 grid gap-3 rounded-[1.25rem] border border-zinc-100 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950 md:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
               <label class="grid gap-2 text-[9px] font-black uppercase tracking-[0.22em] text-zinc-400 md:col-span-2">
+                Titulo que sera publicado
+                <input data-generated-title value="${escapeHtml(article.title || pitch.title || '')}" class="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs font-bold normal-case tracking-normal text-zinc-700 outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200" placeholder="Titulo final da materia" />
+              </label>
+              <label class="grid gap-2 text-[9px] font-black uppercase tracking-[0.22em] text-zinc-400 md:col-span-2">
                 Categoria para a fila
                 <select data-generated-category class="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs font-bold normal-case tracking-normal text-zinc-700 outline-none focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
                   ${[...document.querySelectorAll('[data-category-filter] option')]
@@ -1125,12 +1129,13 @@ const categories = [
         modal?.classList.remove('flex');
       };
 
-      const editGeneratedArticle = async (button, id) => {
+      const saveGeneratedDraft = async (id) => {
         const token = getToken();
         const article = generatedArticles.get(String(id || ''));
         const pitch = pitches.find((item) => String(item.id || '') === String(id || ''));
-        if (!token || !article || !pitch) return;
+        if (!token || !article || !pitch) return null;
         const editedBody = document.querySelector(`[data-generated-editor="${CSS.escape(String(id || ''))}"] [data-generated-body-edit]`)?.innerHTML;
+        const editedTitle = document.querySelector('[data-generated-title]')?.value.trim();
         const editedCoverUrl = document.querySelector('[data-generated-cover-url]')?.value.trim();
         const editedCoverAlt = document.querySelector('[data-generated-cover-alt]')?.value.trim();
         const editedCategory = document.querySelector('[data-generated-category]')?.value.trim();
@@ -1140,6 +1145,52 @@ const categories = [
           editorialMedia.push({ type: 'editorialFlag', homeSection: 'featured' });
         }
 
+        const finalTitle = editedTitle || article.title || pitch.title || 'Materia sem titulo';
+        const slug = String(article.slug || pitch.slug || finalTitle || id)
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .slice(0, 120);
+        const response = await fetch('/api/admin/articles', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            id: `draft:${slug || id}`,
+            slug,
+            title: finalTitle,
+            summary: article.summary || pitch.summary || '',
+            bodyHtml: editedBody || article.bodyHtml || '<p></p>',
+            category: editedCategory || article.category || pitch.category || 'Politica',
+            author: article.author || 'Redacao Novo Alvo',
+            status: 'draft',
+            coverUrl: editedCoverUrl || article.coverUrl || '',
+            coverAlt: editedCoverAlt || article.coverAlt || finalTitle,
+            seoDescription: article.seoDescription || article.metaDescription || article.summary || pitch.summary || '',
+            keywords: article.keywords || pitch.keywords || '',
+            tags: Array.isArray(article.tags) ? article.tags : parseArray(pitch.tags),
+            sources: Array.isArray(article.sources) ? article.sources : parseArray(pitch.sources),
+            media: editorialMedia,
+            readingMinutes: article.readingMinutes || 0,
+          }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          try {
+            localStorage.removeItem('admin-token');
+          } catch {}
+          redirectToLogin();
+          return null;
+        }
+        if (!response.ok) throw new Error(data.error || 'Nao foi possivel salvar a materia revisada.');
+        return data.article?.id || `draft:${slug || id}`;
+      };
+
+      const editGeneratedArticle = async (button, id) => {
         const previousLabel = button?.textContent || '';
         if (button) {
           button.disabled = true;
@@ -1149,48 +1200,8 @@ const categories = [
         if (statusNode) statusNode.textContent = 'Salvando versao editavel da materia...';
 
         try {
-          const slug = String(article.slug || pitch.slug || pitch.title || id)
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-+|-+$/g, '')
-            .slice(0, 120);
-          const response = await fetch('/api/admin/articles', {
-            method: 'POST',
-            headers: {
-              'content-type': 'application/json',
-              authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              id: `draft:${slug || id}`,
-              slug,
-              title: article.title || pitch.title,
-              summary: article.summary || pitch.summary || '',
-              bodyHtml: editedBody || article.bodyHtml || '<p></p>',
-              category: editedCategory || article.category || pitch.category || 'Politica',
-              author: article.author || 'Redacao Novo Alvo',
-              status: 'draft',
-              coverUrl: editedCoverUrl || article.coverUrl || '',
-              coverAlt: editedCoverAlt || article.coverAlt || article.title || pitch.title || '',
-              seoDescription: article.seoDescription || article.metaDescription || article.summary || pitch.summary || '',
-              keywords: article.keywords || pitch.keywords || '',
-              tags: Array.isArray(article.tags) ? article.tags : parseArray(pitch.tags),
-              sources: Array.isArray(article.sources) ? article.sources : parseArray(pitch.sources),
-              media: editorialMedia,
-              readingMinutes: article.readingMinutes || 0,
-            }),
-          });
-          const data = await response.json().catch(() => ({}));
-          if (response.status === 401) {
-            try {
-              localStorage.removeItem('admin-token');
-            } catch {}
-            redirectToLogin();
-            return;
-          }
-          if (!response.ok) throw new Error(data.error || 'Nao foi possivel abrir a materia para edicao.');
-          const articleId = data.article?.id || `draft:${slug || id}`;
+          const articleId = await saveGeneratedDraft(id);
+          if (!articleId) return;
           window.location.href = `/admin/nova/?id=${encodeURIComponent(articleId)}`;
         } catch (error) {
           if (statusNode) statusNode.textContent = error.message || 'Falha ao abrir editor.';
@@ -1242,7 +1253,7 @@ const categories = [
         }
       };
 
-      const updatePitchStatus = async (button, id, nextStatus, clusterKey = '') => {
+      const updatePitchStatus = async (button, id, nextStatus, clusterKey = '', draftArticleId = '') => {
         const token = getToken();
         if (!token) return;
         if (!id) {
@@ -1266,7 +1277,13 @@ const categories = [
               'content-type': 'application/json',
               authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ id, clusterKey, status: nextStatus, category: categoryOverride || undefined }),
+            body: JSON.stringify({
+              id,
+              clusterKey,
+              status: nextStatus,
+              category: categoryOverride || undefined,
+              draftArticleId: draftArticleId || undefined,
+            }),
           });
           const data = await response.json().catch(() => ({}));
           if (response.status === 401) {
@@ -1522,7 +1539,24 @@ const categories = [
 
         const queueButton = event.target.closest('[data-send-generated-to-queue]');
         if (queueButton) {
-          updatePitchStatus(queueButton, queueButton.dataset.sendGeneratedToQueue || '', 'queued', queueButton.dataset.pitchCluster || '').then(closePitchPreview);
+          const id = queueButton.dataset.sendGeneratedToQueue || '';
+          const previousLabel = queueButton.textContent || '';
+          queueButton.disabled = true;
+          queueButton.textContent = 'Salvando revisao...';
+          queueButton.classList.add('opacity-60');
+          if (statusNode) statusNode.textContent = 'Salvando materia revisada antes de enviar para a fila...';
+          saveGeneratedDraft(id)
+            .then((draftArticleId) => {
+              if (!draftArticleId) throw new Error('Nao foi possivel salvar a materia revisada.');
+              return updatePitchStatus(queueButton, id, 'queued', queueButton.dataset.pitchCluster || '', draftArticleId);
+            })
+            .then(closePitchPreview)
+            .catch((error) => {
+              if (statusNode) statusNode.textContent = error.message || 'Falha ao enviar materia revisada para a fila.';
+              queueButton.disabled = false;
+              queueButton.textContent = previousLabel;
+              queueButton.classList.remove('opacity-60');
+            });
           return;
         }
 

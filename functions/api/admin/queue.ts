@@ -31,6 +31,7 @@ type QueueRow = {
   pitch_id: string;
   category: string;
   publish_after: string;
+  draft_article_id?: string;
   title: string;
   summary: string;
   sources: string;
@@ -39,6 +40,26 @@ type QueueRow = {
   image_candidates: string;
   score?: number;
   source_count?: number;
+};
+
+type DraftArticleRow = {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  body_html: string;
+  category: string;
+  author: string;
+  cover_url: string;
+  cover_alt: string;
+  seo_description: string;
+  keywords: string;
+  tags: string;
+  sources: string;
+  media: string;
+  reading_minutes: number;
+  scheduled_at: string;
+  published_at: string;
 };
 
 type ImageCandidate = {
@@ -1781,6 +1802,52 @@ export const buildArticlePayload = async (row: QueueRow, env: Env) => {
   };
 };
 
+const buildArticlePayloadFromDraft = async (db: D1Database, row: QueueRow) => {
+  const draftId = clean(row.draft_article_id, 120);
+  if (!draftId) return null;
+
+  const draft = await db
+    .prepare(
+      `SELECT
+        id, slug, title, summary, body_html, category, author, cover_url, cover_alt,
+        seo_description, keywords, tags, sources, media, reading_minutes, scheduled_at, published_at
+       FROM articles
+       WHERE id = ? OR slug = ?
+       LIMIT 1`,
+    )
+    .bind(draftId, draftId)
+    .first<DraftArticleRow>();
+
+  if (!draft) throw new Error(`Rascunho revisado nao encontrado para a fila: ${draftId}`);
+  if (!hasEditorialBody(draft.body_html)) throw new Error(`Rascunho revisado sem corpo editorial completo: ${draftId}`);
+
+  const publishedAt = new Date().toISOString();
+  const bodyWords = draft.body_html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+  return {
+    id: draft.id,
+    slug: slugify(draft.slug || draft.title),
+    title: clean(draft.title, 220),
+    summary: clean(draft.summary, 700),
+    bodyHtml: clean(draft.body_html, 250000),
+    category: clean(draft.category, 80) || row.category || 'Brasil',
+    author: clean(draft.author, 120) || 'Redacao Novo Alvo',
+    status: 'published',
+    coverUrl: clean(draft.cover_url, 1200),
+    coverAlt: clean(draft.cover_alt, 240) || clean(draft.title, 220),
+    coverCaption: '',
+    seoDescription: clean(draft.seo_description, 220) || clean(draft.summary, 155),
+    keywords: clean(draft.keywords, 700),
+    tags: parseArray(draft.tags).map(String).filter(Boolean),
+    sources: parseArray(draft.sources),
+    media: parseArray(draft.media),
+    readingMinutes: Math.max(1, Number(draft.reading_minutes || 0) || Math.ceil(bodyWords / 220)),
+    scheduledAt: '',
+    publishedAt,
+    generatedWithAi: true,
+    preservedDraft: true,
+  };
+};
+
 export const onRequestGet = async ({ request, env }: { request: Request; env: Env }) => {
   const authError = requireAdmin(request, env);
   if (authError) return authError;
@@ -1841,7 +1908,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
 
   const due = await db
     .prepare(
-      `SELECT q.id, q.pitch_id, q.category, q.publish_after, p.title, p.summary, p.sources, p.tags, p.keywords, p.image_candidates, p.score, p.source_count
+      `SELECT q.id, q.pitch_id, q.category, q.publish_after, q.draft_article_id, p.title, p.summary, p.sources, p.tags, p.keywords, p.image_candidates, p.score, p.source_count
        FROM editorial_queue q
        JOIN editorial_pitches p ON p.id = q.pitch_id
        WHERE q.status = 'queued' AND q.publish_after <= ?
@@ -1858,8 +1925,8 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   for (const item of due.results || []) {
     if (published.length >= limit) break;
     checked += 1;
-    const article = await buildArticlePayload(item, env);
     try {
+      const article = (await buildArticlePayloadFromDraft(db, item)) || (await buildArticlePayload(item, env));
       if (!(article as { generatedWithAi?: boolean }).generatedWithAi) {
         throw new Error((article as { generationError?: string }).generationError || 'Materia bloqueada pela validacao editorial.');
       }
