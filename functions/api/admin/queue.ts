@@ -1809,6 +1809,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
 
   const url = new URL(request.url);
   const limit = Math.max(1, Math.min(5, Number(url.searchParams.get('limit') || 2)));
+  const candidateLimit = Math.min(10, Math.max(limit + 3, limit * 3));
   const now = new Date().toISOString();
   const maxQueueAgeHours = Math.max(1, Math.min(96, Number((env as { QUEUE_MAX_AGE_HOURS?: string }).QUEUE_MAX_AGE_HOURS || 18)));
   const staleCutoff = new Date(Date.now() - maxQueueAgeHours * 60 * 60 * 1000).toISOString();
@@ -1847,13 +1848,16 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
        ORDER BY q.publish_after ASC
        LIMIT ?`,
     )
-    .bind(now, limit)
+    .bind(now, candidateLimit)
     .all<QueueRow>();
 
   const published: unknown[] = [];
+  let checked = 0;
   const origin = new URL(request.url).origin;
 
   for (const item of due.results || []) {
+    if (published.length >= limit) break;
+    checked += 1;
     const article = await buildArticlePayload(item, env);
     try {
       if (!(article as { generatedWithAi?: boolean }).generatedWithAi) {
@@ -1896,5 +1900,5 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     }
   }
 
-  return json({ ok: true, checked: due.results?.length || 0, published });
+  return json({ ok: true, checked, candidates: due.results?.length || 0, published });
 };
