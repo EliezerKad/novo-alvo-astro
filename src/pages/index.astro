@@ -21,6 +21,19 @@ import { formatRelativeDate, getCategoryColor } from '../lib/utils';
 const newsEntries = sortNewsByDate(await getCollection('news'));
 const articles = newsEntries.map(newsEntryToArticle);
 const staticArticleSlugs = articles.map((article) => article.slug);
+const subjectKey = (value: string) =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\b(conselho nacional de justica|cnj)\b/g, 'cnj')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .split(/\s+/)
+    .filter((token) => token.length >= 4 && !['novo', 'nova', 'para', 'pode', 'mesmo', 'com', 'das', 'dos', 'uma', 'por', 'sobre'].includes(token))
+    .sort()
+    .slice(0, 14)
+    .join('-');
+const staticArticleSubjectKeys = articles.map((article) => subjectKey(`${article.category} ${article.title} ${article.summary}`));
 const category = Astro.url.searchParams.get('category') || undefined;
 const filteredArticles = articles.filter((article) => {
   if (category && category !== 'Início' && article.category !== category) return false;
@@ -112,7 +125,7 @@ const isCategoryView = !!category && category !== 'Início';
                           Agora
                         </span>
                       </div>
-                      <div class="px-4 py-1 md:px-6" data-live-pulse-list data-static-slugs={JSON.stringify(staticArticleSlugs)}>
+                      <div class="px-4 py-1 md:px-6" data-live-pulse-list data-static-slugs={JSON.stringify(staticArticleSlugs)} data-static-subjects={JSON.stringify(staticArticleSubjectKeys)}>
                         {pulseArticles.map((article) => (
                           <a href={`/noticia/${article.slug}`} class="group grid min-h-[84px] grid-cols-[58px_minmax(0,1fr)] items-center gap-3 rounded-2xl border-b border-black/10 px-2 py-3.5 transition-colors duration-300 last:border-b-0 hover:bg-[#f5f3ee] hover:shadow-[inset_3px_0_0_#8A1F2D] dark:border-zinc-800 dark:hover:bg-zinc-800/60 md:min-h-[92px] md:grid-cols-[64px_minmax(0,1fr)] md:py-4">
                             <div class="h-14 w-[58px] overflow-hidden rounded-xl bg-[#ebe8df] shadow-sm transition-shadow duration-300 group-hover:shadow-md dark:bg-zinc-800 md:w-16 md:rounded-2xl">
@@ -280,11 +293,26 @@ const isCategoryView = !!category && category !== 'Início';
                     const pulseList = document.querySelector('[data-live-pulse-list]');
                     if (!pulseList) return;
                     const staticSlugs = new Set(JSON.parse(pulseList.dataset.staticSlugs || '[]'));
+                    const staticSubjects = new Set(JSON.parse(pulseList.dataset.staticSubjects || '[]'));
                     const initialPulseItems = Array.from(pulseList.querySelectorAll('a[href]')).map((item) => {
                       const href = item.getAttribute('href') || '';
                       const slug = decodeURIComponent(href.replace(/^\/noticia\//, '').replace(/\/$/, ''));
-                      return { slug, html: item.outerHTML };
+                      const title = item.querySelector('h3')?.textContent || '';
+                      return { slug, subject: subjectKey(title), html: item.outerHTML };
                     });
+                    function subjectKey(value) {
+                      return String(value || '')
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .toLowerCase()
+                        .replace(/\b(conselho nacional de justica|cnj)\b/g, 'cnj')
+                        .replace(/[^a-z0-9]+/g, ' ')
+                        .split(/\s+/)
+                        .filter((token) => token.length >= 4 && !['novo', 'nova', 'para', 'pode', 'mesmo', 'com', 'das', 'dos', 'uma', 'por', 'sobre'].includes(token))
+                        .sort()
+                        .slice(0, 14)
+                        .join('-');
+                    }
                     const categoryColors = {
                       Brasil: 'bg-emerald-600',
                       Mundo: 'bg-blue-900',
@@ -340,8 +368,15 @@ const isCategoryView = !!category && category !== 'Início';
                           : [];
                         if (!articles.length) return;
                         const seen = new Set();
-                        const liveItems = articles.slice(0, 3).map((article) => {
+                        const seenSubjects = new Set(staticSubjects);
+                        const liveItems = articles.filter((article) => {
+                            const key = subjectKey(`${article.category || ''} ${article.title || ''} ${article.summary || ''}`);
+                            if (key && seenSubjects.has(key)) return false;
+                            if (key) seenSubjects.add(key);
+                            return true;
+                          }).slice(0, 3).map((article) => {
                             seen.add(article.slug);
+                            seenSubjects.add(subjectKey(`${article.category || ''} ${article.title || ''} ${article.summary || ''}`));
                             const url = `/noticia/${encodeURIComponent(article.slug)}/`;
                             return `
                               <a href="${url}" class="group grid min-h-[92px] grid-cols-[64px_minmax(0,1fr)] items-center gap-3 rounded-2xl border-b border-black/10 px-2 py-4 transition-colors duration-300 last:border-b-0 hover:bg-[#f5f3ee] hover:shadow-[inset_3px_0_0_#8A1F2D] dark:border-zinc-800 dark:hover:bg-zinc-800/60">
@@ -356,7 +391,7 @@ const isCategoryView = !!category && category !== 'Início';
                             `;
                           });
                         const fallbackItems = initialPulseItems
-                          .filter((item) => item.slug && !seen.has(item.slug))
+                          .filter((item) => item.slug && !seen.has(item.slug) && (!item.subject || !seenSubjects.has(item.subject)))
                           .map((item) => item.html);
                         pulseList.innerHTML = [...liveItems, ...fallbackItems].slice(0, 3).join('');
                         window.__novoAlvoHydrateViews?.(pulseList);
