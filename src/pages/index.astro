@@ -128,7 +128,7 @@ const isCategoryView = !!category && category !== 'Início';
                               <h3 class="line-clamp-3 text-sm font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50 md:text-[15px]">
                                 {article.title}
                               </h3>
-                              <p class="mt-1 text-xs font-bold text-zinc-400">{formatRelativeDate(article.publishedAt)} • {article.views || 0} acessos</p>
+                              <p class="mt-1 text-xs font-bold text-zinc-400">{formatRelativeDate(article.publishedAt)} • <span data-live-view-count={article.slug}>{article.views || 0} acessos</span></p>
                             </div>
                           </a>
                         ))}
@@ -165,7 +165,7 @@ const isCategoryView = !!category && category !== 'Início';
                         <div class="mb-4 text-[11px] font-black uppercase tracking-[0.08em] text-[#e6c7cd]">{displayCategory(nowLead.category)}</div>
                         <h3 class="font-sans text-[2.15rem] font-black leading-[0.94] tracking-[-0.075em] md:text-5xl">{nowLead.title}</h3>
                         <p class="mt-4 line-clamp-3 max-w-xl text-sm font-medium leading-6 text-white/75">{nowLead.summary}</p>
-                        <div class="mt-4 text-xs font-black uppercase tracking-widest text-white/60">{formatRelativeDate(nowLead.publishedAt)} • {nowLead.views || 0} acessos</div>
+                        <div class="mt-4 text-xs font-black uppercase tracking-widest text-white/60">{formatRelativeDate(nowLead.publishedAt)} • <span data-live-view-count={nowLead.slug}>{nowLead.views || 0} acessos</span></div>
                       </div>
                     </a>
 
@@ -184,7 +184,7 @@ const isCategoryView = !!category && category !== 'Início';
                           <div>
                             <div class="mb-2 text-[10px] font-black uppercase tracking-[0.08em] text-[#8A1F2D]">{displayCategory(article.category)}</div>
                             <h3 class="font-sans text-base font-black leading-[1.05] tracking-[-0.055em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50 md:text-xl">{article.title}</h3>
-                            <div class="mt-2 text-xs font-bold text-zinc-400">{formatRelativeDate(article.publishedAt)} • {article.views || 0} acessos</div>
+                            <div class="mt-2 text-xs font-bold text-zinc-400">{formatRelativeDate(article.publishedAt)} • <span data-live-view-count={article.slug}>{article.views || 0} acessos</span></div>
                           </div>
                         </a>
                       ))}
@@ -252,8 +252,30 @@ const isCategoryView = !!category && category !== 'Início';
                           section.dataset.categoryHidden = 'false';
                         });
                         button.closest('div')?.remove();
+                        window.__novoAlvoHydrateViews?.();
                       });
                     }
+
+                    const hydrateViews = async (root = document) => {
+                      const nodes = Array.from(root.querySelectorAll('[data-live-view-count]'));
+                      const slugs = [...new Set(nodes.map((node) => node.dataset.liveViewCount).filter(Boolean))];
+                      if (!slugs.length) return;
+
+                      try {
+                        const response = await fetch(`/api/public/views?slugs=${encodeURIComponent(slugs.join(','))}`);
+                        if (!response.ok) return;
+                        const data = await response.json();
+                        const views = data && typeof data.views === 'object' ? data.views : {};
+                        nodes.forEach((node) => {
+                          const slug = node.dataset.liveViewCount || '';
+                          const value = Number(views[slug] || 0);
+                          node.textContent = node.dataset.viewFormat === 'number' ? String(value) : `${value} acessos`;
+                        });
+                      } catch {}
+                    };
+
+                    window.__novoAlvoHydrateViews = hydrateViews;
+                    void hydrateViews();
 
                     const pulseList = document.querySelector('[data-live-pulse-list]');
                     if (!pulseList) return;
@@ -328,7 +350,7 @@ const isCategoryView = !!category && category !== 'Início';
                                 </div>
                                 <div class="min-w-0">
                                   <h3 class="line-clamp-3 text-[15px] font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50">${escapeHtml(article.title)}</h3>
-                                  <p class="mt-1 text-xs font-bold text-zinc-400">${formatDate(article.published_at || article.scheduled_at || article.updated_at)} • ${Number(article.views || 0)} acessos</p>
+                                  <p class="mt-1 text-xs font-bold text-zinc-400">${formatDate(article.published_at || article.scheduled_at || article.updated_at)} • <span data-live-view-count="${escapeHtml(article.slug)}">${Number(article.views || 0)} acessos</span></p>
                                 </div>
                               </a>
                             `;
@@ -337,6 +359,7 @@ const isCategoryView = !!category && category !== 'Início';
                           .filter((item) => item.slug && !seen.has(item.slug))
                           .map((item) => item.html);
                         pulseList.innerHTML = [...liveItems, ...fallbackItems].slice(0, 3).join('');
+                        window.__novoAlvoHydrateViews?.(pulseList);
                       })
                       .catch(() => {});
                   })();
@@ -357,7 +380,7 @@ const isCategoryView = !!category && category !== 'Início';
                         <a href={`/noticia/${article.slug}`} class="grid grid-cols-[34px_1fr_auto] gap-3 border-b border-black/10 py-4 last:border-b-0 dark:border-zinc-800">
                           <div class="text-2xl font-black leading-none tracking-tighter text-[#8A1F2D]">{index + 1}</div>
                           <h3 class="text-[15px] font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors hover:text-[#8A1F2D] dark:text-zinc-50">{article.title}</h3>
-                          <div class="text-xs font-black text-zinc-400">{article.views || 0}</div>
+                          <div class="text-xs font-black text-zinc-400" data-live-view-count={article.slug} data-view-format="number">{article.views || 0}</div>
                         </a>
                       ))}
                     </div>
@@ -397,11 +420,12 @@ const isCategoryView = !!category && category !== 'Início';
                               <a href="/noticia/${encodeURIComponent(article.slug)}/" class="grid grid-cols-[34px_1fr_auto] gap-3 border-b border-black/10 py-4 last:border-b-0 dark:border-zinc-800">
                                 <div class="text-2xl font-black leading-none tracking-tighter text-[#8A1F2D]">${index + 1}</div>
                                 <h3 class="text-[15px] font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors hover:text-[#8A1F2D] dark:text-zinc-50">${escapeHtml(article.title)}</h3>
-                                <div class="text-xs font-black text-zinc-400">${views}</div>
+                                <div class="text-xs font-black text-zinc-400" data-live-view-count="${escapeHtml(article.slug)}" data-view-format="number">${views}</div>
                               </a>
                             `;
                           })
                           .join('');
+                        window.__novoAlvoHydrateViews?.(list);
                       })
                       .catch(() => {});
                   })();
