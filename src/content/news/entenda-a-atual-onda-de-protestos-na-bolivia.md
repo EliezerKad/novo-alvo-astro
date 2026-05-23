@@ -7,7 +7,7 @@ category: "Mundo"
 author: "Redação Novo Alvo"
 sources: ["O POVO", "DW.com", "Rondoniagora.com", "Jovem Pan", "Metrópoles", "Tribuna do Paraná", "BBC", "Opera Mundi"]
 publishedAt: "2026-05-23T13:31:53.286Z"
-updatedAt: "2026-05-23T14:02:48.092Z"
+updatedAt: "2026-05-23T14:07:56.581Z"
 featured: false
 isFeatured: false
 urgent: false
@@ -24,19 +24,7 @@ tags: ["brasil", "entenda", "atual", "onda", "protestos", "bolivia"]
 
 <p>Uma série de protestos tem tomado as ruas da Bolívia, gerando preocupação e instabilidade no país.</p><p>As manifestações, que parecem ter ganhado força recentemente, são impulsionadas por uma combinação de fatores, incluindo a insatisfação com a qualidade da gasolina e outras questões sociais e políticas.</p>
 <h2>Motivações por trás dos protestos</h2>
-<p>A qualidade da gasolina tem sido apontada como um dos estopins para a atual onda de manifestações. A população expressa descontentamento com o combustível, que estaria em condições insatisfatórias, afetando o cotidiano e a economia local.</p><figure data-editor-media="image" data-align="right" data-media-size="medium" data-credit="" contenteditable="false">
-        <div class="media-controls">
-          <button type="button" data-media-action="caption">Legenda</button>
-          <button type="button" data-media-action="credit">Crédito</button>
-          <button type="button" data-media-action="left">Esq.</button>
-          <button type="button" data-media-action="center">Centro</button>
-          <button type="button" data-media-action="right">Dir.</button>
-          <button type="button" data-media-action="small">P</button>
-          <button type="button" data-media-action="medium">M</button>
-          <button type="button" data-media-action="large">Full</button>
-          <button type="button" data-media-action="remove">Remover</button>
-        </div>
-      <img src="/media/news/entenda-a-atual-onda-de-protestos-na-bolivia-1.jpg" alt="Bandeira da Bolívia"><figcaption><span data-caption="">Bandeira da Bolívia</span><span class="media-credit" data-credit-label=""></span></figcaption></figure><p><br></p><p>Além disso, outros motivos, ainda não totalmente detalhados nas fontes disponíveis, contribuem para o clima de agitação social.</p>
+<p>A qualidade da gasolina tem sido apontada como um dos estopins para a atual onda de manifestações. A população expressa descontentamento com o combustível, que estaria em condições insatisfatórias, afetando o cotidiano e a economia local.</p><p><br></p><p>Além disso, outros motivos, ainda não totalmente detalhados nas fontes disponíveis, contribuem para o clima de agitação social.</p>
 <h2>Evo Morales e a 'Operação Condor 2026'</h2>
 <p>Em meio aos protestos, o ex-presidente Evo Morales fez declarações que adicionam uma camada de complexidade ao cenário.</p><p>Morales mencionou uma suposta "Operação Condor 2026" em andamento na Bolívia, uma referência que evoca um período sombrio da história sul-americana marcado por repressão política.</p><p>A menção a essa operação, associada ao ano de 2026, levanta questionamentos sobre as dinâmicas de poder e as preocupações com a estabilidade democrática no país.</p>
 <h2>Contexto e repercussão</h2>
