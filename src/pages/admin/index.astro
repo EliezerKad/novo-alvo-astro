@@ -12,6 +12,7 @@ const totalViews = newsEntries.reduce((sum, entry) => sum + (entry.data.views ||
 const categories = [...new Set(newsEntries.map((entry) => entry.data.category))];
 const latest = newsEntries.slice(0, 5);
 const mostRead = [...newsEntries].sort((a, b) => (b.data.views || 0) - (a.data.views || 0)).slice(0, 4);
+const latestSlugs = latest.map((entry) => entry.data.slug);
 
 const cards = [
   { label: 'Publicadas', value: published, tone: 'bg-red-600' },
@@ -42,7 +43,7 @@ const cards = [
       {cards.map((card) => (
         <div class="rounded-[1.5rem] border border-white/80 bg-white/70 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(15,23,42,0.10)] dark:border-zinc-800 dark:bg-zinc-900/70">
           <div class={`mb-6 h-2 w-12 rounded-full ${card.tone}`}></div>
-          <strong class="block admin-display text-4xl">{card.value}</strong>
+          <strong class="block admin-display text-4xl" data-admin-total-views={card.label === 'Acessos editoriais' ? 'true' : undefined}>{card.value}</strong>
           <span class="mt-2 block text-[9px] font-black uppercase tracking-widest text-zinc-400">{card.label}</span>
         </div>
       ))}
@@ -63,7 +64,7 @@ const cards = [
                 <h3 class="mt-1 line-clamp-2 admin-display text-xl leading-tight">{entry.data.title}</h3>
                 <p class="mt-2 text-xs font-bold uppercase tracking-widest text-zinc-400">{formatEditorialDate(entry.data.publishedAt.toISOString())}</p>
               </div>
-              <span class="self-center rounded-full bg-zinc-100 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-800">
+              <span data-admin-view-count={entry.data.slug} class="self-center rounded-full bg-zinc-100 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-800">
                 {(entry.data.views || 0).toLocaleString('pt-BR')}
               </span>
             </a>
@@ -85,15 +86,15 @@ const cards = [
 
         <section class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
           <h2 class="mb-5 text-xs font-black uppercase tracking-[0.24em]">Mais lidas</h2>
-          <div class="space-y-4">
+          <div class="space-y-4" data-admin-most-read>
             {mostRead.map((entry, index) => (
-              <div class="flex gap-4">
+              <a href={`/noticia/${entry.data.slug}/`} class="flex gap-4 rounded-2xl p-1 transition hover:bg-white/60 dark:hover:bg-zinc-950/30">
                 <span class="admin-display text-3xl text-[#8A1F2D]">{index + 1}</span>
                 <div>
                   <p class="line-clamp-2 text-sm font-black leading-tight">{entry.data.title}</p>
                   <p class="mt-1 text-[9px] font-black uppercase tracking-widest text-zinc-400">{(entry.data.views || 0).toLocaleString('pt-BR')} acessos</p>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </section>
@@ -101,3 +102,57 @@ const cards = [
     </div>
   </section>
 </AdminLayout>
+
+<script define:vars={{ latestSlugs }}>
+  const formatNumber = (value) => Number(value || 0).toLocaleString('pt-BR');
+  const escapeHtml = (value) =>
+    String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+  const renderMostRead = (articles) => {
+    const root = document.querySelector('[data-admin-most-read]');
+    if (!root || !Array.isArray(articles) || articles.length === 0) return;
+    root.innerHTML = articles
+      .map(
+        (article, index) => `
+          <a href="/noticia/${encodeURIComponent(article.slug)}/" class="flex gap-4 rounded-2xl p-1 transition hover:bg-white/60 dark:hover:bg-zinc-950/30">
+            <span class="admin-display text-3xl text-[#8A1F2D]">${index + 1}</span>
+            <div>
+              <p class="line-clamp-2 text-sm font-black leading-tight">${escapeHtml(article.title)}</p>
+              <p class="mt-1 text-[9px] font-black uppercase tracking-widest text-zinc-400">${formatNumber(article.views)} acessos</p>
+            </div>
+          </a>
+        `,
+      )
+      .join('');
+  };
+
+  const hydrateAdminViews = async () => {
+    const slugs = Array.isArray(latestSlugs) ? latestSlugs : [];
+    const query = new URLSearchParams({ limit: '4' });
+    if (slugs.length) query.set('slugs', slugs.join(','));
+
+    const response = await fetch(`/api/public/view-stats?${query.toString()}`, { cache: 'no-store' });
+    if (!response.ok) return;
+    const data = await response.json();
+
+    const totalNode = document.querySelector('[data-admin-total-views]');
+    if (totalNode && Number.isFinite(Number(data.totalViews))) {
+      totalNode.textContent = formatNumber(data.totalViews);
+    }
+
+    const views = data && typeof data.views === 'object' ? data.views : {};
+    document.querySelectorAll('[data-admin-view-count]').forEach((node) => {
+      const slug = node.getAttribute('data-admin-view-count');
+      node.textContent = formatNumber(views[slug] || 0);
+    });
+
+    renderMostRead(data.top);
+  };
+
+  hydrateAdminViews().catch(() => {});
+</script>

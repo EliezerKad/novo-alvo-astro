@@ -313,6 +313,26 @@ const isCategoryView = !!category && category !== 'Início';
                         .slice(0, 14)
                         .join('-');
                     }
+                    function imageKey(value) {
+                      try {
+                        const url = new URL(String(value || ''), window.location.origin);
+                        return url.pathname
+                          .replace(/-\d{8,}(\.[a-z0-9]+)$/i, '$1')
+                          .replace(/-cover(\.[a-z0-9]+)$/i, '$1')
+                          .toLowerCase();
+                      } catch {
+                        return String(value || '').toLowerCase();
+                      }
+                    }
+                    function sameGoogleAiTopic(article, subjects) {
+                      const haystack = `${article.category || ''} ${article.title || ''} ${article.summary || ''}`
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .toLowerCase();
+                      if (!haystack.includes('google') || !haystack.includes('busca')) return false;
+                      if (!haystack.includes('ia') && !haystack.includes('inteligencia artificial')) return false;
+                      return Array.from(subjects).some((subject) => subject.includes('google') && subject.includes('busca'));
+                    }
                     const categoryColors = {
                       Brasil: 'bg-emerald-600',
                       Mundo: 'bg-blue-900',
@@ -360,7 +380,7 @@ const isCategoryView = !!category && category !== 'Início';
                     const categoryClass = (value) => categoryColors[value] || 'bg-zinc-600';
                     void categoryClass;
 
-                    fetch('/api/public/articles?limit=4')
+                    fetch('/api/public/articles?limit=10')
                       .then((response) => (response.ok ? response.json() : { articles: [] }))
                       .then((data) => {
                         const articles = Array.isArray(data.articles)
@@ -369,10 +389,20 @@ const isCategoryView = !!category && category !== 'Início';
                         if (!articles.length) return;
                         const seen = new Set();
                         const seenSubjects = new Set(staticSubjects);
+                        const seenImages = new Set(
+                          initialPulseItems
+                            .map((item) => item.html.match(/<img[^>]+src="([^"]+)"/)?.[1] || '')
+                            .map(imageKey)
+                            .filter(Boolean),
+                        );
                         const liveItems = articles.filter((article) => {
                             const key = subjectKey(`${article.category || ''} ${article.title || ''} ${article.summary || ''}`);
+                            const coverKey = imageKey(article.cover_url || '');
+                            if (coverKey && seenImages.has(coverKey)) return false;
+                            if (sameGoogleAiTopic(article, seenSubjects)) return false;
                             if (key && seenSubjects.has(key)) return false;
                             if (key) seenSubjects.add(key);
+                            if (coverKey) seenImages.add(coverKey);
                             return true;
                           }).slice(0, 3).map((article) => {
                             seen.add(article.slug);
