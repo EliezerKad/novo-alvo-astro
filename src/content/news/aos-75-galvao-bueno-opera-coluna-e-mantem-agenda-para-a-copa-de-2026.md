@@ -6,8 +6,8 @@ seoDescription: "Famosos: Galvão Bueno, 75 anos, passou por cirurgia na coluna 
 category: "Famosos"
 author: "Redação Novo Alvo"
 sources: ["portalsalvadorfm.com.br", "GazetaWeb", "Globo", "OFuxico", "Midiamax", "A Crítica de Campo Grande", "Pleno.News", "iG Gente", "Diário 24 Horas", "UOL", "Região Noroeste", "Jovem Pan", "Redação MT", "DOL"]
-publishedAt: "2026-05-23T12:12:48.553Z"
-updatedAt: "2026-05-23T12:12:48.701Z"
+publishedAt: "2026-05-23T12:33:00.557Z"
+updatedAt: "2026-05-23T12:33:00.954Z"
 featured: false
 isFeatured: false
 urgent: false
