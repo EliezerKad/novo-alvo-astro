@@ -2,23 +2,23 @@
 title: "Gabriel Ganley, influenciador fitness, morre aos 22 anos em São Paulo"
 slug: "gabriel-ganley-influenciador-fitness-morre-aos-22-anos-em-sao-paulo"
 summary: "Atleta de fisiculturismo teve a morte confirmada pela Integral Médica neste sábado; causa ainda não foi divulgada oficialmente."
-seoDescription: "Atleta de fisiculturismo teve a morte confirmada pela Integral Médica neste sábado; causa ainda não foi divulgada oficialmente."
-category: "Política"
+seoDescription: "Ocorrencias: Atleta de fisiculturismo teve a morte confirmada pela Integral Médica neste sábado; causa ainda não foi divulgada oficialmente."
+category: "Ocorrencias"
 author: "Redação Novo Alvo"
 sources: ["CNN Brasil", "UOL", "gshow", "Folha de S.Paulo", "O Dia"]
 publishedAt: "2026-05-23T21:33:25.646Z"
-updatedAt: "2026-05-23T21:56:15.405Z"
+updatedAt: "2026-05-23T22:12:16.560Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: "now"
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/gabriel-ganley-influenciador-fitness-morre-aos-22-anos-em-sao-paulo-cover-20260523215615.jpg"
+  src: "https://portalnovoalvo.com.br/media/news/gabriel-ganley-influenciador-fitness-morre-aos-22-anos-em-sao-paulo-cover-20260523221216.jpg"
   alt: "Montagem com duas fotos do influenciador fitness Gabriel Ganley em academia"
   caption: "Montagem: Novo Alvo / reprodução de redes sociais"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/gabriel-ganley-influenciador-fitness-morre-aos-22-anos-em-sao-paulo-cover-20260523215615.jpg"
+ogImage: "https://portalnovoalvo.com.br/media/news/gabriel-ganley-influenciador-fitness-morre-aos-22-anos-em-sao-paulo-cover-20260523221216.jpg"
 tags: ["Gabriel Ganley", "Fisiculturismo", "Influenciador fitness", "Ocorrências"]
 ---
 
