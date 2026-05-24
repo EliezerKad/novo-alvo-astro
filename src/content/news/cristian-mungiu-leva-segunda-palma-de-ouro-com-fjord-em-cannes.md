@@ -6,19 +6,19 @@ seoDescription: "Cinema: O filme \"Fjord\", do diretor romeno Cristian Mungiu, l
 category: "Cinema"
 author: "Redação Novo Alvo"
 sources: ["GPS Brasília Portal de Notícias do DF", "Estadão", "Metrópoles", "Agenda do Poder", "Estado de Minas", "Correio do Povo", "CNN Brasil", "O Globo", "Rede Fan FM", "O TEMPO", "Portal Tela", "BOL", "obusilis.com.br", "G1"]
-publishedAt: "2026-05-24T16:55:13.835Z"
-updatedAt: "2026-05-24T16:55:14.140Z"
+publishedAt: "2026-05-24T16:55:30.539Z"
+updatedAt: "2026-05-24T16:55:30.824Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/cristian-mungiu-leva-segunda-palma-de-ouro-com-fjord-em-cannes-cover-20260524165514.webp"
+  src: "https://portalnovoalvo.com.br/media/news/cristian-mungiu-leva-segunda-palma-de-ouro-com-fjord-em-cannes-cover-20260524165530.webp"
   alt: "Festival de Cannes 2026"
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/cristian-mungiu-leva-segunda-palma-de-ouro-com-fjord-em-cannes-cover-20260524165514.webp"
+ogImage: "https://portalnovoalvo.com.br/media/news/cristian-mungiu-leva-segunda-palma-de-ouro-com-fjord-em-cannes-cover-20260524165530.webp"
 tags: ["entretenimento", "festival", "cannes", "2026", "fjord", "ganha", "palma", "ouro", "lista", "completa"]
 ---
 
