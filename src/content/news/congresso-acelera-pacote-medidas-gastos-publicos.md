@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Congresso acelera pacote de medidas para reorganizar gastos publicos"
 slug: "congresso-acelera-pacote-medidas-gastos-publicos"
 summary: "Liderancas avaliam impacto fiscal e cobram previsibilidade para estados e municipios."

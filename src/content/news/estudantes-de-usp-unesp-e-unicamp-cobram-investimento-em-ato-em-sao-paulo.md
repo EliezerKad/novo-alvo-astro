@@ -38,4 +38,4 @@ tags: []
 
 <p>A pasta também afirmou que a atual gestão repassou mais de R$ 64,3 bilhões às universidades desde 2023, valor 28,9% superior ao investido nos quatro anos anteriores. A Polícia Militar disse ter acompanhado a manifestação sem registro de ocorrências.</p>
 
-<p><strong>Por que isso importa:</strong> universidades públicas dependem não apenas de vagas, mas de estrutura para permanência. Quando moradia, alimentação e docentes faltam, o acesso formal ao ensino superior perde força e a evasão tende a atingir justamente estudantes mais vulneráveis.</p>
+<blockquote><strong>Por que isso importa?</strong> universidades públicas dependem não apenas de vagas, mas de estrutura para permanência. Quando moradia, alimentação e docentes faltam, o acesso formal ao ensino superior perde força e a evasão tende a atingir justamente estudantes mais vulneráveis.</blockquote>

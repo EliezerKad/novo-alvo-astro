@@ -33,4 +33,4 @@ tags: ["brasil", "muda", "sisbajud", "acelera", "bloqueio", "contas", "justica"]
 <p>A expectativa é que a nova dinâmica exija uma reação imediata dos devedores para evitar o bloqueio de seus ativos. A rapidez na execução das ordens judiciais é um dos pilares da reformulação.</p>
 <h2>Contexto Judicial</h2>
 <p>A iniciativa do CNJ se insere em um contexto de busca por maior eficiência no Poder Judiciário, especialmente na área de execução de dívidas. A medida visa dar mais poder e agilidade aos credores em processos judiciais.</p>
-<blockquote>Por que isso importa: Acelerando o bloqueio de contas, o CNJ busca dar mais efetividade às decisões judiciais de cobrança, impactando diretamente a vida financeira de devedores e a capacidade de recuperação de valores por parte dos credores.</blockquote>
+<blockquote><strong>Por que isso importa?</strong> Acelerando o bloqueio de contas, o CNJ busca dar mais efetividade às decisões judiciais de cobrança, impactando diretamente a vida financeira de devedores e a capacidade de recuperação de valores por parte dos credores.</blockquote>

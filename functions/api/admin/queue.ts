@@ -1095,6 +1095,15 @@ const buildStructuredArticleHtml = (html: string) => {
   ].join('');
 };
 
+const formatWhyItMattersBlockquote = (value: string) => {
+  const text = clipWholeWord(textFromHtmlFragment(value, 900), 520);
+  const body = text.replace(/^por que isso importa\s*[:?]\s*/i, '').trim();
+  if (body && body !== text) {
+    return `<strong>Por que isso importa?</strong> ${escapeHtml(body)}`;
+  }
+  return escapeHtml(text);
+};
+
 const normalizeArticleHtml = (html: string) => {
   const normalized = safeHtml(html)
     .replace(/<\/(h2|h3|p|blockquote|li)>\s*/gi, '</$1>\n')
@@ -1104,7 +1113,7 @@ const normalizeArticleHtml = (html: string) => {
         .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
         .join(''),
     )
-    .replace(/<blockquote[^>]*>\s*([\s\S]*?)\s*<\/blockquote>/gi, (_match, text) => `<blockquote>${escapeHtml(clipWholeWord(textFromHtmlFragment(text, 900), 520))}</blockquote>`)
+    .replace(/<blockquote[^>]*>\s*([\s\S]*?)\s*<\/blockquote>/gi, (_match, text) => `<blockquote>${formatWhyItMattersBlockquote(text)}</blockquote>`)
     .replace(/<li[^>]*>\s*([\s\S]*?)\s*<\/li>/gi, (_match, text) => `<li>${escapeHtml(clipWholeWord(textFromHtmlFragment(text, 500), 220))}</li>`);
 
   const hasHeading = /<h[23]>/i.test(normalized);
@@ -1430,7 +1439,7 @@ ESTRUTURA PADRONIZADA (OBRIGATORIA):
    Se uma fonte diz "X gera Y", crie uma sintese propria com responsavel direto, consequencia e tensao editorial.
 2. LIDE: 5W2H em no maximo 3 frases curtas. Va direto ao ponto.
 3. CORPO DO TEXTO: subtitulos <h2> a cada cerca de 200 palavras. Sentencas curtas, no maximo 20 palavras. Use <strong> em termos cruciais.
-4. SECAO "POR QUE ISSO IMPORTA": bloco final em <blockquote>. De um passo atras da noticia, analise com ceticismo, projete impacto futuro e entregue o veredito editorial.
+4. SECAO "POR QUE ISSO IMPORTA?": bloco final em <blockquote>, abrindo exatamente com <strong>Por que isso importa?</strong>. De um passo atras da noticia, analise com ceticismo, projete impacto futuro e entregue o veredito editorial. Apenas o rotulo fica em negrito; o restante do bloco fica em peso normal.
 
 ESTILO EDITORIAL (EEAT):
 - Tom analitico, levemente acido, independente e focado em utilidade.
@@ -1473,7 +1482,7 @@ FORMATO EDITORIAL FINAL:
 - Se o tema exigir servico ao leitor, o texto so esta completo quando responder, com dados explicitos quando existirem: quem, o que, quando, onde, como resolver, qual canal, qual prazo e qual documento.
 - Nao use linguagem de cartilha vazia. Cada orientacao pratica precisa estar ancorada em um dado visivel nas fontes.
 - Use <h2> para divisorias fortes e <h3> apenas quando fizer sentido.
-- Feche obrigatoriamente com <blockquote>Por que isso importa: ...</blockquote>.
+- Feche obrigatoriamente com <blockquote><strong>Por que isso importa?</strong> ...</blockquote>.
 - Nao termine o texto no meio de uma frase. O content_html precisa fechar com pontuacao final clara e tags HTML completas.
 
 REGRAS DE IMAGEM:
@@ -1527,7 +1536,7 @@ Voce e um redator jornalistico. Gere uma materia completa e publicavel em portug
 
 REGRAS INVIOLAVEIS:
 - Responda somente JSON valido.
-- O campo content_html e obrigatorio e deve conter a materia completa com 7 a 11 paragrafos, subtitulos <h2> e fechamento em <blockquote>Por que isso importa: ...</blockquote>.
+- O campo content_html e obrigatorio e deve conter a materia completa com 7 a 11 paragrafos, subtitulos <h2> e fechamento em <blockquote><strong>Por que isso importa?</strong> ...</blockquote>.
 - Use os 15 trechos de fontes como base da sintese inedita. Nao faca resumo curto.
 - Antes de escrever, extraia WHO/WHAT/WHEN/WHERE/WHY/HOW. Se WHO tiver nome proprio, use esse nome no titulo, lide ou segundo paragrafo.
 - Nunca escreva "nao identificada", "nao nomeada nas fontes", "nome nao divulgado" ou equivalentes para pessoa central.

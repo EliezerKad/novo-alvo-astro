@@ -44,4 +44,4 @@ tags: ["esportes", "morre", "geovani", "silva", "pequeno", "principe", "anos"]
 <p>O apelido “Pequeno Príncipe” se tornou sinônimo de sua categoria em campo, uma referência à sua técnica refinada e ao seu estilo de jogo elegante. Sua habilidade com a bola nos pés encantou gerações de torcedores.</p>
 <h2>Despedida</h2>
 <p>A causa exata da morte de Geovani Silva não foi divulgada até o momento. No entanto, o impacto de sua partida é inegável, marcando o fim de uma era para muitos que acompanharam sua carreira.</p>
-<blockquote>Por que isso importa: A morte de Geovani Silva representa a perda de um ícone do futebol brasileiro, cuja habilidade e talento deixaram um legado duradouro. Sua trajetória no Vasco e na Seleção Brasileira o consolidam como uma figura importante na história do esporte no país.</blockquote>
+<blockquote><strong>Por que isso importa?</strong> A morte de Geovani Silva representa a perda de um ícone do futebol brasileiro, cuja habilidade e talento deixaram um legado duradouro. Sua trajetória no Vasco e na Seleção Brasileira o consolidam como uma figura importante na história do esporte no país.</blockquote>

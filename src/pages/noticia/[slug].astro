@@ -215,7 +215,7 @@ const schema = {
             prose-ul:mb-8 prose-ul:list-disc prose-ul:pl-6
             prose-li:mb-2 prose-li:text-lg prose-li:leading-8
             prose-a:text-[#8A1F2D] prose-a:font-bold prose-a:no-underline hover:prose-a:underline
-            prose-blockquote:border-l-[4px] prose-blockquote:border-[#8A1F2D] prose-blockquote:pl-5 prose-blockquote:text-2xl prose-blockquote:font-black prose-blockquote:not-italic prose-blockquote:leading-tight prose-blockquote:tracking-[-0.06em] md:prose-blockquote:border-l-[5px] md:prose-blockquote:pl-7 md:prose-blockquote:text-3xl
+            prose-blockquote:border-l-[4px] prose-blockquote:border-[#8A1F2D] prose-blockquote:pl-5 prose-blockquote:text-2xl prose-blockquote:font-normal prose-blockquote:not-italic prose-blockquote:leading-tight prose-blockquote:tracking-[-0.035em] md:prose-blockquote:border-l-[5px] md:prose-blockquote:pl-7 md:prose-blockquote:text-3xl
             dark:prose-invert dark:prose-p:text-zinc-300 dark:prose-headings:text-zinc-50
             article-content overflow-hidden break-words [word-break:break-word] [overflow-wrap:break-word]"
         >
@@ -392,16 +392,20 @@ const schema = {
       color: #18181b;
       font-family: Inter, ui-sans-serif, system-ui, sans-serif;
       font-size: clamp(1.06rem, 1.75vw, 1.28rem);
-      font-weight: 850;
+      font-weight: 400;
       line-height: 1.45;
       letter-spacing: -0.035em;
+    }
+
+    .article-content blockquote strong:first-child {
+      font-weight: 900;
     }
 
     .article-content blockquote p {
       margin-bottom: 0;
       color: inherit;
       font-size: inherit;
-      font-weight: inherit;
+      font-weight: 400;
       line-height: inherit;
     }
 

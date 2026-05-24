@@ -42,4 +42,4 @@ tags: []
 
 <p>O Centro Cultural São Paulo fica na Rua Vergueiro, 1000. O Museu Afro Brasil Emanoel Araújo fica no Parque Ibirapuera, próximo ao Portão 10, na Avenida Pedro Álvares Cabral.</p>
 
-<p><strong>Por que isso importa:</strong> eventos como o Akwaaba ampliam a presença de artistas, pesquisadores e empreendedores negros na agenda cultural. Ao reunir memória, economia criativa e relações internacionais, o festival transforma cultura em ponte de cooperação e desenvolvimento.</p>
+<blockquote><strong>Por que isso importa?</strong> eventos como o Akwaaba ampliam a presença de artistas, pesquisadores e empreendedores negros na agenda cultural. Ao reunir memória, economia criativa e relações internacionais, o festival transforma cultura em ponte de cooperação e desenvolvimento.</blockquote>

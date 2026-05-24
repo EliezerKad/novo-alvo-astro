@@ -58,6 +58,12 @@ const stripEditorChrome = (html: string) =>
     .replace(/\sdata-[a-z0-9-]+="[^"]*"/gi, '')
     .replace(/\sclass="[^"]*(?:media-actions|carousel-controls|editor-only)[^"]*"/gi, '');
 
+const normalizeWhyItMatters = (html: string) =>
+  String(html || '').replace(
+    /<blockquote([^>]*)>\s*(?:<p>\s*)?(?:<strong>\s*)?Por que isso importa\s*[:?]\s*(?:<\/strong>\s*)?([\s\S]*?)(?:\s*<\/p>)?\s*<\/blockquote>/gi,
+    (_match, attrs, text) => `<blockquote${attrs}><strong>Por que isso importa?</strong> ${String(text).trim()}</blockquote>`,
+  );
+
 const parseSources = (value: string): Array<{ name?: string; url?: string; note?: string } | string> => {
   try {
     const parsed = JSON.parse(value || '[]');
@@ -167,7 +173,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
   const description = article.seo_description || article.summary || `Leia ${article.title} no Portal Novo Alvo.`;
   const image = article.cover_url || `${url.origin}/og-default.svg`;
   const sources = parseSources(article.sources);
-  const cleanBody = stripEditorChrome(article.body_html);
+  const cleanBody = normalizeWhyItMatters(stripEditorChrome(article.body_html));
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
@@ -294,6 +300,9 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
       .content img { max-width:100%; border-radius:28px; }
       .content figure { margin:3rem 0; }
       .content a { color:var(--red); font-weight:700; }
+      .content blockquote { margin:3rem 0 0; border-left:4px solid var(--red); border-radius:0 22px 22px 0; background:rgba(220,38,38,.06); padding:1.15rem 1.25rem; color:inherit; font-family:Inter,system-ui,sans-serif; font-size:clamp(1.06rem,1.75vw,1.28rem); font-weight:400; line-height:1.45; letter-spacing:-.025em; }
+      .content blockquote strong:first-child { font-weight:900; }
+      .content blockquote p { margin:0; color:inherit; font-size:inherit; font-weight:400; line-height:inherit; }
       .share { max-width:780px; margin:44px auto 0; padding-top:28px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:18px; }
       .share-label { color:#a1a1aa; font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:.22em; }
       .share-links { display:flex; gap:10px; }

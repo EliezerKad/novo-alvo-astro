@@ -38,4 +38,4 @@ tags: []
 
 <p>O filme também será um teste importante para a estratégia da Disney: transformar personagens consolidados no streaming em eventos de cinema, sem depender apenas da nostalgia dos longas clássicos.</p>
 
-<p><strong>Por que isso importa:</strong> a chegada de <em>O Mandaloriano e Grogu</em> mostra como grandes franquias estão reorganizando a relação entre streaming e cinema. A estreia pode indicar se personagens criados para séries conseguem sustentar bilheteria e renovar o público das sagas tradicionais.</p>
+<blockquote><strong>Por que isso importa?</strong> a chegada de <em>O Mandaloriano e Grogu</em> mostra como grandes franquias estão reorganizando a relação entre streaming e cinema. A estreia pode indicar se personagens criados para séries conseguem sustentar bilheteria e renovar o público das sagas tradicionais.</blockquote>

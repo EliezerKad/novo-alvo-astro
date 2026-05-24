@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Nova geracao de chips impulsiona servicos de IA em dispositivos pessoais"
 slug: "nova-geracao-chips-impulsiona-ia-dispositivos"
 summary: "Fabricantes apostam em processamento local para reduzir latencia e ampliar privacidade."

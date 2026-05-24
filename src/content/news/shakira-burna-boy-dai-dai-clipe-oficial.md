@@ -31,4 +31,4 @@ tags: ["shakira", "burna boy", "dai dai", "música", "clipe"]
 <h2>O que fica para a música pop</h2>
 <p><strong>Dai Dai</strong> também mostra como os lançamentos de grandes artistas dependem cada vez mais de um pacote completo: música, narrativa visual, cortes para redes e colaborações capazes de atravessar mercados diferentes ao mesmo tempo.</p>
 <p>Para Shakira, o clipe funciona como novo ponto de conversa com o público; para Burna Boy, amplia a conexão com a audiência latina. A faixa entra na disputa por atenção em uma semana movimentada para o pop internacional.</p>
-<blockquote>Por que isso importa: lançamentos como Dai Dai mostram como artistas globais estão tratando o videoclipe como motor de alcance, não apenas como complemento da música.</blockquote>
+<blockquote><strong>Por que isso importa?</strong> lançamentos como Dai Dai mostram como artistas globais estão tratando o videoclipe como motor de alcance, não apenas como complemento da música.</blockquote>

@@ -38,4 +38,4 @@ tags: []
 
 <p>Fãs devem acompanhar canais oficiais de venda para evitar golpes, revenda abusiva e páginas falsas que costumam circular quando artistas internacionais anunciam passagem pelo Brasil.</p>
 
-<p><strong>Por que isso importa:</strong> a confirmação reforça São Paulo como uma das principais praças da música internacional na América Latina. Para fãs, a venda oficial é o momento decisivo; para o mercado, a resposta do público ajuda a medir a força das turnês pop no país.</p>
+<blockquote><strong>Por que isso importa?</strong> a confirmação reforça São Paulo como uma das principais praças da música internacional na América Latina. Para fãs, a venda oficial é o momento decisivo; para o mercado, a resposta do público ajuda a medir a força das turnês pop no país.</blockquote>

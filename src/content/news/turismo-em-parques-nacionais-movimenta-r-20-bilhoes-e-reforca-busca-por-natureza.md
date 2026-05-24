@@ -42,4 +42,4 @@ tags: []
 
 <p>O crescimento exige gestão. Superlotação, pressão sobre trilhas, resíduos e infraestrutura frágil podem transformar sucesso turístico em risco ambiental. Por isso, especialistas defendem controle de visitação, educação ambiental e investimento em manejo.</p>
 
-<p><strong>Por que isso importa:</strong> parques nacionais deixaram de ser apenas destinos contemplativos e se tornaram parte relevante do estilo de vida e da economia do turismo. O desafio é transformar a alta demanda em desenvolvimento local sem comprometer os ecossistemas que atraem os visitantes.</p>
+<blockquote><strong>Por que isso importa?</strong> parques nacionais deixaram de ser apenas destinos contemplativos e se tornaram parte relevante do estilo de vida e da economia do turismo. O desafio é transformar a alta demanda em desenvolvimento local sem comprometer os ecossistemas que atraem os visitantes.</blockquote>

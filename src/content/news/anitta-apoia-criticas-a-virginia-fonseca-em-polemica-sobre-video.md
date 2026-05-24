@@ -35,4 +35,4 @@ tags: ["famosos", "anitta", "curte", "video", "contra", "virginia", "polemica", 
 <h2>Contexto e repercussão</h2>
 <p>A polêmica envolvendo Virginia Fonseca, Vini Jr. e as acusações de racismo adiciona mais um capítulo à discussão sobre sensibilidade e responsabilidade nas redes sociais, especialmente quando envolve figuras públicas e temas delicados.</p>
 <p>O apoio de Anitta às críticas reforça a divisão de opiniões e a atenção que o caso atraiu no meio artístico e entre o público.</p>
-<blockquote>Por que isso importa: A repercussão demonstra a sensibilidade do tema racismo e o poder das redes sociais em amplificar ou condenar atitudes de figuras públicas, gerando debates sobre responsabilidade e impacto cultural.</blockquote>
+<blockquote><strong>Por que isso importa?</strong> A repercussão demonstra a sensibilidade do tema racismo e o poder das redes sociais em amplificar ou condenar atitudes de figuras públicas, gerando debates sobre responsabilidade e impacto cultural.</blockquote>

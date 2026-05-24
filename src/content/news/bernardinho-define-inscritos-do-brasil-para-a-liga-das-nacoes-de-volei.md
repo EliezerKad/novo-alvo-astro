@@ -42,4 +42,4 @@ tags: []
 
 <p>A seleção feminina abre sua participação uma semana antes, também no Nilson Nelson. O time comandado por José Roberto Guimarães estreia contra a Holanda no dia 3 de junho, às 20h, e depois enfrenta República Dominicana, Bulgária e Itália.</p>
 
-<p><strong>Por que isso importa:</strong> a Liga das Nações é o principal teste anual das seleções de vôlei. Para o Brasil, jogar a primeira semana em casa dá visibilidade ao grupo, aproxima o público e serve como termômetro para avaliar o elenco em um calendário internacional cada vez mais apertado.</p>
+<blockquote><strong>Por que isso importa?</strong> a Liga das Nações é o principal teste anual das seleções de vôlei. Para o Brasil, jogar a primeira semana em casa dá visibilidade ao grupo, aproxima o público e serve como termômetro para avaliar o elenco em um calendário internacional cada vez mais apertado.</blockquote>

@@ -44,4 +44,4 @@ tags: ["ebola", "saúde", "OMS", "vigilância epidemiológica", "Brasil"]
 
 <p>Como os sinais podem se confundir com outras doenças infecciosas, a confirmação depende de exame laboratorial. A orientação das autoridades é que casos suspeitos sejam comunicados rapidamente aos serviços de saúde, com isolamento seguro e monitoramento das pessoas que tiveram contato direto.</p>
 
-<p><strong>Por que isso importa:</strong> mesmo com risco baixo para o Brasil, surtos de ebola exigem resposta rápida porque a doença tem alta gravidade. Vigilância ativa e comunicação clara evitam pânico, reduzem boatos e ajudam a impedir que um problema regional se transforme em emergência mais ampla.</p>
+<blockquote><strong>Por que isso importa?</strong> mesmo com risco baixo para o Brasil, surtos de ebola exigem resposta rápida porque a doença tem alta gravidade. Vigilância ativa e comunicação clara evitam pânico, reduzem boatos e ajudam a impedir que um problema regional se transforme em emergência mais ampla.</blockquote>

@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Festivais de musica anunciam palcos voltados a artistas independentes"
 slug: "festivais-musica-palcos-artistas-independentes"
 summary: "Curadorias regionais ganham espaco em eventos de grande porte no segundo semestre."
