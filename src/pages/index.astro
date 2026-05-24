@@ -20,20 +20,6 @@ import { formatRelativeDate, getCategoryColor } from '../lib/utils';
 
 const newsEntries = sortNewsByDate(await getCollection('news'));
 const articles = newsEntries.map(newsEntryToArticle);
-const staticArticleSlugs = articles.map((article) => article.slug);
-const subjectKey = (value: string) =>
-  String(value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/\b(conselho nacional de justica|cnj)\b/g, 'cnj')
-    .replace(/[^a-z0-9]+/g, ' ')
-    .split(/\s+/)
-    .filter((token) => token.length >= 4 && !['novo', 'nova', 'para', 'pode', 'mesmo', 'com', 'das', 'dos', 'uma', 'por', 'sobre'].includes(token))
-    .sort()
-    .slice(0, 14)
-    .join('-');
-const staticArticleSubjectKeys = articles.map((article) => subjectKey(`${article.category} ${article.title} ${article.summary}`));
 const category = Astro.url.searchParams.get('category') || undefined;
 const filteredArticles = articles.filter((article) => {
   if (category && category !== 'Início' && article.category !== category) return false;
@@ -125,7 +111,7 @@ const isCategoryView = !!category && category !== 'Início';
                           Agora
                         </span>
                       </div>
-                      <div class="px-4 py-1 md:px-6" data-live-pulse-list data-static-slugs={JSON.stringify(staticArticleSlugs)} data-static-subjects={JSON.stringify(staticArticleSubjectKeys)}>
+                      <div class="px-4 py-1 md:px-6" data-live-pulse-list>
                         {pulseArticles.map((article) => (
                           <a href={`/noticia/${article.slug}`} class="group grid min-h-[84px] grid-cols-[58px_minmax(0,1fr)] items-center gap-3 rounded-2xl border-b border-black/10 px-2 py-3.5 transition-colors duration-300 last:border-b-0 hover:bg-[#f5f3ee] hover:shadow-[inset_3px_0_0_#8A1F2D] dark:border-zinc-800 dark:hover:bg-zinc-800/60 md:min-h-[92px] md:grid-cols-[64px_minmax(0,1fr)] md:py-4">
                             <div class="h-14 w-[58px] overflow-hidden rounded-xl bg-[#ebe8df] shadow-sm transition-shadow duration-300 group-hover:shadow-md dark:bg-zinc-800 md:w-16 md:rounded-2xl">
