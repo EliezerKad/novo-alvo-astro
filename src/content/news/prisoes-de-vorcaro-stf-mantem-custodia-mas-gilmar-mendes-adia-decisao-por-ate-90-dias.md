@@ -6,8 +6,8 @@ seoDescription: "Economia: O Supremo Tribunal Federal formou placar parcial de 2
 category: "Economia"
 author: "Redação Novo Alvo"
 sources: ["tmc.com.br", "Sul 21", "Valor Econômico", "n3news.com.br", "UOL Notícias", "BOL", "Revista Oeste", "CNN Brasil", "Alagoas Alerta", "Portal Tela", "Folha de S.Paulo", "A Crítica de Campo Grande", "Correio Braziliense", "GCMais"]
-publishedAt: "2026-05-24T02:12:04.238Z"
-updatedAt: "2026-05-24T02:12:05.788Z"
+publishedAt: "2026-05-24T02:12:46.207Z"
+updatedAt: "2026-05-24T02:12:48.846Z"
 featured: false
 isFeatured: false
 urgent: false
