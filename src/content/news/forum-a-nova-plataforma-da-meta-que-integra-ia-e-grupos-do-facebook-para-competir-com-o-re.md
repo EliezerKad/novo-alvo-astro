@@ -6,8 +6,8 @@ seoDescription: "Tecnologia: A Meta lançou o Forum, um novo aplicativo de discu
 category: "Tecnologia"
 author: "Redação Novo Alvo"
 sources: ["TechTudo", "Portal Tela", "SpaceMoney", "TudoCelular.com", "Exame", "MacMagazine", "BlockTrends", "Tecnoblog · RSS direto", "Tecnoblog", "Valor Econômico", "Terra", "Times Brasil | CNBC", "gizmodo.com.br", "Adrenaline"]
-publishedAt: "2026-05-24T16:49:47.178Z"
-updatedAt: "2026-05-24T16:49:48.614Z"
+publishedAt: "2026-05-24T16:50:44.910Z"
+updatedAt: "2026-05-24T16:50:46.470Z"
 featured: false
 isFeatured: false
 urgent: false
