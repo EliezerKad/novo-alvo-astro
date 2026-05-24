@@ -270,51 +270,55 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:ital,wght@0,900;1,900&display=swap" />
     <script type="application/ld+json">${JSON.stringify(schema).replace(/</g, '\\u003c')}</script>
     <style>
-      :root { color-scheme: light dark; --red:#dc2626; --ink:#09090b; --muted:#71717a; --line:#e4e4e7; }
+      :root { color-scheme: light dark; --red:#8A1F2D; --ink:#101010; --muted:#71717a; --line:rgba(16,16,16,.10); --paper:#f5f3ee; }
       * { box-sizing:border-box; }
-      body { margin:0; font-family:Inter,system-ui,sans-serif; background:#fff; color:var(--ink); }
-      .article-page { min-height:100vh; padding-bottom:7rem; background:linear-gradient(180deg,#fff 0%,#fff 62%,#fafafa 100%); }
-      .topbar { position:sticky; top:0; z-index:40; border-bottom:1px solid var(--line); background:rgba(255,255,255,.9); backdrop-filter:blur(20px); }
-      .topbar-inner { max-width:1180px; margin:auto; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
-      .brand { display:flex; align-items:center; gap:12px; color:inherit; text-decoration:none; font-weight:900; letter-spacing:.16em; text-transform:uppercase; }
-      .brand img { width:36px; height:36px; }
+      body { margin:0; font-family:Inter,system-ui,sans-serif; background:var(--paper); color:var(--ink); }
+      .article-page { min-height:100vh; padding-bottom:5rem; background:var(--paper); color:var(--ink); transition:background .3s ease,color .3s ease; }
+      .topbar { position:fixed; inset:0 0 auto; z-index:40; border-bottom:1px solid var(--line); background:rgba(255,255,255,.82); backdrop-filter:blur(20px); }
+      .topbar-inner { max-width:1280px; margin:auto; padding:14px 16px; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; }
+      .brand { display:flex; align-items:center; justify-content:center; gap:8px; color:inherit; text-decoration:none; font-family:"Playfair Display",Georgia,serif; font-size:1.7rem; font-weight:900; letter-spacing:-.06em; line-height:1; }
+      .brand img { width:34px; height:34px; }
       .top-actions { display:flex; align-items:center; gap:8px; }
-      .pill-link { border:1px solid var(--line); border-radius:14px; padding:11px 14px; text-decoration:none; color:#52525b; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.14em; transition:.25s ease; }
-      .pill-link:hover { border-color:var(--red); color:var(--red); }
-      .crumbs { max-width:1180px; margin:0 auto; padding:26px 20px 0; display:flex; gap:10px; align-items:center; color:#a1a1aa; font-size:10px; font-weight:900; letter-spacing:.16em; text-transform:uppercase; }
+      .top-actions:first-child { justify-content:flex-start; }
+      .top-actions:last-child { justify-content:flex-end; }
+      .pill-link { display:inline-flex; min-height:40px; align-items:center; justify-content:center; border:1px solid var(--line); border-radius:14px; padding:0 14px; text-decoration:none; color:#52525b; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.12em; transition:.25s ease; }
+      .pill-link:hover { border-color:var(--red); color:var(--red); background:rgba(138,31,45,.06); }
+      .crumbs { max-width:1240px; margin:0 auto; padding:0; display:flex; gap:10px; align-items:center; color:#71717a; font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+      .article-page > .crumbs { display:none; }
       .crumbs a { color:#71717a; text-decoration:none; }
-      main { max-width:1180px; margin:auto; padding:34px 20px 96px; }
-      .meta { display:flex; flex-wrap:wrap; gap:14px; align-items:center; color:#a1a1aa; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.18em; }
-      .cat { background:var(--red); color:white; border-radius:10px; padding:8px 12px; }
-      h1 { margin:34px 0 24px; max-width:1040px; font-family:"Playfair Display",Georgia,serif; font-size:clamp(3rem,8vw,6.7rem); line-height:.96; letter-spacing:-.055em; }
-      .summary { max-width:900px; color:#52525b; font-size:clamp(1.35rem,3.2vw,2.05rem); line-height:1.28; font-style:italic; }
-      .byline { margin-top:24px; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.16em; color:#3f3f46; }
-      .hero-figure { margin:56px 0 76px; }
-      .hero-figure div { overflow:hidden; border-radius:42px; background:#f4f4f5; box-shadow:0 24px 80px rgba(15,23,42,.16); aspect-ratio:21/9; }
+      main { max-width:1240px; margin:auto; padding:120px 12px 80px; }
+      .meta { margin-top:28px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; color:#71717a; font-size:11px; font-weight:900; }
+      .meta span { display:inline-flex; min-height:40px; align-items:center; border:1px solid var(--line); border-radius:999px; background:#fff; padding:0 14px; box-shadow:0 8px 24px rgba(16,16,16,.035); }
+      .meta .cat { border-color:transparent; background:rgba(138,31,45,.10); color:var(--red); text-transform:uppercase; letter-spacing:.08em; }
+      h1 { margin:34px 0 0; max-width:980px; font-family:Inter,system-ui,sans-serif; font-size:clamp(2.65rem,10.5vw,5.875rem); font-weight:950; line-height:.9; letter-spacing:-.088em; color:#101010; }
+      .summary { margin-top:24px; max-width:760px; color:#52525b; font-size:clamp(1.12rem,2.2vw,1.5rem); font-weight:500; line-height:1.5; font-style:normal; }
+      .byline { margin-top:24px; display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:1.25rem; background:#fff; padding:12px 16px; color:#18181b; font-size:12px; font-weight:900; box-shadow:0 18px 50px rgba(16,16,16,.055); }
+      .hero-figure { margin:38px 0 64px; max-width:900px; }
+      .hero-figure div { min-height:280px; overflow:hidden; border-radius:1.6rem; background:#ebe8df; box-shadow:0 24px 70px rgba(16,16,16,.12); aspect-ratio:16/9; }
       .hero-figure img { display:block; width:100%; height:100%; object-fit:cover; }
-      figcaption { margin-top:14px; text-align:center; color:#71717a; font-size:12px; font-style:italic; }
-      .content { max-width:780px; margin:0 auto; font-family:Georgia,serif; font-size:1.28rem; line-height:1.85; overflow-wrap:anywhere; }
-      .content p { margin:0 0 2rem; }
-      .content h2 { margin:4rem 0 1.5rem; padding-left:1rem; border-left:4px solid var(--red); font-family:"Playfair Display",Georgia,serif; font-size:2.4rem; line-height:1.05; font-style:italic; }
-      .content h3 { margin:3rem 0 1rem; font-family:"Playfair Display",Georgia,serif; font-size:1.75rem; }
+      figcaption { margin-top:12px; color:#71717a; font-size:12px; font-weight:800; line-height:1.5; }
+      .content { max-width:760px; font-family:Inter,system-ui,sans-serif; overflow-wrap:anywhere; }
+      .content p { margin:0 0 1.55rem; color:#292927; font-size:clamp(1.05rem,1.35vw,1.2rem); font-weight:400; line-height:1.82; letter-spacing:-.01em; }
+      .content h2 { margin:2.75rem 0 1rem; color:#101010; font-family:Inter,system-ui,sans-serif; font-size:clamp(1.32rem,2.4vw,1.72rem); font-weight:950; line-height:1.08; letter-spacing:-.055em; }
+      .content h3 { margin:2.15rem 0 .85rem; color:#101010; font-family:Inter,system-ui,sans-serif; font-size:clamp(1.12rem,1.9vw,1.36rem); font-weight:900; line-height:1.16; letter-spacing:-.04em; }
       .content img { max-width:100%; border-radius:28px; }
       .content figure { margin:3rem 0; }
       .content a { color:var(--red); font-weight:700; }
-      .content blockquote { margin:3rem 0 0; border-left:4px solid var(--red); border-radius:0 22px 22px 0; background:rgba(220,38,38,.06); padding:1.15rem 1.25rem; color:inherit; font-family:Inter,system-ui,sans-serif; font-size:clamp(1.06rem,1.75vw,1.28rem); font-weight:400; line-height:1.45; letter-spacing:-.025em; }
+      .content blockquote { margin:3rem 0 0; border-left:4px solid var(--red); border-radius:0 1.25rem 1.25rem 0; background:rgba(138,31,45,.08); padding:1.15rem 1.25rem; color:#18181b; font-family:Inter,system-ui,sans-serif; font-size:clamp(1.06rem,1.75vw,1.28rem); font-weight:400; line-height:1.45; letter-spacing:-.025em; }
       .content blockquote strong:first-child { font-weight:900; }
       .content blockquote p { margin:0; color:inherit; font-size:inherit; font-weight:400; line-height:inherit; }
-      .share { max-width:780px; margin:44px auto 0; padding-top:28px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:18px; }
+      .share { max-width:760px; margin:44px 0 0; padding-top:28px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:18px; }
       .share-label { color:#a1a1aa; font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:.22em; }
       .share-links { display:flex; gap:10px; }
       .share-links a { width:44px; height:44px; display:grid; place-items:center; border-radius:14px; background:#f4f4f5; color:#18181b; text-decoration:none; font-weight:900; transition:.25s ease; }
       .share-links a:hover { background:var(--red); color:white; transform:translateY(-2px); }
-      .sources { max-width:780px; margin:48px auto 0; padding-top:24px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-      .sources span, .sources a { border:1px solid var(--line); border-radius:999px; padding:7px 10px; color:#71717a; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.12em; text-decoration:none; }
-      .ad-slot { max-width:780px; min-height:96px; margin:54px auto; border:1px dashed var(--line); border-radius:32px; display:grid; place-items:center; color:#d4d4d8; font-size:8px; font-weight:900; letter-spacing:.35em; text-transform:uppercase; background:#fafafa; }
-      .related { margin:72px auto 0; max-width:980px; }
-      .related-head { display:flex; align-items:center; gap:14px; border-bottom:2px solid var(--red); padding-bottom:14px; }
+      .sources { max-width:760px; margin:48px 0 0; padding-top:24px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+      .sources span, .sources a { border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.45); padding:7px 10px; color:#71717a; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.12em; text-decoration:none; }
+      .ad-slot { max-width:728px; min-height:90px; margin:54px 0; border:1px dashed var(--line); border-radius:1.5rem; display:grid; place-items:center; color:#d4d4d8; font-size:8px; font-weight:900; letter-spacing:.35em; text-transform:uppercase; background:#fafafa; }
+      .related { margin:72px 0 0; max-width:980px; }
+      .related-head { display:flex; align-items:center; gap:14px; border-bottom:1px solid var(--line); padding-bottom:14px; }
       .related-head span { width:22px; height:22px; border-radius:999px; background:var(--red); box-shadow:0 0 34px rgba(220,38,38,.35); }
-      .related-head h2 { margin:0; font-family:Inter,system-ui,sans-serif; font-size:12px; line-height:1; letter-spacing:.22em; text-transform:uppercase; font-style:italic; }
+      .related-head h2 { margin:0; font-family:Inter,system-ui,sans-serif; font-size:12px; line-height:1; letter-spacing:.22em; text-transform:uppercase; }
       .related-track { margin-top:28px; display:grid; grid-auto-flow:column; grid-auto-columns:minmax(260px,1fr); gap:18px; overflow-x:auto; scroll-snap-type:x mandatory; padding:4px 2px 18px; }
       .related-card { min-width:0; scroll-snap-align:start; overflow:hidden; border:1px solid var(--line); border-radius:28px; background:#fff; color:inherit; text-decoration:none; box-shadow:0 24px 70px rgba(15,23,42,.08); transition:.35s ease; }
       .related-card:hover { transform:translateY(-3px); box-shadow:0 28px 90px rgba(220,38,38,.12); }
@@ -324,29 +328,32 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
       .related-card span { color:var(--red); font-size:9px; font-weight:900; letter-spacing:.16em; text-transform:uppercase; }
       .related-card h3 { margin:10px 0 8px; font-family:"Playfair Display",Georgia,serif; font-size:1.55rem; line-height:1; letter-spacing:-.04em; font-style:italic; }
       .related-card p { margin:0; color:#71717a; font-size:.88rem; line-height:1.55; }
-      .home-bottom { margin:54px auto 0; width:56px; height:56px; border-radius:22px; background:#18181b; color:white; display:grid; place-items:center; text-decoration:none; box-shadow:0 18px 48px rgba(15,23,42,.24); transition:.3s ease; }
+      .home-bottom { margin:54px 0 0; width:56px; height:56px; border-radius:22px; background:#18181b; color:white; display:grid; place-items:center; text-decoration:none; box-shadow:0 18px 48px rgba(15,23,42,.24); transition:.3s ease; }
       .home-bottom:hover { background:var(--red); transform:translateY(-2px); }
-      footer { border-top:1px solid var(--line); padding:34px 20px; text-align:center; color:#a1a1aa; font-size:10px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; }
+      footer { border-top:1px solid var(--line); padding:34px 20px; color:#a1a1aa; font-size:10px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; }
       @media (max-width:720px) {
-        .topbar-inner { padding:12px 16px; }
-        .brand { letter-spacing:.08em; font-size:.86rem; }
+        .topbar-inner { padding:12px 16px; grid-template-columns:auto 1fr auto; }
+        .brand { font-size:1.25rem; }
         .brand img { width:30px; height:30px; }
-        .pill-link { padding:9px 11px; font-size:9px; }
-        main { padding:28px 18px 78px; }
-        h1 { font-size:clamp(2.8rem,15vw,4.7rem); }
+        .pill-link { min-height:36px; padding:0 11px; font-size:9px; }
+        main { padding:96px 18px 78px; }
+        h1 { font-size:clamp(2.8rem,14vw,4.7rem); }
         .hero-figure { margin:36px 0; }
-        .hero-figure div { border-radius:30px; aspect-ratio:4/3; }
-        .content { font-size:1.14rem; line-height:1.78; }
+        .hero-figure div { border-radius:1.35rem; aspect-ratio:4/3; }
         .related-track { grid-auto-columns:82%; }
       }
       @media (prefers-color-scheme:dark) {
         :root { --line:#27272a; }
-        body, .article-page { background:#09090b; color:#fafafa; }
-        .topbar { background:rgba(9,9,11,.88); }
+        body, .article-page { background:linear-gradient(180deg,#080809 0%,#141416 50%,#080809 100%); color:#fafafa; }
+        .topbar { background:rgba(9,9,11,.82); }
         .pill-link { color:#d4d4d8; }
-        .summary, .byline { color:#d4d4d8; }
-        .content { color:#e4e4e7; }
+        h1, .content h2, .content h3 { color:#fafafa; }
+        .summary { color:#a1a1aa; }
+        .byline, .meta span { border-color:#27272a; background:#18181b; color:#e4e4e7; }
+        .content p { color:#d4d4d8; }
+        .content blockquote { background:rgba(138,31,45,.18); color:#f4f4f5; }
         .share-links a, .ad-slot { background:#18181b; color:#e4e4e7; }
+        .sources span, .sources a { border-color:#27272a; background:rgba(24,24,27,.60); }
         .related-card { background:#09090b; }
         .related-card p { color:#a1a1aa; }
       }
@@ -356,7 +363,8 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
     <div class="article-page">
       <header class="topbar">
         <nav class="topbar-inner">
-          <a href="/" class="brand"><img src="/favicon.svg" alt="" /> Portal Novo Alvo</a>
+          <div class="top-actions"><a href="/" class="pill-link">Voltar</a></div>
+          <a href="/" class="brand"><img src="/favicon.svg" alt="" /> NOVO ALVO</a>
           <div class="top-actions">
             <a href="/buscar/" class="pill-link">Buscar</a>
             <a href="/" class="pill-link">Início</a>
@@ -370,6 +378,11 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
       </div>
       <main>
         <article>
+          <div class="crumbs">
+            <a href="/">Inicio</a>
+            <span>/</span>
+            <span>${escapeHtml(article.category)}</span>
+          </div>
           <div class="meta">
             <span class="cat">${escapeHtml(article.category)}</span>
             <span>${escapeHtml(formatPublished(published))}</span>
