@@ -1052,6 +1052,8 @@ const safeHtml = (value: unknown) =>
   String(value || '')
     .replace(/<3/g, '')
     .replace(/\*+/g, '')
+    .replace(/\bDonald Trump,\s*ex-presidente dos Estados Unidos\b/gi, 'Donald Trump, presidente dos Estados Unidos')
+    .replace(/\bex-presidente dos Estados Unidos\s+Donald Trump\b/gi, 'presidente dos Estados Unidos Donald Trump')
     .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
     .replace(/\son\w+="[^"]*"/gi, '')
     .replace(/\son\w+='[^']*'/gi, '')
@@ -1104,8 +1106,29 @@ const formatWhyItMattersBlockquote = (value: string) => {
   return escapeHtml(text);
 };
 
+const normalizeEditorialQuoteFlow = (html: string) => {
+  let output = String(html || '')
+    .replace(/([.!?,;:])\s+([\u201d"])/g, '$1$2')
+    .replace(/([\u201c"])\s+/g, '$1');
+
+  let previous = '';
+  while (output !== previous) {
+    previous = output;
+    output = output.replace(
+      /<p([^>]*)>\s*([^<]*[\u201c"][^<]*?)\s*<\/p>\s*<p[^>]*>\s*([^<]*?[.!?])\s*([\u201d"])\s+([A-Z\u00c0-\u017f0-9][\s\S]*?)\s*<\/p>/gi,
+      (_match, attrs, first, quoteEnd, quote, rest) =>
+        `<p${attrs}>${String(first).trim()} ${String(quoteEnd).trim()}${quote}</p><p>${String(rest).trim()}</p>`,
+    );
+  }
+
+  return output.replace(
+    /<p([^>]*)>\s*([\s\S]*?[.!?][\u201d"])\s+([A-Z\u00c0-\u017f0-9][^<]*?)\s*<\/p>/g,
+    (_match, attrs, quoteSentence, rest) => `<p${attrs}>${String(quoteSentence).trim()}</p><p>${String(rest).trim()}</p>`,
+  );
+};
+
 const normalizeArticleHtml = (html: string) => {
-  const normalized = safeHtml(html)
+  const normalized = normalizeEditorialQuoteFlow(safeHtml(html)
     .replace(/<\/(h2|h3|p|blockquote|li)>\s*/gi, '</$1>\n')
     .replace(/<(h2|h3)[^>]*>\s*(.*?)\s*<\/\1>/gi, (_match, tag, text) => `<${tag}>${escapeHtml(clipWholeWord(textFromHtmlFragment(text, 500), 140))}</${tag}>`)
     .replace(/<p[^>]*>\s*([\s\S]*?)\s*<\/p>/gi, (_match, text) =>
@@ -1114,7 +1137,7 @@ const normalizeArticleHtml = (html: string) => {
         .join(''),
     )
     .replace(/<blockquote[^>]*>\s*([\s\S]*?)\s*<\/blockquote>/gi, (_match, text) => `<blockquote>${formatWhyItMattersBlockquote(text)}</blockquote>`)
-    .replace(/<li[^>]*>\s*([\s\S]*?)\s*<\/li>/gi, (_match, text) => `<li>${escapeHtml(clipWholeWord(textFromHtmlFragment(text, 500), 220))}</li>`);
+    .replace(/<li[^>]*>\s*([\s\S]*?)\s*<\/li>/gi, (_match, text) => `<li>${escapeHtml(clipWholeWord(textFromHtmlFragment(text, 500), 220))}</li>`));
 
   const hasHeading = /<h[23]>/i.test(normalized);
   const paragraphs = (normalized.match(/<p>/gi) || []).length;
@@ -1125,13 +1148,13 @@ const normalizeArticleHtml = (html: string) => {
   const chunks = splitLongText(text).slice(0, 10);
   if (!chunks.length) return normalized;
   const midpoint = Math.max(2, Math.floor(chunks.length / 2));
-  return chunks
+  return normalizeEditorialQuoteFlow(chunks
     .map((paragraph, index) => {
       if (index === midpoint) return `<h2>O ponto de press\u00e3o</h2><p>${escapeHtml(paragraph)}</p>`;
       if (index === chunks.length - 2 && chunks.length > 5) return `<h3>O efeito imediato</h3><p>${escapeHtml(paragraph)}</p>`;
       return `<p>${escapeHtml(paragraph)}</p>`;
     })
-    .join('');
+    .join(''));
 };
 
 const htmlFromModelField = (value: unknown) => {
@@ -1419,6 +1442,7 @@ CLASSIFICACAO PREVIA OBRIGATORIA:
 - Fato Estatico: o que aconteceu. Exemplo: "O preco subiu".
 - Agente Ativo: quem causou, decidiu, moveu, perdeu ou ganhou. De nome aos bois.
 - Regra de responsabilidade nominal: se o texto disser que alguem afirmou, declarou, publicou, admitiu, defendeu, acusou, decidiu, aprovou, negou, pediu, atacou ou causou algo, a frase deve trazer o nome da pessoa, orgao, empresa, partido, clube ou cargo oficial responsavel. Nunca escreva "um pre-candidato", "um politico", "uma autoridade", "um dirigente" ou "uma celebridade" como sujeito de acusacao, fala ou decisao.
+- Regra de cargo atual: nao chame autoridade em exercicio de "ex-" por memoria. Em maio de 2026, Donald Trump e presidente dos Estados Unidos; se a fonte tratar de fato antigo, use "entao presidente" apenas para o evento historico.
 - Se as fontes fornecidas nao identificarem nominalmente o responsavel, nao crie a frase acusatoria. Reescreva com o fato verificavel: "A pauta nao identifica nominalmente o autor da fala" ou foque na reacao publica sem atribuir a uma pessoa anonima.
 - Causa Latente: por que isso aconteceu agora.
 - Conflito: se houver divergencia entre governo, empresa, clube, usuarios ou mercado, exponha como ponto central.
@@ -1518,6 +1542,7 @@ ${sourceLines || 'Fontes nao listadas.'}
 IMPORTANTE SOBRE AS FONTES:
 - Os trechos extraidos da materia completa e o dossie factual têm prioridade sobre titulo RSS e resumo operacional.
 - Quando houver nome de pessoa, orgao, clube, empresa ou cargo nesses trechos, use o nome. Nao substitua por sujeito vago.
+- Nao invente cargo por memoria. Em maio de 2026, Donald Trump e presidente dos Estados Unidos; "ex-presidente" so cabe em contexto historico explicitamente antigo e, nesse caso, prefira "entao presidente".
 
 - Se houver nomes proprios obrigatorios listados, a materia final precisa citar esses nomes no titulo, lide ou primeiros paragrafos quando forem vitimas, investigados, autoridades, atletas, empresas ou personagens centrais. Omitir nome obrigatorio torna a materia invalida.
 

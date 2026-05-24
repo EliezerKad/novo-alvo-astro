@@ -64,6 +64,27 @@ const normalizeWhyItMatters = (html: string) =>
     (_match, attrs, text) => `<blockquote${attrs}><strong>Por que isso importa?</strong> ${String(text).trim()}</blockquote>`,
   );
 
+const normalizeEditorialQuoteFlow = (html: string) => {
+  let output = String(html || '')
+    .replace(/([.!?,;:])\s+([\u201d"])/g, '$1$2')
+    .replace(/([\u201c"])\s+/g, '$1');
+
+  let previous = '';
+  while (output !== previous) {
+    previous = output;
+    output = output.replace(
+      /<p([^>]*)>\s*([^<]*[\u201c"][^<]*?)\s*<\/p>\s*<p[^>]*>\s*([^<]*?[.!?])\s*([\u201d"])\s+([A-Z\u00c0-\u017f0-9][\s\S]*?)\s*<\/p>/gi,
+      (_match, attrs, first, quoteEnd, quote, rest) =>
+        `<p${attrs}>${String(first).trim()} ${String(quoteEnd).trim()}${quote}</p><p>${String(rest).trim()}</p>`,
+    );
+  }
+
+  return output.replace(
+    /<p([^>]*)>\s*([\s\S]*?[.!?][\u201d"])\s+([A-Z\u00c0-\u017f0-9][^<]*?)\s*<\/p>/g,
+    (_match, attrs, quoteSentence, rest) => `<p${attrs}>${String(quoteSentence).trim()}</p><p>${String(rest).trim()}</p>`,
+  );
+};
+
 const parseSources = (value: string): Array<{ name?: string; url?: string; note?: string } | string> => {
   try {
     const parsed = JSON.parse(value || '[]');
@@ -217,7 +238,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
   const description = article.seo_description || article.summary || `Leia ${article.title} no Portal Novo Alvo.`;
   const image = article.cover_url || `${url.origin}/og-default.svg`;
   const sources = parseSources(article.sources);
-  const cleanBody = normalizeWhyItMatters(stripEditorChrome(article.body_html));
+  const cleanBody = normalizeEditorialQuoteFlow(normalizeWhyItMatters(stripEditorChrome(article.body_html)));
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
@@ -376,7 +397,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
       .content img { max-width:100%; border-radius:28px; }
       .content figure { margin:3rem 0; }
       .content a { color:var(--red); font-weight:700; }
-      .content blockquote { margin:3rem 0 0; border-left:4px solid var(--red); border-radius:0 1.25rem 1.25rem 0; background:rgba(138,31,45,.08); padding:1.15rem 1.25rem; color:#18181b; font-family:Inter,system-ui,sans-serif; font-size:clamp(1.06rem,1.75vw,1.28rem); font-weight:400; line-height:1.45; letter-spacing:-.025em; }
+      .content blockquote { margin:3rem 0 0; border-left:4px solid var(--red); border-radius:0 1.25rem 1.25rem 0; background:rgba(138,31,45,.08); padding:1.15rem 1.25rem; color:#18181b; font-family:Inter,system-ui,sans-serif; font-size:clamp(1.05rem,1.35vw,1.2rem); font-weight:400; line-height:1.82; letter-spacing:-.01em; }
       .content blockquote strong:first-child { font-weight:900; }
       .content blockquote p { margin:0; color:inherit; font-size:inherit; font-weight:400; line-height:inherit; }
       .share { max-width:760px; margin:44px 0 0; padding-top:28px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:18px; }
@@ -489,7 +510,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
       <section class="mx-auto max-w-[1240px] px-3 pb-14 sm:px-4 md:pb-16">
         <div class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,760px)_340px] lg:gap-14">
           <div>
-            <div class="prose prose-zinc max-w-none prose-p:mb-6 prose-p:text-[1.08rem] prose-p:font-normal prose-p:leading-[1.78] prose-p:tracking-[-0.01em] prose-p:text-[#292927] md:prose-p:mb-7 md:prose-p:text-xl md:prose-p:leading-[1.82] prose-headings:font-sans prose-headings:font-black prose-headings:tracking-[-0.065em] prose-headings:text-zinc-950 prose-h2:mb-4 prose-h2:mt-11 prose-h2:text-3xl prose-h2:leading-none md:prose-h2:mb-5 md:prose-h2:mt-14 md:prose-h2:text-4xl prose-h3:mb-3 prose-h3:mt-8 prose-h3:text-2xl md:prose-h3:mb-4 md:prose-h3:mt-10 prose-strong:text-zinc-950 prose-strong:font-black prose-ul:mb-8 prose-ul:list-disc prose-ul:pl-6 prose-li:mb-2 prose-li:text-lg prose-li:leading-8 prose-a:text-[#8A1F2D] prose-a:font-bold prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-[4px] prose-blockquote:border-[#8A1F2D] prose-blockquote:pl-5 prose-blockquote:text-2xl prose-blockquote:font-normal prose-blockquote:not-italic prose-blockquote:leading-tight prose-blockquote:tracking-[-0.035em] md:prose-blockquote:border-l-[5px] md:prose-blockquote:pl-7 md:prose-blockquote:text-3xl dark:prose-invert dark:prose-p:text-zinc-300 dark:prose-headings:text-zinc-50 article-content overflow-hidden break-words [word-break:break-word] [overflow-wrap:break-word]">${cleanBody || `<p>${escapeHtml(article.summary || '')}</p>`}</div>
+            <div class="prose prose-zinc max-w-none prose-p:mb-6 prose-p:text-[1.08rem] prose-p:font-normal prose-p:leading-[1.78] prose-p:tracking-[-0.01em] prose-p:text-[#292927] md:prose-p:mb-7 md:prose-p:text-xl md:prose-p:leading-[1.82] prose-headings:font-sans prose-headings:font-black prose-headings:tracking-[-0.065em] prose-headings:text-zinc-950 prose-h2:mb-4 prose-h2:mt-11 prose-h2:text-3xl prose-h2:leading-none md:prose-h2:mb-5 md:prose-h2:mt-14 md:prose-h2:text-4xl prose-h3:mb-3 prose-h3:mt-8 prose-h3:text-2xl md:prose-h3:mb-4 md:prose-h3:mt-10 prose-strong:text-zinc-950 prose-strong:font-black prose-ul:mb-8 prose-ul:list-disc prose-ul:pl-6 prose-li:mb-2 prose-li:text-lg prose-li:leading-8 prose-a:text-[#8A1F2D] prose-a:font-bold prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-[4px] prose-blockquote:border-[#8A1F2D] prose-blockquote:pl-5 prose-blockquote:text-[1.08rem] prose-blockquote:font-normal prose-blockquote:not-italic prose-blockquote:leading-[1.78] prose-blockquote:tracking-[-0.01em] md:prose-blockquote:border-l-[5px] md:prose-blockquote:pl-7 md:prose-blockquote:text-xl md:prose-blockquote:leading-[1.82] dark:prose-invert dark:prose-p:text-zinc-300 dark:prose-headings:text-zinc-50 article-content overflow-hidden break-words [word-break:break-word] [overflow-wrap:break-word]">${cleanBody || `<p>${escapeHtml(article.summary || '')}</p>`}</div>
             ${sourcesHtml}
             <div class="mt-12 flex justify-center border-t border-black/10 pt-8 dark:border-zinc-800"><div class="overflow-hidden relative flex flex-col items-center justify-center h-[90px] w-full max-w-[728px]"><div class="absolute top-1 left-2 z-10 pointer-events-none"><span class="text-[7px] font-black text-zinc-400 dark:text-zinc-600 uppercase tracking-widest">Publicidade</span></div></div></div>
           </div>

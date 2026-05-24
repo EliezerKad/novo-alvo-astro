@@ -292,8 +292,6 @@ const isCategoryView = !!category && category !== 'Início';
 
                     const pulseList = document.querySelector('[data-live-pulse-list]');
                     if (!pulseList) return;
-                    const staticSlugs = new Set(JSON.parse(pulseList.dataset.staticSlugs || '[]'));
-                    const staticSubjects = new Set(JSON.parse(pulseList.dataset.staticSubjects || '[]'));
                     const initialPulseItems = Array.from(pulseList.querySelectorAll('a[href]')).map((item) => {
                       const href = item.getAttribute('href') || '';
                       const slug = decodeURIComponent(href.replace(/^\/noticia\//, '').replace(/\/$/, ''));
@@ -384,17 +382,12 @@ const isCategoryView = !!category && category !== 'Início';
                       .then((response) => (response.ok ? response.json() : { articles: [] }))
                       .then((data) => {
                         const articles = Array.isArray(data.articles)
-                          ? data.articles.filter((article) => article?.slug && !staticSlugs.has(article.slug))
+                          ? data.articles.filter((article) => article?.slug)
                           : [];
                         if (!articles.length) return;
                         const seen = new Set();
-                        const seenSubjects = new Set(staticSubjects);
-                        const seenImages = new Set(
-                          initialPulseItems
-                            .map((item) => item.html.match(/<img[^>]+src="([^"]+)"/)?.[1] || '')
-                            .map(imageKey)
-                            .filter(Boolean),
-                        );
+                        const seenSubjects = new Set();
+                        const seenImages = new Set();
                         const liveItems = articles.filter((article) => {
                             const key = subjectKey(`${article.category || ''} ${article.title || ''} ${article.summary || ''}`);
                             const coverKey = imageKey(article.cover_url || '');

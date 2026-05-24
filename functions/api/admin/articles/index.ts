@@ -93,6 +93,133 @@ const clean = (value: unknown, max = 2000) =>
     .trim()
     .slice(0, max);
 
+const SUBJECT_STOP_WORDS = new Set([
+  'a',
+  'ao',
+  'aos',
+  'as',
+  'com',
+  'como',
+  'contra',
+  'da',
+  'das',
+  'de',
+  'do',
+  'dos',
+  'e',
+  'em',
+  'entre',
+  'mais',
+  'na',
+  'nas',
+  'no',
+  'nos',
+  'o',
+  'os',
+  'para',
+  'por',
+  'que',
+  'se',
+  'sem',
+  'sob',
+  'sobre',
+  'sua',
+  'suas',
+  'seu',
+  'seus',
+  'um',
+  'uma',
+]);
+
+const subjectTokens = (value: unknown) =>
+  new Set(
+    clean(value, 3000)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/\bdjoko\b/g, 'djokovic')
+      .replace(/\bconselho nacional de justica\b/g, 'cnj')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .split(/\s+/)
+      .map((token) => token.trim())
+      .filter((token) => token.length >= 3 && !SUBJECT_STOP_WORDS.has(token)),
+  );
+
+const overlapScore = (left: Set<string>, right: Set<string>) => {
+  if (!left.size || !right.size) return { overlap: 0, ratio: 0 };
+  let overlap = 0;
+  for (const token of left) {
+    if (right.has(token)) overlap += 1;
+  }
+  return { overlap, ratio: overlap / Math.min(left.size, right.size) };
+};
+
+const findDuplicateArticle = async (
+  db: D1Database,
+  article: ReturnType<typeof normalizePayload>,
+  existingId = '',
+) => {
+  const needle = subjectTokens(`${article.category} ${article.title} ${article.summary} ${article.keywords} ${article.tags}`);
+  if (needle.size < 4) return null;
+
+  const result = await db
+    .prepare(
+      `SELECT id, slug, title, summary, category, keywords, tags
+       FROM articles
+       WHERE id != ?
+         AND status IN ('draft', 'scheduled', 'published')
+         AND category = ?
+       ORDER BY COALESCE(NULLIF(published_at, ''), scheduled_at, updated_at) DESC
+       LIMIT 160`,
+    )
+    .bind(existingId || article.id, article.category)
+    .all<{
+      id: string;
+      slug: string;
+      title: string;
+      summary: string;
+      category: string;
+      keywords?: string;
+      tags?: string;
+    }>();
+
+  for (const candidate of result.results || []) {
+    const haystack = subjectTokens(`${candidate.category} ${candidate.title} ${candidate.summary} ${candidate.keywords || ''} ${candidate.tags || ''}`);
+    const score = overlapScore(needle, haystack);
+    if (score.overlap >= 5 && score.ratio >= 0.5) {
+      return { article: candidate, score };
+    }
+  }
+
+  return null;
+};
+
+const normalizeEditorialQuoteFlow = (html: string) => {
+  let output = String(html || '')
+    .replace(/([.!?,;:])\s+([\u201d"])/g, '$1$2')
+    .replace(/([\u201c"])\s+/g, '$1');
+
+  let previous = '';
+  while (output !== previous) {
+    previous = output;
+    output = output.replace(
+      /<p([^>]*)>\s*([^<]*[\u201c"][^<]*?)\s*<\/p>\s*<p[^>]*>\s*([^<]*?[.!?])\s*([\u201d"])\s+([A-Z\u00c0-\u017f0-9][\s\S]*?)\s*<\/p>/gi,
+      (_match, attrs, first, quoteEnd, quote, rest) =>
+        `<p${attrs}>${String(first).trim()} ${String(quoteEnd).trim()}${quote}</p><p>${String(rest).trim()}</p>`,
+    );
+  }
+
+  return output.replace(
+    /<p([^>]*)>\s*([\s\S]*?[.!?][\u201d"])\s+([A-Z\u00c0-\u017f0-9][^<]*?)\s*<\/p>/g,
+    (_match, attrs, quoteSentence, rest) => `<p${attrs}>${String(quoteSentence).trim()}</p><p>${String(rest).trim()}</p>`,
+  );
+};
+
+const normalizeCurrentPublicRoles = (value: string) =>
+  String(value || '')
+    .replace(/\bDonald Trump,\s*ex-presidente dos Estados Unidos\b/gi, 'Donald Trump, presidente dos Estados Unidos')
+    .replace(/\bex-presidente dos Estados Unidos\s+Donald Trump\b/gi, 'presidente dos Estados Unidos Donald Trump');
+
 const slugify = (value: unknown) =>
   clean(value, 180)
     .normalize('NFD')
@@ -692,8 +819,8 @@ const normalizePayload = (payload: ArticlePayload) => {
     id: clean(payload.id, 80) || uid(),
     slug: slugify(payload.slug || title || uid()),
     title: title || 'Matéria sem título',
-    summary: clean(payload.summary, 700),
-    bodyHtml: clean(payload.bodyHtml, 250000),
+    summary: normalizeCurrentPublicRoles(clean(payload.summary, 700)),
+    bodyHtml: normalizeCurrentPublicRoles(normalizeEditorialQuoteFlow(clean(payload.bodyHtml, 250000))),
     category: clean(payload.category, 80) || 'Política',
     author: clean(payload.author, 120) || 'Redação Novo Alvo',
     status,
@@ -828,6 +955,18 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   const id = existing?.id || article.id;
   const previousSlug = clean(existing?.slug, 160);
   const previousPublishedAt = clean(existing?.published_at, 80);
+  const duplicate = await findDuplicateArticle(db, article, id);
+  if (!existing && duplicate) {
+    return json(
+      {
+        error:
+          `Possivel materia duplicada: o assunto ja existe em "${duplicate.article.title}" (${duplicate.article.slug}). Edite a materia existente em vez de criar uma nova.`,
+        duplicateOf: duplicate.article.slug,
+      },
+      { status: 409 },
+    );
+  }
+
   const publishedAt =
     article.status === 'published'
       ? article.publishedAt || previousPublishedAt || article.updatedAt
