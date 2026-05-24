@@ -154,6 +154,7 @@ const normalizeCategoryKey = (value) =>
     .replace(/[^a-z0-9]+/g, '');
 
 const categoryByKey = new Map(Object.keys(FEEDS).map((category) => [normalizeCategoryKey(category), category]));
+const BLOCKED_FAMOSOS_TOPIC_PATTERN = /\b(virginia|virg[ií]nia|ze\s*felipe|z[eé]\s*felipe|vini\s*jr|vinicius\s*j[uú]nior)\b/i;
 
 const getArgValue = (name) => {
   const inline = process.argv.find((arg) => arg.startsWith(`--${name}=`));
@@ -1256,7 +1257,11 @@ const parseRssItems = (xml, category, sourceMeta = {}) => {
       summary,
       publishedAt,
     };
-  }).filter((item) => item.title && item.link);
+  }).filter((item) => {
+    if (!item.title || !item.link) return false;
+    if (item.category === 'Famosos' && BLOCKED_FAMOSOS_TOPIC_PATTERN.test(`${item.title} ${item.summary}`)) return false;
+    return true;
+  });
 };
 
 const fetchFeed = async ([category, url, _index = 0, sourceMeta = {}]) => {
@@ -1334,8 +1339,15 @@ const fetchEditorialSourceEntries = async (categories = Object.keys(FEEDS)) => {
 
 const feedEntries = async (categories = Object.keys(FEEDS)) => {
   const customEntries = await fetchEditorialSourceEntries(categories);
-  if (customEntries.length) return customEntries.filter(([category]) => categories.includes(category));
-  return fallbackFeedEntries(categories);
+  const customForCategories = customEntries.filter(([category]) => categories.includes(category));
+  const categoriesWithCustom = new Set(customForCategories.map(([category]) => category));
+  const fallbackForMissingCategories = fallbackFeedEntries(categories).filter(([category]) => !categoriesWithCustom.has(category));
+  if (customForCategories.length) {
+    const missing = categories.filter((category) => !categoriesWithCustom.has(category));
+    if (missing.length) console.log(`[sources] fallback interno ativo para: ${missing.join(', ')}.`);
+    return [...customForCategories, ...fallbackForMissingCategories];
+  }
+  return fallbackForMissingCategories;
 };
 
 const stripSearchOperators = (query) =>
