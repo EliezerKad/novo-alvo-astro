@@ -6,19 +6,19 @@ seoDescription: "Ocorrencias: Alain Prost, tetracampeão da Fórmula 1, foi assa
 category: "Ocorrencias"
 author: "Redação Novo Alvo"
 sources: ["A Redação", "O Globo", "Terra", "O Dia", "ge", "Tribuna do Agreste", "Gazeta Esportiva", "band.com.br", "Mix Vale"]
-publishedAt: "2026-05-24T12:08:57.695Z"
-updatedAt: "2026-05-24T12:08:58.036Z"
+publishedAt: "2026-05-24T12:19:52.477Z"
+updatedAt: "2026-05-24T12:19:52.991Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/alain-prost-e-assaltado-dentro-de-casa-na-suica-e-sofre-ferimento-na-cabeca-cover-20260524120858.webp"
+  src: "https://portalnovoalvo.com.br/media/news/alain-prost-e-assaltado-dentro-de-casa-na-suica-e-sofre-ferimento-na-cabeca-cover-20260524121952.webp"
   alt: "Alain Prost, ex-piloto de Fórmula 1, após assalto em sua casa na Suíça"
   caption: "Credito: Unsplash"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/alain-prost-e-assaltado-dentro-de-casa-na-suica-e-sofre-ferimento-na-cabeca-cover-20260524120858.webp"
+ogImage: "https://portalnovoalvo.com.br/media/news/alain-prost-e-assaltado-dentro-de-casa-na-suica-e-sofre-ferimento-na-cabeca-cover-20260524121952.webp"
 tags: ["esportes", "alain", "prost", "assaltado", "dentro", "casa", "suica", "sofre", "ferimento", "cabeca"]
 ---
 
