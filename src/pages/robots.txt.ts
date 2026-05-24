@@ -7,33 +7,69 @@ export const GET: APIRoute = ({ site }) => {
   return new Response(
     `User-agent: *
 Allow: /
+Disallow: /admin
 Disallow: /admin/
+Disallow: /admin/*
+Disallow: /api/admin/
+Disallow: /api/admin/*
+Disallow: /redacao
 Disallow: /redacao/
+Disallow: /redacao/*
 
 User-agent: Googlebot
 Allow: /
+Disallow: /admin
 Disallow: /admin/
+Disallow: /admin/*
+Disallow: /api/admin/
+Disallow: /api/admin/*
+Disallow: /redacao
 Disallow: /redacao/
+Disallow: /redacao/*
 
 User-agent: Googlebot-News
 Allow: /
+Disallow: /admin
 Disallow: /admin/
+Disallow: /admin/*
+Disallow: /api/admin/
+Disallow: /api/admin/*
+Disallow: /redacao
 Disallow: /redacao/
+Disallow: /redacao/*
 
 User-agent: Googlebot-Image
 Allow: /
+Disallow: /admin
 Disallow: /admin/
+Disallow: /admin/*
+Disallow: /api/admin/
+Disallow: /api/admin/*
+Disallow: /redacao
 Disallow: /redacao/
+Disallow: /redacao/*
 
 User-agent: Googlebot-Video
 Allow: /
+Disallow: /admin
 Disallow: /admin/
+Disallow: /admin/*
+Disallow: /api/admin/
+Disallow: /api/admin/*
+Disallow: /redacao
 Disallow: /redacao/
+Disallow: /redacao/*
 
 User-agent: Google-InspectionTool
 Allow: /
+Disallow: /admin
 Disallow: /admin/
+Disallow: /admin/*
+Disallow: /api/admin/
+Disallow: /api/admin/*
+Disallow: /redacao
 Disallow: /redacao/
+Disallow: /redacao/*
 
 Sitemap: ${sitemap.href}
 `,

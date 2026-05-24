@@ -2,6 +2,9 @@ type Env = {
   ADMIN_TOKEN?: string;
 };
 
+const CANONICAL_HOST = 'portalnovoalvo.com.br';
+const CANONICAL_ORIGIN = `https://${CANONICAL_HOST}`;
+
 const parseCookies = (header: string | null) =>
   Object.fromEntries(
     String(header || '')
@@ -25,6 +28,18 @@ export const onRequest = async ({
   next: () => Promise<Response>;
 }) => {
   const url = new URL(request.url);
+  const host = url.hostname.toLowerCase();
+  const forwardedProto = request.headers.get('x-forwarded-proto')?.toLowerCase() || url.protocol.replace(':', '');
+
+  if ((host === CANONICAL_HOST || host === `www.${CANONICAL_HOST}`) && (host !== CANONICAL_HOST || forwardedProto !== 'https')) {
+    return Response.redirect(`${CANONICAL_ORIGIN}${url.pathname}${url.search}`, 301);
+  }
+
+  if (url.pathname.startsWith('/redacao') || url.pathname.startsWith('/api/admin')) {
+    const response = await next();
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+    return response;
+  }
 
   if (!url.pathname.startsWith('/admin')) {
     return next();
@@ -34,10 +49,14 @@ export const onRequest = async ({
   const cookies = parseCookies(request.headers.get('cookie'));
 
   if (token && cookies.admin_session === token) {
-    return next();
+    const response = await next();
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+    return response;
   }
 
   const loginUrl = new URL('/redacao/', url.origin);
   loginUrl.searchParams.set('next', `${url.pathname}${url.search}${url.hash}`);
-  return Response.redirect(loginUrl.toString(), 302);
+  const response = Response.redirect(loginUrl.toString(), 302);
+  response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  return response;
 };

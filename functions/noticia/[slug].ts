@@ -34,6 +34,8 @@ type CmsArticle = {
   updated_at: string;
 };
 
+const CANONICAL_ORIGIN = 'https://portalnovoalvo.com.br';
+
 const escapeHtml = (value: unknown) =>
   String(value || '')
     .replace(/&/g, '&amp;')
@@ -231,12 +233,11 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
   } catch {
     related = [];
   }
-  const url = new URL(request.url);
-  const canonical = `${url.origin}/noticia/${encodeURIComponent(article.slug)}/`;
+  const canonical = `${CANONICAL_ORIGIN}/noticia/${encodeURIComponent(article.slug)}/`;
   const published = article.published_at || article.scheduled_at || article.created_at || article.updated_at;
   const modified = article.updated_at || published;
   const description = article.seo_description || article.summary || `Leia ${article.title} no Portal Novo Alvo.`;
-  const image = article.cover_url || `${url.origin}/og-default.svg`;
+  const image = article.cover_url || `${CANONICAL_ORIGIN}/og-default.svg`;
   const sources = parseSources(article.sources);
   const cleanBody = normalizeEditorialQuoteFlow(normalizeWhyItMatters(stripEditorChrome(article.body_html)));
   const schema = {
@@ -251,7 +252,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
     publisher: {
       '@type': 'NewsMediaOrganization',
       name: 'Portal Novo Alvo',
-      logo: { '@type': 'ImageObject', url: `${url.origin}/og-default.svg` },
+      logo: { '@type': 'ImageObject', url: `${CANONICAL_ORIGIN}/og-default.svg` },
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
     articleSection: article.category,
@@ -270,7 +271,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
           ${related
             .map((item) => {
               const itemUrl = `/noticia/${encodeURIComponent(item.slug || '')}/`;
-              const itemImage = item.cover_url || `${url.origin}/og-default.svg`;
+              const itemImage = item.cover_url || `${CANONICAL_ORIGIN}/og-default.svg`;
               return `<a class="related-card" href="${itemUrl}">
                 <img src="${escapeHtml(itemImage)}" alt="${escapeHtml(item.cover_alt || item.title)}" loading="lazy" onerror="this.onerror=null;this.src='/og-default.svg';" />
                 <div>
@@ -318,7 +319,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
         <div class="grid">${topRelated
           .map((item) => {
             const itemUrl = `/noticia/${encodeURIComponent(item.slug || '')}/`;
-            const itemImage = item.cover_url || `${url.origin}/og-default.svg`;
+            const itemImage = item.cover_url || `${CANONICAL_ORIGIN}/og-default.svg`;
             return `<a href="${itemUrl}" class="group grid grid-cols-[82px_1fr] gap-3 border-t border-black/10 py-3 first:border-t-0 first:pt-0 last:pb-0 dark:border-zinc-800">
               <div class="h-[62px] w-[82px] overflow-hidden rounded-2xl bg-[#ebe8df] dark:bg-zinc-800">
                 <img src="${escapeHtml(itemImage)}" alt="${escapeHtml(item.cover_alt || item.title)}" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
