@@ -6,8 +6,8 @@ seoDescription: "Politica: Presidente do Congresso Nacional, Davi Alcolumbre, al
 category: "Politica"
 author: "Redação Novo Alvo"
 sources: ["- Misto Brasil", "Jovem Pan", "O POVO+", "ClickCampos", "UOL Notícias", "Gazeta De Varginha", "MSN", "O TEMPO", "CartaCapital"]
-publishedAt: "2026-05-24T08:13:42.069Z"
-updatedAt: "2026-05-24T08:13:43.299Z"
+publishedAt: "2026-05-24T11:21:16.111Z"
+updatedAt: "2026-05-24T11:21:16.145Z"
 featured: false
 isFeatured: false
 urgent: false
