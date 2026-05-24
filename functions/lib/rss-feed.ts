@@ -49,7 +49,10 @@ const articleDate = (article: ArticleRow) => article.published_at || article.sch
 const absoluteUrl = (value: string) => {
   if (!value) return `${ORIGIN}/og-default.svg`;
   try {
-    return new URL(value, ORIGIN).toString();
+    const url = new URL(value, ORIGIN);
+    if (!/^https?:$/i.test(url.protocol)) return `${ORIGIN}/og-default.svg`;
+    if (url.hostname === 'www.portalnovoalvo.com.br') url.hostname = 'portalnovoalvo.com.br';
+    return url.toString();
   } catch {
     return `${ORIGIN}/og-default.svg`;
   }
