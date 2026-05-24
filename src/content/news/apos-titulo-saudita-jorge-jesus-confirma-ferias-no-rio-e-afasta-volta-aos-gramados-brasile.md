@@ -6,8 +6,8 @@ seoDescription: "Futebol: Jorge Jesus encerra ciclo vitorioso no Al-Nassr após 
 category: "Futebol"
 author: "Redação Novo Alvo"
 sources: ["romanews.com.br", "Mix Vale", "Terra", "Portal Tela", "Alô Alô Bahia", "c4noticias.com.br", "Blog do Anthony Medeiros", "ge", "No Ataque", "MSN", "Correio Braziliense", "JM Online", "Jornal Mundo Lusíada"]
-publishedAt: "2026-05-24T00:56:56.114Z"
-updatedAt: "2026-05-24T00:56:56.268Z"
+publishedAt: "2026-05-24T01:00:26.485Z"
+updatedAt: "2026-05-24T01:00:26.646Z"
 featured: false
 isFeatured: false
 urgent: false
