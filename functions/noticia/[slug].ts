@@ -128,9 +128,6 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
     }
   }
 
-  const staticPage = await fallbackToAssets(request, env);
-  if (staticPage.status !== 404) return staticPage;
-
   if (!db) return fallbackToAssets(request, env);
 
   const article = await db
@@ -146,7 +143,10 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
     .bind(slug, now)
     .first<CmsArticle>();
 
-  if (!article) return fallbackToAssets(request, env);
+  if (!article) {
+    const staticPage = await fallbackToAssets(request, env);
+    return staticPage;
+  }
   let related: Partial<CmsArticle>[] = [];
   try {
     const relatedResult = await db
