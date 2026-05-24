@@ -6,8 +6,8 @@ seoDescription: "Mundo: Donald Trump declarou que, ou um acordo é feito com o I
 category: "Mundo"
 author: "Redação Novo Alvo"
 sources: ["Terra", "G1", "R7", "UOL Notícias", "Valor Econômico", "Estado de Minas", "nhk.or.jp", "CNN Brasil"]
-publishedAt: "2026-05-24T17:09:31.414Z"
-updatedAt: "2026-05-24T17:09:31.573Z"
+publishedAt: "2026-05-24T17:15:52.446Z"
+updatedAt: "2026-05-24T17:15:52.959Z"
 featured: false
 isFeatured: false
 urgent: false
