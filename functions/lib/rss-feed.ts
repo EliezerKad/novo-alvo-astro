@@ -82,7 +82,8 @@ const selectBalanced = (articles: ArticleRow[], limit: number, category?: string
   return selected;
 };
 
-export const buildRssResponse = async (request: Request, env: Env) => {
+export const buildRssResponse = async ({ request, env }: { request: Request; env: Env }) => {
+  try {
   const db = env.EDITORIAL_DB;
   if (!db) {
     return new Response('EDITORIAL_DB nao configurado.', {
@@ -178,4 +179,28 @@ ${items}
       'cache-control': 'public, max-age=300, s-maxage=300',
     },
   });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+  <title>Portal Novo Alvo</title>
+  <link>${ORIGIN}/</link>
+  <description>Noticias, analise e cobertura editorial com foco em fatos relevantes.</description>
+  <language>pt-BR</language>
+  <lastBuildDate>${escapeXml(new Date().toUTCString())}</lastBuildDate>
+  <ttl>10</ttl>
+  <item>
+    <title>${escapeXml('RSS temporariamente indisponivel')}</title>
+    <link>${ORIGIN}/</link>
+    <guid isPermaLink="true">${ORIGIN}/</guid>
+    <description>${escapeXml(message)}</description>
+    <pubDate>${escapeXml(new Date().toUTCString())}</pubDate>
+  </item>
+</channel>
+</rss>`;
+    return new Response(xml, {
+      headers: { 'content-type': 'application/rss+xml; charset=utf-8', 'cache-control': 'no-store' },
+    });
+  }
 };
