@@ -6,8 +6,8 @@ seoDescription: "Games: Com Red Dead Redemption 2 quebrando recordes de vendas e
 category: "Games"
 author: "Redação Novo Alvo"
 sources: ["Olhar Digital", "gamehall.com.br", "ovicio.com.br", "IGN Brasil", "ContilNet Notícias", "GameVicio", "IGN Portugal", "Mix Vale", "TudoCelular.com", "Gameplayscassi", "Canaltech", "Gamereactor", "Portal Viciados", "Jornal dos Jogos"]
-publishedAt: "2026-05-24T11:21:20.962Z"
-updatedAt: "2026-05-24T11:21:22.013Z"
+publishedAt: "2026-05-24T12:02:20.182Z"
+updatedAt: "2026-05-24T12:02:23.455Z"
 featured: false
 isFeatured: false
 urgent: false
