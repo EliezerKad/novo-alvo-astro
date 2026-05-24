@@ -7,8 +7,8 @@ category: "Futebol"
 author: "Redação Novo Alvo"
 sources: []
 publishedAt: "2026-05-24T22:15:00.000Z"
-updatedAt: "2026-05-24T23:43:27.462Z"
-featured: false
+updatedAt: "2026-05-24T23:44:19.513Z"
+featured: true
 isFeatured: false
 urgent: false
 homeSection: ""
