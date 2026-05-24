@@ -7,25 +7,25 @@ category: "Futebol"
 author: "Redação Novo Alvo"
 sources: []
 publishedAt: "2026-05-24T22:15:00.000Z"
-updatedAt: "2026-05-24T23:22:44.358Z"
+updatedAt: "2026-05-24T23:43:27.462Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/og-default.svg"
+  src: "https://portalnovoalvo.com.br/media/news/cbf-expoe-audio-do-var-da-expulsao-de-carrascal-em-flamengo-x-palmeiras-cover-20260524234327.avif"
   alt: "Jogadores de Flamengo e Palmeiras em campo durante partida do Campeonato Brasileiro."
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/og-default.svg"
+ogImage: "https://portalnovoalvo.com.br/media/news/cbf-expoe-audio-do-var-da-expulsao-de-carrascal-em-flamengo-x-palmeiras-cover-20260524234327.avif"
 tags: []
 ---
 
 <p>A Confederação Brasileira de Futebol (CBF) divulgou o áudio do VAR referente à expulsão do jogador Jorge Carrascal, do Flamengo, durante a partida contra o Palmeiras, válida pela 17ª rodada do Campeonato Brasileiro.</p><p>O lance ocorreu no primeiro tempo, quando Carrascal atingiu o rosto do zagueiro Murilo com a sola da chuteira em uma disputa de bola aérea.</p>
 <figure class="audio-card">
   <p><strong>Ouça o áudio do VAR divulgado pela CBF</strong></p>
-  <audio controls preload="metadata"src="/assets/audio/audio-var-carrascal-flamengo-palmeiras-20260524.wav"></audio>
+  <audio controls=""preload="metadata"src="/assets/audio/audio-var-carrascal-flamengo-palmeiras-20260524.wav"></audio>
   <figcaption>O trecho ajuda a entender como a equipe de arbitragem interpretou a disputa de Carrascal com Murilo e por que a decisão de campo foi mantida.</figcaption>
 </figure>
 <h2>Análise da jogada</h2>
