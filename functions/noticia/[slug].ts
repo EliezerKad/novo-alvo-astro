@@ -66,6 +66,79 @@ const normalizeWhyItMatters = (html: string) =>
     (_match, attrs, text) => `<blockquote${attrs}><strong>Por que isso importa?</strong> ${String(text).trim()}</blockquote>`,
   );
 
+const themeBootScript = `<script>
+      try {
+        const stored = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', stored === 'dark' || (!stored && prefersDark));
+      } catch {}
+    </script>`;
+
+const themeToggleButton = `<button
+              type="button"
+              class="w-10 h-10 shrink-0 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center border border-zinc-200 dark:border-zinc-700 shadow-sm hover:bg-red-600 hover:border-red-600 hover:text-white dark:hover:text-white transition-all text-zinc-700 dark:text-zinc-200"
+              title="Modo Escuro"
+              aria-label="Ativar modo escuro"
+              data-theme-toggle
+            >
+              <svg class="w-4 h-4 dark:hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>
+              </svg>
+              <svg class="hidden w-4 h-4 dark:block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+              </svg>
+            </button>`;
+
+const themeToggleScript = `<script>
+      (() => {
+        const applyTheme = (theme) => {
+          document.documentElement.classList.toggle('dark', theme === 'dark');
+          document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+            button.title = theme === 'dark' ? 'Modo Claro' : 'Modo Escuro';
+            button.setAttribute('aria-label', theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro');
+          });
+        };
+        document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+          button.addEventListener('click', () => {
+            const nextTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+            try { localStorage.setItem('theme', nextTheme); } catch {}
+            applyTheme(nextTheme);
+          });
+        });
+        applyTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+      })();
+    </script>`;
+
+const dynamicArticleStyle = `<style>
+      .article-content .audio-card {
+        margin: 2.75rem 0;
+        border-left: 4px solid #8A1F2D;
+        border-radius: 0 1.35rem 1.35rem 0;
+        background: rgba(138, 31, 45, 0.055);
+        padding: 1.2rem 1.25rem;
+      }
+      .article-content .audio-card p {
+        margin: 0 0 0.85rem;
+      }
+      .article-content .audio-card audio {
+        display: block;
+        width: 100%;
+      }
+      .article-content .audio-card figcaption {
+        margin: 0.85rem 0 0;
+        color: #71717a;
+        font-size: 0.92rem;
+        font-weight: 700;
+        line-height: 1.55;
+      }
+      .dark .article-content .audio-card {
+        background: rgba(138, 31, 45, 0.18);
+      }
+      .dark .article-content .audio-card figcaption {
+        color: rgb(161 161 170);
+      }
+    </style>`;
+
 const normalizeEditorialQuoteFlow = (html: string) => {
   let output = String(html || '')
     .replace(/([.!?,;:])\s+([\u201d"])/g, '$1$2')
@@ -358,11 +431,13 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
     <meta name="twitter:title" content="${escapeHtml(article.title)}" />
     <meta name="twitter:description" content="${escapeHtml(description)}" />
     <meta name="twitter:image" content="${escapeHtml(image)}" />
+    ${themeBootScript}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:ital,wght@0,900;1,900&display=swap" />
     <script type="application/ld+json">${JSON.stringify(schema).replace(/</g, '\\u003c')}</script>
     ${shellAssets}
+    ${dynamicArticleStyle}
     <template data-disabled-legacy-dynamic-style>
       :root { color-scheme: light dark; --red:#8A1F2D; --ink:#101010; --muted:#71717a; --line:rgba(16,16,16,.10); --paper:#f5f3ee; }
       * { box-sizing:border-box; }
@@ -468,6 +543,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
             <span class="text-2xl font-serif font-black tracking-tighter leading-none transition-colors group-hover:text-[#501620] md:text-[1.7rem]">NOVO ALVO</span>
           </a>
           <div class="flex items-center gap-2">
+            ${themeToggleButton}
             <a href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-zinc-100 dark:bg-zinc-800 hover:bg-red-600 hover:text-white dark:text-zinc-400" title="Compartilhar">↗</a>
           </div>
         </div>
@@ -604,6 +680,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
         } catch {}
       })();
     </script>
+    ${themeToggleScript}
   </body>
 </html>`;
 
