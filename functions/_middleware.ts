@@ -4,6 +4,13 @@ type Env = {
 
 const CANONICAL_HOST = 'portalnovoalvo.com.br';
 const CANONICAL_ORIGIN = `https://${CANONICAL_HOST}`;
+const ROBOTS_HEADER = 'noindex, nofollow, noarchive';
+
+const withRobotsHeader = (response: Response) => {
+  const nextResponse = new Response(response.body, response);
+  nextResponse.headers.set('X-Robots-Tag', ROBOTS_HEADER);
+  return nextResponse;
+};
 
 const parseCookies = (header: string | null) =>
   Object.fromEntries(
@@ -37,8 +44,7 @@ export const onRequest = async ({
 
   if (url.pathname.startsWith('/redacao') || url.pathname.startsWith('/api/admin')) {
     const response = await next();
-    response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
-    return response;
+    return withRobotsHeader(response);
   }
 
   if (!url.pathname.startsWith('/admin')) {
@@ -50,13 +56,16 @@ export const onRequest = async ({
 
   if (token && cookies.admin_session === token) {
     const response = await next();
-    response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
-    return response;
+    return withRobotsHeader(response);
   }
 
   const loginUrl = new URL('/redacao/', url.origin);
   loginUrl.searchParams.set('next', `${url.pathname}${url.search}${url.hash}`);
-  const response = Response.redirect(loginUrl.toString(), 302);
-  response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
-  return response;
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: loginUrl.toString(),
+      'X-Robots-Tag': ROBOTS_HEADER,
+    },
+  });
 };
