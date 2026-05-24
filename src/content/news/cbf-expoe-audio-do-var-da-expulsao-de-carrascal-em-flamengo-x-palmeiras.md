@@ -5,31 +5,29 @@ summary: "Confira a íntegra da conversa entre árbitro e VAR no lance que resul
 seoDescription: "Futebol: Confira a íntegra da conversa entre árbitro e VAR no lance que resultou no cartão vermelho para o jogador do Flamengo contra o Palmeiras no…"
 category: "Futebol"
 author: "Redação Novo Alvo"
-sources: ["365Scores", "Torcedores", "Palmeiras Online", "ge", "SpaceMoney", "Portal Tela", "ESPN Brasil", "No Ataque", "band.com.br", "Agora RN"]
-publishedAt: "2026-05-24T22:16:21.002Z"
-updatedAt: "2026-05-24T22:16:21.151Z"
-featured: true
+sources: []
+publishedAt: "2026-05-24T22:15:00.000Z"
+updatedAt: "2026-05-24T23:22:44.358Z"
+featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/cbf-expoe-audio-do-var-da-expulsao-de-carrascal-em-flamengo-x-palmeiras-cover-20260524221621.jpg"
+  src: "https://portalnovoalvo.com.br/og-default.svg"
   alt: "Jogadores de Flamengo e Palmeiras em campo durante partida do Campeonato Brasileiro."
-  caption: "Credito: Unsplash"
+  caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/cbf-expoe-audio-do-var-da-expulsao-de-carrascal-em-flamengo-x-palmeiras-cover-20260524221621.jpg"
-tags: ["esportes", "flamengo", "palmeiras", "divulga", "audio", "expulsao", "carrascal"]
+ogImage: "https://portalnovoalvo.com.br/og-default.svg"
+tags: []
 ---
 
 <p>A Confederação Brasileira de Futebol (CBF) divulgou o áudio do VAR referente à expulsão do jogador Jorge Carrascal, do Flamengo, durante a partida contra o Palmeiras, válida pela 17ª rodada do Campeonato Brasileiro.</p><p>O lance ocorreu no primeiro tempo, quando Carrascal atingiu o rosto do zagueiro Murilo com a sola da chuteira em uma disputa de bola aérea.</p>
-<div data-editor-media="embed"data-align="center"data-media-size="large"contenteditable="false">
-  <div class="audio-card">
-    <p><strong>Ouça o áudio do VAR divulgado pela CBF</strong></p>
-    <audio controls preload="metadata"src="/media/news/audio-var-carrascal-flamengo-palmeiras-20260524.wav"style="width:100%"></audio>
-    <p>O trecho ajuda a entender como a equipe de arbitragem interpretou a disputa de Carrascal com Murilo e por que a decisão de campo foi mantida.</p>
-  </div>
-</div><p><br></p>
+<figure class="audio-card">
+  <p><strong>Ouça o áudio do VAR divulgado pela CBF</strong></p>
+  <audio controls preload="metadata"src="/assets/audio/audio-var-carrascal-flamengo-palmeiras-20260524.wav"></audio>
+  <figcaption>O trecho ajuda a entender como a equipe de arbitragem interpretou a disputa de Carrascal com Murilo e por que a decisão de campo foi mantida.</figcaption>
+</figure>
 <h2>Análise da jogada</h2>
 <p>Na conversa divulgada, o árbitro de campo, Davi de Oliveira Lacerda, e a equipe do VAR, liderada por Caio Max Augusto Vieira, discutem a jogada. A comunicação indica que o lance foi considerado jogo brusco grave, com potencial de risco à integridade física do adversário.</p><p>A fala destacada no áudio é:"Essa bola se joga com a cabeça, não com o pé", em referência à forma como Carrascal disputou a bola.</p>
 <h2>Decisão mantida</h2>
