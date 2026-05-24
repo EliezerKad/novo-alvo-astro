@@ -6,8 +6,8 @@ seoDescription: "Cinema: O filme \"Fjord\", do diretor romeno Cristian Mungiu, l
 category: "Cinema"
 author: "Redação Novo Alvo"
 sources: ["GPS Brasília Portal de Notícias do DF", "Estadão", "Metrópoles", "Agenda do Poder", "Estado de Minas", "Correio do Povo", "CNN Brasil", "O Globo", "Rede Fan FM", "O TEMPO", "Portal Tela", "BOL", "obusilis.com.br", "G1"]
-publishedAt: "2026-05-24T16:47:13.073Z"
-updatedAt: "2026-05-24T16:47:13.615Z"
+publishedAt: "2026-05-24T16:47:16.847Z"
+updatedAt: "2026-05-24T16:47:16.986Z"
 featured: false
 isFeatured: false
 urgent: false
