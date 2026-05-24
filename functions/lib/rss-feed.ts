@@ -97,7 +97,9 @@ export const buildRssResponse = async (request: Request, env: Env) => {
   const now = new Date().toISOString();
   const visibleAt = new Date(Date.now() - 2 * 60 * 1000).toISOString();
 
-  const fields = `slug, title, summary, category, author, cover_url, cover_alt, seo_description, tags, published_at, scheduled_at, updated_at`;
+  const fields = `slug, title, summary, category, author,
+    CASE WHEN cover_url LIKE 'data:%' THEN '' ELSE cover_url END AS cover_url,
+    cover_alt, seo_description, tags, published_at, scheduled_at, updated_at`;
   const result = category
     ? await db
         .prepare(
