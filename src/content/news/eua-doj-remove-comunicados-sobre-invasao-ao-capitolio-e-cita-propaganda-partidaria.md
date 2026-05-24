@@ -6,8 +6,8 @@ seoDescription: "Mundo: O Departamento de Justiça dos EUA removeu comunicados s
 category: "Mundo"
 author: "Redação Novo Alvo"
 sources: ["O POVO", "GZH", "Portal do Holanda", "Jornal do Brasil", "dw.com", "jornalcruzeiro.com.br", "CNN Brasil", "Folha PE", "O Antagonista", "A Gazeta", "Opera Mundi", "Brasil 247", "Jornal de Brasília", "TecMundo", "Revista Oeste", "Tribuna do Norte", "BBC", "Diário do Grande ABC", "Estado de Minas", "Olhar Digital"]
-publishedAt: "2026-05-24T12:06:58.031Z"
-updatedAt: "2026-05-24T12:07:01.005Z"
+publishedAt: "2026-05-24T12:07:10.930Z"
+updatedAt: "2026-05-24T12:07:13.960Z"
 featured: false
 isFeatured: false
 urgent: false
