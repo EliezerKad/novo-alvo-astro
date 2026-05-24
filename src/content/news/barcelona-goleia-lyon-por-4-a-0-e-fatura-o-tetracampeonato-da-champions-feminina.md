@@ -6,8 +6,8 @@ seoDescription: "Esportes: Com atuação de gala de Ewa Pajor e Salma Paralluelo
 category: "Esportes"
 author: "Redação Novo Alvo"
 sources: ["Portal Tela", "Exame", "Gazeta Esportiva", "BOL", "Correio Braziliense", "SpaceMoney", "365Scores", "Diario de Pernambuco", "Rádio Itatiaia", "UOL", "O Dia", "Olimpíada Todo Dia", "Estado de Minas"]
-publishedAt: "2026-05-24T03:24:28.330Z"
-updatedAt: "2026-05-24T03:24:30.396Z"
+publishedAt: "2026-05-24T03:25:34.849Z"
+updatedAt: "2026-05-24T03:25:36.989Z"
 featured: false
 isFeatured: false
 urgent: false
