@@ -6,19 +6,19 @@ seoDescription: "Futebol: Confira a íntegra da conversa entre árbitro e VAR no
 category: "Futebol"
 author: "Redação Novo Alvo"
 sources: ["365Scores", "Torcedores", "Palmeiras Online", "ge", "SpaceMoney", "Portal Tela", "ESPN Brasil", "No Ataque", "band.com.br", "Agora RN"]
-publishedAt: "2026-05-24T22:16:03.660Z"
-updatedAt: "2026-05-24T22:16:03.815Z"
+publishedAt: "2026-05-24T22:16:14.135Z"
+updatedAt: "2026-05-24T22:16:14.275Z"
 featured: true
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/cbf-expoe-audio-do-var-da-expulsao-de-carrascal-em-flamengo-x-palmeiras-cover-20260524221603.jpg"
+  src: "https://portalnovoalvo.com.br/media/news/cbf-expoe-audio-do-var-da-expulsao-de-carrascal-em-flamengo-x-palmeiras-cover-20260524221614.jpg"
   alt: "Jogadores de Flamengo e Palmeiras em campo durante partida do Campeonato Brasileiro."
   caption: "Credito: Unsplash"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/cbf-expoe-audio-do-var-da-expulsao-de-carrascal-em-flamengo-x-palmeiras-cover-20260524221603.jpg"
+ogImage: "https://portalnovoalvo.com.br/media/news/cbf-expoe-audio-do-var-da-expulsao-de-carrascal-em-flamengo-x-palmeiras-cover-20260524221614.jpg"
 tags: ["esportes", "flamengo", "palmeiras", "divulga", "audio", "expulsao", "carrascal"]
 ---
 
