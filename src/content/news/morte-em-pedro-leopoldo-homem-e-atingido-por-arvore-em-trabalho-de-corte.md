@@ -6,8 +6,8 @@ seoDescription: "Ocorrencias: Um homem de 49 anos morreu em Pedro Leopoldo, Mina
 category: "Ocorrencias"
 author: "Redação Novo Alvo"
 sources: ["Metrópoles", "UOL Notícias", "Bnews", "O Popular", "GZH", "Tribuna do Norte", "Jornal de Brasília", "Diário da Região", "O Liberal", "Jornal Opção", "Rondoniagora.com"]
-publishedAt: "2026-05-25T05:13:21.522Z"
-updatedAt: "2026-05-25T05:13:21.644Z"
+publishedAt: "2026-05-25T06:48:01.296Z"
+updatedAt: "2026-05-25T06:48:01.433Z"
 featured: false
 isFeatured: false
 urgent: false
