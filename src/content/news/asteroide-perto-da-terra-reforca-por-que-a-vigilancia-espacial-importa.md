@@ -6,8 +6,8 @@ seoDescription: "Ciencia: A passagem de um asteroide de pequeno porte perto da T
 category: "Ciencia"
 author: "Redação Novo Alvo"
 sources: ["https://www.cnnbrasil.com.br/ciencia/asteroide-do-tamanho-de-onibus-passa-perto-da-terra-nesta-segunda-18/", "https://r7.com"]
-publishedAt: "2026-05-25T16:42:12.726Z"
-updatedAt: "2026-05-25T16:42:13.159Z"
+publishedAt: "2026-05-25T16:42:16.024Z"
+updatedAt: "2026-05-25T16:42:16.167Z"
 featured: false
 isFeatured: false
 urgent: false
