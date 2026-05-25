@@ -6,8 +6,8 @@ seoDescription: "Entretenimento: A 18 dias da Copa do Mundo, o Brasil se mobiliz
 category: "Entretenimento"
 author: "Redação Novo Alvo"
 sources: ["Exame", "O POVO", "jornalcruzeiro.com.br", "Jornal de Brasília", "A Gazeta", "Campo Grande News", "DW.com", "NSC Total"]
-publishedAt: "2026-05-25T17:28:10.222Z"
-updatedAt: "2026-05-25T17:28:12.314Z"
+publishedAt: "2026-05-25T17:50:19.989Z"
+updatedAt: "2026-05-25T17:50:21.877Z"
 featured: false
 isFeatured: false
 urgent: false
