@@ -6,8 +6,8 @@ seoDescription: "Moda: A ascensão da Zara no ranking de valor de marca mostra c
 category: "Moda"
 author: "Redação Novo Alvo"
 sources: ["https://oglobo.globo.com", "https://www.cnnbrasil.com.br", "https://exame.com"]
-publishedAt: "2026-05-25T20:54:38.564Z"
-updatedAt: "2026-05-25T20:54:38.703Z"
+publishedAt: "2026-05-25T21:11:37.098Z"
+updatedAt: "2026-05-25T21:11:37.477Z"
 featured: false
 isFeatured: false
 urgent: false
