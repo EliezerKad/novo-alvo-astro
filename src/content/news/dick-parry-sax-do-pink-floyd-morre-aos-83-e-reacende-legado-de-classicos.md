@@ -6,8 +6,8 @@ seoDescription: "Entretenimento: Parceiro de David Gilmour e presença marcante 
 category: "Entretenimento"
 author: "Redação Novo Alvo"
 sources: ["https://www.cnnbrasil.com.br/entretenimento/morre-dick-parry-saxofonista-do-pink-floyd-aos-83-anos/", "https://www.otempo.com.br/entretenimento/2026/5/23/morre-dick-parry-saxofonista-do-pink-floyd-aos-83-anos", "https://www.em.com.br/cultura/2026/05/7426546-morre-saxofonista-do-pink-floyd.html"]
-publishedAt: "2026-05-25T13:06:48.318Z"
-updatedAt: "2026-05-25T13:06:50.121Z"
+publishedAt: "2026-05-25T13:09:14.020Z"
+updatedAt: "2026-05-25T13:09:15.789Z"
 featured: false
 isFeatured: false
 urgent: false
