@@ -124,7 +124,6 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
   const sort = clean(url.searchParams.get('sort'), 30);
   const now = new Date().toISOString();
   await publishDueScheduled(request, env, now).catch(() => {});
-  const safeScheduledPublishedAt = new Date(Date.now() - 2 * 60 * 1000).toISOString();
 
   const selectFields = `a.id, a.slug, a.title, a.summary, a.category, a.author, a.status, a.cover_url, a.cover_alt,
        a.reading_minutes, a.scheduled_at, a.published_at, a.created_at, a.updated_at,
@@ -140,26 +139,18 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
        LEFT JOIN article_views v ON v.slug = a.slug
        WHERE category = ?
          AND status = 'published'
-         AND (
-           COALESCE(NULLIF(a.scheduled_at, ''), '') = ''
-           OR COALESCE(NULLIF(a.published_at, ''), a.updated_at) <= ?
-         )
        ${orderBy}
        LIMIT ?`
     : `SELECT ${selectFields}
        FROM articles a
        LEFT JOIN article_views v ON v.slug = a.slug
        WHERE status = 'published'
-         AND (
-           COALESCE(NULLIF(a.scheduled_at, ''), '') = ''
-           OR COALESCE(NULLIF(a.published_at, ''), a.updated_at) <= ?
-         )
        ${orderBy}
        LIMIT ?`;
 
   const result = category
-    ? await db.prepare(query).bind(category, safeScheduledPublishedAt, limit).all()
-    : await db.prepare(query).bind(safeScheduledPublishedAt, limit).all();
+    ? await db.prepare(query).bind(category, limit).all()
+    : await db.prepare(query).bind(limit).all();
 
   return json({ articles: result.results || [] });
 };

@@ -406,6 +406,26 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
           .join('')}</div>
       </section>`
     : '';
+  const newsletterHtml = `<section class="group relative mx-auto max-w-[900px] overflow-hidden rounded-[1.45rem] border border-black/10 bg-[#101010] p-4 text-white shadow-[0_18px_48px_rgba(16,16,16,0.14)] transition-all duration-500 hover:-translate-y-0.5 hover:shadow-[0_24px_68px_rgba(16,16,16,0.18)] dark:border-white/10 dark:bg-zinc-950 md:rounded-[1.75rem] md:p-5">
+        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(138,31,45,0.36),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.07),transparent_34%)]"></div>
+        <div class="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+        <div class="relative z-10 grid gap-4 md:grid-cols-[minmax(0,1fr)_360px] md:items-end md:gap-8">
+          <div class="space-y-2.5">
+            <span class="inline-flex rounded-full bg-white/10 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.2em] text-[#f4c8cf] ring-1 ring-white/10">Newsletter</span>
+            <h3 class="max-w-md font-sans text-2xl font-black leading-[0.95] tracking-[-0.065em] text-white md:text-[2rem]">O essencial antes do ruido.</h3>
+            <p class="max-w-lg text-sm font-medium leading-6 text-white/62">Um briefing curto para acompanhar os fatos que movem o dia.</p>
+          </div>
+          <div class="hidden rounded-[1.15rem] border border-emerald-300/25 bg-emerald-400/10 p-4 text-sm font-bold leading-6 text-emerald-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]" data-newsletter-confirmation>
+            <span class="block text-[9px] font-black uppercase tracking-[0.22em] text-emerald-200">Inscricao confirmada</span>
+            <span class="mt-1 block" data-newsletter-confirmation-message>Voce esta na lista. Enviamos uma mensagem de boas-vindas.</span>
+          </div>
+          <form class="relative" data-newsletter-form>
+            <input type="email" required name="email" placeholder="seu e-mail" class="h-11 w-full rounded-full border border-white/10 bg-white/[0.08] px-4 pr-24 text-sm font-bold text-white outline-none transition-all placeholder:text-white/35 focus:border-[#f4c8cf]/60 focus:ring-2 focus:ring-[#8A1F2D]/45" />
+            <button type="submit" class="absolute bottom-1.5 right-1.5 top-1.5 inline-flex items-center justify-center rounded-full bg-[#8A1F2D] px-4 text-[9px] font-black uppercase tracking-[0.12em] text-white transition-all hover:bg-white hover:text-[#8A1F2D]">Assinar</button>
+          </form>
+          <p class="hidden text-xs font-bold text-white/65" data-newsletter-status aria-live="polite"></p>
+        </div>
+      </section>`;
 
   const html = `<!doctype html>
 <html lang="pt-BR">
@@ -593,6 +613,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
           </div>
           <aside class="grid h-fit gap-5 lg:sticky lg:top-28 lg:self-start">${sideRelatedHtml}</aside>
         </div>
+        <div class="mt-12 md:mt-16">${newsletterHtml}</div>
       </section>
     </article>
     <div class="article-page" style="display:none">
@@ -679,6 +700,52 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
           }, 1500);
         } catch {}
       })();
+    </script>
+    <script>
+      document.querySelectorAll('[data-newsletter-form]').forEach((form) => {
+        const wrapper = form.parentElement;
+        const status = wrapper && wrapper.querySelector('[data-newsletter-status]');
+        const confirmation = wrapper && wrapper.querySelector('[data-newsletter-confirmation]');
+        const confirmationMessage = wrapper && wrapper.querySelector('[data-newsletter-confirmation-message]');
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const email = String(new FormData(form).get('email') || '').trim();
+          const button = form.querySelector('button[type="submit"]');
+          if (button) button.disabled = true;
+          if (confirmation) confirmation.classList.add('hidden');
+          if (status) {
+            status.classList.remove('hidden');
+            status.textContent = 'Salvando sua inscricao...';
+          }
+          try {
+            const response = await fetch('/api/newsletter', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ email, sourcePath: window.location.pathname }),
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data.ok) throw new Error(data.error || 'Nao foi possivel assinar agora.');
+            form.reset();
+            form.classList.add('hidden');
+            if (status) {
+              status.classList.add('hidden');
+              status.textContent = '';
+            }
+            if (confirmation) {
+              confirmation.classList.remove('hidden');
+              if (confirmationMessage) {
+                confirmationMessage.textContent = data.emailSent
+                  ? 'Voce esta na lista. Enviamos uma mensagem de boas-vindas para seu e-mail.'
+                  : 'Voce esta na lista. A mensagem de boas-vindas sera enviada em breve.';
+              }
+            }
+          } catch (error) {
+            if (status) status.textContent = error instanceof Error ? error.message : 'Nao foi possivel assinar agora.';
+          } finally {
+            if (button) button.disabled = false;
+          }
+        });
+      });
     </script>
     ${themeToggleScript}
   </body>
