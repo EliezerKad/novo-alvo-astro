@@ -6,8 +6,8 @@ seoDescription: "Lifestyle: Levantamentos recentes sobre qualidade de vida coloc
 category: "Lifestyle"
 author: "Redação Novo Alvo"
 sources: ["https://www.gazetadopovo.com.br", "https://www.folhape.com.br", "https://www.agazeta.com.br"]
-publishedAt: "2026-05-25T19:07:22.960Z"
-updatedAt: "2026-05-25T19:07:23.147Z"
+publishedAt: "2026-05-25T19:07:42.607Z"
+updatedAt: "2026-05-25T19:07:42.759Z"
 featured: false
 isFeatured: false
 urgent: false
