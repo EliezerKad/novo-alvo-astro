@@ -160,7 +160,7 @@ const normalizeEditorialQuoteFlow = (html: string) => {
   );
 };
 
-const parseSources = (value: string): Array<{ name?: string; url?: string; note?: string } | string> => {
+const parseSources = (value: string): Array<{ name?: string; publisher?: string; title?: string; url?: string; sourceUrl?: string; note?: string } | string> => {
   try {
     const parsed = JSON.parse(value || '[]');
     return Array.isArray(parsed) ? parsed : [];
@@ -365,9 +365,10 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
           <ul class="flex flex-wrap gap-2 text-[9px] font-black uppercase tracking-[0.12em] text-zinc-500 dark:text-zinc-500">${sources
         .map((source) => {
           if (typeof source === 'string') return `<li class="rounded-md border border-black/10 bg-white/45 px-2 py-1 dark:border-zinc-800 dark:bg-zinc-900/60">${escapeHtml(source)}</li>`;
-          const label = source.name || source.url || 'Fonte';
-          return source.url
-            ? `<li class="rounded-md border border-black/10 bg-white/45 px-2 py-1 dark:border-zinc-800 dark:bg-zinc-900/60"><a href="${escapeHtml(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a></li>`
+          const label = source.name || source.publisher || source.title || source.url || source.sourceUrl || 'Fonte';
+          const url = source.url || source.sourceUrl || '';
+          return url
+            ? `<li class="rounded-md border border-black/10 bg-white/45 px-2 py-1 dark:border-zinc-800 dark:bg-zinc-900/60"><a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a></li>`
             : `<li class="rounded-md border border-black/10 bg-white/45 px-2 py-1 dark:border-zinc-800 dark:bg-zinc-900/60">${escapeHtml(label)}</li>`;
         })
         .join('')}</ul></div>`
