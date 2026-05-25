@@ -6,8 +6,8 @@ seoDescription: "Politica: Com a liberação das vaquinhas eleitorais, pré-cand
 category: "Politica"
 author: "Redação Novo Alvo"
 sources: ["https://agenciabrasil.ebc.com.br", "https://www.mpf.mp.br"]
-publishedAt: "2026-05-25T19:44:01.045Z"
-updatedAt: "2026-05-25T19:44:01.392Z"
+publishedAt: "2026-05-25T19:44:04.287Z"
+updatedAt: "2026-05-25T19:44:04.391Z"
 featured: false
 isFeatured: false
 urgent: false
