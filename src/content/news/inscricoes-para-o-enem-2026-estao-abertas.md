@@ -6,8 +6,8 @@ seoDescription: "Educacao: O Ministério da Educação e o Inep abriram as inscr
 category: "Educacao"
 author: "Redação Novo Alvo"
 sources: ["www.gov.br", "ipiranoticias.com", "Notícias de Três Lagoas - Rádio Caçula", "GP1", "Agência Brasil", "Guararema News", "THMais", "Quero Bolsa", "CartaCapital", "GuarulhosWeb", "Tribuna de Jundiaí", "viva.com.br", "DiviNews", "Mix Vale"]
-publishedAt: "2026-05-25T19:06:24.898Z"
-updatedAt: "2026-05-25T19:06:26.540Z"
+publishedAt: "2026-05-25T19:07:22.960Z"
+updatedAt: "2026-05-25T19:07:24.714Z"
 featured: false
 isFeatured: false
 urgent: false
