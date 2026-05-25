@@ -14,11 +14,11 @@ urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/financiamento-coletivo-abre-a-largada-pratica-das-campanhas-de-2026-cover.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/financiamento-coletivo-abre-a-largada-pratica-das-campanhas-de-2026-cover-20260525194404.avif"
   alt: "Financiamento coletivo abre a largada prática das campanhas de 2026"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/financiamento-coletivo-abre-a-largada-pratica-das-campanhas-de-2026-cover.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/financiamento-coletivo-abre-a-largada-pratica-das-campanhas-de-2026-cover-20260525194404.avif"
 tags: ["Eleições 2026", "Financiamento Coletivo", "Política"]
 ---
 

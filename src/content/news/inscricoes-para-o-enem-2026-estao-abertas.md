@@ -14,11 +14,11 @@ urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/inscricoes-para-o-enem-2026-estao-abertas-cover.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/inscricoes-para-o-enem-2026-estao-abertas-cover-20260525193218.avif"
   alt: "Fluxograma do Sistema de Seleção Unificada (Sisu), que utiliza a nota do Enem."
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/inscricoes-para-o-enem-2026-estao-abertas-cover.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/inscricoes-para-o-enem-2026-estao-abertas-cover-20260525193218.avif"
 tags: ["educacao", "inscricoes", "enem", "2026", "estao", "abertas"]
 ---
 
