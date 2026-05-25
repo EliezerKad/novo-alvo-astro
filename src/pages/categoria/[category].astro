@@ -96,7 +96,7 @@ const breadcrumbs = [
                   Mais acessadas em {categoryLabel}
                 </h3>
               </div>
-              <div class="space-y-4">
+              <div class="space-y-4" data-category-most-read-list>
                 {fallbackMostRead.map((article, index) => (
                   <a href={`/noticia/${article.slug}`} class="-mx-2 grid grid-cols-[74px_1fr] gap-3 rounded-2xl p-2 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#fbfaf7] hover:shadow-[0_18px_42px_rgba(16,16,16,0.065)] dark:hover:bg-zinc-900/70">
                     <div class="relative h-[58px] overflow-hidden rounded-2xl bg-[#ebe8df] shadow-sm dark:bg-zinc-800">
@@ -148,4 +148,74 @@ const breadcrumbs = [
       </div>
     </main>
   </div>
+
+  <script define:vars={{ category }}>
+    (() => {
+      const list = document.querySelector('[data-category-most-read-list]');
+      if (!list) return;
+
+      const escapeHtml = (value) =>
+        String(value || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+
+      const formatRelativeDate = (value) => {
+        const date = new Date(value || '');
+        if (Number.isNaN(date.getTime())) return '';
+        const diffMs = Date.now() - date.getTime();
+        const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
+        if (diffMinutes < 1) return 'agora';
+        if (diffMinutes < 60) return `ha ${diffMinutes} min`;
+        const diffHours = Math.floor(diffMinutes / 60);
+        if (diffHours < 24) return `ha ${diffHours}h`;
+        return `ha ${Math.floor(diffHours / 24)}d`;
+      };
+
+      const renderImage = (article) => {
+        if (!article.cover_url) {
+          return '<div class="grid h-full place-items-center text-zinc-300 dark:text-zinc-700"></div>';
+        }
+        return `<img src="${escapeHtml(article.cover_url)}" alt="${escapeHtml(article.cover_alt || article.title)}" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />`;
+      };
+
+      fetch(`/api/public/articles?limit=5&sort=views&category=${encodeURIComponent(category)}`)
+        .then((response) => (response.ok ? response.json() : { articles: [] }))
+        .then((data) => {
+          const ranked = Array.isArray(data.articles)
+            ? data.articles.filter((article) => article?.slug && Number(article.views || 0) > 0)
+            : [];
+          if (!ranked.length) return;
+
+          list.innerHTML = ranked
+            .slice(0, 5)
+            .map((article, index) => {
+              const views = Number(article.views || 0);
+              return `
+                <a href="/noticia/${encodeURIComponent(article.slug)}/" class="-mx-2 grid grid-cols-[74px_1fr] gap-3 rounded-2xl p-2 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#fbfaf7] hover:shadow-[0_18px_42px_rgba(16,16,16,0.065)] dark:hover:bg-zinc-900/70">
+                  <div class="relative h-[58px] overflow-hidden rounded-2xl bg-[#ebe8df] shadow-sm dark:bg-zinc-800">
+                    ${renderImage(article)}
+                    <span class="absolute left-1.5 top-1.5 rounded-full bg-zinc-950/75 px-1.5 py-0.5 text-[7px] font-black text-white backdrop-blur">${index + 1}</span>
+                  </div>
+                  <div class="min-w-0">
+                    <span class="mb-1 block w-fit rounded-md bg-[#8A1F2D]/10 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-widest text-[#8A1F2D]">${escapeHtml(article.category || category)}</span>
+                    <h4 class="line-clamp-2 font-sans text-sm font-black leading-[1.1] tracking-[-0.045em] text-zinc-950 transition-colors hover:text-[#8A1F2D] dark:text-zinc-100">${escapeHtml(article.title)}</h4>
+                    <div class="mt-1.5 flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-zinc-400">
+                      <span aria-hidden="true" class="inline-block h-2.5 w-2.5 rounded-full border border-current"></span>
+                      <span data-live-view-count="${escapeHtml(article.slug)}">${views} acessos</span>
+                      <span class="text-zinc-300">/</span>
+                      ${escapeHtml(formatRelativeDate(article.published_at || article.scheduled_at || article.updated_at))}
+                    </div>
+                  </div>
+                </a>
+              `;
+            })
+            .join('');
+          window.__novoAlvoHydrateViews?.(list);
+        })
+        .catch(() => {});
+    })();
+  </script>
 </BaseLayout>
