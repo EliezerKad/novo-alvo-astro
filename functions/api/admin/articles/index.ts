@@ -638,7 +638,8 @@ const publishMarkdownToGitHub = async (
       articleForMarkdown.coverUrl = r2Cover.publicPath;
       uploadedAssets.push(r2Cover.key);
     } else {
-      const assetPath = `public/uploads/news/${article.slug}-cover-${clean(article.updatedAt, 40).replace(/[^0-9]/g, '').slice(0, 14) || Date.now()}.${coverUpload.extension}`;
+      const assetName = `${article.slug}-cover-${clean(article.updatedAt, 40).replace(/[^0-9]/g, '').slice(0, 14) || Date.now()}.${coverUpload.extension}`;
+      const assetPath = `public/uploads/news/${assetName}`;
       await putGitHubFile({
         repository,
         branch,
@@ -647,7 +648,7 @@ const publishMarkdownToGitHub = async (
         message: `upload article cover: ${article.title}`,
         headers,
       });
-      articleForMarkdown.coverUrl = `/uploads/news/${article.slug}-cover.${coverUpload.extension}`;
+      articleForMarkdown.coverUrl = `/uploads/news/${assetName}`;
       uploadedAssets.push(assetPath);
     }
   } else {
@@ -658,7 +659,8 @@ const publishMarkdownToGitHub = async (
     } else {
       const remoteCoverUpload = await remoteImageToUpload(articleForMarkdown.coverUrl);
       if (remoteCoverUpload) {
-        const assetPath = `public/uploads/news/${article.slug}-cover-${clean(article.updatedAt, 40).replace(/[^0-9]/g, '').slice(0, 14) || Date.now()}.${remoteCoverUpload.extension}`;
+        const assetName = `${article.slug}-cover-${clean(article.updatedAt, 40).replace(/[^0-9]/g, '').slice(0, 14) || Date.now()}.${remoteCoverUpload.extension}`;
+        const assetPath = `public/uploads/news/${assetName}`;
         await putGitHubFile({
           repository,
           branch,
@@ -667,7 +669,7 @@ const publishMarkdownToGitHub = async (
           message: `mirror article cover: ${article.title}`,
           headers,
         });
-        articleForMarkdown.coverUrl = `/uploads/news/${article.slug}-cover.${remoteCoverUpload.extension}`;
+        articleForMarkdown.coverUrl = `/uploads/news/${assetName}`;
         uploadedAssets.push(assetPath);
       }
     }
