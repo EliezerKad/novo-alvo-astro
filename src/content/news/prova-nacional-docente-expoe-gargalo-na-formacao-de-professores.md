@@ -6,8 +6,8 @@ seoDescription: "Educacao: Resultados divulgados pelo MEC mostram que uma parcel
 category: "Educacao"
 author: "Redação Novo Alvo"
 sources: ["https://noticias.uol.com.br", "https://www.estadao.com.br/educacao/", "https://www.cartacapital.com.br/educacao/"]
-publishedAt: "2026-05-25T16:42:16.024Z"
-updatedAt: "2026-05-25T16:42:17.609Z"
+publishedAt: "2026-05-25T17:57:47.265Z"
+updatedAt: "2026-05-25T17:57:47.441Z"
 featured: false
 isFeatured: false
 urgent: false
