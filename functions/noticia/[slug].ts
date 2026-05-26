@@ -400,7 +400,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
               </div>
               <div>
                 <h3 class="text-sm font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50">${escapeHtml(item.title)}</h3>
-                <p class="mt-1 text-[11px] font-bold text-zinc-400">${escapeHtml(item.category || article.category)} • <span data-live-view-count="${escapeHtml(item.slug || '')}">0 acessos</span></p>
+                <p class="mt-1 text-[11px] font-bold text-zinc-400">${escapeHtml(item.category || article.category)} • <span data-live-view-count="${escapeHtml(item.slug || '')}">0 views</span></p>
               </div>
             </a>`;
           })
@@ -581,7 +581,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
             <p class="mt-5 max-w-3xl text-lg font-medium leading-7 text-zinc-600 dark:text-zinc-400 md:mt-6 md:text-2xl md:leading-9">${escapeHtml(article.summary || description)}</p>
             <div class="mt-6 flex flex-wrap gap-2 md:mt-8">
               <span class="inline-flex min-h-9 items-center rounded-full border border-black/10 bg-white px-3.5 text-[11px] font-extrabold text-zinc-600 shadow-[0_8px_24px_rgba(16,16,16,0.035)] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 md:min-h-10 md:px-4 md:text-xs"><strong class="mr-1 text-zinc-950 dark:text-zinc-50">${escapeHtml(formatEditorialDate(published))}</strong></span>
-              <span data-live-view-count="${escapeHtml(article.slug)}" class="inline-flex min-h-9 items-center rounded-full border border-black/10 bg-white px-3.5 text-[11px] font-extrabold text-zinc-600 shadow-[0_8px_24px_rgba(16,16,16,0.035)] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 md:min-h-10 md:px-4 md:text-xs">0 acessos</span>
+              <span data-live-view-count="${escapeHtml(article.slug)}" class="inline-flex min-h-9 items-center rounded-full border border-black/10 bg-white px-3.5 text-[11px] font-extrabold text-zinc-600 shadow-[0_8px_24px_rgba(16,16,16,0.035)] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 md:min-h-10 md:px-4 md:text-xs">0 views</span>
               <span class="inline-flex min-h-9 items-center rounded-full border border-black/10 bg-white px-3.5 text-[11px] font-extrabold text-zinc-600 shadow-[0_8px_24px_rgba(16,16,16,0.035)] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 md:min-h-10 md:px-4 md:text-xs">${escapeHtml(String(article.reading_minutes || 1))} min de leitura</span>
             </div>
             <div class="mt-6 inline-flex items-center gap-3 rounded-[1.25rem] border border-black/10 bg-white p-2.5 pr-4 shadow-[0_18px_50px_rgba(16,16,16,0.055)] dark:border-zinc-800 dark:bg-zinc-900 md:mt-8 md:rounded-[1.375rem] md:p-3 md:pr-5">
@@ -643,7 +643,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
           <div class="meta">
             <span class="cat">${escapeHtml(article.category)}</span>
             <span>${escapeHtml(formatPublished(published))}</span>
-            <span data-live-view-count="${escapeHtml(article.slug)}">0 acessos</span>
+            <span data-live-view-count="${escapeHtml(article.slug)}">0 views</span>
             <span>${escapeHtml(String(article.reading_minutes || 1))} min de leitura</span>
           </div>
           <h1>${escapeHtml(article.title)}</h1>
@@ -679,7 +679,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
             nodes.forEach((node) => {
               const slug = node.getAttribute('data-live-view-count');
               const value = Number(views[slug] || 0);
-              node.textContent = value + ' acessos';
+              node.textContent = value + ' views';
             });
           })
           .catch(() => {});

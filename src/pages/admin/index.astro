@@ -18,7 +18,7 @@ const cards = [
   { label: 'Publicadas', value: published, tone: 'bg-red-600' },
   { label: 'Destaques', value: featured, tone: 'bg-zinc-950 dark:bg-zinc-50 dark:text-zinc-950' },
   { label: 'Urgentes', value: urgent, tone: 'bg-amber-500' },
-  { label: 'Acessos editoriais', value: totalViews.toLocaleString('pt-BR'), tone: 'bg-emerald-600' },
+  { label: 'Views editoriais', value: totalViews.toLocaleString('pt-BR'), tone: 'bg-emerald-600' },
 ];
 ---
 
@@ -43,7 +43,7 @@ const cards = [
       {cards.map((card) => (
         <div class="rounded-[1.5rem] border border-white/80 bg-white/70 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(15,23,42,0.10)] dark:border-zinc-800 dark:bg-zinc-900/70">
           <div class={`mb-6 h-2 w-12 rounded-full ${card.tone}`}></div>
-          <strong class="block admin-display text-4xl" data-admin-total-views={card.label === 'Acessos editoriais' ? 'true' : undefined}>{card.value}</strong>
+          <strong class="block admin-display text-4xl" data-admin-total-views={card.label === 'Views editoriais' ? 'true' : undefined}>{card.value}</strong>
           <span class="mt-2 block text-[9px] font-black uppercase tracking-widest text-zinc-400">{card.label}</span>
         </div>
       ))}
@@ -92,7 +92,7 @@ const cards = [
                 <span class="admin-display text-3xl text-[#8A1F2D]">{index + 1}</span>
                 <div>
                   <p class="line-clamp-2 text-sm font-black leading-tight">{entry.data.title}</p>
-                  <p class="mt-1 text-[9px] font-black uppercase tracking-widest text-zinc-400">{(entry.data.views || 0).toLocaleString('pt-BR')} acessos</p>
+                  <p class="mt-1 text-[9px] font-black uppercase tracking-widest text-zinc-400">{(entry.data.views || 0).toLocaleString('pt-BR')} views</p>
                 </div>
               </a>
             ))}
@@ -123,7 +123,7 @@ const cards = [
             <span class="admin-display text-3xl text-[#8A1F2D]">${index + 1}</span>
             <div>
               <p class="line-clamp-2 text-sm font-black leading-tight">${escapeHtml(article.title)}</p>
-              <p class="mt-1 text-[9px] font-black uppercase tracking-widest text-zinc-400">${formatNumber(article.views)} acessos</p>
+              <p class="mt-1 text-[9px] font-black uppercase tracking-widest text-zinc-400">${formatNumber(article.views)} views</p>
             </div>
           </a>
         `,

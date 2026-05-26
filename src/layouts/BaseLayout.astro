@@ -187,7 +187,7 @@ const breadcrumbSchema = breadcrumbs.length > 0
               nodes.forEach((node) => {
                 const slug = node.dataset.liveViewCount || '';
                 const value = Number(views[slug] || 0);
-                node.textContent = node.dataset.viewFormat === 'number' ? String(value) : `${value} acessos`;
+                node.textContent = node.dataset.viewFormat === 'number' ? String(value) : `${value} views`;
               });
             } catch {}
           };

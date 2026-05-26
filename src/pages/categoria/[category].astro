@@ -128,7 +128,7 @@ const breadcrumbs = [
                       </h4>
                       <div class="mt-1.5 flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-zinc-400">
                         <Icon name="eye" class="h-2.5 w-2.5" />
-                        <span data-live-view-count={article.slug}>{article.views || 0} acessos</span>
+                        <span data-live-view-count={article.slug}>{article.views || 0} views</span>
                         <span class="text-zinc-300">/</span>
                         {formatRelativeDate(article.publishedAt)}
                       </div>
@@ -204,7 +204,7 @@ const breadcrumbs = [
                     <h4 class="line-clamp-2 font-sans text-sm font-black leading-[1.1] tracking-[-0.045em] text-zinc-950 transition-colors hover:text-[#8A1F2D] dark:text-zinc-100">${escapeHtml(article.title)}</h4>
                     <div class="mt-1.5 flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-zinc-400">
                       <span aria-hidden="true" class="inline-block h-2.5 w-2.5 rounded-full border border-current"></span>
-                      <span data-live-view-count="${escapeHtml(article.slug)}">${views} acessos</span>
+                      <span data-live-view-count="${escapeHtml(article.slug)}">${views} views</span>
                       <span class="text-zinc-300">/</span>
                       ${escapeHtml(formatRelativeDate(article.published_at || article.scheduled_at || article.updated_at))}
                     </div>
