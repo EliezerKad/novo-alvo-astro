@@ -42,7 +42,7 @@ export const onRequest = async ({
     return Response.redirect(`${CANONICAL_ORIGIN}${url.pathname}${url.search}`, 301);
   }
 
-  if (url.pathname.startsWith('/redacao') || url.pathname.startsWith('/api/admin')) {
+  if (url.pathname.startsWith('/redacao') || url.pathname.startsWith('/api/')) {
     const response = await next();
     return withRobotsHeader(response);
   }
