@@ -1,0 +1,242 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Newsletter | Portal Novo Alvo" active="newsletter">
+  <section class="space-y-6">
+    <header class="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/72 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-900/72">
+      <div class="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-red-500/10 blur-3xl"></div>
+      <div class="relative flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div class="space-y-3">
+          <span class="text-[10px] font-black uppercase tracking-[0.35em] text-red-600">Newsletter</span>
+          <h1 class="admin-display text-4xl md:text-6xl">Relatorio de e-mails</h1>
+          <p class="max-w-2xl text-sm font-medium leading-7 text-zinc-500 dark:text-zinc-400">
+            Acompanhamento de inscritos e eventos do Resend sem expor chave, comando ou PowerShell.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="inline-flex rounded-2xl bg-red-600 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-red-600/20 transition-all hover:-translate-y-0.5 hover:bg-red-700"
+          data-refresh-newsletter
+        >
+          Atualizar
+        </button>
+      </div>
+    </header>
+
+    <section class="grid grid-cols-1 gap-4 md:grid-cols-4" data-newsletter-cards>
+      {['Inscritos ativos', 'Enviados recentes', 'Abertos', 'Cliques'].map((label) => (
+        <div class="rounded-[1.5rem] border border-white/80 bg-white/70 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+          <div class="mb-6 h-2 w-12 rounded-full bg-red-600"></div>
+          <strong class="block admin-display text-4xl" data-newsletter-card={label}>--</strong>
+          <span class="mt-2 block text-[9px] font-black uppercase tracking-widest text-zinc-400">{label}</span>
+        </div>
+      ))}
+    </section>
+
+    <section class="grid grid-cols-1 gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+      <div class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-5 flex flex-col gap-3 border-b border-zinc-100 pb-4 dark:border-zinc-800 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 class="text-xs font-black uppercase tracking-[0.24em]">Ultimos envios</h2>
+            <p class="mt-2 text-xs font-bold text-zinc-400" data-newsletter-status>Carregando relatorio...</p>
+          </div>
+          <input
+            type="search"
+            class="h-11 rounded-2xl border border-zinc-200 bg-white/70 px-4 text-sm font-bold text-zinc-700 outline-none transition focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"
+            placeholder="Filtrar por assunto"
+            data-newsletter-filter
+          />
+        </div>
+        <div class="overflow-hidden rounded-[1.35rem] border border-zinc-100 dark:border-zinc-800">
+          <div class="grid grid-cols-[1.2fr_0.8fr_110px] gap-3 bg-zinc-50 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-400 dark:bg-zinc-950/50">
+            <span>Assunto</span>
+            <span>Destino</span>
+            <span>Status</span>
+          </div>
+          <div class="divide-y divide-zinc-100 dark:divide-zinc-800" data-newsletter-email-list>
+            <div class="px-4 py-5 text-sm font-bold text-zinc-400">Carregando...</div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="space-y-6">
+        <section class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+          <h2 class="mb-5 text-xs font-black uppercase tracking-[0.24em]">Base local</h2>
+          <div class="space-y-3" data-newsletter-subscribers>
+            <p class="text-sm font-bold text-zinc-400">Carregando inscritos...</p>
+          </div>
+        </section>
+
+        <section class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+          <h2 class="mb-5 text-xs font-black uppercase tracking-[0.24em]">Broadcasts</h2>
+          <div class="space-y-3" data-newsletter-broadcasts>
+            <p class="text-sm font-bold text-zinc-400">Carregando broadcasts...</p>
+          </div>
+        </section>
+      </aside>
+    </section>
+  </section>
+</AdminLayout>
+
+<script is:inline>
+  const formatNumber = (value) => Number(value || 0).toLocaleString('pt-BR');
+  const formatDate = (value) => {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  };
+  const escapeHtml = (value) =>
+    String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+  const statusTone = (event) => {
+    if (event === 'opened' || event === 'clicked') return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300';
+    if (event === 'bounced' || event === 'complained') return 'bg-red-100 text-red-700 dark:bg-red-400/10 dark:text-red-300';
+    if (event === 'delivered') return 'bg-blue-100 text-blue-700 dark:bg-blue-400/10 dark:text-blue-300';
+    return 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-300';
+  };
+
+  const getToken = () => {
+    try {
+      return localStorage.getItem('admin-token') || '';
+    } catch {
+      return '';
+    }
+  };
+
+  const setCard = (label, value) => {
+    const node = document.querySelector(`[data-newsletter-card="${label}"]`);
+    if (node) node.textContent = formatNumber(value);
+  };
+
+  const renderEmails = (rows) => {
+    const root = document.querySelector('[data-newsletter-email-list]');
+    if (!root) return;
+    if (!Array.isArray(rows) || rows.length === 0) {
+      root.innerHTML = '<div class="px-4 py-5 text-sm font-bold text-zinc-400">Nenhum envio encontrado.</div>';
+      return;
+    }
+    root.innerHTML = rows
+      .map((email) => {
+        const to = Array.isArray(email.to) ? email.to.join(', ') : '';
+        return `
+          <div class="grid grid-cols-[1.2fr_0.8fr_110px] gap-3 px-4 py-4 text-sm">
+            <div class="min-w-0">
+              <p class="truncate font-black text-zinc-950 dark:text-zinc-50">${escapeHtml(email.subject || 'Sem assunto')}</p>
+              <p class="mt-1 text-[10px] font-bold uppercase tracking-widest text-zinc-400">${escapeHtml(formatDate(email.createdAt))}</p>
+            </div>
+            <p class="min-w-0 truncate text-xs font-bold text-zinc-500 dark:text-zinc-400">${escapeHtml(to)}</p>
+            <span class="h-fit rounded-full px-3 py-2 text-center text-[9px] font-black uppercase tracking-widest ${statusTone(email.lastEvent)}">${escapeHtml(email.lastEvent)}</span>
+          </div>
+        `;
+      })
+      .join('');
+  };
+
+  const renderMap = (selector, data) => {
+    const root = document.querySelector(selector);
+    if (!root) return;
+    const entries = Object.entries(data || {});
+    if (!entries.length) {
+      root.innerHTML = '<p class="text-sm font-bold text-zinc-400">Sem dados ainda.</p>';
+      return;
+    }
+    root.innerHTML = entries
+      .map(
+        ([key, value]) => `
+          <div class="flex items-center justify-between rounded-2xl bg-white/55 px-4 py-3 dark:bg-zinc-950/35">
+            <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400">${escapeHtml(key)}</span>
+            <strong class="text-sm font-black">${formatNumber(value)}</strong>
+          </div>
+        `,
+      )
+      .join('');
+  };
+
+  const renderBroadcasts = (rows, error) => {
+    const root = document.querySelector('[data-newsletter-broadcasts]');
+    if (!root) return;
+    if (error) {
+      root.innerHTML = `<p class="text-sm font-bold leading-6 text-zinc-400">${escapeHtml(error)}</p>`;
+      return;
+    }
+    if (!Array.isArray(rows) || rows.length === 0) {
+      root.innerHTML = '<p class="text-sm font-bold text-zinc-400">Nenhum broadcast encontrado.</p>';
+      return;
+    }
+    root.innerHTML = rows
+      .slice(0, 6)
+      .map(
+        (broadcast) => `
+          <div class="rounded-2xl bg-white/55 px-4 py-3 dark:bg-zinc-950/35">
+            <p class="truncate text-xs font-black">${escapeHtml(broadcast.id)}</p>
+            <p class="mt-1 text-[10px] font-black uppercase tracking-widest text-zinc-400">${escapeHtml(broadcast.status || 'sem status')} ${broadcast.sent_at ? `- ${escapeHtml(formatDate(broadcast.sent_at))}` : ''}</p>
+          </div>
+        `,
+      )
+      .join('');
+  };
+
+  const loadReport = async () => {
+    const status = document.querySelector('[data-newsletter-status]');
+    const filter = document.querySelector('[data-newsletter-filter]');
+    const subject = filter instanceof HTMLInputElement ? filter.value.trim() : '';
+    if (status) status.textContent = 'Atualizando relatorio...';
+    const params = new URLSearchParams();
+    if (subject) params.set('subject', subject);
+    const response = await fetch(`/api/admin/resend-report?${params.toString()}`, {
+      cache: 'no-store',
+      headers: { authorization: `Bearer ${getToken()}` },
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) {
+      throw new Error(data.detail || data.error || 'Nao foi possivel carregar o relatorio.');
+    }
+
+    const eventCounts = data.emails?.eventCounts || {};
+    const rows = data.emails?.rows || [];
+    const opened = Number(eventCounts.opened || 0) + Number(eventCounts.clicked || 0);
+    setCard('Inscritos ativos', data.subscribers?.subscribed || 0);
+    setCard('Enviados recentes', rows.length || 0);
+    setCard('Abertos', opened);
+    setCard('Cliques', eventCounts.clicked || 0);
+    renderEmails(rows);
+    renderMap('[data-newsletter-subscribers]', data.subscribers || {});
+    renderBroadcasts(data.broadcasts?.rows || [], data.broadcasts?.error || '');
+    if (status) status.textContent = `Atualizado em ${formatDate(data.generatedAt)}.`;
+  };
+
+  document.querySelector('[data-refresh-newsletter]')?.addEventListener('click', () => {
+    loadReport().catch((error) => {
+      const status = document.querySelector('[data-newsletter-status]');
+      if (status) status.textContent = error instanceof Error ? error.message : 'Falha ao carregar.';
+    });
+  });
+
+  let filterTimer;
+  document.querySelector('[data-newsletter-filter]')?.addEventListener('input', () => {
+    window.clearTimeout(filterTimer);
+    filterTimer = window.setTimeout(() => {
+      loadReport().catch((error) => {
+        const status = document.querySelector('[data-newsletter-status]');
+        if (status) status.textContent = error instanceof Error ? error.message : 'Falha ao carregar.';
+      });
+    }, 450);
+  });
+
+  loadReport().catch((error) => {
+    const status = document.querySelector('[data-newsletter-status]');
+    if (status) status.textContent = error instanceof Error ? error.message : 'Falha ao carregar.';
+  });
+</script>
