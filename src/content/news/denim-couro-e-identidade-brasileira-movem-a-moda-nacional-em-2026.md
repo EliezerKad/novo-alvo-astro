@@ -6,19 +6,19 @@ seoDescription: "Moda brasileira em 2026 aposta em denim, couro, sustentabilidad
 category: "Moda"
 author: "Redação Novo Alvo"
 sources: ["GPS Brasília - Ronda da Moda Nacional", "FebraTêxtil - mudança para maio de 2026", "ELLE Brasil - Dia Mundial do Jeans 2026", "CLAUDIA - tendências de jeans 2026", "Estado de Minas - jeans em 2026", "BE News - jeans e mercado", "Ministério da Cultura - Plano Setorial da Moda"]
-publishedAt: "2026-05-26T14:36:54.838Z"
-updatedAt: "2026-05-26T14:36:55.276Z"
+publishedAt: "2026-05-26T14:36:58.658Z"
+updatedAt: "2026-05-26T14:36:58.810Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/denim-couro-e-identidade-brasileira-movem-a-moda-nacional-em-2026-cover-20260526143655.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/denim-couro-e-identidade-brasileira-movem-a-moda-nacional-em-2026-cover-20260526143658.avif"
   alt: "Modelo em passarela com luzes de desfile de moda"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/denim-couro-e-identidade-brasileira-movem-a-moda-nacional-em-2026-cover-20260526143655.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/denim-couro-e-identidade-brasileira-movem-a-moda-nacional-em-2026-cover-20260526143658.avif"
 tags: ["moda", "denim", "jeans", "moda-brasileira", "sustentabilidade"]
 ---
 
