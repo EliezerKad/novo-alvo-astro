@@ -97,7 +97,7 @@ const breadcrumbs = [
                 </h3>
               </div>
               <div class="space-y-4" data-category-most-read-list>
-                {fallbackMostRead.map((article, index) => (
+                {fallbackMostRead.map((article) => (
                   <a href={`/noticia/${article.slug}`} class="-mx-2 grid grid-cols-[74px_1fr] gap-3 rounded-2xl p-2 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#fbfaf7] hover:shadow-[0_18px_42px_rgba(16,16,16,0.065)] dark:hover:bg-zinc-900/70">
                     <div class="relative h-[58px] overflow-hidden rounded-2xl bg-[#ebe8df] shadow-sm dark:bg-zinc-800">
                       {article.imageUrl ? (
@@ -115,9 +115,6 @@ const breadcrumbs = [
                           <Icon name="image" class="h-5 w-5 opacity-20" />
                         </div>
                       )}
-                      <span class="absolute left-1.5 top-1.5 rounded-full bg-zinc-950/75 px-1.5 py-0.5 text-[7px] font-black text-white backdrop-blur">
-                        {index + 1}
-                      </span>
                     </div>
                     <div class="min-w-0">
                       <span class="mb-1 block w-fit rounded-md bg-[#8A1F2D]/10 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-widest text-[#8A1F2D]">
@@ -191,13 +188,12 @@ const breadcrumbs = [
 
           list.innerHTML = ranked
             .slice(0, 5)
-            .map((article, index) => {
+            .map((article) => {
               const views = Number(article.views || 0);
               return `
                 <a href="/noticia/${encodeURIComponent(article.slug)}/" class="-mx-2 grid grid-cols-[74px_1fr] gap-3 rounded-2xl p-2 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#fbfaf7] hover:shadow-[0_18px_42px_rgba(16,16,16,0.065)] dark:hover:bg-zinc-900/70">
                   <div class="relative h-[58px] overflow-hidden rounded-2xl bg-[#ebe8df] shadow-sm dark:bg-zinc-800">
                     ${renderImage(article)}
-                    <span class="absolute left-1.5 top-1.5 rounded-full bg-zinc-950/75 px-1.5 py-0.5 text-[7px] font-black text-white backdrop-blur">${index + 1}</span>
                   </div>
                   <div class="min-w-0">
                     <span class="mb-1 block w-fit rounded-md bg-[#8A1F2D]/10 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-widest text-[#8A1F2D]">${escapeHtml(article.category || category)}</span>
