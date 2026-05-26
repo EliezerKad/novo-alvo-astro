@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <rect width="1200" height="630" fill="#18181b"/>
-  <circle cx="600" cy="270" r="105" fill="none" stroke="#dc2626" stroke-width="18"/>
-  <line x1="600" y1="145" x2="600" y2="205" stroke="#dc2626" stroke-width="14"/>
-  <line x1="600" y1="335" x2="600" y2="395" stroke="#dc2626" stroke-width="14"/>
-  <line x1="475" y1="270" x2="535" y2="270" stroke="#dc2626" stroke-width="14"/>
-  <line x1="665" y1="270" x2="725" y2="270" stroke="#dc2626" stroke-width="14"/>
-  <rect x="580" y="250" width="40" height="40" fill="#dc2626"/>
+  <circle cx="600" cy="270" r="105" fill="none" stroke="#8A1F2D" stroke-width="18"/>
+  <line x1="600" y1="145" x2="600" y2="205" stroke="#8A1F2D" stroke-width="14"/>
+  <line x1="600" y1="335" x2="600" y2="395" stroke="#8A1F2D" stroke-width="14"/>
+  <line x1="475" y1="270" x2="535" y2="270" stroke="#8A1F2D" stroke-width="14"/>
+  <line x1="665" y1="270" x2="725" y2="270" stroke="#8A1F2D" stroke-width="14"/>
+  <rect x="580" y="250" width="40" height="40" fill="#8A1F2D"/>
   <text x="600" y="475" text-anchor="middle" fill="#fafafa" font-family="Georgia, serif" font-size="86" font-weight="900">NOVO ALVO</text>
   <text x="600" y="525" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="22" font-weight="900" letter-spacing="8">FATOS E IMPACTO 24H</text>
 </svg>

@@ -76,7 +76,7 @@ const themeBootScript = `<script>
 
 const themeToggleButton = `<button
               type="button"
-              class="w-10 h-10 shrink-0 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center border border-zinc-200 dark:border-zinc-700 shadow-sm hover:bg-red-600 hover:border-red-600 hover:text-white dark:hover:text-white transition-all text-zinc-700 dark:text-zinc-200"
+              class="w-10 h-10 shrink-0 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center border border-zinc-200 dark:border-zinc-700 shadow-sm hover:bg-[#8A1F2D] hover:border-[#8A1F2D] hover:text-white dark:hover:text-white transition-all text-zinc-700 dark:text-zinc-200"
               title="Modo Escuro"
               aria-label="Ativar modo escuro"
               data-theme-toggle
@@ -554,7 +554,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
       <nav class="fixed top-0 inset-x-0 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl z-50 border-b border-zinc-100 dark:border-zinc-800 py-4 lg:py-6">
         <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
           <a href="/" class="group flex items-center gap-2 text-zinc-900 dark:text-zinc-50">
-            <div class="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center group-hover:bg-red-600 group-hover:text-white transition-all">
+            <div class="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center group-hover:bg-[#8A1F2D] group-hover:text-white transition-all">
               <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
             </div>
             <span class="hidden md:block font-black uppercase tracking-widest text-[10px]">Voltar</span>
@@ -565,7 +565,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
           </a>
           <div class="flex items-center gap-2">
             ${themeToggleButton}
-            <a href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-zinc-100 dark:bg-zinc-800 hover:bg-red-600 hover:text-white dark:text-zinc-400" title="Compartilhar">↗</a>
+            <a href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-zinc-100 dark:bg-zinc-800 hover:bg-[#8A1F2D] hover:text-white dark:text-zinc-400" title="Compartilhar">↗</a>
           </div>
         </div>
       </nav>
