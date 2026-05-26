@@ -6,19 +6,19 @@ seoDescription: "Ocorrencias: Dois estudantes brasileiros de medicina foram pres
 category: "Ocorrencias"
 author: "Redação Novo Alvo"
 sources: ["Metrópoles", "G1", "Diário da Manhã", "TNOnline", "band.com.br", "Campo Grande News", "Terra", "BBC"]
-publishedAt: "2026-05-26T06:01:45.361Z"
-updatedAt: "2026-05-26T06:01:45.550Z"
+publishedAt: "2026-05-26T06:36:08.226Z"
+updatedAt: "2026-05-26T06:36:09.497Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/estudantes-de-medicina-sao-presos-com-r-150-mil-em-emagrecedores-ilegais-em-foz-do-iguacu-cover-20260526060145.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/estudantes-de-medicina-sao-presos-com-r-150-mil-em-emagrecedores-ilegais-em-foz-do-iguacu-cover-20260526063609.avif"
   alt: "Agentes da Receita Federal fiscalizam a Aduana da Ponte Internacional da Amizade, na fronteira entre Brasil e Paraguai."
   caption: "Credito: Unsplash"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/estudantes-de-medicina-sao-presos-com-r-150-mil-em-emagrecedores-ilegais-em-foz-do-iguacu-cover-20260526060145.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/estudantes-de-medicina-sao-presos-com-r-150-mil-em-emagrecedores-ilegais-em-foz-do-iguacu-cover-20260526063609.avif"
 tags: ["brasil", "paraguai", "alunos", "brasileiros", "presos", "ampolas", "emagrecedoras"]
 ---
 
