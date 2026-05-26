@@ -6,8 +6,8 @@ seoDescription: "Cultura: Com habilitação de propostas e avanço da Cultura Vi
 category: "Cultura"
 author: "Redação Novo Alvo"
 sources: ["Ministério da Cultura - Rouanet no Interior", "Ministério da Cultura - 15 mil Pontos de Cultura", "Ministério da Cultura - Pontão de Culturas Indígenas", "Ministério da Cultura - Ano Cultural Brasil-China 2026", "Ministério da Cultura - TEIA Nacional", "Ministério da Cultura - Plano Nacional do Livro e Leitura", "Ministério do Turismo - tendências e cultura local"]
-publishedAt: "2026-05-26T13:10:29.491Z"
-updatedAt: "2026-05-26T13:10:29.638Z"
+publishedAt: "2026-05-26T13:19:07.243Z"
+updatedAt: "2026-05-26T13:19:07.643Z"
 featured: false
 isFeatured: false
 urgent: false
