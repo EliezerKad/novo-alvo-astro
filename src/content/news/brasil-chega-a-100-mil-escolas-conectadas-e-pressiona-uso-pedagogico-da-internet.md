@@ -6,19 +6,19 @@ seoDescription: "Brasil ultrapassa 100 mil escolas públicas com internet gratui
 category: "Tecnologia"
 author: "Redação Novo Alvo"
 sources: ["Ministério das Comunicações - 100 mil escolas conectadas", "Secretaria de Comunicação - Escolas Conectadas em 2025", "Secretaria de Comunicação - conectividade adequada chega a 70%", "Poder360 - governo diz que 100 mil escolas têm internet adequada", "TCU - auditoria sobre conectividade escolar", "BNDES - edital para conectar escolas no Norte e Nordeste", "MEC - Estratégia Nacional de Escolas Conectadas"]
-publishedAt: "2026-05-26T16:56:32.770Z"
-updatedAt: "2026-05-26T16:56:33.234Z"
+publishedAt: "2026-05-26T16:57:40.978Z"
+updatedAt: "2026-05-26T16:57:41.150Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/brasil-chega-a-100-mil-escolas-conectadas-e-pressiona-uso-pedagogico-da-internet-cover-20260526165633.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/brasil-chega-a-100-mil-escolas-conectadas-e-pressiona-uso-pedagogico-da-internet-cover-20260526165741.avif"
   alt: "Sala de aula com estudantes e computadores"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/brasil-chega-a-100-mil-escolas-conectadas-e-pressiona-uso-pedagogico-da-internet-cover-20260526165633.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/brasil-chega-a-100-mil-escolas-conectadas-e-pressiona-uso-pedagogico-da-internet-cover-20260526165741.avif"
 tags: ["tecnologia", "educacao", "internet", "escolas-conectadas", "mec"]
 ---
 
