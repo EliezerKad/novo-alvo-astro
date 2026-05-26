@@ -116,6 +116,9 @@ const subjectTokens = (value) =>
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .replace(/\bdjoko\b/g, 'djokovic')
+      .replace(/\basteroides\b/g, 'asteroide')
+      .replace(/\baproximacoes?\b/g, 'aproximacao')
+      .replace(/\bpassagens?\b/g, 'passagem')
       .replace(/[^a-z0-9]+/g, ' ')
       .split(/\s+/)
       .map((token) => token.trim())
@@ -209,10 +212,10 @@ const toPublishedSubject = (article) => ({
 const listPublishedSubjects = async () => {
   const bySlug = new Map();
   for (const article of d1(
-    `SELECT slug, title, summary, category, published_at, updated_at
+    `SELECT slug, title, summary, category, status, published_at, scheduled_at, updated_at
      FROM articles
-     WHERE status = 'published'
-     ORDER BY COALESCE(NULLIF(published_at, ''), updated_at) DESC
+     WHERE status IN ('published', 'scheduled')
+     ORDER BY COALESCE(NULLIF(published_at, ''), NULLIF(scheduled_at, ''), updated_at) DESC
      LIMIT 400`,
   )) {
     if (article?.slug) bySlug.set(article.slug, article);
