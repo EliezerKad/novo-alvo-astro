@@ -6,19 +6,19 @@ seoDescription: "Alertas de asteroides próximos da Terra reforçam a importânc
 category: "Ciencia"
 author: "Redação Novo Alvo"
 sources: ["NASA - Center for Near Earth Object Studies", "NASA - Planetary Defense", "ESA - Near-Earth Objects", "Minor Planet Center", "International Asteroid Warning Network", "NASA/JPL - Small-Body Database", "UNOOSA - Space Mission Planning Advisory Group"]
-publishedAt: "2026-05-26T19:43:09.126Z"
-updatedAt: "2026-05-26T19:43:09.529Z"
+publishedAt: "2026-05-26T19:44:33.442Z"
+updatedAt: "2026-05-26T19:44:33.600Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/vigilancia-de-asteroides-ganha-forca-com-novas-alertas-de-aproximacao-cover-20260526194309.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/vigilancia-de-asteroides-ganha-forca-com-novas-alertas-de-aproximacao-cover-20260526194433.avif"
   alt: "Imagem da Terra vista do espaço"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/vigilancia-de-asteroides-ganha-forca-com-novas-alertas-de-aproximacao-cover-20260526194309.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/vigilancia-de-asteroides-ganha-forca-com-novas-alertas-de-aproximacao-cover-20260526194433.avif"
 tags: ["ciencia", "asteroides", "espaco", "nasa", "esa"]
 ---
 
