@@ -6,19 +6,19 @@ seoDescription: "Turismo brasileiro registra alta em 2026 e reforça impacto eco
 category: "Economia"
 author: "Redação Novo Alvo"
 sources: ["Ministério do Turismo - Dia Nacional do Turismo", "Ministério do Turismo - Revista Tendências 2026", "Secretaria de Comunicação - Salão do Turismo", "Revista Turismo Brasil 2026", "Ministério do Turismo - publicação de tendências", "Ministério da Cultura - Ano Cultural Brasil-China", "Ministério das Comunicações - conectividade e inclusão"]
-publishedAt: "2026-05-26T17:50:22.390Z"
-updatedAt: "2026-05-26T17:50:22.552Z"
+publishedAt: "2026-05-26T17:51:28.269Z"
+updatedAt: "2026-05-26T17:51:28.412Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/turismo-brasileiro-vive-melhor-momento-e-vira-vetor-economico-em-2026-cover-20260526175022.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/turismo-brasileiro-vive-melhor-momento-e-vira-vetor-economico-em-2026-cover-20260526175128.avif"
   alt: "Vista aérea do Rio de Janeiro com montanhas e mar"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/turismo-brasileiro-vive-melhor-momento-e-vira-vetor-economico-em-2026-cover-20260526175022.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/turismo-brasileiro-vive-melhor-momento-e-vira-vetor-economico-em-2026-cover-20260526175128.avif"
 tags: ["economia", "turismo", "viagens", "brasil", "cultura-local"]
 ---
 
