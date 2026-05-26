@@ -7,36 +7,24 @@ category: "Saude"
 author: "Redação Novo Alvo"
 sources: ["Agência Brasil", "Empresa Brasil de Comunicação (EBC)", "Tribuna do Sertão", "Folha do Estado da Bahia", "Perfil Multi", "Extra online", "Oeste Mais", "Éder Luiz Notícias", "www.gov.br", "Aratu On", "WH3", "Clic Camaquã", "Vanity Brasil", "Rádio Itatiaia"]
 publishedAt: "2026-05-26T00:17:21.760Z"
-updatedAt: "2026-05-26T00:17:22.027Z"
+updatedAt: "2026-05-26T00:30:47.956Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/anvisa-aprova-novo-medicamento-para-doenca-de-parkinson-cover-20260526001722.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/anvisa-aprova-novo-medicamento-para-doenca-de-parkinson-cover-20260526003047.avif"
   alt: "Representação de neurônios e símbolo da psiquiatria"
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/anvisa-aprova-novo-medicamento-para-doenca-de-parkinson-cover-20260526001722.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/anvisa-aprova-novo-medicamento-para-doenca-de-parkinson-cover-20260526003047.avif"
 tags: ["saude", "anvisa", "aprova", "novo", "medicamento", "doenca", "parkinson"]
 ---
 
 <p>A Agência Nacional de Vigilância Sanitária (Anvisa) deu um passo importante no tratamento da doença de Parkinson ao aprovar o registro do Vyalev, um novo medicamento destinado a pacientes em estágio avançado da condição.</p><p>A decisão, publicada nesta segunda-feira (25), visa oferecer uma alternativa terapêutica para indivíduos que enfrentam flutuações motoras graves e debilitantes, e que não obtiveram resposta adequada às terapias atualmente disponíveis no mercado brasileiro.</p>
 <h2>Nova Esperança para Pacientes Avançados</h2>
-<p>O Vyalev associa as substâncias foslevodopa e foscarbidopa hidratada, com o objetivo principal de reduzir as variações na resposta ao tratamento, um desafio comum nas fases mais avançadas da doença de Parkinson.</p><figure data-editor-media="image"data-align="left"data-media-size="medium"data-credit=""contenteditable="false">
-        <div class="media-controls">
-          <button type="button"data-media-action="caption">Legenda</button>
-          <button type="button"data-media-action="credit">Crédito</button>
-          <button type="button"data-media-action="left">Esq.</button>
-          <button type="button"data-media-action="center">Centro</button>
-          <button type="button"data-media-action="right">Dir.</button>
-          <button type="button"data-media-action="small">P</button>
-          <button type="button"data-media-action="medium">M</button>
-          <button type="button"data-media-action="large">Full</button>
-          <button type="button"data-media-action="remove">Remover</button>
-        </div>
-      <img src="/media/news/anvisa-aprova-novo-medicamento-para-doenca-de-parkinson-1.png"alt="Representação de neurônios e símbolo da psiquiatria"><figcaption><span data-caption="">Representação de neurônios e símbolo da psiquiatria</span><span class="media-credit"data-credit-label=""></span></figcaption></figure><p><br></p><p>Essas oscilações motoras alternam períodos de controle dos sintomas, como tremores e rigidez muscular, com momentos de perda de eficácia, quando os sinais da doença se intensificam de forma imprevisível.</p>
+<p>O Vyalev associa as substâncias foslevodopa e foscarbidopa hidratada, com o objetivo principal de reduzir as variações na resposta ao tratamento, um desafio comum nas fases mais avançadas da doença de Parkinson.</p><p><br></p><p>Essas oscilações motoras alternam períodos de controle dos sintomas, como tremores e rigidez muscular, com momentos de perda de eficácia, quando os sinais da doença se intensificam de forma imprevisível.</p>
 <h2>Mecanismo de Ação e Administração Contínua</h2>
 <p>O mecanismo de ação do Vyalev busca justamente evitar essas oscilações, proporcionando maior estabilidade clínica. Diferente das terapias convencionais, o novo medicamento é administrado por meio de uma infusão subcutânea contínua.</p><p>Essa tecnologia garante a liberação da medicação durante 24 horas por dia, mantendo níveis mais estáveis no organismo e, consequentemente, um controle mais consistente dos sintomas motores.</p>
 <h2>Entendendo as Flutuações Motoras</h2>
