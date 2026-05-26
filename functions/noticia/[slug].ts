@@ -560,7 +560,16 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
             <span class="hidden md:block font-black uppercase tracking-widest text-[10px]">Voltar</span>
           </a>
           <a href="/" class="group flex items-center gap-2 text-zinc-900 dark:text-zinc-50" aria-label="Portal Novo Alvo">
-            <img src="/favicon.svg" alt="" class="h-8 w-8 md:h-9 md:w-9" />
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" class="h-8 w-8 text-[#8A1F2D] transition-colors group-hover:text-[#501620] md:h-9 md:w-9" aria-hidden="true">
+              <circle cx="250" cy="250" r="209" fill="none" stroke="currentColor" stroke-width="29"></circle>
+              <line x1="250" y1="21" x2="250" y2="114" stroke="currentColor" stroke-width="21"></line>
+              <line x1="250" y1="386" x2="250" y2="479" stroke="currentColor" stroke-width="21"></line>
+              <line x1="21" y1="250" x2="114" y2="250" stroke="currentColor" stroke-width="21"></line>
+              <line x1="386" y1="250" x2="479" y2="250" stroke="currentColor" stroke-width="21"></line>
+              <line x1="275.5" y1="275.5" x2="338.7" y2="338.7" stroke="currentColor" stroke-width="21" stroke-linecap="butt"></line>
+              <line x1="224.5" y1="224.5" x2="161.3" y2="161.3" stroke="currentColor" stroke-width="21" stroke-linecap="butt"></line>
+              <rect x="214" y="214" width="72" height="72" fill="currentColor"></rect>
+            </svg>
             <span class="text-2xl font-serif font-black tracking-tighter leading-none transition-colors group-hover:text-[#501620] md:text-[1.7rem]">NOVO ALVO</span>
           </a>
           <div class="flex items-center gap-2">
