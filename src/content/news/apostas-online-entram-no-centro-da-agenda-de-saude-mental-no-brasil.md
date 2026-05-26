@@ -6,19 +6,19 @@ seoDescription: "Brasil amplia ações sobre apostas online e saúde mental com 
 category: "Saude"
 author: "Redação Novo Alvo"
 sources: ["Ministério da Saúde - curso sobre apostas e saúde mental", "Ministério da Saúde - debate na OMS sobre apostas eletrônicas", "Ministério da Saúde - teleatendimento gratuito pelo SUS", "Ministério da Saúde - guia nacional sobre apostas online", "Ministério da Saúde - Pesquisa Nacional de Saúde Mental", "O Liberal - curso da Fiocruz sobre apostas e saúde mental", "CBN Recife - 20 mil vagas em curso da Fiocruz"]
-publishedAt: "2026-05-26T12:24:23.109Z"
-updatedAt: "2026-05-26T12:24:23.260Z"
+publishedAt: "2026-05-26T12:29:15.824Z"
+updatedAt: "2026-05-26T12:29:16.129Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/apostas-online-entram-no-centro-da-agenda-de-saude-mental-no-brasil-cover-20260526122423.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/apostas-online-entram-no-centro-da-agenda-de-saude-mental-no-brasil-cover-20260526122916.avif"
   alt: "Pessoa usando celular com tela iluminada em ambiente escuro"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/apostas-online-entram-no-centro-da-agenda-de-saude-mental-no-brasil-cover-20260526122423.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/apostas-online-entram-no-centro-da-agenda-de-saude-mental-no-brasil-cover-20260526122916.avif"
 tags: ["saude", "apostas-online", "bets", "saude-mental", "sus", "fiocruz"]
 ---
 
