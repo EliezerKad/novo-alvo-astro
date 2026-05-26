@@ -7,18 +7,18 @@ category: "Brasil"
 author: "Redação Novo Alvo"
 sources: ["Gilberto Léda", "Bahia Na Política", "Blog do Bruno Muniz", "Blog do Esmael", "AM POST", "Anota Bahia", "Studio Notícias", "News Cariri", "News Rondônia", "Valor Econômico", "Aratu On", "VEJA", "oreporter.com", "O Imparcial"]
 publishedAt: "2026-05-26T00:26:35.229Z"
-updatedAt: "2026-05-26T00:26:35.524Z"
+updatedAt: "2026-05-26T00:26:54.617Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://source.unsplash.com/1600x900/?dino%2Cnega%2Cpedido%2Csoltura%2Cdeolane%2Cbezerra%2Cbrazil%2Ccity%2Cpeople"
+  src: "https://portalnovoalvo.com.br/media/news/ministro-flavio-dino-mantem-deolane-presa-em-investigacao-de-lavagem-para-o-pcc-cover-20260526002654.webp"
   alt: "Ministro Flávio Dino e a influenciadora Deolane Bezerra"
   caption: "Credito: Unsplash"
   layout: "full"
-ogImage: "https://source.unsplash.com/1600x900/?dino%2Cnega%2Cpedido%2Csoltura%2Cdeolane%2Cbezerra%2Cbrazil%2Ccity%2Cpeople"
+ogImage: "https://portalnovoalvo.com.br/media/news/ministro-flavio-dino-mantem-deolane-presa-em-investigacao-de-lavagem-para-o-pcc-cover-20260526002654.webp"
 tags: ["brasil", "dino", "nega", "pedido", "soltura", "deolane", "bezerra"]
 ---
 
