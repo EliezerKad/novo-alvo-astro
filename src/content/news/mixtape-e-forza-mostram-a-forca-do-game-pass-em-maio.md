@@ -2,23 +2,23 @@
 title: "Mixtape e Forza mostram a força do Game Pass em maio"
 slug: "mixtape-e-forza-mostram-a-forca-do-game-pass-em-maio"
 summary: "A combinação entre lançamento de grande orçamento e aventura narrativa ajuda a explicar por que maio virou um mês estratégico para o serviço da Microsoft."
-seoDescription: "Game Pass ganha força em maio com Forza Horizon 6, Mixtape e novos jogos, combinando escala, catálogo e lançamentos no primeiro dia."
+seoDescription: "Games: A combinação entre lançamento de grande orçamento e aventura narrativa ajuda a explicar por que maio virou um mês estratégico para o serviço da…"
 category: "Games"
 author: "Redação Novo Alvo"
 sources: ["Canaltech - Game Pass recebe Forza Horizon 6 e Mixtape", "Xbox - Forza Horizon 6", "Forza.net - lançamento de Forza Horizon 6", "Gematsu - Forza Horizon 6 goes gold", "Windows Central - Forza Horizon 6 no Game Pass", "GamesRadar - recepção de Mixtape", "Adrenaline - lançamentos de maio de 2026"]
-publishedAt: "2026-05-26T11:33:50.801Z"
-updatedAt: "2026-05-26T11:33:52.883Z"
+publishedAt: "2026-05-26T11:33:54.500Z"
+updatedAt: "2026-05-26T11:58:46.095Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/mixtape-e-forza-mostram-a-forca-do-game-pass-em-maio-cover-20260526113352.avif"
+  src: "https://portalnovoalvo.com.br/media/news/mixtape-e-forza-mostram-a-forca-do-game-pass-em-maio-cover-20260526115846.webp"
   alt: "Controle de videogame diante de uma tela colorida"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/mixtape-e-forza-mostram-a-forca-do-game-pass-em-maio-cover-20260526113352.avif"
+ogImage: "https://portalnovoalvo.com.br/media/news/mixtape-e-forza-mostram-a-forca-do-game-pass-em-maio-cover-20260526115846.webp"
 tags: ["games", "game-pass", "xbox", "mixtape", "forza-horizon-6"]
 ---
 
