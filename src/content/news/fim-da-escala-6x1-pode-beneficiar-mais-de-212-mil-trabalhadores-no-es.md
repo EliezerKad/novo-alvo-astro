@@ -2,13 +2,13 @@
 title: "Fim da escala 6x1: Mais de 1 milhão de trabalhadores podem ser beneficiados"
 slug: "fim-da-escala-6x1-pode-beneficiar-mais-de-212-mil-trabalhadores-no-es"
 summary: "Abolição da escala 6x1 promete impactar positivamente a vida de centenas de milhares de trabalhadores em diversos estados brasileiros, com estimativas apontando para mais de 1 milhão de pessoas beneficiadas."
-seoDescription: "Abolição da escala 6x1 promete impactar positivamente a vida de centenas de milhares de trabalhadores em diversos estados brasileiros, com estimativas"
+seoDescription: "Brasil: Abolição da escala 6x1 promete impactar positivamente a vida de centenas de milhares de trabalhadores em diversos estados brasileiros, com…"
 category: "Brasil"
 author: "Redação Novo Alvo"
 sources: ["Folha Vitória", "TC Online", "Portal do Holanda", "Em Dia ES", "Site Aracruz", "A Gazeta", "Conexão Tocantins", "A Crítica", "Diário do Amapá", "Jornal Pequeno", "O POVO+", "CNN Brasil", "Brasil de Fato", "O GLOBO"]
 publishedAt: "2026-05-26T15:55:41.799Z"
-updatedAt: "2026-05-26T15:55:41.969Z"
-featured: false
+updatedAt: "2026-05-26T17:18:59.207Z"
+featured: true
 isFeatured: false
 urgent: false
 homeSection: ""
