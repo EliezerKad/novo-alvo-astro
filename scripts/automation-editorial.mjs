@@ -201,17 +201,30 @@ const listNewPitchesFromD1 = () =>
      LIMIT 100`,
   );
 
-const listPublishedSubjects = () =>
-  d1(
+const toPublishedSubject = (article) => ({
+  ...article,
+  tokens: subjectTokens(`${article.category || ''} ${article.title || ''} ${article.summary || ''}`),
+});
+
+const listPublishedSubjects = async () => {
+  const bySlug = new Map();
+  for (const article of d1(
     `SELECT slug, title, summary, category, published_at, updated_at
      FROM articles
      WHERE status = 'published'
      ORDER BY COALESCE(NULLIF(published_at, ''), updated_at) DESC
      LIMIT 400`,
-  ).map((article) => ({
-    ...article,
-    tokens: subjectTokens(`${article.category || ''} ${article.title || ''} ${article.summary || ''}`),
-  }));
+  )) {
+    if (article?.slug) bySlug.set(article.slug, article);
+  }
+
+  const publicData = await publicJson('/api/public/articles?limit=400').catch(() => ({ articles: [] }));
+  for (const article of publicData.articles || []) {
+    if (article?.slug && !bySlug.has(article.slug)) bySlug.set(article.slug, article);
+  }
+
+  return [...bySlug.values()].map(toPublishedSubject);
+};
 
 const duplicateForPitch = (pitch, publishedSubjects) => {
   const pitchTokens = subjectTokens(
@@ -350,7 +363,7 @@ const main = async () => {
         return { pitches: listNewPitchesFromD1() };
       })
     : { pitches: listNewPitchesFromD1() };
-  const publishedSubjects = listPublishedSubjects();
+  const publishedSubjects = await listPublishedSubjects();
   const duplicates = [];
   const uniquePitches = [];
   const categoryBackfill = [];
