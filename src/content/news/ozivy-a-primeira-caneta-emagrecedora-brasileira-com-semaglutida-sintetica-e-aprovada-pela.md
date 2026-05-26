@@ -6,19 +6,19 @@ seoDescription: "Saude: Agência Nacional de Vigilância Sanitária autoriza Ozi
 category: "Saude"
 author: "Redação Novo Alvo"
 sources: ["VEJA", "TVBV ONLINE", "Diario de Pernambuco", "barbacenatem.com.br", "Jovem Pan", "Rádio Pampa", "Xataka Brasil", "R7", "Agenda Capital", "Portal 98 FM Natal", "MSN", "Hoje em Dia", "Agora RS", "Agora RN"]
-publishedAt: "2026-05-26T20:26:44.836Z"
-updatedAt: "2026-05-26T20:26:45.302Z"
+publishedAt: "2026-05-26T20:59:34.817Z"
+updatedAt: "2026-05-26T20:59:35.327Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/ozivy-a-primeira-caneta-emagrecedora-brasileira-com-semaglutida-sintetica-e-aprovada-pela-cover-20260526202645.webp"
+  src: "https://portalnovoalvo.com.br/media/news/ozivy-a-primeira-caneta-emagrecedora-brasileira-com-semaglutida-sintetica-e-aprovada-pela-cover-20260526205935.webp"
   alt: "Logotipo da Anvisa ao lado de uma caneta de medicamento e símbolos de saúde."
   caption: "Credito: Unsplash"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/ozivy-a-primeira-caneta-emagrecedora-brasileira-com-semaglutida-sintetica-e-aprovada-pela-cover-20260526202645.webp"
+ogImage: "https://portalnovoalvo.com.br/media/news/ozivy-a-primeira-caneta-emagrecedora-brasileira-com-semaglutida-sintetica-e-aprovada-pela-cover-20260526205935.webp"
 tags: ["saude", "anvisa", "aprova", "primeira", "caneta", "emagrecedora", "brasileira"]
 ---
 
