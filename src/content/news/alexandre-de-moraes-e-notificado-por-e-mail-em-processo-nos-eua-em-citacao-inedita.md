@@ -6,8 +6,8 @@ seoDescription: "Mundo: Ministro do STF Alexandre de Moraes recebeu notificaçã
 category: "Mundo"
 author: "Redação Novo Alvo"
 sources: ["SpaceMoney", "Pagina1mt", "Agência Brasil", "Diário Goianiense", "G1", "Correio Braziliense", "RCWTV", "Opina News", "R7", "CenárioMT", "CNN Brasil", "Fato Paulista", "UOL Notícias", "O TEMPO"]
-publishedAt: "2026-05-26T00:34:32.888Z"
-updatedAt: "2026-05-26T00:34:33.045Z"
+publishedAt: "2026-05-26T00:44:28.100Z"
+updatedAt: "2026-05-26T00:44:28.240Z"
 featured: false
 isFeatured: false
 urgent: false
