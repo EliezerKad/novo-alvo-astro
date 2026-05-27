@@ -6,19 +6,19 @@ seoDescription: "Depois da expansão da conectividade escolar, o desafio passa a
 category: "Educacao"
 author: "Redacao Novo Alvo"
 sources: ["Ministério da Educação", "Ministério das Comunicações", "Agência Brasil", "Cetic.br", "NIC.br", "Unesco", "Todos Pela Educação"]
-publishedAt: "2026-05-27T17:05:28.118Z"
-updatedAt: "2026-05-27T17:05:30.530Z"
+publishedAt: "2026-05-27T17:08:04.003Z"
+updatedAt: "2026-05-27T17:08:05.867Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/educacao-conectada-entra-na-fase-mais-dificil-transformar-internet-em-aprendizagem-cover-20260527170530.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/educacao-conectada-entra-na-fase-mais-dificil-transformar-internet-em-aprendizagem-cover-20260527170805.avif"
   alt: "Sala de aula com estudantes usando computadores"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/educacao-conectada-entra-na-fase-mais-dificil-transformar-internet-em-aprendizagem-cover-20260527170530.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/educacao-conectada-entra-na-fase-mais-dificil-transformar-internet-em-aprendizagem-cover-20260527170805.avif"
 tags: ["educacao", "internet", "escola", "professores", "inclusao digital"]
 ---
 
