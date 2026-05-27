@@ -6,8 +6,8 @@ seoDescription: "Cultura: A rede de Pontos de Cultura reforça uma mudança de f
 category: "Cultura"
 author: "Redação Novo Alvo"
 sources: ["Ministério da Cultura", "Agência Brasil", "Itaú Cultural", "Observatório Itaú Cultural", "IBGE", "Cetic.br", "Unesco"]
-publishedAt: "2026-05-27T19:32:12.140Z"
-updatedAt: "2026-05-27T19:32:12.279Z"
+publishedAt: "2026-05-27T19:40:20.800Z"
+updatedAt: "2026-05-27T19:40:20.987Z"
 featured: false
 isFeatured: false
 urgent: false
