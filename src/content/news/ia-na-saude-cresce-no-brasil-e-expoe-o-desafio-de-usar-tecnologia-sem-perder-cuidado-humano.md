@@ -6,8 +6,8 @@ seoDescription: "Saude: Pesquisa TIC Saúde mostra avanço da inteligência arti
 category: "Saude"
 author: "Redação Novo Alvo"
 sources: ["Agência Brasil", "CGI.br", "Cetic.br", "NIC.br", "Ministério da Saúde", "OPAS", "Organização Mundial da Saúde"]
-publishedAt: "2026-05-27T15:51:25.027Z"
-updatedAt: "2026-05-27T15:51:25.205Z"
+publishedAt: "2026-05-27T15:58:02.324Z"
+updatedAt: "2026-05-27T15:58:02.694Z"
 featured: false
 isFeatured: false
 urgent: false
