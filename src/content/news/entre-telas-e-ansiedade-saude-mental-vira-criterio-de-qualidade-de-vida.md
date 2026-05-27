@@ -6,19 +6,19 @@ seoDescription: "O debate sobre bem-estar deixou de ser nicho e entrou na rotina
 category: "Lifestyle"
 author: "Redacao Novo Alvo"
 sources: ["Organização Mundial da Saúde", "OPAS", "Ministério da Saúde", "Cetic.br", "NIC.br", "Sociedade Brasileira de Psicologia", "Unicef"]
-publishedAt: "2026-05-27T23:34:31.024Z"
-updatedAt: "2026-05-27T23:34:33.913Z"
+publishedAt: "2026-05-27T23:36:23.576Z"
+updatedAt: "2026-05-27T23:36:26.331Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/entre-telas-e-ansiedade-saude-mental-vira-criterio-de-qualidade-de-vida-cover-20260527233433.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/entre-telas-e-ansiedade-saude-mental-vira-criterio-de-qualidade-de-vida-cover-20260527233626.avif"
   alt: "Pessoa descansando em ambiente calmo com luz natural"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/entre-telas-e-ansiedade-saude-mental-vira-criterio-de-qualidade-de-vida-cover-20260527233433.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/entre-telas-e-ansiedade-saude-mental-vira-criterio-de-qualidade-de-vida-cover-20260527233626.avif"
 tags: ["lifestyle", "saude mental", "bem-estar", "telas", "rotina"]
 ---
 
