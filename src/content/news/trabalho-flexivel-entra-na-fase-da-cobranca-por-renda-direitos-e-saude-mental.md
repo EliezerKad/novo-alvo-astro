@@ -6,19 +6,19 @@ seoDescription: "A economia de plataformas amadureceu, mas a promessa de autonom
 category: "Economia"
 author: "Redacao Novo Alvo"
 sources: ["IBGE", "Ipea", "Organização Internacional do Trabalho", "Ministério do Trabalho e Emprego", "DIEESE", "Fundação Seade", "Agência Brasil"]
-publishedAt: "2026-05-27T22:15:42.266Z"
-updatedAt: "2026-05-27T22:15:42.438Z"
+publishedAt: "2026-05-27T22:27:26.316Z"
+updatedAt: "2026-05-27T22:27:26.880Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/trabalho-flexivel-entra-na-fase-da-cobranca-por-renda-direitos-e-saude-mental-cover-20260527221542.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/trabalho-flexivel-entra-na-fase-da-cobranca-por-renda-direitos-e-saude-mental-cover-20260527222726.avif"
   alt: "Profissionais reunidos em mesa de trabalho com notebooks"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/trabalho-flexivel-entra-na-fase-da-cobranca-por-renda-direitos-e-saude-mental-cover-20260527221542.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/trabalho-flexivel-entra-na-fase-da-cobranca-por-renda-direitos-e-saude-mental-cover-20260527222726.avif"
 tags: ["trabalho", "economia", "plataformas", "renda", "saude mental"]
 ---
 
