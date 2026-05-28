@@ -6,19 +6,19 @@ seoDescription: "Famosos: A nova fase dos famosos combina aparições calculadas
 category: "Famosos"
 author: "Redação Novo Alvo"
 sources: ["Quem", "Caras", "Marie Claire Brasil", "Gshow", "Folha Ilustrada", "UOL Splash", "CNN Pop"]
-publishedAt: "2026-05-28T16:26:49.205Z"
-updatedAt: "2026-05-28T16:26:49.474Z"
+publishedAt: "2026-05-28T17:26:14.966Z"
+updatedAt: "2026-05-28T17:26:15.372Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/celebridades-trocam-exposicao-total-por-controle-de-narrativa-nas-redes-cover-20260528162649.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/celebridades-trocam-exposicao-total-por-controle-de-narrativa-nas-redes-cover-20260528172615.avif"
   alt: "Fotógrafos registrando celebridade em evento"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/celebridades-trocam-exposicao-total-por-controle-de-narrativa-nas-redes-cover-20260528162649.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/celebridades-trocam-exposicao-total-por-controle-de-narrativa-nas-redes-cover-20260528172615.avif"
 tags: ["famosos", "celebridades", "redes sociais", "imagem publica"]
 ---
 
