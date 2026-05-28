@@ -108,7 +108,7 @@ const welcomeHtml = (origin: string, token: string, email: string) => {
 
       <div style="background:#fff;border:1px solid #e8e1d8;border-radius:24px;padding:42px 36px;box-shadow:0 18px 55px rgba(24,24,27,0.08)">
         <p style="margin:0 0 20px;font-size:16px;line-height:1.75;color:#2f2f2f">${greeting}</p>
-        <h1 style="font-family:Arial,Helvetica,sans-serif;font-size:34px;line-height:1.08;margin:0 0 28px;letter-spacing:-0.04em;color:#101010">O que importa, do jeito que d&aacute; vontade de ler</h1>
+        <h1 style="font-family:Arial,Helvetica,sans-serif;font-size:32px;line-height:1.12;margin:0 0 28px;letter-spacing:-0.04em;color:#101010">Bem-vindo ao Portal Novo Alvo</h1>
 
         <p style="margin:0 0 20px;font-size:16px;line-height:1.78;color:#2b2b2b">O Novo Alvo nasceu para ser um portal de informa&ccedil;&atilde;o r&aacute;pida, precisa e sem ru&iacute;do.</p>
         <p style="margin:0 0 20px;font-size:16px;line-height:1.78;color:#2b2b2b">A gente sabe como &eacute; f&aacute;cil se perder entre manchetes apressadas, opini&atilde;o disfar&ccedil;ada de not&iacute;cia e conte&uacute;do feito s&oacute; para disputar aten&ccedil;&atilde;o. Por isso, nossa proposta &eacute; simples: reunir o que importa, explicar com contexto e entregar uma leitura que respeite o seu tempo.</p>
@@ -118,7 +118,7 @@ const welcomeHtml = (origin: string, token: string, email: string) => {
         <p style="margin:0 0 30px;font-size:16px;line-height:1.78;color:#2b2b2b">A ideia n&atilde;o &eacute; correr atr&aacute;s de cada tend&ecirc;ncia, nem repetir o que aparece em todo lugar. &Eacute; olhar para os fatos com cuidado, escolher boas pautas e transformar informa&ccedil;&atilde;o em uma leitura &uacute;til, clara e poss&iacute;vel de acompanhar.</p>
 
         <p style="margin:0">
-          <a href="mailto:contato@portalnovoalvo.com.br?subject=Pauta%20para%20o%20Portal%20Novo%20Alvo" style="display:inline-block;background:#8A1F2D;color:#fff;text-decoration:none;font-weight:800;border-radius:999px;padding:15px 22px">Falar com a reda&ccedil;&atilde;o</a>
+          <a href="${origin}/" style="display:inline-block;background:#8A1F2D;color:#fff;text-decoration:none;font-weight:800;border-radius:999px;padding:15px 22px">Acessar o portal</a>
         </p>
       </div>
 
