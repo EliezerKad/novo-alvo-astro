@@ -6,19 +6,19 @@ seoDescription: "Com jogos decisivos, viagens e convocações, o futebol brasile
 category: "Futebol"
 author: "Redacao Novo Alvo"
 sources: ["CBF", "ge", "ESPN Brasil", "UOL Esporte", "Lance", "Gazeta Esportiva", "Estadão Esportes"]
-publishedAt: "2026-05-28T14:20:20.701Z"
-updatedAt: "2026-05-28T14:20:20.871Z"
+publishedAt: "2026-05-28T14:21:49.056Z"
+updatedAt: "2026-05-28T14:21:49.459Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/calendario-aperta-clubes-e-transforma-gestao-fisica-em-assunto-central-do-futebol-cover-20260528142020.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/calendario-aperta-clubes-e-transforma-gestao-fisica-em-assunto-central-do-futebol-cover-20260528142149.avif"
   alt: "Campo de futebol visto do alto com jogadores em atividade"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/calendario-aperta-clubes-e-transforma-gestao-fisica-em-assunto-central-do-futebol-cover-20260528142020.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/calendario-aperta-clubes-e-transforma-gestao-fisica-em-assunto-central-do-futebol-cover-20260528142149.avif"
 tags: ["futebol", "calendario", "brasileirao", "clubes", "preparacao"]
 ---
 
