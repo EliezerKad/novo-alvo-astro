@@ -6,8 +6,8 @@ seoDescription: "Musica: Paris Jackson, filha de Michael Jackson, ganha destaque
 category: "Musica"
 author: "Redação Novo Alvo"
 sources: ["Antena 1", "Regional Paulista", "MSN", "Portal Tela", "Mix Vale", "diariodopara.com.br", "Globo", "CNN Brasil"]
-publishedAt: "2026-05-28T22:30:33.331Z"
-updatedAt: "2026-05-28T22:30:36.637Z"
+publishedAt: "2026-05-28T22:59:24.201Z"
+updatedAt: "2026-05-28T22:59:26.622Z"
 featured: false
 isFeatured: false
 urgent: false
