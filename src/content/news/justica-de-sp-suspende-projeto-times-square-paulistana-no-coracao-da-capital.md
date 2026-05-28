@@ -2,23 +2,23 @@
 title: "Justiça de SP suspende projeto 'Times Square Paulistana' no coração da capital"
 slug: "justica-de-sp-suspende-projeto-times-square-paulistana-no-coracao-da-capital"
 summary: "A Justiça de São Paulo suspendeu o projeto 'Times Square Paulistana', que previa painéis de LED no cruzamento das avenidas Ipiranga e São João, citando impacto urbano e potencial dano à população."
-seoDescription: "Tecnologia: A Justiça de São Paulo suspendeu o projeto 'Times Square Paulistana', que previa painéis de LED no cruzamento das avenidas Ipiranga e São João…"
-category: "Tecnologia"
+seoDescription: "Brasil: A Justiça de São Paulo suspendeu o projeto 'Times Square Paulistana', que previa painéis de LED no cruzamento das avenidas Ipiranga e São João…"
+category: "Brasil"
 author: "Redação Novo Alvo"
 sources: ["Meio e Mensagem", "Portal iG", "Surgiu", "Meio Norte", "Metrópoles", "DComercio", "CartaCapital", "Portal Chapada Grande", "G1", "Jovem Pan"]
 publishedAt: "2026-05-28T12:18:52.473Z"
-updatedAt: "2026-05-28T12:18:55.810Z"
+updatedAt: "2026-05-28T12:19:07.103Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/justica-de-sp-suspende-projeto-times-square-paulistana-no-coracao-da-capital-cover-20260528121855.jpg"
+  src: "https://portalnovoalvo.com.br/media/news/justica-de-sp-suspende-projeto-times-square-paulistana-no-coracao-da-capital-cover-20260528121907.jpg"
   alt: "Governador Tarcísio de Freitas, um dos anunciantes do projeto Boulevard São João."
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/justica-de-sp-suspende-projeto-times-square-paulistana-no-coracao-da-capital-cover-20260528121855.jpg"
+ogImage: "https://portalnovoalvo.com.br/media/news/justica-de-sp-suspende-projeto-times-square-paulistana-no-coracao-da-capital-cover-20260528121907.jpg"
 tags: ["tecnologia", "justica", "suspende", "projeto", "times", "square", "paulistana"]
 ---
 
