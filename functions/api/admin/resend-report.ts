@@ -28,6 +28,20 @@ type SubscriberRow = {
   total?: number;
 };
 
+type CampaignTotals = {
+  total?: number;
+  subscribed?: number;
+  unsubscribed?: number;
+  sent?: number;
+  pending?: number;
+  unsubscribed_after_send?: number;
+};
+
+type UnsubscribedRow = {
+  email?: string;
+  updated_at?: string;
+};
+
 const json = (body: unknown, init: ResponseInit = {}) =>
   new Response(JSON.stringify(body), {
     ...init,
@@ -93,7 +107,7 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
   const subjectFilter = clean(url.searchParams.get('subject'), 120).toLowerCase();
 
   try {
-    const [emailsResponse, broadcastsResponse, subscriberTotals] = await Promise.all([
+    const [emailsResponse, broadcastsResponse, subscriberTotals, campaignTotals, recentUnsubscribes] = await Promise.all([
       resendFetch(apiKey, '/emails'),
       resendFetch(apiKey, '/broadcasts').catch((error) => ({ data: [], error: error instanceof Error ? error.message : String(error) })),
       env.EDITORIAL_DB
@@ -104,6 +118,35 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
           )
             .bind()
             .all<SubscriberRow>()
+            .catch(() => ({ results: [] }))
+        : Promise.resolve({ results: [] }),
+      env.EDITORIAL_DB
+        ? env.EDITORIAL_DB.prepare(
+            `SELECT
+                COUNT(*) AS total,
+                SUM(CASE WHEN status = 'subscribed' THEN 1 ELSE 0 END) AS subscribed,
+                SUM(CASE WHEN status = 'unsubscribed' THEN 1 ELSE 0 END) AS unsubscribed,
+                SUM(CASE WHEN last_auto_response_at IS NOT NULL AND last_auto_response_at != '' THEN 1 ELSE 0 END) AS sent,
+                SUM(CASE WHEN last_auto_response_at IS NULL OR last_auto_response_at = '' THEN 1 ELSE 0 END) AS pending,
+                SUM(CASE WHEN status = 'unsubscribed' AND last_auto_response_at IS NOT NULL AND last_auto_response_at != '' THEN 1 ELSE 0 END) AS unsubscribed_after_send
+               FROM newsletter_subscribers`,
+          )
+            .bind()
+            .first<CampaignTotals>()
+            .catch(() => null)
+        : Promise.resolve(null),
+      env.EDITORIAL_DB
+        ? env.EDITORIAL_DB.prepare(
+            `SELECT email, updated_at
+               FROM newsletter_subscribers
+              WHERE status = 'unsubscribed'
+                AND last_auto_response_at IS NOT NULL
+                AND last_auto_response_at != ''
+              ORDER BY updated_at DESC
+              LIMIT 8`,
+          )
+            .bind()
+            .all<UnsubscribedRow>()
             .catch(() => ({ results: [] }))
         : Promise.resolve({ results: [] }),
     ]);
@@ -149,6 +192,22 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
         error: 'error' in broadcastsResponse ? broadcastsResponse.error : '',
       },
       subscribers,
+      campaign: {
+        total: safeNumber(campaignTotals?.total),
+        subscribed: safeNumber(campaignTotals?.subscribed),
+        unsubscribed: safeNumber(campaignTotals?.unsubscribed),
+        sent: safeNumber(campaignTotals?.sent),
+        pending: safeNumber(campaignTotals?.pending),
+        unsubscribedAfterSend: safeNumber(campaignTotals?.unsubscribed_after_send),
+        unsubscribeRate:
+          safeNumber(campaignTotals?.sent) > 0
+            ? Number(((safeNumber(campaignTotals?.unsubscribed_after_send) / safeNumber(campaignTotals?.sent)) * 100).toFixed(2))
+            : 0,
+        recentUnsubscribes: (recentUnsubscribes.results || []).map((row) => ({
+          email: clean(row.email, 254),
+          updatedAt: clean(row.updated_at, 80),
+        })),
+      },
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {

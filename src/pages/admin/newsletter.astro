@@ -25,7 +25,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     </header>
 
     <section class="grid grid-cols-1 gap-4 md:grid-cols-4" data-newsletter-cards>
-      {['Inscritos ativos', 'Enviados recentes', 'Abertos', 'Cliques'].map((label) => (
+      {['Inscritos ativos', 'Enviados campanha', 'Pendentes', 'Descadastros'].map((label) => (
         <div class="rounded-[1.5rem] border border-white/80 bg-white/70 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
           <div class="mb-6 h-2 w-12 rounded-full bg-red-600"></div>
           <strong class="block admin-display text-4xl" data-newsletter-card={label}>--</strong>
@@ -61,6 +61,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       </div>
 
       <aside class="space-y-6">
+        <section class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+          <h2 class="mb-5 text-xs font-black uppercase tracking-[0.24em]">Campanha atual</h2>
+          <div class="space-y-3" data-newsletter-campaign>
+            <p class="text-sm font-bold text-zinc-400">Carregando campanha...</p>
+          </div>
+        </section>
+
         <section class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
           <h2 class="mb-5 text-xs font-black uppercase tracking-[0.24em]">Base local</h2>
           <div class="space-y-3" data-newsletter-subscribers>
@@ -188,6 +195,53 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       .join('');
   };
 
+  const renderCampaign = (campaign) => {
+    const root = document.querySelector('[data-newsletter-campaign]');
+    if (!root) return;
+    if (!campaign) {
+      root.innerHTML = '<p class="text-sm font-bold text-zinc-400">Sem dados ainda.</p>';
+      return;
+    }
+    const rows = [
+      ['Total da base', campaign.total || 0],
+      ['Enviados marcados', campaign.sent || 0],
+      ['Pendentes', campaign.pending || 0],
+      ['Descadastros pos-envio', `${formatNumber(campaign.unsubscribedAfterSend || 0)} (${Number(campaign.unsubscribeRate || 0).toLocaleString('pt-BR')}%)`],
+    ];
+    const recent = Array.isArray(campaign.recentUnsubscribes) ? campaign.recentUnsubscribes : [];
+    root.innerHTML = `
+      ${rows
+        .map(
+          ([key, value]) => `
+            <div class="flex items-center justify-between rounded-2xl bg-white/55 px-4 py-3 dark:bg-zinc-950/35">
+              <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400">${escapeHtml(key)}</span>
+              <strong class="text-sm font-black">${escapeHtml(value)}</strong>
+            </div>
+          `,
+        )
+        .join('')}
+      ${
+        recent.length
+          ? `<div class="pt-2">
+              <p class="mb-2 text-[10px] font-black uppercase tracking-widest text-zinc-400">Ultimos descadastros</p>
+              <div class="space-y-2">
+                ${recent
+                  .map(
+                    (item) => `
+                      <div class="rounded-2xl bg-red-50/70 px-4 py-3 dark:bg-red-950/15">
+                        <p class="truncate text-xs font-black text-zinc-800 dark:text-zinc-100">${escapeHtml(item.email)}</p>
+                        <p class="mt-1 text-[10px] font-bold uppercase tracking-widest text-zinc-400">${escapeHtml(formatDate(item.updatedAt))}</p>
+                      </div>
+                    `,
+                  )
+                  .join('')}
+              </div>
+            </div>`
+          : ''
+      }
+    `;
+  };
+
   const loadReport = async () => {
     const status = document.querySelector('[data-newsletter-status]');
     const filter = document.querySelector('[data-newsletter-filter]');
@@ -204,14 +258,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       throw new Error(data.detail || data.error || 'Nao foi possivel carregar o relatorio.');
     }
 
-    const eventCounts = data.emails?.eventCounts || {};
     const rows = data.emails?.rows || [];
-    const opened = Number(eventCounts.opened || 0) + Number(eventCounts.clicked || 0);
-    setCard('Inscritos ativos', data.subscribers?.subscribed || 0);
-    setCard('Enviados recentes', rows.length || 0);
-    setCard('Abertos', opened);
-    setCard('Cliques', eventCounts.clicked || 0);
+    setCard('Inscritos ativos', data.campaign?.subscribed || data.subscribers?.subscribed || 0);
+    setCard('Enviados campanha', data.campaign?.sent || 0);
+    setCard('Pendentes', data.campaign?.pending || 0);
+    setCard('Descadastros', data.campaign?.unsubscribedAfterSend || 0);
     renderEmails(rows);
+    renderCampaign(data.campaign || {});
     renderMap('[data-newsletter-subscribers]', data.subscribers || {});
     renderBroadcasts(data.broadcasts?.rows || [], data.broadcasts?.error || '');
     if (status) status.textContent = `Atualizado em ${formatDate(data.generatedAt)}.`;
