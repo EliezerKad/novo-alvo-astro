@@ -6,8 +6,8 @@ seoDescription: "Cinema: A presença internacional anima o setor, mas o desafio 
 category: "Cinema"
 author: "Redação Novo Alvo"
 sources: ["Ancine", "Festival de Cannes", "Agência Brasil", "Tela Viva", "AdoroCinema", "Omelete", "Folha Ilustrada"]
-publishedAt: "2026-05-28T22:08:30.293Z"
-updatedAt: "2026-05-28T22:08:33.309Z"
+publishedAt: "2026-05-28T22:08:30.277Z"
+updatedAt: "2026-05-28T22:08:34.309Z"
 featured: false
 isFeatured: false
 urgent: false
