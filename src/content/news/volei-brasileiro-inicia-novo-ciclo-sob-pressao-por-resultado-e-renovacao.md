@@ -6,19 +6,19 @@ seoDescription: "Entre Liga das Nações, renovação de elenco e expectativa ol
 category: "Esportes"
 author: "Redacao Novo Alvo"
 sources: ["CBV", "Volleyball World", "Comitê Olímpico do Brasil", "ge", "UOL Esporte", "ESPN Brasil", "Agência Brasil"]
-publishedAt: "2026-05-28T20:07:58.638Z"
-updatedAt: "2026-05-28T20:08:02.893Z"
+publishedAt: "2026-05-28T20:10:35.905Z"
+updatedAt: "2026-05-28T20:10:39.553Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/volei-brasileiro-inicia-novo-ciclo-sob-pressao-por-resultado-e-renovacao-cover-20260528200802.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/volei-brasileiro-inicia-novo-ciclo-sob-pressao-por-resultado-e-renovacao-cover-20260528201039.avif"
   alt: "Jogadores de vôlei disputando bola próxima à rede"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/volei-brasileiro-inicia-novo-ciclo-sob-pressao-por-resultado-e-renovacao-cover-20260528200802.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/volei-brasileiro-inicia-novo-ciclo-sob-pressao-por-resultado-e-renovacao-cover-20260528201039.avif"
 tags: ["esportes", "volei", "selecao brasileira", "liga das nacoes"]
 ---
 
