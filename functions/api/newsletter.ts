@@ -81,50 +81,60 @@ const inferFirstName = (email: string) => {
     'renata',
     'thiago',
   ]);
-  if (names.has(firstToken)) return firstToken === 'joao' ? 'João' : titleCase(firstToken);
+  if (names.has(firstToken)) return firstToken === 'joao' ? 'Jo&atilde;o' : titleCase(firstToken);
   return '';
 };
 
 const welcomeHtml = (origin: string, token: string, email: string) => {
   const firstName = inferFirstName(email);
-  const greeting = firstName ? `Olá, ${firstName}.` : 'Olá.';
+  const greeting = firstName ? `Ol&aacute;, ${firstName}.` : 'Ol&aacute;.';
   const unsubscribeUrl = `${origin}/api/newsletter?unsubscribe=${encodeURIComponent(token)}`;
+  const logoSymbolUrl = `${origin}/favicon.svg`;
+
   return `
-  <div style="margin:0;background:#f4f1ec;padding:0;font-family:Arial,Helvetica,sans-serif;color:#171717">
-    <div style="max-width:680px;margin:0 auto;padding:34px 18px 28px">
-      <div style="padding:22px 0 26px;text-align:center">
-        <div style="display:inline-block;border-top:1px solid #d8d1c7;border-bottom:1px solid #d8d1c7;padding:13px 18px;font-size:15px;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;color:#8A1F2D">Portal Novo Alvo</div>
+  <div style="margin:0;background:#f6f3ee;padding:0;font-family:Arial,Helvetica,sans-serif;color:#171717">
+    <div style="max-width:680px;margin:0 auto;padding:42px 18px 32px">
+      <div style="padding:8px 0 34px;text-align:center">
+        <div style="display:inline-block;text-align:center">
+          <div style="display:inline-table;vertical-align:middle">
+            <span style="display:inline-block;width:34px;height:34px;vertical-align:middle;margin-right:10px">
+              <img src="${logoSymbolUrl}" width="34" height="34" alt="" style="display:block;border:0;outline:none;text-decoration:none">
+            </span>
+            <span style="display:inline-block;vertical-align:middle;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:1;font-weight:900;letter-spacing:-0.05em;color:#141414">NOVO ALVO</span>
+          </div>
+          <div style="margin-top:7px;font-size:9px;line-height:1;font-weight:900;letter-spacing:0.32em;text-transform:uppercase;color:#9b948d">Fatos e Impacto 24h</div>
+        </div>
       </div>
 
-      <div style="background:#fff;border:1px solid #e8e1d8;border-radius:22px;padding:34px 30px;box-shadow:0 18px 55px rgba(24,24,27,0.08)">
-        <p style="margin:0 0 18px;font-size:16px;line-height:1.7">${greeting}</p>
-        <h1 style="font-size:32px;line-height:1.05;margin:0 0 22px;letter-spacing:-0.04em;color:#101010">Bem-vindo ao Portal Novo Alvo</h1>
+      <div style="background:#fff;border:1px solid #e8e1d8;border-radius:24px;padding:42px 36px;box-shadow:0 18px 55px rgba(24,24,27,0.08)">
+        <p style="margin:0 0 20px;font-size:16px;line-height:1.75;color:#2f2f2f">${greeting}</p>
+        <h1 style="font-family:Arial,Helvetica,sans-serif;font-size:34px;line-height:1.08;margin:0 0 28px;letter-spacing:-0.04em;color:#101010">O que importa, do jeito que d&aacute; vontade de ler</h1>
 
-        <p style="margin:0 0 18px;font-size:16px;line-height:1.72">Você está recebendo este e-mail porque se cadastrou em uma de nossas redes ou demonstrou interesse em acompanhar o Portal Novo Alvo.</p>
-        <p style="margin:0 0 18px;font-size:16px;line-height:1.72">O Novo Alvo nasceu para acompanhar o que muda o Brasil e o mundo sem transformar tudo em barulho. A ideia é simples: selecionar fatos relevantes, organizar contexto e entregar uma leitura rápida, clara e útil para quem precisa entender o que está acontecendo sem perder tempo no excesso de informação.</p>
-        <p style="margin:0 0 18px;font-size:16px;line-height:1.72">Nossa curadoria olha com atenção para tecnologia, comportamento, saúde mental, cultura, economia, política, programas sociais, carreira e os movimentos que afetam a vida prática de quem trabalha, estuda, empreende, cuida de pessoas ou tenta simplesmente se manter bem informado.</p>
-        <p style="margin:0 0 24px;font-size:16px;line-height:1.72">A newsletter que você vai receber não será uma lista automática de links. Vamos priorizar assuntos que merecem contexto, explicar por que eles importam e indicar leituras do portal quando fizer sentido.</p>
+        <p style="margin:0 0 20px;font-size:16px;line-height:1.78;color:#2b2b2b">O Novo Alvo nasceu para ser um portal de informa&ccedil;&atilde;o r&aacute;pida, precisa e sem ru&iacute;do.</p>
+        <p style="margin:0 0 20px;font-size:16px;line-height:1.78;color:#2b2b2b">A gente sabe como &eacute; f&aacute;cil se perder entre manchetes apressadas, opini&atilde;o disfar&ccedil;ada de not&iacute;cia e conte&uacute;do feito s&oacute; para disputar aten&ccedil;&atilde;o. Por isso, nossa proposta &eacute; simples: reunir o que importa, explicar com contexto e entregar uma leitura que respeite o seu tempo.</p>
+        <p style="margin:0 0 20px;font-size:16px;line-height:1.78;color:#2b2b2b">Aqui, not&iacute;cia n&atilde;o precisa vir com gritaria. Pode ser direta, bem apurada e ainda assim ter linguagem leve, visual limpo e um pouco de respiro.</p>
+        <p style="margin:0 0 20px;font-size:16px;line-height:1.78;color:#2b2b2b">O portal acompanha os assuntos que atravessam a vida real: Brasil, cultura, tecnologia, comportamento, sa&uacute;de, economia, entretenimento e tudo aquilo que ajuda a entender melhor o mundo sem precisar morar dentro do feed.</p>
+        <p style="margin:0 0 20px;font-size:16px;line-height:1.78;color:#2b2b2b">Tamb&eacute;m somos um portal colaborativo. Se voc&ecirc; trabalha com comunica&ccedil;&atilde;o, acompanha de perto algum tema relevante ou quer compartilhar uma pauta, hist&oacute;ria, fonte ou olhar que mere&ccedil;a espa&ccedil;o, a gente quer ouvir.</p>
+        <p style="margin:0 0 30px;font-size:16px;line-height:1.78;color:#2b2b2b">A ideia n&atilde;o &eacute; correr atr&aacute;s de cada tend&ecirc;ncia, nem repetir o que aparece em todo lugar. &Eacute; olhar para os fatos com cuidado, escolher boas pautas e transformar informa&ccedil;&atilde;o em uma leitura &uacute;til, clara e poss&iacute;vel de acompanhar.</p>
 
-        <div style="border-left:4px solid #8A1F2D;background:#f7f2ef;border-radius:0 16px 16px 0;padding:18px 18px;margin:28px 0">
-          <p style="margin:0 0 10px;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#8A1F2D">O que esperar</p>
-          <ul style="margin:0;padding-left:18px;color:#27272a;font-size:15px;line-height:1.75">
-            <li>Um resumo enxuto dos temas mais importantes da semana</li>
-            <li>Destaques por área, sem excesso de manchetes</li>
-            <li>Contexto para tecnologia, saúde, cultura, trabalho e políticas públicas</li>
-            <li>Links para matérias selecionadas quando elas realmente ajudarem a entender melhor o assunto</li>
-          </ul>
-        </div>
-
-        <p style="margin:0 0 26px;font-size:16px;line-height:1.72">Neste primeiro envio, queremos só abrir a conversa. Se essa proposta fizer sentido para você, seja bem-vindo ao Portal Novo Alvo.</p>
-
-        <p style="margin:0 0 4px">
-          <a href="${origin}/" style="display:inline-block;background:#8A1F2D;color:#fff;text-decoration:none;font-weight:800;border-radius:999px;padding:14px 22px">Acessar o Portal Novo Alvo</a>
+        <p style="margin:0">
+          <a href="mailto:contato@portalnovoalvo.com.br?subject=Pauta%20para%20o%20Portal%20Novo%20Alvo" style="display:inline-block;background:#8A1F2D;color:#fff;text-decoration:none;font-weight:800;border-radius:999px;padding:15px 22px">Falar com a reda&ccedil;&atilde;o</a>
         </p>
       </div>
 
-      <p style="font-size:12px;color:#77716a;line-height:1.65;margin:22px 4px 0;text-align:center">
-        Você está recebendo este e-mail porque se cadastrou em uma de nossas redes.<br>
-        Se não quiser mais receber nossas mensagens, pode
+      <div style="padding:30px 0 12px;text-align:center">
+        <div style="display:inline-table;vertical-align:middle">
+          <span style="display:inline-block;width:24px;height:24px;vertical-align:middle;margin-right:8px">
+            <img src="${logoSymbolUrl}" width="24" height="24" alt="" style="display:block;border:0;outline:none;text-decoration:none">
+          </span>
+          <span style="display:inline-block;vertical-align:middle;font-family:Georgia,'Times New Roman',serif;font-size:20px;line-height:1;font-weight:900;letter-spacing:-0.05em;color:#222">NOVO ALVO</span>
+        </div>
+        <div style="margin-top:8px;font-size:9px;line-height:1;font-weight:900;letter-spacing:0.28em;text-transform:uppercase;color:#9b948d">Fatos e Impacto 24h</div>
+      </div>
+
+      <p style="font-size:12px;color:#77716a;line-height:1.7;margin:16px 4px 0;text-align:center">
+        Voc&ecirc; est&aacute; recebendo este e-mail porque se cadastrou em uma de nossas redes.<br>
+        Se n&atilde;o quiser mais receber nossas mensagens, pode
         <a href="${unsubscribeUrl}" style="color:#8A1F2D;text-decoration:underline">se descadastrar aqui</a>.
       </p>
     </div>
@@ -148,11 +158,11 @@ const sendWelcomeEmail = async (env: Env, origin: string, subscriber: Subscriber
       from,
       to: subscriber.email,
       reply_to: replyTo,
-      subject: 'Bem-vindo ao Portal Novo Alvo',
+      subject: 'O que importa, do jeito que dá vontade de ler',
       html: welcomeHtml(origin, subscriber.unsub_token, subscriber.email),
       text:
-        'Voce esta recebendo este e-mail porque se cadastrou em uma de nossas redes. ' +
-        'O Portal Novo Alvo seleciona fatos relevantes, organiza contexto e entrega uma leitura rapida, clara e util. ' +
+        'O Novo Alvo nasceu para ser um portal de informacao rapida, precisa e sem ruido. ' +
+        'Somos um portal colaborativo: se voce trabalha com comunicacao, acompanha algum tema relevante ou quer compartilhar uma pauta, a gente quer ouvir. ' +
         `Para cancelar: ${origin}/api/newsletter?unsubscribe=${encodeURIComponent(subscriber.unsub_token)}`,
     }),
   });
