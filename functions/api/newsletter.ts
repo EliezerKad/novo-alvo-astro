@@ -85,7 +85,7 @@ const inferFirstName = (email: string) => {
   return '';
 };
 
-const welcomeHtml = (origin: string, token: string, email: string) => {
+export const welcomeHtml = (origin: string, token: string, email: string) => {
   const firstName = inferFirstName(email);
   const greeting = firstName ? `Ol&aacute;, ${firstName}.` : 'Ol&aacute;.';
   const unsubscribeUrl = `${origin}/api/newsletter?unsubscribe=${encodeURIComponent(token)}`;
