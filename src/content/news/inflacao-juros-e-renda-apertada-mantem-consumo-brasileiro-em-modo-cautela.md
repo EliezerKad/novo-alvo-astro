@@ -6,19 +6,19 @@ seoDescription: "Mesmo com sinais pontuais de melhora, famílias seguem olhando 
 category: "Economia"
 author: "Redacao Novo Alvo"
 sources: ["Banco Central", "IBGE", "Ipea", "FGV Ibre", "Agência Brasil", "Confederação Nacional do Comércio", "Serasa Experian"]
-publishedAt: "2026-05-28T19:17:43.552Z"
-updatedAt: "2026-05-28T19:17:43.711Z"
+publishedAt: "2026-05-28T19:18:52.319Z"
+updatedAt: "2026-05-28T19:18:52.528Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/inflacao-juros-e-renda-apertada-mantem-consumo-brasileiro-em-modo-cautela-cover-20260528191743.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/inflacao-juros-e-renda-apertada-mantem-consumo-brasileiro-em-modo-cautela-cover-20260528191852.avif"
   alt: "Pessoa conferindo contas e documentos financeiros sobre a mesa"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/inflacao-juros-e-renda-apertada-mantem-consumo-brasileiro-em-modo-cautela-cover-20260528191743.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/inflacao-juros-e-renda-apertada-mantem-consumo-brasileiro-em-modo-cautela-cover-20260528191852.avif"
 tags: ["economia", "inflacao", "juros", "renda", "consumo"]
 ---
 
