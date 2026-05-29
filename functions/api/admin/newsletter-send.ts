@@ -92,7 +92,17 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     dryRun?: boolean;
     onlyUnsent?: boolean;
     origin?: string;
+    testEmail?: string;
+    testEmails?: string[];
   };
+  const rawTestEmails = [
+    clean(payload.testEmail, 254),
+    ...(Array.isArray(payload.testEmails) ? payload.testEmails.map((email) => clean(email, 254)) : []),
+  ]
+    .filter((email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    .filter((email, index, list) => list.findIndex((item) => item.toLowerCase() === email.toLowerCase()) === index)
+    .slice(0, 5);
+  const isTestSend = rawTestEmails.length > 0;
   const offset = Math.max(0, Math.floor(Number(payload.offset || 0)));
   const limit = Math.min(100, Math.max(1, Math.floor(Number(payload.limit || 100))));
   const dryRun = Boolean(payload.dryRun);
@@ -101,26 +111,48 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   const from = clean(env.NEWSLETTER_FROM, 180) || 'Portal Novo Alvo <newsletter@portalnovoalvo.com.br>';
   const replyTo = clean(env.NEWSLETTER_REPLY_TO, 180) || 'contato@portalnovoalvo.com.br';
 
-  const subscribers = await db
-    .prepare(
-      `SELECT email, unsub_token
-       FROM newsletter_subscribers
-       WHERE email IS NOT NULL
-         AND email != ''
-         ${onlyUnsent ? "AND (last_auto_response_at IS NULL OR last_auto_response_at = '')" : ''}
-       ORDER BY lower(email)
-       LIMIT ? OFFSET ?`,
-    )
-    .bind(limit, offset)
-    .all<Subscriber>();
-
-  const contacts = subscribers.results || [];
+  let contacts: Subscriber[] = [];
+  if (isTestSend) {
+    const testContacts: Subscriber[] = [];
+    for (const email of rawTestEmails) {
+      const existing = await db
+        .prepare(
+          `SELECT email, unsub_token
+             FROM newsletter_subscribers
+            WHERE lower(email) = lower(?)
+            LIMIT 1`,
+        )
+        .bind(email)
+        .all<Subscriber>();
+      const row = existing.results?.[0];
+      testContacts.push({
+        email,
+        unsub_token: clean(row?.unsub_token, 120) || `test-${Date.now()}`,
+      });
+    }
+    contacts = testContacts;
+  } else {
+    const subscribers = await db
+      .prepare(
+        `SELECT email, unsub_token
+         FROM newsletter_subscribers
+         WHERE email IS NOT NULL
+           AND email != ''
+           ${onlyUnsent ? "AND (last_auto_response_at IS NULL OR last_auto_response_at = '')" : ''}
+         ORDER BY lower(email)
+         LIMIT ? OFFSET ?`,
+      )
+      .bind(limit, offset)
+      .all<Subscriber>();
+    contacts = subscribers.results || [];
+  }
   if (!contacts.length) return json({ ok: true, sent: 0, offset, limit, onlyUnsent, done: true });
 
   if (dryRun) {
     return json({
       ok: true,
       dryRun: true,
+      test: isTestSend,
       offset,
       limit,
       onlyUnsent,
@@ -185,15 +217,18 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   }
 
   const now = new Date().toISOString();
-  for (const subscriber of contacts) {
-    await db
-      .prepare('UPDATE newsletter_subscribers SET last_auto_response_at = ?, updated_at = ? WHERE email = ?')
-      .bind(now, now, subscriber.email)
-      .run();
+  if (!isTestSend) {
+    for (const subscriber of contacts) {
+      await db
+        .prepare('UPDATE newsletter_subscribers SET last_auto_response_at = ?, updated_at = ? WHERE email = ?')
+        .bind(now, now, subscriber.email)
+        .run();
+    }
   }
 
   return json({
     ok: true,
+    test: isTestSend,
     offset,
     limit,
     onlyUnsent,
