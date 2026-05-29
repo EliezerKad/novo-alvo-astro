@@ -6,8 +6,8 @@ seoDescription: "Plataformas combinam franquias, reprises afetivas e formatos co
 category: "Entretenimento"
 author: "Redacao Novo Alvo"
 sources: ["Netflix Brasil", "Prime Video Brasil", "Max Brasil", "Disney+ Brasil", "JustWatch", "Omelete", "UOL Splash"]
-publishedAt: "2026-05-29T01:05:18.344Z"
-updatedAt: "2026-05-29T01:05:21.172Z"
+publishedAt: "2026-05-29T01:05:18.340Z"
+updatedAt: "2026-05-29T01:05:21.880Z"
 featured: false
 isFeatured: false
 urgent: false
