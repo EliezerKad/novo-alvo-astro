@@ -6,19 +6,19 @@ seoDescription: "A escola que recebe adolescentes conectados precisa responder a
 category: "Educacao"
 author: "Redacao Novo Alvo"
 sources: ["Ministério da Educação", "Inep", "Todos Pela Educação", "Unesco", "Cetic.br", "Agência Brasil", "Conselho Nacional de Educação"]
-publishedAt: "2026-05-29T01:45:28.893Z"
-updatedAt: "2026-05-29T01:45:31.054Z"
+publishedAt: "2026-05-29T03:37:30.724Z"
+updatedAt: "2026-05-29T03:37:32.616Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/ensino-medio-volta-ao-centro-da-cobranca-por-proposito-trabalho-e-tecnologia-cover-20260529014531.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/ensino-medio-volta-ao-centro-da-cobranca-por-proposito-trabalho-e-tecnologia-cover-20260529033732.avif"
   alt: "Estudantes caminhando em ambiente escolar com livros e mochilas"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/ensino-medio-volta-ao-centro-da-cobranca-por-proposito-trabalho-e-tecnologia-cover-20260529014531.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/ensino-medio-volta-ao-centro-da-cobranca-por-proposito-trabalho-e-tecnologia-cover-20260529033732.avif"
 tags: ["educacao", "ensino medio", "juventude", "tecnologia", "trabalho"]
 ---
 
