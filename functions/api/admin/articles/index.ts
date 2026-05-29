@@ -195,9 +195,15 @@ const findDuplicateArticle = async (
 };
 
 const normalizeEditorialQuoteFlow = (html: string) => {
+  const normalizeTextQuotes = (value: string) =>
+    value
+      .replace(/([.!?,;:])\s+([\u201d"])/g, '$1$2')
+      .replace(/(^|[\s>])([\u201c"])\s+/g, '$1$2');
+
   let output = String(html || '')
-    .replace(/([.!?,;:])\s+([\u201d"])/g, '$1$2')
-    .replace(/([\u201c"])\s+/g, '$1');
+    .split(/(<[^>]+>)/g)
+    .map((chunk) => (chunk.startsWith('<') ? chunk : normalizeTextQuotes(chunk)))
+    .join('');
 
   let previous = '';
   while (output !== previous) {
