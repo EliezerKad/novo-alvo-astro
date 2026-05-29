@@ -7,18 +7,18 @@ category: "Ocorrencias"
 author: "Redação Novo Alvo"
 sources: ["Jovem Pan", "UOL Notícias", "Super Rádio Tupi", "Só Notícia Boa", "Folha Vitória", "Jornal do Tocantins", "R7", "Rádio Itatiaia", "Portal Tela", "Folha de S.Paulo", "O TEMPO", "AUGUSTO URGENTE- JACOBINA BAHIA", "Estado de Minas", "Jornal de Brasília"]
 publishedAt: "2026-05-29T19:33:49.301Z"
-updatedAt: "2026-05-29T19:33:51.472Z"
+updatedAt: "2026-05-29T19:43:29.661Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/mulher-jogada-de-penhasco-por-ex-companheiro-recebe-alta-em-mg-cover-20260529193041.png"
+  src: "https://portalnovoalvo.com.br/media/news/jogada-de-penhasco-mulher-sobrevive-a-feminicidio-e-retorna-para-casa-em-minas-gerais-cover-20260529194329.webp"
   alt: "Ilustração genérica de uma paisagem montanhosa."
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/mulher-jogada-de-penhasco-por-ex-companheiro-recebe-alta-em-mg-cover-20260529193041.png"
+ogImage: "https://portalnovoalvo.com.br/media/news/jogada-de-penhasco-mulher-sobrevive-a-feminicidio-e-retorna-para-casa-em-minas-gerais-cover-20260529194329.webp"
 tags: ["tecnologia", "mulher", "jogada", "penhasco", "companheiro", "recebe", "alta"]
 ---
 
