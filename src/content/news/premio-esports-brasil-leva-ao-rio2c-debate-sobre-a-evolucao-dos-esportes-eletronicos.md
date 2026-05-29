@@ -6,8 +6,8 @@ seoDescription: "Games: Principal premiação de esports da América Latina marc
 category: "Games"
 author: "Redação Novo Alvo"
 sources: ["Manual dos Games", "Portal Viciados", "ABC da Comunicação", "levelupnews.com.br", "Acesso GEEK", "Portal Tela", "TechTudo", "Revista Arkade"]
-publishedAt: "2026-05-29T19:06:21.192Z"
-updatedAt: "2026-05-29T19:06:21.905Z"
+publishedAt: "2026-05-29T19:14:03.478Z"
+updatedAt: "2026-05-29T19:14:03.773Z"
 featured: false
 isFeatured: false
 urgent: false
