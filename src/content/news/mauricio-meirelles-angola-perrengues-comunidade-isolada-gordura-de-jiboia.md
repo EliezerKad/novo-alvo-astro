@@ -7,7 +7,7 @@ category: "Entretenimento"
 author: "Redação Novo Alvo"
 sources: ["AchismosTV", "YouTube", "Projeto Três Continentes"]
 publishedAt: "2026-05-29T20:43:52.9383841Z"
-updatedAt: "2026-05-29T21:30:55.989Z"
+updatedAt: "2026-05-29T21:31:51.085Z"
 featured: false
 isFeatured: false
 urgent: false
@@ -22,7 +22,7 @@ ogImage: "https://portalnovoalvo.com.br/uploads/news/mauricio-meirelles-angola-c
 tags: ["Maurício Meirelles", "Angola", "Três Continentes", "AchismosTV", "Entretenimento"]
 ---
 
-<p>O humorista Maurício Meirelles surpreendeu seus seguidores ao embarcar em uma das jornadas mais intensas e rústicas de sua carreira. Como parte do projeto internacional <strong>"Três Continentes"</strong>, que une comédia e visão multicultural ao lado do francês Paul Cabannes, o angolano Baptista Mirando e do chinês Paulo, o comediante viajou até Angola para explorar realidades distantes do turismo convencional.</p>
+<p>O humorista Maurício Meirelles surpreendeu seus seguidores ao embarcar em uma das jornadas mais intensas e rústicas de sua carreira. Como parte do projeto internacional <strong>"Três Continentes"</strong>, que une comédia e visão multicultural ao lado do francês Paul Cabannes, o angolano Baptista Miranda e do chinês Paulo, o comediante viajou até Angola para explorar realidades distantes do turismo convencional.</p>
 
 <p>O destino da vez foi o Parque Nacional da Kissama e uma comunidade pesqueira isolada à beira de uma lagoa africana. O resultado misturou choques culturais, reflexões sobre felicidade e os perrengues que costumam acompanhar o humorista em viagens fora da rota comum.</p>
 
