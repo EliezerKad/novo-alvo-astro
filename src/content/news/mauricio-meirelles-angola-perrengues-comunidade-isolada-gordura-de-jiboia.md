@@ -7,7 +7,7 @@ category: "Entretenimento"
 author: "Redação Novo Alvo"
 sources: ["AchismosTV", "YouTube", "Projeto Três Continentes"]
 publishedAt: "2026-05-29T20:43:52.9383841Z"
-updatedAt: "2026-05-29T20:45:19.599Z"
+updatedAt: "2026-05-29T20:51:32.911Z"
 featured: false
 isFeatured: false
 urgent: false
@@ -26,7 +26,7 @@ tags: ["Maurício Meirelles", "Angola", "Três Continentes", "AchismosTV", "Entr
 
 <p>O destino da vez foi o Parque Nacional da Kissama e uma comunidade pesqueira isolada à beira de uma lagoa africana. O resultado misturou choques culturais, reflexões sobre felicidade e os perrengues que costumam acompanhar o humorista em viagens fora da rota comum.</p>
 
-<div data-editor-media="embed"data-align="center"data-media-size="large"><iframe width="560"height="315"src="https://www.youtube.com/embed/orbwn-cZbIE?si=ZjgvWVZuRuphGNkS"title="YouTube video player"frameborder="0"allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"referrerpolicy="strict-origin-when-cross-origin"allowfullscreen></iframe></div>
+<div data-editor-media="embed" data-align="center" data-media-size="large"><iframe width="560" height="315" src="https://www.youtube.com/embed/orbwn-cZbIE?si=ZjgvWVZuRuphGNkS" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
 
 <h3>Viagem raiz e o choque com a rotina africana</h3>
 
