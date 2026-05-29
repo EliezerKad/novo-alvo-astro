@@ -6,19 +6,19 @@ seoDescription: "Plataformas combinam franquias, reprises afetivas e formatos co
 category: "Entretenimento"
 author: "Redacao Novo Alvo"
 sources: ["Netflix Brasil", "Prime Video Brasil", "Max Brasil", "Disney+ Brasil", "JustWatch", "Omelete", "UOL Splash"]
-publishedAt: "2026-05-29T00:31:17.726Z"
-updatedAt: "2026-05-29T00:31:20.807Z"
+publishedAt: "2026-05-29T00:31:24.992Z"
+updatedAt: "2026-05-29T00:31:27.610Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/streaming-aposta-em-nostalgia-e-conforto-para-segurar-publico-cansado-de-escolher-cover-20260529003120.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/streaming-aposta-em-nostalgia-e-conforto-para-segurar-publico-cansado-de-escolher-cover-20260529003127.avif"
   alt: "Pessoa segurando controle remoto diante de tela iluminada"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/streaming-aposta-em-nostalgia-e-conforto-para-segurar-publico-cansado-de-escolher-cover-20260529003120.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/streaming-aposta-em-nostalgia-e-conforto-para-segurar-publico-cansado-de-escolher-cover-20260529003127.avif"
 tags: ["entretenimento", "streaming", "nostalgia", "series", "plataformas"]
 ---
 
