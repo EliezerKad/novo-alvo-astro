@@ -6,19 +6,19 @@ seoDescription: "Ocorrencias: Homem que pediu redução de barulho de templo rel
 category: "Ocorrencias"
 author: "Redação Novo Alvo"
 sources: ["ContilNet Notícias", "Metrópoles", "Bnews", "Portal Tela", "SCC10", "NSC Total", "JETSS", "Pragmatismo Político", "G1"]
-publishedAt: "2026-05-29T22:10:45.086Z"
-updatedAt: "2026-05-29T22:10:45.253Z"
+publishedAt: "2026-05-29T22:10:53.997Z"
+updatedAt: "2026-05-29T22:10:54.176Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/guarda-municipal-de-folga-agride-pai-de-crianca-autista-por-barulho-de-igreja-em-balneario-cover-20260529221045.webp"
+  src: "https://portalnovoalvo.com.br/media/news/guarda-municipal-de-folga-agride-pai-de-crianca-autista-por-barulho-de-igreja-em-balneario-cover-20260529221054.webp"
   alt: "Pai de criança autista é agredido por guarda municipal ao reclamar de som alto de igreja em Balneário Camboriú, Santa Catarina."
   caption: "Credito: Unsplash"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/guarda-municipal-de-folga-agride-pai-de-crianca-autista-por-barulho-de-igreja-em-balneario-cover-20260529221045.webp"
+ogImage: "https://portalnovoalvo.com.br/media/news/guarda-municipal-de-folga-agride-pai-de-crianca-autista-por-barulho-de-igreja-em-balneario-cover-20260529221054.webp"
 tags: ["brasil", "crianca", "autista", "agredido", "guarda", "reclamar", "alto"]
 ---
 
