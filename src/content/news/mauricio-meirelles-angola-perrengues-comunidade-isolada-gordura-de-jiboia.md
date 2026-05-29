@@ -2,12 +2,12 @@
 title: "Maurício Meirelles em Angola: perrengues, comunidade isolada e os segredos da gordura de jiboia"
 slug: "mauricio-meirelles-angola-perrengues-comunidade-isolada-gordura-de-jiboia"
 summary: "Humorista explora Angola no projeto Três Continentes, visita comunidade pesqueira isolada, conhece mercados tradicionais e transforma perrengues em reflexão cultural."
-seoDescription: "Maurício Meirelles visita Angola no projeto Três Continentes, passa por comunidade pesqueira, mercado tradicional e vive perrengues durante a viagem."
+seoDescription: "Entretenimento: Humorista explora Angola no projeto Três Continentes, visita comunidade pesqueira isolada, conhece mercados tradicionais e transforma…"
 category: "Entretenimento"
 author: "Redação Novo Alvo"
 sources: ["AchismosTV", "YouTube", "Projeto Três Continentes"]
 publishedAt: "2026-05-29T20:43:52.9383841Z"
-updatedAt: "2026-05-29T20:51:32.911Z"
+updatedAt: "2026-05-29T21:30:55.989Z"
 featured: false
 isFeatured: false
 urgent: false
@@ -16,17 +16,17 @@ views: 0
 cover:
   src: "https://portalnovoalvo.com.br/uploads/news/mauricio-meirelles-angola-cover.png"
   alt: "Maurício Meirelles conversa com moradores durante viagem do projeto Três Continentes em Angola"
-  caption: "Maurício Meirelles em Angola no projeto Três Continentes"
+  caption: "AchismosTV"
   layout: "full"
 ogImage: "https://portalnovoalvo.com.br/uploads/news/mauricio-meirelles-angola-cover.png"
 tags: ["Maurício Meirelles", "Angola", "Três Continentes", "AchismosTV", "Entretenimento"]
 ---
 
-<p>O humorista Maurício Meirelles surpreendeu seus seguidores ao embarcar em uma das jornadas mais intensas e rústicas de sua carreira. Como parte do projeto internacional <strong>"Três Continentes"</strong>, que une comédia e visão multicultural ao lado do francês Batista e do chinês Paulo, o comediante viajou até Angola para explorar realidades distantes do turismo convencional.</p>
+<p>O humorista Maurício Meirelles surpreendeu seus seguidores ao embarcar em uma das jornadas mais intensas e rústicas de sua carreira. Como parte do projeto internacional <strong>"Três Continentes"</strong>, que une comédia e visão multicultural ao lado do francês Paul Cabannes, o angolano Baptista Mirando e do chinês Paulo, o comediante viajou até Angola para explorar realidades distantes do turismo convencional.</p>
 
 <p>O destino da vez foi o Parque Nacional da Kissama e uma comunidade pesqueira isolada à beira de uma lagoa africana. O resultado misturou choques culturais, reflexões sobre felicidade e os perrengues que costumam acompanhar o humorista em viagens fora da rota comum.</p>
 
-<div data-editor-media="embed" data-align="center" data-media-size="large"><iframe width="560" height="315" src="https://www.youtube.com/embed/orbwn-cZbIE?si=ZjgvWVZuRuphGNkS" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+<div data-editor-media="embed" data-align="center" data-media-size="large"><iframe width="560" height="315" src="https://www.youtube.com/embed/orbwn-cZbIE?si=ZjgvWVZuRuphGNkS" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe></div>
 
 <h3>Viagem raiz e o choque com a rotina africana</h3>
 
