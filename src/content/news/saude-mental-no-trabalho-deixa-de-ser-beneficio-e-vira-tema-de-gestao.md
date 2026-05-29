@@ -2,23 +2,23 @@
 title: "Saúde mental no trabalho deixa de ser benefício e vira tema de gestão"
 slug: "saude-mental-no-trabalho-deixa-de-ser-beneficio-e-vira-tema-de-gestao"
 summary: "Empresas passam a ser cobradas por ambiente psicologicamente seguro, prevenção de burnout e rotinas que não dependam só de resiliência individual."
-seoDescription: "Empresas passam a ser cobradas por ambiente psicologicamente seguro, prevenção de burnout e rotinas que não dependam só de resiliência individual."
+seoDescription: "Saude: Empresas passam a ser cobradas por ambiente psicologicamente seguro, prevenção de burnout e rotinas que não dependam só de resiliência individual."
 category: "Saude"
-author: "Redacao Novo Alvo"
+author: "Redação Novo Alvo"
 sources: ["Ministério da Saúde", "Ministério do Trabalho e Emprego", "Organização Mundial da Saúde", "OPAS", "Fundacentro", "Associação Nacional de Medicina do Trabalho", "Agência Brasil"]
 publishedAt: "2026-05-29T07:04:48.425Z"
-updatedAt: "2026-05-29T07:04:51.196Z"
-featured: false
+updatedAt: "2026-05-29T11:32:18.381Z"
+featured: true
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/saude-mental-no-trabalho-deixa-de-ser-beneficio-e-vira-tema-de-gestao-cover-20260529070451.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/saude-mental-no-trabalho-deixa-de-ser-beneficio-e-vira-tema-de-gestao-cover-20260529113218.avif"
   alt: "Pessoa em mesa de trabalho com expressão de cansaço diante do computador"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/saude-mental-no-trabalho-deixa-de-ser-beneficio-e-vira-tema-de-gestao-cover-20260529070451.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/saude-mental-no-trabalho-deixa-de-ser-beneficio-e-vira-tema-de-gestao-cover-20260529113218.avif"
 tags: ["saude", "saude mental", "trabalho", "burnout", "gestao"]
 ---
 
