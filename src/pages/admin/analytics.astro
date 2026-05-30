@@ -1,0 +1,210 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Analytics | Portal Novo Alvo" active="analytics">
+  <section class="space-y-8" data-analytics-page>
+    <header class="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/72 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-900/72">
+      <div class="pointer-events-none absolute -right-28 -top-28 h-72 w-72 rounded-full bg-red-500/10 blur-3xl"></div>
+      <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div class="space-y-3">
+          <span class="text-[10px] font-black uppercase tracking-[0.35em] text-red-600">Leitura real</span>
+          <h1 class="admin-display text-4xl md:text-6xl">Analytics do portal</h1>
+          <p class="max-w-2xl text-sm font-medium leading-7 text-zinc-500 dark:text-zinc-400">
+            Visao interna de views em materias, visitantes aproximados, categorias mais fortes e sinais de leitura que o Search Console nao mostra.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" data-days="7" class="rounded-full border border-black/10 bg-white px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-950">7 dias</button>
+          <button type="button" data-days="14" class="rounded-full border border-black/10 bg-zinc-950 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-white transition hover:border-red-600 dark:border-zinc-800 dark:bg-white dark:text-zinc-950">14 dias</button>
+          <button type="button" data-days="30" class="rounded-full border border-black/10 bg-white px-4 py-3 text-[9px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-red-600 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-950">30 dias</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="grid grid-cols-1 gap-4 md:grid-cols-4">
+      <article class="rounded-[1.5rem] border border-white/80 bg-white/70 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-6 h-2 w-12 rounded-full bg-red-600"></div>
+        <strong class="admin-display block text-4xl" data-total-views>...</strong>
+        <span class="mt-2 block text-[9px] font-black uppercase tracking-widest text-zinc-400">Views totais</span>
+      </article>
+      <article class="rounded-[1.5rem] border border-white/80 bg-white/70 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-6 h-2 w-12 rounded-full bg-emerald-600"></div>
+        <strong class="admin-display block text-4xl" data-total-visitors>...</strong>
+        <span class="mt-2 block text-[9px] font-black uppercase tracking-widest text-zinc-400">Visitantes aproximados</span>
+      </article>
+      <article class="rounded-[1.5rem] border border-white/80 bg-white/70 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-6 h-2 w-12 rounded-full bg-zinc-950 dark:bg-white"></div>
+        <strong class="admin-display block text-4xl" data-range-views>...</strong>
+        <span class="mt-2 block text-[9px] font-black uppercase tracking-widest text-zinc-400">Views no periodo</span>
+      </article>
+      <article class="rounded-[1.5rem] border border-white/80 bg-white/70 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-6 h-2 w-12 rounded-full bg-amber-500"></div>
+        <strong class="admin-display block text-4xl" data-clean-estimate>...</strong>
+        <span class="mt-2 block text-[9px] font-black uppercase tracking-widest text-zinc-400">Sem maior visitante</span>
+      </article>
+    </section>
+
+    <section class="grid grid-cols-1 gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+      <article class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-5 flex items-center justify-between border-b border-zinc-100 pb-4 dark:border-zinc-800">
+          <h2 class="text-xs font-black uppercase tracking-[0.24em]">Ritmo diario</h2>
+          <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400" data-generated-at>Atualizando...</span>
+        </div>
+        <div class="space-y-3" data-daily-list></div>
+      </article>
+
+      <article class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-5 border-b border-zinc-100 pb-4 dark:border-zinc-800">
+          <h2 class="text-xs font-black uppercase tracking-[0.24em]">Leitura por categoria</h2>
+        </div>
+        <div class="space-y-3" data-category-list></div>
+      </article>
+    </section>
+
+    <section class="grid grid-cols-1 gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+      <article class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-5 border-b border-zinc-100 pb-4 dark:border-zinc-800">
+          <h2 class="text-xs font-black uppercase tracking-[0.24em]">Materias mais lidas</h2>
+        </div>
+        <div class="space-y-3" data-article-list></div>
+      </article>
+
+      <article class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-5 border-b border-zinc-100 pb-4 dark:border-zinc-800">
+          <h2 class="text-xs font-black uppercase tracking-[0.24em]">Sinal de acessos proprios</h2>
+        </div>
+        <p class="mb-5 text-sm font-medium leading-7 text-zinc-500 dark:text-zinc-400">
+          Se o maior visitante for voce, este bloco mostra o quanto ele pesa no total. Hoje isso ajuda a ler os numeros sem se enganar.
+        </p>
+        <div class="space-y-3" data-visitor-list></div>
+      </article>
+    </section>
+  </section>
+</AdminLayout>
+
+<script is:inline>
+  const token = localStorage.getItem('admin-token') || '';
+  if (!token) window.location.href = `/redacao/?next=${encodeURIComponent('/admin/analytics/')}`;
+
+  const formatNumber = (value) => Number(value || 0).toLocaleString('pt-BR');
+  const formatDate = (value) => {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+  };
+  const escapeHtml = (value) =>
+    String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+  const setText = (selector, value) => {
+    const node = document.querySelector(selector);
+    if (node) node.textContent = value;
+  };
+
+  const bar = (value, max) => {
+    const width = max > 0 ? Math.max(3, Math.round((Number(value || 0) / max) * 100)) : 0;
+    return `<span class="block h-2 rounded-full bg-zinc-100 dark:bg-zinc-800"><span class="block h-2 rounded-full bg-red-600" style="width:${width}%"></span></span>`;
+  };
+
+  const loadAnalytics = async (days = 14) => {
+    const response = await fetch(`/api/admin/analytics?days=${encodeURIComponent(String(days))}`, {
+      cache: 'no-store',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.error || 'Falha ao carregar analytics.');
+
+    setText('[data-total-views]', formatNumber(data.totals.views));
+    setText('[data-total-visitors]', formatNumber(data.totals.visitors));
+    setText('[data-range-views]', formatNumber(data.range.views));
+    setText('[data-clean-estimate]', formatNumber(data.totals.viewsWithoutLeadingVisitor));
+    setText('[data-generated-at]', `Atualizado em ${formatDate(data.generatedAt)}`);
+
+    const maxDaily = Math.max(...data.daily.map((item) => Number(item.views || 0)), 1);
+    document.querySelector('[data-daily-list]').innerHTML = data.daily
+      .slice()
+      .reverse()
+      .map(
+        (item) => `
+          <div class="rounded-2xl border border-zinc-100 bg-white/45 p-4 dark:border-zinc-800 dark:bg-zinc-950/30">
+            <div class="mb-3 flex items-center justify-between gap-3">
+              <strong class="text-sm font-black">${escapeHtml(item.day)}</strong>
+              <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400">${formatNumber(item.views)} views / ${formatNumber(item.visitors)} visitantes</span>
+            </div>
+            ${bar(item.views, maxDaily)}
+          </div>
+        `,
+      )
+      .join('');
+
+    const maxCategory = Math.max(...data.categories.map((item) => Number(item.views || 0)), 1);
+    document.querySelector('[data-category-list]').innerHTML = data.categories
+      .map(
+        (item) => `
+          <div class="rounded-2xl border border-zinc-100 bg-white/45 p-4 dark:border-zinc-800 dark:bg-zinc-950/30">
+            <div class="mb-3 flex items-center justify-between gap-3">
+              <strong class="text-sm font-black">${escapeHtml(item.category)}</strong>
+              <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400">${formatNumber(item.views)} views</span>
+            </div>
+            ${bar(item.views, maxCategory)}
+            <p class="mt-2 text-[10px] font-bold text-zinc-400">${formatNumber(item.articles)} materias / ${item.viewsPerArticle} views por materia / ${item.share}%</p>
+          </div>
+        `,
+      )
+      .join('');
+
+    document.querySelector('[data-article-list]').innerHTML = data.topArticles
+      .slice(0, 12)
+      .map(
+        (item) => `
+          <a href="/noticia/${encodeURIComponent(item.slug)}/" class="block rounded-2xl border border-zinc-100 bg-white/45 p-4 transition hover:-translate-y-0.5 hover:border-red-200 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-950/30">
+            <span class="text-[8px] font-black uppercase tracking-widest text-red-600">${escapeHtml(item.category)}</span>
+            <div class="mt-2 flex items-start justify-between gap-4">
+              <strong class="line-clamp-2 text-base font-black leading-tight">${escapeHtml(item.title)}</strong>
+              <span class="shrink-0 rounded-full bg-zinc-100 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-800">${formatNumber(item.views)} views</span>
+            </div>
+            <p class="mt-2 text-[10px] font-bold text-zinc-400">Ultima leitura: ${formatDate(item.lastViewedAt)}</p>
+          </a>
+        `,
+      )
+      .join('');
+
+    document.querySelector('[data-visitor-list]').innerHTML = data.topVisitors
+      .map(
+        (item) => `
+          <div class="rounded-2xl border border-zinc-100 bg-white/45 p-4 dark:border-zinc-800 dark:bg-zinc-950/30">
+            <div class="flex items-start justify-between gap-4">
+              <strong class="text-sm font-black">${escapeHtml(item.visitorId)}</strong>
+              <span class="rounded-full bg-zinc-100 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-800">${formatNumber(item.views)} views</span>
+            </div>
+            <p class="mt-2 text-[10px] font-bold text-zinc-400">${formatNumber(item.articles)} materias / ${item.share}% do total</p>
+          </div>
+        `,
+      )
+      .join('');
+  };
+
+  document.querySelectorAll('[data-days]').forEach((button) => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('[data-days]').forEach((item) => {
+        item.classList.remove('bg-zinc-950', 'text-white', 'dark:bg-white', 'dark:text-zinc-950');
+        item.classList.add('bg-white', 'text-zinc-500', 'dark:bg-zinc-950');
+      });
+      button.classList.add('bg-zinc-950', 'text-white', 'dark:bg-white', 'dark:text-zinc-950');
+      button.classList.remove('bg-white', 'text-zinc-500', 'dark:bg-zinc-950');
+      loadAnalytics(Number(button.dataset.days || 14)).catch((error) => {
+        setText('[data-generated-at]', error.message || 'Erro ao carregar');
+      });
+    });
+  });
+
+  loadAnalytics().catch((error) => {
+    setText('[data-generated-at]', error.message || 'Erro ao carregar');
+  });
+</script>

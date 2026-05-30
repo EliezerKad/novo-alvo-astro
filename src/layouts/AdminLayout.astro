@@ -4,7 +4,7 @@ import '../styles.css';
 interface Props {
   title: string;
   description?: string;
-  active?: 'dashboard' | 'news' | 'new' | 'pitches' | 'sources' | 'drafts' | 'scheduled' | 'published' | 'media' | 'categories' | 'newsletter' | 'seo' | 'settings' | 'home';
+  active?: 'dashboard' | 'analytics' | 'news' | 'new' | 'pitches' | 'sources' | 'drafts' | 'scheduled' | 'published' | 'media' | 'categories' | 'newsletter' | 'seo' | 'settings' | 'home';
 }
 
 const {
@@ -15,6 +15,7 @@ const {
 
 const navItems = [
   { href: '/admin/', label: 'Dashboard', id: 'dashboard', icon: 'grid' },
+  { href: '/admin/analytics/', label: 'Analytics', id: 'analytics', icon: 'chart' },
   { href: '/admin/nova/', label: 'Nova matéria', id: 'new', icon: 'pen' },
   { href: '/admin/pautas/', label: 'Pautas', id: 'pitches', icon: 'spark' },
   { href: '/admin/fontes/', label: 'Fontes', id: 'sources', icon: 'rss' },
@@ -39,6 +40,7 @@ const iconPath = {
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path>',
   tag: '<path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L3 13V3h10l7.59 7.59a2 2 0 0 1 0 2.82Z"></path><circle cx="7.5" cy="7.5" r="1.5"></circle>',
   spark: '<path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"></path>',
+  chart: '<path d="M3 3v18h18"></path><path d="m7 15 4-4 3 3 5-7"></path><path d="M18 7h1v1"></path>',
   gear: '<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h.1a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"></path>',
 };
 ---
