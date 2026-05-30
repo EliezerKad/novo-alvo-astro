@@ -6,19 +6,19 @@ seoDescription: "Educacao: Descubra estratégias para dialogar com adolescentes,
 category: "Educacao"
 author: "Redação Novo Alvo"
 sources: ["Nexo Jornal", "Tecnoblog", "ContilNet Notícias", "GZH", "Estado de Minas", "Exame", "Canaltech", "O Globo", "BBC", "TecMundo"]
-publishedAt: "2026-05-30T16:07:07.178Z"
-updatedAt: "2026-05-30T16:07:07.316Z"
+publishedAt: "2026-05-30T16:07:32.318Z"
+updatedAt: "2026-05-30T16:07:32.399Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/alem-do-silencio-estrategias-para-uma-conexao-genuina-com-adolescentes-cover-20260530160707.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/alem-do-silencio-estrategias-para-uma-conexao-genuina-com-adolescentes-cover-20260530160732.avif"
   alt: "Foto de Gaelle Marcel na Unsplash"
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/alem-do-silencio-estrategias-para-uma-conexao-genuina-com-adolescentes-cover-20260530160707.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/alem-do-silencio-estrategias-para-uma-conexao-genuina-com-adolescentes-cover-20260530160732.avif"
 tags: ["brasil", "conversar", "adolescentes"]
 ---
 
