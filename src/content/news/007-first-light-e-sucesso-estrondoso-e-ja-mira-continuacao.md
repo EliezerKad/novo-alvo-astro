@@ -6,8 +6,8 @@ seoDescription: "Games: Novo jogo de James Bond, 007: First Light, vendeu mais d
 category: "Games"
 author: "Redação Novo Alvo"
 sources: ["IGN Brasil", "Oficina da Net", "ACidade ON", "nosbastidores.com.br", "Mix Vale", "games.gg", "Portal Viciados", "Flow Games", "Manual dos Games", "DOL", "Magazine.HD", "Proddigital POP", "Eurogamer.pt", "TecMundo"]
-publishedAt: "2026-05-30T23:04:30.940Z"
-updatedAt: "2026-05-30T23:04:31.363Z"
+publishedAt: "2026-05-30T23:12:04.137Z"
+updatedAt: "2026-05-30T23:12:04.601Z"
 featured: false
 isFeatured: false
 urgent: false
