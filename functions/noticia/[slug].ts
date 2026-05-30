@@ -44,6 +44,20 @@ const escapeHtml = (value: unknown) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 
+const categoryLabels: Record<string, string> = {
+  Politica: 'Política',
+  Saude: 'Saúde',
+  Ciencia: 'Ciência',
+  Educacao: 'Educação',
+  Musica: 'Música',
+  Ocorrencias: 'Ocorrências',
+};
+
+const displayCategory = (category?: string) => {
+  const cleanCategory = String(category || '').replace(/\u0000/g, '').trim().slice(0, 80);
+  return categoryLabels[cleanCategory] || cleanCategory;
+};
+
 const decodeVisibleEntities = (value: string) =>
   String(value || '')
     .replace(/&amp;#(\d+);/g, (_match, code) => String.fromCharCode(Number(code)))
@@ -348,7 +362,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
               return `<a class="related-card" href="${itemUrl}">
                 <img src="${escapeHtml(itemImage)}" alt="${escapeHtml(item.cover_alt || item.title)}" loading="lazy" onerror="this.onerror=null;this.src='/og-default.svg';" />
                 <div>
-                  <span>${escapeHtml(item.category || article.category)}</span>
+                  <span>${escapeHtml(displayCategory(item.category || article.category))}</span>
                   <h3>${escapeHtml(item.title)}</h3>
                   <p>${escapeHtml(item.summary || '')}</p>
                 </div>
@@ -400,7 +414,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
               </div>
               <div>
                 <h3 class="text-sm font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50">${escapeHtml(item.title)}</h3>
-                <p class="mt-1 text-[11px] font-bold text-zinc-400">${escapeHtml(item.category || article.category)} • <span data-live-view-count="${escapeHtml(item.slug || '')}">0 views</span></p>
+                <p class="mt-1 text-[11px] font-bold text-zinc-400">${escapeHtml(displayCategory(item.category || article.category))} • <span data-live-view-count="${escapeHtml(item.slug || '')}">0 views</span></p>
               </div>
             </a>`;
           })
@@ -582,11 +596,11 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
       <div class="pt-20 lg:pt-32"></div>
       <header class="mx-auto max-w-[1240px] px-3 pb-10 pt-6 sm:px-4 md:pb-16 md:pt-12">
         <nav aria-label="Breadcrumb" class="mb-6 flex flex-wrap items-center gap-2 text-[11px] font-extrabold text-zinc-500 dark:text-zinc-500 md:mb-8 md:text-xs">
-          <a href="/" class="transition-colors hover:text-[#8A1F2D]">Inicio</a><span class="text-zinc-400">/</span><a href="/?category=${encodeURIComponent(article.category)}" class="transition-colors hover:text-[#8A1F2D]">${escapeHtml(article.category)}</a><span class="text-zinc-400">/</span><span class="font-black text-[#8A1F2D]">${escapeHtml(article.title)}</span>
+          <a href="/" class="transition-colors hover:text-[#8A1F2D]">Inicio</a><span class="text-zinc-400">/</span><a href="/?category=${encodeURIComponent(article.category)}" class="transition-colors hover:text-[#8A1F2D]">${escapeHtml(displayCategory(article.category))}</a><span class="text-zinc-400">/</span><span class="font-black text-[#8A1F2D]">${escapeHtml(article.title)}</span>
         </nav>
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-11">
           <div>
-            <span class="mb-4 inline-flex h-8 items-center rounded-full bg-[#8A1F2D]/10 px-3.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#8A1F2D] md:mb-5 md:h-9 md:px-4 md:text-xs">${escapeHtml(article.category)}</span>
+            <span class="mb-4 inline-flex h-8 items-center rounded-full bg-[#8A1F2D]/10 px-3.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#8A1F2D] md:mb-5 md:h-9 md:px-4 md:text-xs">${escapeHtml(displayCategory(article.category))}</span>
             <h1 class="max-w-5xl text-[clamp(2.65rem,15vw,5.875rem)] font-sans font-black leading-[0.9] tracking-[-0.088em] text-[#101010] dark:text-zinc-50 sm:text-[clamp(3.35rem,11vw,5.875rem)]">${escapeHtml(article.title)}</h1>
             <p class="mt-5 max-w-3xl text-lg font-medium leading-7 text-zinc-600 dark:text-zinc-400 md:mt-6 md:text-2xl md:leading-9">${escapeHtml(article.summary || description)}</p>
             <div class="mt-6 flex flex-wrap gap-2 md:mt-8">
@@ -641,17 +655,17 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
       <div class="crumbs">
         <a href="/">Início</a>
         <span>/</span>
-        <span>${escapeHtml(article.category)}</span>
+        <span>${escapeHtml(displayCategory(article.category))}</span>
       </div>
       <main>
         <article>
           <div class="crumbs">
             <a href="/">Inicio</a>
             <span>/</span>
-            <span>${escapeHtml(article.category)}</span>
+            <span>${escapeHtml(displayCategory(article.category))}</span>
           </div>
           <div class="meta">
-            <span class="cat">${escapeHtml(article.category)}</span>
+            <span class="cat">${escapeHtml(displayCategory(article.category))}</span>
             <span>${escapeHtml(formatPublished(published))}</span>
             <span data-live-view-count="${escapeHtml(article.slug)}">0 views</span>
             <span>${escapeHtml(String(article.reading_minutes || 1))} min de leitura</span>
