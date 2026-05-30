@@ -6,8 +6,8 @@ seoDescription: "Futebol: A Conmebol realizou o sorteio da Copa Sul-Americana 20
 category: "Futebol"
 author: "Redação Novo Alvo"
 sources: ["Portal Hortolândia", "BNews RN", "Nosso Palestra", "Portal ABC do ABC", "LeiaJá", "SCC10", "CBN", "Metrópoles", "ABCD Jornal", "MSN"]
-publishedAt: "2026-05-30T15:17:45.101Z"
-updatedAt: "2026-05-30T15:17:45.473Z"
+publishedAt: "2026-05-30T15:18:13.919Z"
+updatedAt: "2026-05-30T15:18:14.033Z"
 featured: false
 isFeatured: false
 urgent: false
