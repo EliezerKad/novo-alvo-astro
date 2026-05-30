@@ -146,7 +146,7 @@ const iconPath = {
     <div class="pointer-events-none fixed inset-x-0 top-0 h-32 bg-gradient-to-b from-white/65 to-transparent dark:from-white/5"></div>
     <div class="pointer-events-none fixed inset-0 opacity-[0.045] [background-image:radial-gradient(#101010_0.7px,transparent_0.7px)] [background-size:18px_18px] dark:opacity-[0.035]"></div>
     <div class="admin-shell relative min-h-screen lg:grid">
-      <aside class="admin-sidebar border-b border-black/10 bg-[#fffdf8]/88 px-4 py-4 shadow-[10px_0_46px_rgba(16,16,16,0.045)] backdrop-blur-2xl dark:border-zinc-800/80 dark:bg-zinc-950/82 lg:sticky lg:top-0 lg:h-screen lg:overflow-hidden lg:border-b-0 lg:border-r lg:px-4 lg:py-5">
+      <aside class="admin-sidebar border-b border-black/10 bg-[#fffdf8]/88 px-4 py-4 shadow-[10px_0_46px_rgba(16,16,16,0.045)] backdrop-blur-2xl dark:border-zinc-800/80 dark:bg-zinc-950/82 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r lg:px-4 lg:py-5">
         <div class="flex items-center justify-between gap-4 lg:block">
           <a href="/admin/" class="admin-brand flex items-center justify-center gap-3 lg:flex-col">
             <span class="flex h-12 w-12 items-center justify-center rounded-3xl bg-[#8A1F2D] text-white shadow-[0_18px_38px_rgba(138,31,45,0.25)] ring-1 ring-[#8A1F2D]/30 transition-transform duration-500 hover:scale-105">
@@ -193,13 +193,13 @@ const iconPath = {
           </div>
         </div>
 
-        <nav class="mt-5 flex gap-2 overflow-x-auto pb-1 lg:mt-8 lg:block lg:space-y-2 lg:overflow-visible lg:pb-0">
+        <nav class="mt-5 flex gap-2 overflow-x-auto pb-1 lg:mt-6 lg:block lg:space-y-1.5 lg:overflow-visible lg:pb-0">
           {navItems.map((item) => (
             <a
               href={item.href}
               title={item.label}
               data-admin-nav-id={item.id}
-              class={`admin-nav-link group whitespace-nowrap rounded-3xl px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-all duration-300 lg:flex lg:w-full lg:items-center lg:justify-center lg:gap-3 ${
+              class={`admin-nav-link group whitespace-nowrap rounded-3xl px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-all duration-300 lg:flex lg:w-full lg:items-center lg:justify-center lg:gap-3 lg:py-2.5 ${
                 active === item.id
                   ? 'bg-[#101010] text-white shadow-[0_18px_45px_rgba(16,16,16,0.14)] dark:bg-white dark:text-zinc-950'
                   : 'bg-white/50 text-zinc-500 hover:-translate-y-0.5 hover:bg-white hover:text-[#8A1F2D] hover:shadow-[0_16px_38px_rgba(16,16,16,0.07)] dark:bg-zinc-900/55 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-50'
@@ -211,7 +211,7 @@ const iconPath = {
           ))}
         </nav>
 
-        <div class="admin-nav-label mt-8 hidden rounded-3xl border border-black/10 bg-white/48 p-5 shadow-[0_18px_45px_rgba(16,16,16,0.045)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/55 lg:block">
+        <div class="admin-nav-label mt-5 hidden rounded-3xl border border-black/10 bg-white/48 p-4 shadow-[0_18px_45px_rgba(16,16,16,0.045)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/55 lg:block">
           <p class="text-[9px] font-black uppercase tracking-[0.24em] text-zinc-400">Modo atual</p>
           <p class="mt-2 text-sm font-bold text-zinc-700 dark:text-zinc-300">Redação visual em evolução, pronta para conectar CMS e publicação em tempo real.</p>
         </div>
