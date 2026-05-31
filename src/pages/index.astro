@@ -362,6 +362,7 @@ const isCategoryView = !!category && category !== 'Início';
                   {categorySections.map((section, sectionIndex) => {
                     const isHiddenCategorySection = sectionIndex >= initialCategorySections;
                     const shouldShowAdAfterSection = (sectionIndex + 1) % 3 === 0;
+                    const shouldShowNewsletterAfterSection = hasMoreCategorySections && sectionIndex === initialCategorySections + 1;
 
                     return (
                       <>
@@ -400,6 +401,15 @@ const isCategoryView = !!category && category !== 'Início';
                             </span>
                             <AdCard size="728x90" class="w-full max-w-[728px] h-[90px]" />
                           </div>
+                        )}
+
+                        {shouldShowNewsletterAfterSection && (
+                          <section
+                            class="hidden border-y border-black/10 py-8 dark:border-zinc-800 md:py-12"
+                            data-category-hidden="true"
+                          >
+                            <NewsletterBlock class="mx-auto max-w-[980px]" />
+                          </section>
                         )}
                       </>
                     );
