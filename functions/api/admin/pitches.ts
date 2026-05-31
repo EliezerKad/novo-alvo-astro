@@ -28,6 +28,7 @@ type PitchPayload = {
   internalLinks?: unknown[];
   imageCandidates?: unknown[];
   score?: number;
+  discoverScore?: number;
   expiresAt?: string;
   forceUpdate?: boolean;
   bypassMemory?: boolean;
@@ -39,12 +40,14 @@ type PitchRecord = {
   category?: string;
   status?: string;
   title?: string;
+  summary?: string;
   tags?: string;
   keywords?: string;
   updated_at?: string;
   image_candidates?: string;
   source_count?: number;
   score?: number;
+  discover_score?: number;
 };
 
 type MemoryRecord = {
@@ -178,7 +181,7 @@ const editorialTokens = (value: unknown) => {
 };
 
 const recordText = (record: Partial<PitchRecord>) =>
-  `${record.title || ''} ${parseArray(record.tags).join(' ')} ${record.keywords || ''}`;
+  `${record.category || ''} ${record.title || ''} ${record.summary || ''} ${parseArray(record.tags).join(' ')} ${record.keywords || ''}`;
 
 const semanticOverlap = (left: unknown, right: unknown) => {
   const leftTokens = new Set(editorialTokens(left).slice(0, 14));
@@ -292,7 +295,7 @@ const findRecentDuplicate = async (db: D1Database, pitch: ReturnType<typeof norm
   const now = new Date().toISOString();
   const recent = await db
     .prepare(
-      `SELECT id, cluster_key, title, status, tags, keywords, updated_at
+      `SELECT id, cluster_key, title, summary, category, status, tags, keywords, updated_at
        FROM editorial_pitches
        WHERE category = ?
          AND (expires_at IS NULL OR expires_at = '' OR expires_at >= ? OR status IN ('dismissed', 'queued', 'converted'))
@@ -302,12 +305,13 @@ const findRecentDuplicate = async (db: D1Database, pitch: ReturnType<typeof norm
     .bind(pitch.category, now)
     .all<PitchRecord & { cluster_key?: string }>();
 
-  const incomingText = `${pitch.title} ${parseArray(pitch.tags).join(' ')} ${pitch.keywords}`;
+  const incomingText = `${pitch.category} ${pitch.title} ${pitch.summary} ${parseArray(pitch.tags).join(' ')} ${pitch.keywords}`;
   return (recent.results || []).find((record) => {
     if (record.cluster_key === pitch.clusterKey) return false;
     const score = semanticOverlap(incomingText, recordText(record));
-    if (record.status === 'dismissed') return score >= 0.62;
-    return score >= 0.76;
+    if (record.status === 'dismissed') return score >= 0.55;
+    if (['queued', 'converted', 'published', 'reviewed'].includes(clean(record.status, 24))) return score >= 0.58;
+    return score >= 0.66;
   });
 };
 
@@ -344,6 +348,7 @@ const normalizePitch = (payload: PitchPayload) => {
     internalLinks: asJson(payload.internalLinks),
     imageCandidates: asJson(payload.imageCandidates),
     score: Math.max(0, Math.min(1000, Number(payload.score || 0))),
+    discoverScore: Math.max(0, Math.min(600, Number(payload.discoverScore || 0))),
     expiresAt: clean(payload.expiresAt, 40),
     updatedAt: now,
   };
@@ -495,8 +500,8 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     .prepare(
       `INSERT INTO editorial_pitches (
         id, cluster_key, title, summary, category, status, source_count, primary_url,
-        sources, tags, keywords, internal_links, image_candidates, score, expires_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        sources, tags, keywords, internal_links, image_candidates, score, discover_score, expires_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(cluster_key) DO UPDATE SET
         title = excluded.title,
         summary = excluded.summary,
@@ -514,6 +519,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
           ELSE editorial_pitches.status
         END,
         score = excluded.score,
+        discover_score = excluded.discover_score,
         expires_at = excluded.expires_at,
         updated_at = CASE
           WHEN excluded.source_count > editorial_pitches.source_count OR excluded.score > editorial_pitches.score
@@ -536,6 +542,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       pitch.internalLinks,
       pitch.imageCandidates,
       pitch.score,
+      pitch.discoverScore,
       pitch.expiresAt,
       pitch.updatedAt,
       shouldReopenReviewed ? 1 : 0,
@@ -545,7 +552,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   await rememberPitch(db, pitch, remembered ? 'developing' : 'seen', pitch.expiresAt);
 
   const stored = await db
-    .prepare('SELECT id, status, source_count, score FROM editorial_pitches WHERE cluster_key = ? LIMIT 1')
+    .prepare('SELECT id, status, source_count, score, discover_score FROM editorial_pitches WHERE cluster_key = ? LIMIT 1')
     .bind(pitch.clusterKey)
     .first<PitchRecord>();
 
@@ -557,6 +564,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       status: stored?.status || pitch.status,
       sourceCount: Number(stored?.source_count || pitch.sourceCount || 0),
       score: Number(stored?.score || pitch.score || 0),
+      discoverScore: Number(stored?.discover_score || pitch.discoverScore || 0),
       visibleAsNew: (stored?.status || pitch.status) === 'new' && Number(stored?.source_count || pitch.sourceCount || 0) >= 5,
     },
   });

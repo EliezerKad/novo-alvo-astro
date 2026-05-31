@@ -21,6 +21,7 @@ const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
 const D1_DATABASE = process.env.AUTOMATION_D1_DATABASE || 'novo-alvo-editorial';
 const MIN_SOURCES = Number(process.env.AUTOMATION_MIN_SOURCES || 8);
 const MIN_SCORE = Number(process.env.AUTOMATION_MIN_SCORE || 900);
+const MIN_DISCOVER_SCORE = Number(process.env.AUTOMATION_MIN_DISCOVER_SCORE || 260);
 const MAX_QUEUE_PER_RUN = Number(process.env.AUTOMATION_MAX_QUEUE_PER_RUN || 1);
 const MAX_OPEN_QUEUE = Number(process.env.AUTOMATION_MAX_OPEN_QUEUE || 2);
 const RECENT_CATEGORY_HOURS = Number(process.env.AUTOMATION_RECENT_CATEGORY_HOURS || 8);
@@ -72,6 +73,72 @@ const parseDate = (value) => {
 
 const sqlString = (value) => `'${String(value || '').replace(/'/g, "''")}'`;
 
+const CATEGORY_DAILY_TARGETS = {
+  Brasil: 4,
+  Famosos: 4,
+  Ocorrencias: 4,
+  Musica: 3,
+  Economia: 2,
+  Tecnologia: 1,
+  Mundo: 1,
+  Futebol: 1,
+};
+
+const CATEGORY_WEIGHTS = {
+  Economia: 1.12,
+  Famosos: 1.15,
+  Musica: 1.15,
+  Ocorrencias: 1.15,
+  Brasil: 1.1,
+  Tecnologia: 1.08,
+};
+
+const FOOTBALL_HIGH_SIGNAL_PATTERN = /\b(flamengo|corinthians|palmeiras|neymar|endrick|estevao|estêvão|selecao brasileira|seleção brasileira|cbf|ancelotti|copa do mundo|libertadores|copa do brasil)\b/i;
+const CINEMA_HIGH_SIGNAL_PATTERN = /\b(marvel|dc|netflix|hbo|max|disney|bilheteria|oscar|cannes|festival de cannes|prime video)\b/i;
+const EMOTION_PATTERN = /\b(superacao|superação|tragedia|tragédia|morre|morreu|morte|morto|morta|conquista|conflito|escandalo|escândalo|polemica|polêmica|acusacao|acusação|investigacao|investigação|drama|surpreende|emociona|viral)\b/i;
+const CURIOSITY_PATTERN = /\b(inesperado|bastidor|bastidores|descoberta|segredo|curioso|curiosidade|mudanca|mudança|surpreendente|revela|revelou|entenda|por que|motivo|mistério|misterio)\b/i;
+const CELEBRITY_PATTERN = /\b(celebridade|famoso|famosa|influenciador|influenciadora|artista|ator|atriz|cantor|cantora|apresentador|apresentadora|atleta|neymar|joao fonseca|joão fonseca|lula|bolsonaro|trump|drake|shakira|anitta)\b/i;
+const HUMAN_IMPACT_PATTERN = /\b(saude|saúde|seguranca|segurança|educacao|educação|emprego|renda|salario|salário|juros|inflacao|inflação|familia|família|trabalho|consumidor|morador|jovem|crianca|criança|idoso|vitima|vítima)\b/i;
+const NOVELTY_PATTERN = /\b(agora|hoje|novo|nova|inedito|inédito|lanca|lança|lancamento|lançamento|estreia|decisao|decisão|aprova|proibe|proíbe|anuncia|mudou|muda|ultima hora|última hora)\b/i;
+const SEARCH_VOLUME_PATTERN = /\b(google|openai|meta|apple|microsoft|netflix|hbo|disney|marvel|dc|flamengo|corinthians|palmeiras|neymar|drake|shakira|anitta|lula|bolsonaro|trump|inss|enem|selic|dolar|dólar|pix)\b/i;
+
+const normalized = (value) =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+const scoreSignal = (pattern, text, base = 35, perMatch = 18) => {
+  const matches = text.match(pattern);
+  if (!matches) return 0;
+  return Math.min(100, base + matches.length * perMatch);
+};
+
+const discoverScoreForPitch = (pitch) => {
+  const stored = Number(pitch.discover_score || pitch.discoverScore || 0);
+  if (stored > 0) return Math.min(600, stored);
+  const text = normalized(`${pitch.category || ''} ${pitch.title || ''} ${pitch.summary || ''} ${pitch.keywords || ''} ${pitch.tags || ''}`);
+  return Math.max(
+    0,
+    Math.min(
+      600,
+      scoreSignal(EMOTION_PATTERN, text, 42, 20) +
+        scoreSignal(CURIOSITY_PATTERN, text, 35, 18) +
+        scoreSignal(CELEBRITY_PATTERN, text, pitch.category === 'Famosos' || pitch.category === 'Musica' ? 55 : 40, 20) +
+        scoreSignal(HUMAN_IMPACT_PATTERN, text, ['Brasil', 'Ocorrencias', 'Economia', 'Saude', 'Educacao'].includes(pitch.category) ? 52 : 36, 18) +
+        scoreSignal(NOVELTY_PATTERN, text, 42, 16) +
+        scoreSignal(SEARCH_VOLUME_PATTERN, text, 45, 18),
+    ),
+  );
+};
+
+const editorialWeightForPitch = (pitch) => {
+  const text = `${pitch.title || ''} ${pitch.summary || ''} ${pitch.keywords || ''} ${pitch.tags || ''}`;
+  if (pitch.category === 'Futebol' && !FOOTBALL_HIGH_SIGNAL_PATTERN.test(text)) return 0.92;
+  if (pitch.category === 'Cinema' && !CINEMA_HIGH_SIGNAL_PATTERN.test(text)) return 0.9;
+  return CATEGORY_WEIGHTS[pitch.category] || 1;
+};
+
 const STOP_WORDS = new Set([
   'a',
   'ao',
@@ -119,6 +186,9 @@ const subjectTokens = (value) =>
       .replace(/\basteroides\b/g, 'asteroide')
       .replace(/\baproximacoes?\b/g, 'aproximacao')
       .replace(/\bpassagens?\b/g, 'passagem')
+      .replace(/\bconselho nacional de justica\b/g, 'cnj')
+      .replace(/\binteligencia artificial\b/g, 'ia')
+      .replace(/\bvirada cultural\b/g, 'viradacultural')
       .replace(/[^a-z0-9]+/g, ' ')
       .split(/\s+/)
       .map((token) => token.trim())
@@ -183,6 +253,34 @@ const buildCategoryRecency = async () => {
   return recency;
 };
 
+const buildRecentCategoryCounts = async () => {
+  const since = Date.now() - 24 * 60 * 60 * 1000;
+  const counts = new Map();
+  const seen = new Set();
+  const add = (article) => {
+    const category = String(article.category || '').trim();
+    if (!category) return;
+    const key = String(article.slug || article.id || `${article.title || ''}:${article.published_at || article.publishedAt || ''}`);
+    if (key && seen.has(key)) return;
+    const time = parseDate(article.published_at || article.publishedAt || article.scheduled_at || article.updated_at || article.created_at);
+    if (time >= since) counts.set(category, (counts.get(category) || 0) + 1);
+    if (key) seen.add(key);
+  };
+
+  const publicData = await publicJson('/api/public/articles?limit=120').catch(() => ({ articles: [] }));
+  for (const article of publicData.articles || []) add(article);
+
+  for (const article of d1(
+    `SELECT category, published_at, scheduled_at, updated_at
+     FROM articles
+     WHERE status IN ('published', 'scheduled')
+     ORDER BY COALESCE(NULLIF(published_at, ''), NULLIF(scheduled_at, ''), updated_at) DESC
+     LIMIT 160`,
+  )) add(article);
+
+  return counts;
+};
+
 const listQueued = () =>
   d1(
     `SELECT q.id, q.status, q.category, q.publish_after, p.title, p.score, p.source_count
@@ -194,13 +292,13 @@ const listQueued = () =>
 
 const listNewPitchesFromD1 = () =>
   d1(
-    `SELECT id, cluster_key, category, title, summary, keywords, tags, sources, score, source_count, updated_at
+    `SELECT id, cluster_key, category, title, summary, keywords, tags, sources, score, COALESCE(discover_score, 0) AS discover_score, source_count, updated_at
      FROM editorial_pitches
      WHERE status = 'new'
        AND source_count >= ${Math.max(1, Math.floor(MIN_SOURCES))}
        AND score >= ${Math.max(0, Math.floor(MIN_SCORE))}
        AND (expires_at IS NULL OR expires_at = '' OR expires_at >= ${sqlString(new Date().toISOString())})
-     ORDER BY score DESC, source_count DESC, updated_at DESC
+     ORDER BY discover_score DESC, score DESC, source_count DESC, updated_at DESC
      LIMIT 100`,
   );
 
@@ -235,7 +333,7 @@ const duplicateForPitch = (pitch, publishedSubjects) => {
   );
   for (const article of publishedSubjects) {
     const score = overlapScore(pitchTokens, article.tokens);
-    if (score.overlap >= 5 && score.ratio >= 0.55) return { article, score };
+    if (score.overlap >= 4 && score.ratio >= 0.46) return { article, score };
   }
   return null;
 };
@@ -264,18 +362,24 @@ const markDuplicatePitch = async (pitch, duplicate, apiAvailable) => {
   console.warn(`[duplicate] ${pitch.title} -> ${duplicate.article.slug} (${note})`);
 };
 
-const rankPitches = (pitches, recency) => {
+const rankPitches = (pitches, recency, recentCounts = new Map()) => {
   const recentCutoff = Date.now() - RECENT_CATEGORY_HOURS * 60 * 60 * 1000;
   return pitches
     .filter((pitch) => Number(pitch.source_count || 0) >= MIN_SOURCES)
     .filter((pitch) => Number(pitch.score || 0) >= MIN_SCORE)
+    .filter((pitch) => discoverScoreForPitch(pitch) >= MIN_DISCOVER_SCORE)
     .filter((pitch) => sourcePublishers(pitch).size >= MIN_SOURCES)
     .map((pitch) => {
       const categoryTime = recency.get(pitch.category) || 0;
       const staleBoost = categoryTime && categoryTime > recentCutoff ? 0 : 100000;
+      const target = CATEGORY_DAILY_TARGETS[pitch.category] || 1;
+      const publishedToday = recentCounts.get(pitch.category) || 0;
+      const quotaBoost = Math.max(0, target - publishedToday) * 6500;
+      const editorialScore = Number(pitch.score || 0) * editorialWeightForPitch(pitch);
+      const discoverScore = discoverScoreForPitch(pitch);
       return {
         pitch,
-        rank: staleBoost + Number(pitch.score || 0) * 10 + Number(pitch.source_count || 0) - Math.floor(categoryTime / 100000000),
+        rank: staleBoost + quotaBoost + editorialScore * 8 + discoverScore * 16 + Number(pitch.source_count || 0) * 4 - Math.floor(categoryTime / 100000000),
       };
     })
     .sort((a, b) => b.rank - a.rank || Number(b.pitch.score || 0) - Number(a.pitch.score || 0))
@@ -358,6 +462,7 @@ const main = async () => {
   }
 
   const recency = await buildCategoryRecency();
+  const recentCounts = await buildRecentCategoryCounts();
   const pitchData = apiAvailable
     ? await requestJson(`/api/admin/pitches?status=new&minSources=${MIN_SOURCES}&limit=100`).catch((error) => {
         if (!isNetworkError(error)) throw error;
@@ -387,7 +492,7 @@ const main = async () => {
     }
     uniquePitches.push(pitch);
   }
-  const rankedUnique = rankPitches(uniquePitches, recency);
+  const rankedUnique = rankPitches(uniquePitches, recency, recentCounts);
   for (const category of wantedCategories) {
     const replacement = rankedUnique.find(
       (pitch) => pitch.category === category && !categoryBackfill.some((item) => item.id === pitch.id),

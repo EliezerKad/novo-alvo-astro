@@ -156,6 +156,76 @@ const normalizeCategoryKey = (value) =>
 const categoryByKey = new Map(Object.keys(FEEDS).map((category) => [normalizeCategoryKey(category), category]));
 const BLOCKED_FAMOSOS_TOPIC_PATTERN = /\b(virginia|virg[ií]nia|ze\s*felipe|z[eé]\s*felipe|vini\s*jr|vinicius\s*j[uú]nior)\b/i;
 
+const EDITORIAL_CATEGORY_PRIORITY = [
+  'Famosos',
+  'Musica',
+  'Ocorrencias',
+  'Brasil',
+  'Economia',
+  'Tecnologia',
+  'Mundo',
+  'Futebol',
+  'Cultura',
+  'Entretenimento',
+  'Saude',
+  'Cinema',
+  'Educacao',
+  'Games',
+  'Moda',
+  'Politica',
+  'Esportes',
+  'Ciencia',
+  'Lifestyle',
+];
+
+const EDITORIAL_CATEGORY_WEIGHTS = {
+  Economia: 1.12,
+  Famosos: 1.15,
+  Musica: 1.15,
+  Ocorrencias: 1.15,
+  Brasil: 1.1,
+  Tecnologia: 1.08,
+};
+
+const FOOTBALL_HIGH_SIGNAL_PATTERN = /\b(flamengo|corinthians|palmeiras|neymar|endrick|estevao|estêvão|selecao brasileira|seleção brasileira|cbf|ancelotti|copa do mundo|libertadores|copa do brasil)\b/i;
+const CINEMA_HIGH_SIGNAL_PATTERN = /\b(marvel|dc|netflix|hbo|max|disney|bilheteria|oscar|cannes|festival de cannes|prime video)\b/i;
+const EMOTION_PATTERN = /\b(superacao|superação|tragedia|tragédia|morre|morreu|morte|morto|morta|conquista|conflito|escandalo|escândalo|polemica|polêmica|acusacao|acusação|investigacao|investigação|drama|surpreende|emociona|viral)\b/i;
+const CURIOSITY_PATTERN = /\b(inesperado|bastidor|bastidores|descoberta|segredo|curioso|curiosidade|mudanca|mudança|surpreendente|revela|revelou|entenda|por que|motivo|mistério|misterio)\b/i;
+const CELEBRITY_PATTERN = /\b(celebridade|famoso|famosa|influenciador|influenciadora|artista|ator|atriz|cantor|cantora|apresentador|apresentadora|atleta|neymar|joao fonseca|joão fonseca|lula|bolsonaro|trump|drake|shakira|anitta)\b/i;
+const HUMAN_IMPACT_PATTERN = /\b(saude|saúde|seguranca|segurança|educacao|educação|emprego|renda|salario|salário|juros|inflacao|inflação|familia|família|trabalho|consumidor|morador|jovem|crianca|criança|idoso|vitima|vítima)\b/i;
+const NOVELTY_PATTERN = /\b(agora|hoje|novo|nova|inedito|inédito|lanca|lança|lancamento|lançamento|estreia|decisao|decisão|aprova|proibe|proíbe|anuncia|mudou|muda|ultima hora|última hora)\b/i;
+const SEARCH_VOLUME_PATTERN = /\b(google|openai|meta|apple|microsoft|netflix|hbo|disney|marvel|dc|flamengo|corinthians|palmeiras|neymar|drake|shakira|anitta|lula|bolsonaro|trump|inss|enem|selic|dolar|dólar|pix)\b/i;
+
+const scoreSignal = (pattern, text, base = 35, perMatch = 18) => {
+  const matches = text.match(pattern);
+  if (!matches) return 0;
+  return Math.min(100, base + matches.length * perMatch);
+};
+
+const discoverScore = (pitch) => {
+  const text = normalizedText(`${pitch.category || ''} ${pitch.title || ''} ${pitch.summary || ''} ${pitch.keywords || ''} ${Array.isArray(pitch.tags) ? pitch.tags.join(' ') : ''}`);
+  const emotion = scoreSignal(EMOTION_PATTERN, text, 42, 20);
+  const curiosity = scoreSignal(CURIOSITY_PATTERN, text, 35, 18);
+  const celebrity = scoreSignal(CELEBRITY_PATTERN, text, pitch.category === 'Famosos' || pitch.category === 'Musica' ? 55 : 40, 20);
+  const humanImpact = scoreSignal(HUMAN_IMPACT_PATTERN, text, ['Brasil', 'Ocorrencias', 'Economia', 'Saude', 'Educacao'].includes(pitch.category) ? 52 : 36, 18);
+  const novelty = scoreSignal(NOVELTY_PATTERN, text, 42, 16);
+  const searchVolume = scoreSignal(SEARCH_VOLUME_PATTERN, text, 45, 18);
+  return Math.max(0, Math.min(600, emotion + curiosity + celebrity + humanImpact + novelty + searchVolume));
+};
+
+const editorialCategoryWeight = (pitch) => {
+  const text = `${pitch.title || ''} ${pitch.summary || ''} ${pitch.keywords || ''} ${Array.isArray(pitch.tags) ? pitch.tags.join(' ') : ''}`;
+  if (pitch.category === 'Futebol' && !FOOTBALL_HIGH_SIGNAL_PATTERN.test(text)) return 0.92;
+  if (pitch.category === 'Cinema' && !CINEMA_HIGH_SIGNAL_PATTERN.test(text)) return 0.9;
+  return EDITORIAL_CATEGORY_WEIGHTS[pitch.category] || 1;
+};
+
+const weightedPitchScore = (pitch) => {
+  const base = Number(pitch.score || 0);
+  const discoverBoost = discoverScore(pitch) / 600;
+  return Math.min(1000, Math.round(base * editorialCategoryWeight(pitch) + discoverBoost * 90));
+};
+
 const getArgValue = (name) => {
   const inline = process.argv.find((arg) => arg.startsWith(`--${name}=`));
   if (inline) return inline.split('=').slice(1).join('=');
@@ -1623,7 +1693,7 @@ const buildPitch = (items) => {
   const isRadar = items.some((item) => item.radarCluster);
   const signature = subjectSignature(orderedItems, first.category);
 
-  return {
+  const pitchDraft = {
     clusterKey: `${slugify(first.category)}:${isRadar ? 'radar:' : ''}${signature}`,
     title: pitchTitle,
     summary: `O fato central envolve ${pitchTitle}. A abordagem editorial deve identificar o agente ativo, a causa imediata e a consequencia concreta para o leitor.`,
@@ -1636,8 +1706,15 @@ const buildPitch = (items) => {
     keywords: keywords.join(', '),
     internalLinks: [],
     imageCandidates,
-    score: Math.min(1000, sourceQuality * 110 + keywords.length * 5 + Math.max(0, sourceCount - 8) * 12),
+    score: sourceQuality * 110 + keywords.length * 5 + Math.max(0, sourceCount - 8) * 12,
     expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+  };
+
+  const discover = discoverScore(pitchDraft);
+  return {
+    ...pitchDraft,
+    discoverScore: discover,
+    score: weightedPitchScore(pitchDraft),
   };
 };
 
@@ -1705,7 +1782,7 @@ const runHousekeeping = async () => {
 
 const addUniquePitch = (selected, seen, pitch) => {
   if (!pitch || seen.has(pitch.clusterKey)) return false;
-  const repeatedSubject = selected.some((item) => item.category === pitch.category && semanticPitchOverlap(item, pitch) >= 0.72);
+  const repeatedSubject = selected.some((item) => item.category === pitch.category && semanticPitchOverlap(item, pitch) >= 0.62);
   if (repeatedSubject) return false;
   selected.push(pitch);
   seen.add(pitch.clusterKey);
@@ -1713,8 +1790,8 @@ const addUniquePitch = (selected, seen, pitch) => {
 };
 
 const semanticPitchOverlap = (left, right) => {
-  const leftTokens = new Set(extractKeywords(left?.title || '', left?.category || '').slice(0, 8));
-  const rightTokens = new Set(extractKeywords(right?.title || '', right?.category || '').slice(0, 8));
+  const leftTokens = new Set(extractKeywords(`${left?.title || ''} ${left?.summary || ''} ${left?.keywords || ''} ${(left?.tags || []).join?.(' ') || ''}`, left?.category || '').slice(0, 12));
+  const rightTokens = new Set(extractKeywords(`${right?.title || ''} ${right?.summary || ''} ${right?.keywords || ''} ${(right?.tags || []).join?.(' ') || ''}`, right?.category || '').slice(0, 12));
   if (!leftTokens.size || !rightTokens.size) return 0;
   let shared = 0;
   for (const token of leftTokens) {
@@ -1723,11 +1800,17 @@ const semanticPitchOverlap = (left, right) => {
   return shared / Math.min(leftTokens.size, rightTokens.size);
 };
 
+const orderedEditorialCategories = (categories) => [
+  ...EDITORIAL_CATEGORY_PRIORITY.filter((category) => categories.includes(category)),
+  ...categories.filter((category) => !EDITORIAL_CATEGORY_PRIORITY.includes(category)),
+];
+
 const balancePitches = (topicPitches, radarPitches, coveragePitches, limit, categories = Object.keys(FEEDS)) => {
   const selected = [];
   const seen = new Set();
   const radarByCategory = new Map();
   const coverageByCategory = new Map();
+  const orderedCategories = orderedEditorialCategories(categories);
 
   for (const pitch of radarPitches) {
     if (!radarByCategory.has(pitch.category)) radarByCategory.set(pitch.category, []);
@@ -1738,13 +1821,13 @@ const balancePitches = (topicPitches, radarPitches, coveragePitches, limit, cate
     coverageByCategory.get(pitch.category).push(pitch);
   }
 
-  for (const category of categories) {
+  for (const category of orderedCategories) {
     addUniquePitch(selected, seen, radarByCategory.get(category)?.[0] || coverageByCategory.get(category)?.[0]);
     if (selected.length >= limit) return selected;
   }
 
   for (let round = 1; round < RADAR_BATCHES_PER_CATEGORY; round += 1) {
-    for (const category of categories) {
+    for (const category of orderedCategories) {
       addUniquePitch(selected, seen, radarByCategory.get(category)?.[round] || coverageByCategory.get(category)?.[round]);
       if (selected.length >= limit) return selected;
     }
