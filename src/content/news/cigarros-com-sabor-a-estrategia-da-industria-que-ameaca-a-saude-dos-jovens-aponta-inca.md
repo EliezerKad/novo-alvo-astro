@@ -6,19 +6,19 @@ seoDescription: "Saude: O Instituto Nacional de Câncer (INCA) emite alerta sobr
 category: "Saude"
 author: "Redação Novo Alvo"
 sources: ["INCA", "Anvisa", "Supremo Tribunal Federal", "ACT Promoção da Saúde", "OPAS/OMS", "Agência Brasil", "Gazeta News"]
-publishedAt: "2026-05-31T14:06:01.720Z"
-updatedAt: "2026-05-31T14:06:02.080Z"
+publishedAt: "2026-05-31T14:12:28.604Z"
+updatedAt: "2026-05-31T14:12:28.783Z"
 featured: true
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/cigarros-com-sabor-a-estrategia-da-industria-que-ameaca-a-saude-dos-jovens-aponta-inca-cover-20260531140602.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/cigarros-com-sabor-a-estrategia-da-industria-que-ameaca-a-saude-dos-jovens-aponta-inca-cover-20260531141228.avif"
   alt: "Foto de Elsa Olofsson na Unsplash"
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/cigarros-com-sabor-a-estrategia-da-industria-que-ameaca-a-saude-dos-jovens-aponta-inca-cover-20260531140602.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/cigarros-com-sabor-a-estrategia-da-industria-que-ameaca-a-saude-dos-jovens-aponta-inca-cover-20260531141228.avif"
 tags: ["saude", "inca", "anvisa", "tabagismo", "cigarros", "jovens", "nicotina", "stf"]
 ---
 
