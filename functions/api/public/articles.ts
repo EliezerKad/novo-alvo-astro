@@ -122,14 +122,33 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
   const limit = Math.max(1, Math.min(30, Number(url.searchParams.get('limit') || 12)));
   const category = clean(url.searchParams.get('category'), 80);
   const sort = clean(url.searchParams.get('sort'), 30);
+  const period = clean(url.searchParams.get('period'), 20);
   const now = new Date().toISOString();
   await publishDueScheduled(request, env, now).catch(() => {});
 
+  const periodDays = period === '24h' ? 1 : period === '7d' ? 7 : 0;
+  const periodSince = periodDays > 0 ? new Date(Date.now() - periodDays * 24 * 60 * 60 * 1000).toISOString() : '';
+  const periodJoin =
+    sort === 'views' && periodDays > 0
+      ? `LEFT JOIN (
+          SELECT slug, COUNT(*) AS period_views
+          FROM article_view_events
+          WHERE viewed_at >= ?
+          GROUP BY slug
+        ) pv ON pv.slug = a.slug`
+      : '';
+
+  const selectViews =
+    sort === 'views' && periodDays > 0
+      ? `COALESCE(pv.period_views, 0) AS views, COALESCE(v.total_views, 0) AS total_views`
+      : `COALESCE(v.total_views, 0) AS views, COALESCE(v.total_views, 0) AS total_views`;
   const selectFields = `a.id, a.slug, a.title, a.summary, a.category, a.author, a.status, a.cover_url, a.cover_alt,
        a.reading_minutes, a.scheduled_at, a.published_at, a.created_at, a.updated_at,
-       COALESCE(v.total_views, 0) AS views`;
+       ${selectViews}`;
   const orderBy =
-    sort === 'views'
+    sort === 'views' && periodDays > 0
+      ? `ORDER BY COALESCE(pv.period_views, 0) DESC, COALESCE(v.total_views, 0) DESC, COALESCE(NULLIF(a.published_at, ''), a.scheduled_at, a.updated_at) DESC`
+      : sort === 'views'
       ? `ORDER BY COALESCE(v.total_views, 0) DESC, COALESCE(NULLIF(a.published_at, ''), a.scheduled_at, a.updated_at) DESC`
       : `ORDER BY COALESCE(NULLIF(a.published_at, ''), a.scheduled_at, a.updated_at) DESC`;
 
@@ -137,6 +156,7 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
     ? `SELECT ${selectFields}
        FROM articles a
        LEFT JOIN article_views v ON v.slug = a.slug
+       ${periodJoin}
        WHERE category = ?
          AND status = 'published'
        ${orderBy}
@@ -144,13 +164,16 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
     : `SELECT ${selectFields}
        FROM articles a
        LEFT JOIN article_views v ON v.slug = a.slug
+       ${periodJoin}
        WHERE status = 'published'
        ${orderBy}
        LIMIT ?`;
 
-  const result = category
-    ? await db.prepare(query).bind(category, limit).all()
-    : await db.prepare(query).bind(limit).all();
+  const binds: unknown[] = periodDays > 0 ? [periodSince] : [];
+  if (category) binds.push(category);
+  binds.push(limit);
+
+  const result = await db.prepare(query).bind(...binds).all();
 
   return json({ articles: result.results || [] });
 };

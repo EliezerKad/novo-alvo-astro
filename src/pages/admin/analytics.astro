@@ -22,7 +22,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       </div>
     </header>
 
-    <section class="grid grid-cols-1 gap-4 md:grid-cols-4">
+    <section class="grid grid-cols-1 gap-4 md:grid-cols-4 xl:grid-cols-8">
       <article class="rounded-[1.5rem] border border-white/80 bg-white/70 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
         <div class="mb-6 h-2 w-12 rounded-full bg-red-600"></div>
         <strong class="admin-display block text-4xl" data-total-views>...</strong>
@@ -42,6 +42,26 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <div class="mb-6 h-2 w-12 rounded-full bg-amber-500"></div>
         <strong class="admin-display block text-4xl" data-clean-estimate>...</strong>
         <span class="mt-2 block text-[9px] font-black uppercase tracking-widest text-zinc-400">Sem maior visitante</span>
+      </article>
+      <article class="rounded-[1.5rem] border border-white/80 bg-white/70 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-6 h-2 w-12 rounded-full bg-violet-600"></div>
+        <strong class="admin-display block text-4xl" data-views-per-article>...</strong>
+        <span class="mt-2 block text-[9px] font-black uppercase tracking-widest text-zinc-400">Views por materia</span>
+      </article>
+      <article class="rounded-[1.5rem] border border-white/80 bg-white/70 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-6 h-2 w-12 rounded-full bg-blue-600"></div>
+        <strong class="admin-display block text-4xl" data-pages-per-visitor>...</strong>
+        <span class="mt-2 block text-[9px] font-black uppercase tracking-widest text-zinc-400">Paginas por visitante</span>
+      </article>
+      <article class="rounded-[1.5rem] border border-white/80 bg-white/70 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-6 h-2 w-12 rounded-full bg-fuchsia-600"></div>
+        <strong class="admin-display block text-4xl" data-return-rate>...</strong>
+        <span class="mt-2 block text-[9px] font-black uppercase tracking-widest text-zinc-400">Taxa de retorno</span>
+      </article>
+      <article class="rounded-[1.5rem] border border-white/80 bg-white/70 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-6 h-2 w-12 rounded-full bg-cyan-600"></div>
+        <strong class="admin-display block text-4xl" data-growth-rate>...</strong>
+        <span class="mt-2 block text-[9px] font-black uppercase tracking-widest text-zinc-400">Crescimento</span>
       </article>
     </section>
 
@@ -79,6 +99,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </p>
         <div class="space-y-3" data-visitor-list></div>
       </article>
+    </section>
+
+    <section class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+      <div class="mb-5 border-b border-zinc-100 pb-4 dark:border-zinc-800">
+        <h2 class="text-xs font-black uppercase tracking-[0.24em]">Views por hora</h2>
+      </div>
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" data-hourly-list></div>
     </section>
   </section>
 </AdminLayout>
@@ -124,6 +151,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     setText('[data-total-visitors]', formatNumber(data.totals.visitors));
     setText('[data-range-views]', formatNumber(data.range.views));
     setText('[data-clean-estimate]', formatNumber(data.totals.viewsWithoutLeadingVisitor));
+    setText('[data-views-per-article]', String(data.range.viewsPerArticle || data.content.viewsPerArticle || 0).replace('.', ','));
+    setText('[data-pages-per-visitor]', String(data.range.pagesPerVisitor || 0).replace('.', ','));
+    setText('[data-return-rate]', `${formatNumber(data.range.returnRate)}%`);
+    setText('[data-growth-rate]', data.range.growth === null ? '-' : `${data.range.growth > 0 ? '+' : ''}${String(data.range.growth).replace('.', ',')}%`);
     setText('[data-generated-at]', `Atualizado em ${formatDate(data.generatedAt)}`);
 
     const maxDaily = Math.max(...data.daily.map((item) => Number(item.views || 0)), 1);
@@ -154,6 +185,22 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             </div>
             ${bar(item.views, maxCategory)}
             <p class="mt-2 text-[10px] font-bold text-zinc-400">${formatNumber(item.articles)} materias / ${item.viewsPerArticle} views por materia / ${item.share}%</p>
+          </div>
+        `,
+      )
+      .join('');
+
+    const maxHourly = Math.max(...data.hourly.map((item) => Number(item.views || 0)), 1);
+    document.querySelector('[data-hourly-list]').innerHTML = data.hourly
+      .map(
+        (item) => `
+          <div class="rounded-2xl border border-zinc-100 bg-white/45 p-4 dark:border-zinc-800 dark:bg-zinc-950/30">
+            <div class="mb-3 flex items-center justify-between gap-3">
+              <strong class="text-sm font-black">${escapeHtml(item.hour)}h</strong>
+              <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400">${formatNumber(item.views)} views</span>
+            </div>
+            ${bar(item.views, maxHourly)}
+            <p class="mt-2 text-[10px] font-bold text-zinc-400">${formatNumber(item.visitors)} visitantes</p>
           </div>
         `,
       )

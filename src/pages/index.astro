@@ -206,6 +206,133 @@ const isCategoryView = !!category && category !== 'Início';
                   </div>
                 </section>
 
+                <section class="grid grid-cols-1 gap-5 border-t border-black/10 pt-10 dark:border-zinc-800 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] md:pt-16">
+                  <div class="overflow-hidden rounded-[1.55rem] border border-black/10 bg-white shadow-[0_18px_50px_rgba(16,16,16,0.055)] dark:border-zinc-800 dark:bg-zinc-900 md:rounded-[1.875rem]">
+                    <div class="flex min-h-[64px] items-center justify-between gap-3 border-b border-black/10 px-5 py-4 dark:border-zinc-800 md:px-6 md:py-5">
+                      <h2 class="text-xl font-black leading-none tracking-tighter text-zinc-950 dark:text-zinc-50">
+                        Últimas notícias
+                      </h2>
+                      <span class="text-[10px] font-black uppercase tracking-[0.1em] text-[#8A1F2D]">10 manchetes</span>
+                    </div>
+                    <div class="divide-y divide-black/10 dark:divide-zinc-800" data-latest-news-list>
+                      {visibleArticles.slice(0, 10).map((article) => (
+                        <a href={`/noticia/${article.slug}/`} class="group grid grid-cols-[72px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#f5f3ee] dark:hover:bg-zinc-800/60 md:grid-cols-[88px_minmax(0,1fr)_auto] md:px-6">
+                          <div class="h-14 w-[72px] overflow-hidden rounded-2xl bg-[#ebe8df] dark:bg-zinc-800 md:w-[88px]">
+                            {article.imageUrl ? (
+                              <img src={article.imageUrl} alt={article.title} class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
+                            ) : (
+                              <div class="grid h-full place-items-center text-zinc-300"><Icon name="image" class="h-5 w-5 opacity-30" /></div>
+                            )}
+                          </div>
+                          <div class="min-w-0">
+                            <div class="mb-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#8A1F2D]">{displayCategory(article.category)}</div>
+                            <h3 class="line-clamp-2 text-[15px] font-black leading-tight tracking-[-0.025em] text-zinc-950 group-hover:text-[#8A1F2D] dark:text-zinc-50 md:text-base">{article.title}</h3>
+                            <p class="mt-1 text-xs font-bold text-zinc-400">{formatRelativeDate(article.publishedAt)} • <span data-live-view-count={article.slug}>{article.views || 0} views</span></p>
+                          </div>
+                          <Icon name="chevronRight" class="hidden h-4 w-4 text-zinc-300 transition-transform group-hover:translate-x-1 group-hover:text-[#8A1F2D] sm:block" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div class="grid gap-5">
+                    {[
+                      ['Em alta 24h', 'Movimento recente', 'data-trending-24-list'],
+                      ['Mais lidas 7 dias', 'Semana', 'data-most-7-list'],
+                      ['Mais lidas geral', 'Histórico', 'data-most-all-list'],
+                    ].map(([title, label, attr]) => (
+                      <section class="overflow-hidden rounded-[1.55rem] border border-black/10 bg-white shadow-[0_18px_50px_rgba(16,16,16,0.055)] dark:border-zinc-800 dark:bg-zinc-900 md:rounded-[1.875rem]">
+                        <div class="flex items-center justify-between gap-3 border-b border-black/10 px-5 py-4 dark:border-zinc-800">
+                          <h3 class="text-base font-black leading-none tracking-tighter text-zinc-950 dark:text-zinc-50">{title}</h3>
+                          <span class="text-[9px] font-black uppercase tracking-[0.1em] text-[#8A1F2D]">{label}</span>
+                        </div>
+                        <div class="px-5 py-2" {...{ [attr]: true }}>
+                          {mostRead.slice(0, 4).map((article) => (
+                            <a href={`/noticia/${article.slug}/`} class="group grid grid-cols-[minmax(0,1fr)_auto] gap-3 border-b border-black/10 py-3 last:border-b-0 dark:border-zinc-800">
+                              <div class="min-w-0">
+                                <div class="mb-1 text-[8px] font-black uppercase tracking-[0.12em] text-[#8A1F2D]">{displayCategory(article.category)}</div>
+                                <h4 class="line-clamp-2 text-sm font-black leading-tight tracking-[-0.02em] text-zinc-950 group-hover:text-[#8A1F2D] dark:text-zinc-50">{article.title}</h4>
+                              </div>
+                              <span class="shrink-0 text-xs font-black text-zinc-400" data-live-view-count={article.slug}>{article.views || 0} views</span>
+                            </a>
+                          ))}
+                        </div>
+                      </section>
+                    ))}
+                  </div>
+                </section>
+
+                <script is:inline>
+                  (() => {
+                    const escapeHtml = (value) =>
+                      String(value || '')
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#039;');
+                    const categoryLabel = (value) =>
+                      ({ Politica: 'Política', Saude: 'Saúde', Ciencia: 'Ciência', Educacao: 'Educação', Musica: 'Música', Ocorrencias: 'Ocorrências' }[value] || value || 'Notícias');
+                    const formatDate = (value) => {
+                      const date = new Date(value || Date.now());
+                      const diff = Date.now() - date.getTime();
+                      const minutes = Math.max(1, Math.floor(diff / 60000));
+                      if (minutes < 60) return `há ${minutes} min`;
+                      const hours = Math.floor(minutes / 60);
+                      if (hours < 24) return `há ${hours}h`;
+                      return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(date);
+                    };
+                    const fetchArticles = async (url) => {
+                      const response = await fetch(url, { cache: 'no-store' });
+                      if (!response.ok) return [];
+                      const data = await response.json().catch(() => ({ articles: [] }));
+                      return Array.isArray(data.articles) ? data.articles.filter((article) => article?.slug) : [];
+                    };
+                    const renderLatest = (list, articles) => {
+                      if (!list || !articles.length) return;
+                      list.innerHTML = articles.slice(0, 10).map((article) => `
+                        <a href="/noticia/${encodeURIComponent(article.slug)}/" class="group grid grid-cols-[72px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#f5f3ee] dark:hover:bg-zinc-800/60 md:grid-cols-[88px_minmax(0,1fr)_auto] md:px-6">
+                          <div class="h-14 w-[72px] overflow-hidden rounded-2xl bg-[#ebe8df] dark:bg-zinc-800 md:w-[88px]">
+                            ${article.cover_url ? `<img src="${escapeHtml(article.cover_url)}" alt="${escapeHtml(article.cover_alt || article.title)}" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />` : `<div class="grid h-full place-items-center text-zinc-300"></div>`}
+                          </div>
+                          <div class="min-w-0">
+                            <div class="mb-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#8A1F2D]">${escapeHtml(categoryLabel(article.category))}</div>
+                            <h3 class="line-clamp-2 text-[15px] font-black leading-tight tracking-[-0.025em] text-zinc-950 group-hover:text-[#8A1F2D] dark:text-zinc-50 md:text-base">${escapeHtml(article.title)}</h3>
+                            <p class="mt-1 text-xs font-bold text-zinc-400">${formatDate(article.published_at || article.scheduled_at || article.updated_at)} • <span data-live-view-count="${escapeHtml(article.slug)}">${Number(article.total_views ?? article.views ?? 0)} views</span></p>
+                          </div>
+                          <span class="hidden text-zinc-300 transition-transform group-hover:translate-x-1 group-hover:text-[#8A1F2D] sm:block">›</span>
+                        </a>
+                      `).join('');
+                      window.__novoAlvoHydrateViews?.(list);
+                    };
+                    const renderCompact = (list, articles) => {
+                      if (!list || !articles.length) return;
+                      list.innerHTML = articles.slice(0, 4).map((article) => `
+                        <a href="/noticia/${encodeURIComponent(article.slug)}/" class="group grid grid-cols-[minmax(0,1fr)_auto] gap-3 border-b border-black/10 py-3 last:border-b-0 dark:border-zinc-800">
+                          <div class="min-w-0">
+                            <div class="mb-1 text-[8px] font-black uppercase tracking-[0.12em] text-[#8A1F2D]">${escapeHtml(categoryLabel(article.category))}</div>
+                            <h4 class="line-clamp-2 text-sm font-black leading-tight tracking-[-0.02em] text-zinc-950 group-hover:text-[#8A1F2D] dark:text-zinc-50">${escapeHtml(article.title)}</h4>
+                          </div>
+                          <span class="shrink-0 text-xs font-black text-zinc-400" data-live-view-count="${escapeHtml(article.slug)}">${Number(article.total_views ?? article.views ?? 0)} views</span>
+                        </a>
+                      `).join('');
+                      window.__novoAlvoHydrateViews?.(list);
+                    };
+
+                    Promise.all([
+                      fetchArticles('/api/public/articles?limit=10'),
+                      fetchArticles('/api/public/articles?limit=4&sort=views&period=24h'),
+                      fetchArticles('/api/public/articles?limit=4&sort=views&period=7d'),
+                      fetchArticles('/api/public/articles?limit=4&sort=views&period=all'),
+                    ]).then(([latest, hot24, top7, topAll]) => {
+                      renderLatest(document.querySelector('[data-latest-news-list]'), latest);
+                      renderCompact(document.querySelector('[data-trending-24-list]'), hot24);
+                      renderCompact(document.querySelector('[data-most-7-list]'), top7);
+                      renderCompact(document.querySelector('[data-most-all-list]'), topAll);
+                    }).catch(() => {});
+                  })();
+                </script>
+
                 <div id="editorias" class="space-y-10 border-t border-black/10 pt-10 dark:border-zinc-800 md:space-y-20 md:pt-20" data-category-sections>
                   {categorySections.map((section, sectionIndex) => {
                     const isHiddenCategorySection = sectionIndex >= initialCategorySections;

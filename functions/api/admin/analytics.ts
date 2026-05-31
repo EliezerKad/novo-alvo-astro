@@ -52,8 +52,9 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
   const url = new URL(request.url);
   const days = Math.max(1, Math.min(60, Number(url.searchParams.get('days') || 14)));
   const since = new Date(Date.now() - (days - 1) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const previousSince = new Date(Date.now() - (days * 2 - 1) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-  const [totals, rangeTotals, daily, categories, topArticles, visitors] = await Promise.all([
+  const [totals, rangeTotals, previousTotals, publishedArticles, rangePublishedArticles, hourly, daily, categories, topArticles, visitors, returningVisitors] = await Promise.all([
     db
       .prepare(
         `SELECT COUNT(*) AS views,
@@ -76,6 +77,39 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
       )
       .bind(since)
       .first(),
+    db
+      .prepare(
+        `SELECT COUNT(*) AS views,
+                COUNT(DISTINCT visitor_id) AS visitors,
+                COUNT(DISTINCT slug) AS articles
+           FROM article_view_events
+          WHERE substr(viewed_at, 1, 10) >= ?
+            AND substr(viewed_at, 1, 10) < ?`,
+      )
+      .bind(previousSince, since)
+      .first(),
+    db.prepare(`SELECT COUNT(*) AS articles FROM articles WHERE status = 'published'`).first(),
+    db
+      .prepare(
+        `SELECT COUNT(*) AS articles
+           FROM articles
+          WHERE status = 'published'
+            AND substr(COALESCE(NULLIF(published_at, ''), scheduled_at, updated_at), 1, 10) >= ?`,
+      )
+      .bind(since)
+      .first(),
+    db
+      .prepare(
+        `SELECT substr(viewed_at, 12, 2) AS hour,
+                COUNT(*) AS views,
+                COUNT(DISTINCT visitor_id) AS visitors
+           FROM article_view_events
+          WHERE substr(viewed_at, 1, 10) >= ?
+          GROUP BY hour
+          ORDER BY hour ASC`,
+      )
+      .bind(since)
+      .all(),
     db
       .prepare(
         `SELECT substr(viewed_at, 1, 10) AS day,
@@ -130,12 +164,30 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
           LIMIT 8`,
       )
       .all(),
+    db
+      .prepare(
+        `SELECT COUNT(*) AS visitors
+           FROM (
+             SELECT visitor_id, COUNT(*) AS views, COUNT(DISTINCT substr(viewed_at, 1, 10)) AS active_days
+               FROM article_view_events
+              WHERE substr(viewed_at, 1, 10) >= ?
+              GROUP BY visitor_id
+             HAVING views > 1 OR active_days > 1
+           )`,
+      )
+      .bind(since)
+      .first(),
   ]);
 
   const totalViews = num((totals as { views?: number } | null)?.views);
   const leadingVisitor = ((visitors.results || []) as Array<{ views?: number }>)[0];
   const leadingVisitorViews = num(leadingVisitor?.views);
   const rangeViews = num((rangeTotals as { views?: number } | null)?.views);
+  const previousViews = num((previousTotals as { views?: number } | null)?.views);
+  const totalPublished = num((publishedArticles as { articles?: number } | null)?.articles);
+  const rangePublished = num((rangePublishedArticles as { articles?: number } | null)?.articles);
+  const rangeVisitors = num((rangeTotals as { visitors?: number } | null)?.visitors);
+  const returning = num((returningVisitors as { visitors?: number } | null)?.visitors);
 
   return json({
     ok: true,
@@ -153,11 +205,28 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
     },
     range: {
       views: rangeViews,
-      visitors: num((rangeTotals as { visitors?: number } | null)?.visitors),
+      visitors: rangeVisitors,
       articles: num((rangeTotals as { articles?: number } | null)?.articles),
+      publishedArticles: rangePublished,
       firstViewedAt: clean((rangeTotals as { first_viewed_at?: string } | null)?.first_viewed_at, 80),
       lastViewedAt: clean((rangeTotals as { last_viewed_at?: string } | null)?.last_viewed_at, 80),
+      viewsPerArticle: rangePublished > 0 ? Number((rangeViews / rangePublished).toFixed(2)) : 0,
+      pagesPerVisitor: rangeVisitors > 0 ? Number((rangeViews / rangeVisitors).toFixed(2)) : 0,
+      returningVisitors: returning,
+      returnRate: pct(returning, rangeVisitors),
+      previousViews,
+      growth: previousViews > 0 ? Number((((rangeViews - previousViews) / previousViews) * 100).toFixed(1)) : null,
+      internalCtr: null,
     },
+    content: {
+      publishedArticles: totalPublished,
+      viewsPerArticle: totalPublished > 0 ? Number((totalViews / totalPublished).toFixed(2)) : 0,
+    },
+    hourly: ((hourly.results || []) as Array<{ hour?: string; views?: number; visitors?: number }>).map((row) => ({
+      hour: clean(row.hour, 4),
+      views: num(row.views),
+      visitors: num(row.visitors),
+    })),
     daily: ((daily.results || []) as Array<{ day?: string; views?: number; visitors?: number; articles?: number }>).map((row) => ({
       day: clean(row.day, 20),
       views: num(row.views),

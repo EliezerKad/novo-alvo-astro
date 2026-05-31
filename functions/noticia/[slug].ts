@@ -320,6 +320,53 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
   } catch {
     related = [];
   }
+  let mostReadNow: Array<Partial<CmsArticle> & { views?: number }> = [];
+  try {
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const mostReadResult = await db
+      .prepare(
+        `SELECT a.id, a.slug, a.title, a.summary, a.category, a.cover_url, a.cover_alt,
+                a.published_at, a.scheduled_at, a.updated_at, COUNT(e.event_key) AS views
+           FROM article_view_events e
+           INNER JOIN articles a ON a.slug = e.slug
+          WHERE e.viewed_at >= ?
+            AND a.slug != ?
+            AND (a.status = 'published' OR (a.status = 'scheduled' AND a.scheduled_at <= ?))
+          GROUP BY a.id, a.slug, a.title, a.summary, a.category, a.cover_url, a.cover_alt, a.published_at, a.scheduled_at, a.updated_at
+          ORDER BY views DESC, COALESCE(NULLIF(a.published_at, ''), a.scheduled_at, a.updated_at) DESC
+          LIMIT 4`,
+      )
+      .bind(dayAgo, slug, now)
+      .all<Partial<CmsArticle> & { views?: number }>();
+
+    mostReadNow = mostReadResult.results || [];
+  } catch {
+    mostReadNow = [];
+  }
+
+  if (mostReadNow.length < 4) {
+    try {
+      const fallbackMostRead = await db
+        .prepare(
+          `SELECT a.id, a.slug, a.title, a.summary, a.category, a.cover_url, a.cover_alt,
+                  a.published_at, a.scheduled_at, a.updated_at, COALESCE(v.total_views, 0) AS views
+             FROM articles a
+             LEFT JOIN article_views v ON v.slug = a.slug
+            WHERE a.slug != ?
+              AND (a.status = 'published' OR (a.status = 'scheduled' AND a.scheduled_at <= ?))
+            ORDER BY COALESCE(v.total_views, 0) DESC, COALESCE(NULLIF(a.published_at, ''), a.scheduled_at, a.updated_at) DESC
+            LIMIT 8`,
+        )
+        .bind(slug, now)
+        .all<Partial<CmsArticle> & { views?: number }>();
+
+      const seenMost = new Set(mostReadNow.map((item) => item.slug).filter(Boolean));
+      mostReadNow = [
+        ...mostReadNow,
+        ...((fallbackMostRead.results || []).filter((item) => item.slug && !seenMost.has(item.slug)).slice(0, 4 - mostReadNow.length)),
+      ];
+    } catch {}
+  }
   const canonical = `${CANONICAL_ORIGIN}/noticia/${encodeURIComponent(article.slug)}/`;
   const published = article.published_at || article.scheduled_at || article.created_at || article.updated_at;
   const modified = article.updated_at || published;
@@ -419,6 +466,53 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
             </a>`;
           })
           .join('')}</div>
+      </section>`
+    : '';
+  const recommendationCard = (item: Partial<CmsArticle> & { views?: number }) => {
+    const itemUrl = `/noticia/${encodeURIComponent(item.slug || '')}/`;
+    const itemImage = item.cover_url || `${CANONICAL_ORIGIN}/og-default.svg`;
+    const itemDate = formatEditorialDate(item.published_at || item.scheduled_at || item.updated_at || '');
+    return `<a href="${itemUrl}" class="group grid min-w-0 grid-cols-[88px_minmax(0,1fr)] gap-3 rounded-[1.15rem] border border-black/10 bg-white/60 p-2.5 transition-all hover:-translate-y-0.5 hover:border-[#8A1F2D]/25 hover:bg-white hover:shadow-[0_18px_48px_rgba(16,16,16,0.08)] dark:border-zinc-800 dark:bg-zinc-900/70 dark:hover:bg-zinc-900">
+      <div class="h-[72px] w-[88px] overflow-hidden rounded-[0.95rem] bg-[#ebe8df] dark:bg-zinc-800">
+        <img src="${escapeHtml(itemImage)}" alt="${escapeHtml(item.cover_alt || item.title)}" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
+      </div>
+      <div class="min-w-0 py-1">
+        <span class="text-[8px] font-black uppercase tracking-[0.12em] text-[#8A1F2D]">${escapeHtml(displayCategory(item.category || article.category))}</span>
+        <h3 class="mt-1 line-clamp-2 text-sm font-black leading-tight tracking-[-0.025em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50">${escapeHtml(item.title)}</h3>
+        <p class="mt-1 text-[10px] font-bold uppercase tracking-[0.04em] text-zinc-400">${escapeHtml(itemDate)}${typeof item.views === 'number' ? ` • ${Number(item.views || 0)} views` : ''}</p>
+      </div>
+    </a>`;
+  };
+  const pickDistinct = <T extends Partial<CmsArticle>>(items: T[], limit: number, seen: Set<string>) => {
+    const selected: T[] = [];
+    for (const item of items) {
+      const itemSlug = item.slug || '';
+      if (!itemSlug || seen.has(itemSlug)) continue;
+      selected.push(item);
+      seen.add(itemSlug);
+      if (selected.length >= limit) break;
+    }
+    return selected;
+  };
+  const recommendationSeen = new Set<string>([article.slug]);
+  const recommendationGroups = [
+    { title: 'Relacionadas', label: 'Contexto', items: pickDistinct(related, 4, recommendationSeen) },
+    { title: 'Da mesma editoria', label: displayCategory(article.category), items: pickDistinct(related, 4, recommendationSeen) },
+    { title: 'Mais lidas agora', label: '24h', items: pickDistinct(mostReadNow, 4, recommendationSeen) },
+  ].filter((group) => group.items.length > 0);
+  const recommendationsHtml = recommendationGroups.length
+    ? `<section class="mt-10 grid gap-5 md:mt-14" aria-label="Recomendacoes de leitura">
+        ${recommendationGroups
+          .map(
+            (group) => `<div class="rounded-[1.45rem] border border-black/10 bg-white/45 p-4 shadow-[0_18px_50px_rgba(16,16,16,0.04)] dark:border-zinc-800 dark:bg-zinc-950/30 md:rounded-[1.75rem] md:p-5">
+              <div class="mb-4 flex items-center justify-between gap-3">
+                <h2 class="text-base font-black tracking-[-0.035em] text-zinc-950 dark:text-zinc-50">${escapeHtml(group.title)}</h2>
+                <span class="text-[9px] font-black uppercase tracking-[0.12em] text-[#8A1F2D]">${escapeHtml(group.label)}</span>
+              </div>
+              <div class="grid gap-3 md:grid-cols-2">${group.items.map(recommendationCard).join('')}</div>
+            </div>`,
+          )
+          .join('')}
       </section>`
     : '';
   const newsletterHtml = `<section class="group relative mx-auto max-w-[900px] overflow-hidden rounded-[1.45rem] border border-black/10 bg-[#101010] p-4 text-white shadow-[0_18px_48px_rgba(16,16,16,0.14)] transition-all duration-500 hover:-translate-y-0.5 hover:shadow-[0_24px_68px_rgba(16,16,16,0.18)] dark:border-white/10 dark:bg-zinc-950 md:rounded-[1.75rem] md:p-5">
@@ -639,6 +733,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
           <aside class="grid h-fit gap-5 lg:sticky lg:top-28 lg:self-start">${sideRelatedHtml}</aside>
         </div>
         <div class="mt-12 md:mt-16">${newsletterHtml}</div>
+        ${recommendationsHtml}
       </section>
     </article>
     <div class="article-page" style="display:none">
