@@ -6,8 +6,8 @@ seoDescription: "Musica: Cantora observa que faixas antigas ganharam novo fôleg
 category: "Musica"
 author: "Redação Novo Alvo"
 sources: ["CNN Brasil", "UOL Splash", "G1 Pop & Arte", "Rolling Stone Brasil", "Tenho Mais Discos Que Amigos", "Metrópoles", "Terra"]
-publishedAt: "2026-05-31T16:43:08.974Z"
-updatedAt: "2026-05-31T16:43:11.105Z"
+publishedAt: "2026-05-31T16:43:09.203Z"
+updatedAt: "2026-05-31T16:43:11.365Z"
 featured: false
 isFeatured: false
 urgent: false
