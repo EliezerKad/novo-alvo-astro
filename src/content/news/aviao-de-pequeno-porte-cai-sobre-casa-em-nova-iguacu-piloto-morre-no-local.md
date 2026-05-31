@@ -6,8 +6,8 @@ seoDescription: "Ocorrencias: Um avião de pequeno porte caiu sobre uma residên
 category: "Ocorrencias"
 author: "Redação Novo Alvo"
 sources: ["Terra", "Tribuna Online", "Bahia Notícias", "UOL Notícias", "Meio Norte", "Gazeta Brasil", "Notícias ao Minuto Brasil", "CNN Brasil"]
-publishedAt: "2026-05-31T20:54:16.593Z"
-updatedAt: "2026-05-31T20:54:19.428Z"
+publishedAt: "2026-05-31T20:56:45.427Z"
+updatedAt: "2026-05-31T20:56:46.703Z"
 featured: false
 isFeatured: false
 urgent: false
