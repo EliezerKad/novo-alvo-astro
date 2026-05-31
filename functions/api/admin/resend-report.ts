@@ -122,6 +122,8 @@ const resendFetch = async (apiKey: string, path: string) => {
   return data as ResendListResponse;
 };
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const resendFetchPages = async (apiKey: string, path: string, maxItems = 700) => {
   const all: unknown[] = [];
   let after = '';
@@ -136,6 +138,7 @@ const resendFetchPages = async (apiKey: string, path: string, maxItems = 700) =>
     const last = data[data.length - 1] as { id?: string } | undefined;
     after = clean(last?.id, 120);
     if (!hasMore || !after || all.length >= maxItems) break;
+    await sleep(260);
   }
 
   return { data: all.slice(0, maxItems), has_more: hasMore && all.length >= maxItems };
@@ -182,8 +185,6 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
   const apiKey = clean(env.RESEND_API_KEY, 500);
   if (!apiKey) return json({ ok: false, error: 'RESEND_API_KEY nao configurada no Cloudflare.' }, { status: 503 });
 
-  const url = new URL(request.url);
-  const subjectFilter = clean(url.searchParams.get('subject'), 120).toLowerCase();
   if (env.EDITORIAL_DB) await ensureTables(env.EDITORIAL_DB).catch(() => null);
 
   try {
@@ -294,7 +295,7 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
           clicked: event === 'clicked',
         };
       })
-      .filter((email) => !subjectFilter || email.subject.toLowerCase().includes(subjectFilter));
+      .filter(Boolean);
 
     const eventCounts = normalizedEmails.reduce<Record<string, number>>((counts, email) => {
       counts[email.lastEvent] = (counts[email.lastEvent] || 0) + 1;

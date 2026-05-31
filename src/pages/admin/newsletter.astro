@@ -134,14 +134,23 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     if (node) node.textContent = formatNumber(value);
   };
 
+  let latestRows = [];
+
   const renderEmails = (rows) => {
     const root = document.querySelector('[data-newsletter-email-list]');
     if (!root) return;
-    if (!Array.isArray(rows) || rows.length === 0) {
+    const filter = document.querySelector('[data-newsletter-filter]');
+    const subject = filter instanceof HTMLInputElement ? filter.value.trim().toLowerCase() : '';
+    const visibleRows = (Array.isArray(rows) ? rows : []).filter((email) => {
+      if (!subject) return true;
+      const to = Array.isArray(email.to) ? email.to.join(', ') : '';
+      return String(email.subject || '').toLowerCase().includes(subject) || to.toLowerCase().includes(subject);
+    });
+    if (visibleRows.length === 0) {
       root.innerHTML = '<div class="px-4 py-5 text-sm font-bold text-zinc-400">Nenhum envio encontrado.</div>';
       return;
     }
-    root.innerHTML = rows
+    root.innerHTML = visibleRows
       .map((email) => {
         const to = Array.isArray(email.to) ? email.to.join(', ') : '';
         return `
@@ -281,12 +290,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
   const loadReport = async () => {
     const status = document.querySelector('[data-newsletter-status]');
-    const filter = document.querySelector('[data-newsletter-filter]');
-    const subject = filter instanceof HTMLInputElement ? filter.value.trim() : '';
     if (status) status.textContent = 'Atualizando relatorio...';
-    const params = new URLSearchParams();
-    if (subject) params.set('subject', subject);
-    const response = await fetch(`/api/admin/resend-report?${params.toString()}`, {
+    const response = await fetch('/api/admin/resend-report', {
       cache: 'no-store',
       headers: { authorization: `Bearer ${getToken()}` },
     });
@@ -296,6 +301,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     }
 
     const rows = data.emails?.rows || [];
+    latestRows = rows;
     setCard('Inscritos ativos', data.campaign?.subscribed || data.subscribers?.subscribed || 0);
     const localEngagement = data.emails?.localEngagement || {};
     const resendEvents = data.emails?.eventCounts || {};
@@ -331,11 +337,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   document.querySelector('[data-newsletter-filter]')?.addEventListener('input', () => {
     window.clearTimeout(filterTimer);
     filterTimer = window.setTimeout(() => {
-      loadReport().catch((error) => {
-        const status = document.querySelector('[data-newsletter-status]');
-        if (status) status.textContent = error instanceof Error ? error.message : 'Falha ao carregar.';
-      });
-    }, 450);
+      renderEmails(latestRows);
+    }, 150);
   });
 
   loadReport().catch((error) => {
