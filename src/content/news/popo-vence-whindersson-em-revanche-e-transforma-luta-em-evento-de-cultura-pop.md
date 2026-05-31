@@ -6,8 +6,8 @@ seoDescription: "Esportes: Acelino Popó Freitas supera Whindersson Nunes em rev
 category: "Esportes"
 author: "Redação Novo Alvo"
 sources: ["SpaceMoney", "GE", "CNN Brasil", "UOL Esporte", "Metrópoles", "ESPN", "Terra"]
-publishedAt: "2026-05-31T21:50:37.867Z"
-updatedAt: "2026-05-31T21:50:40.467Z"
+publishedAt: "2026-05-31T21:50:38.021Z"
+updatedAt: "2026-05-31T21:50:40.820Z"
 featured: false
 isFeatured: false
 urgent: false
