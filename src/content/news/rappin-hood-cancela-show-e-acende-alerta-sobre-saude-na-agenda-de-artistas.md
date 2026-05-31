@@ -6,8 +6,8 @@ seoDescription: "Cultura: Ausência do rapper em apresentação reacende discuss
 category: "Cultura"
 author: "Redação Novo Alvo"
 sources: ["Metrópoles", "UOL", "Estadão", "CNN Brasil", "G1", "Terra", "Folha de S.Paulo"]
-publishedAt: "2026-05-31T23:05:47.746Z"
-updatedAt: "2026-05-31T23:05:48.002Z"
+publishedAt: "2026-05-31T23:07:45.184Z"
+updatedAt: "2026-05-31T23:07:45.597Z"
 featured: false
 isFeatured: false
 urgent: false
