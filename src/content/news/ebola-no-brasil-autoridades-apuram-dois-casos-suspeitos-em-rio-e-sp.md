@@ -6,19 +6,19 @@ seoDescription: "Ocorrencias: Dois casos suspeitos de Ebola estão sob investiga
 category: "Ocorrencias"
 author: "Redação Novo Alvo"
 sources: ["SBT News", "Estadão", "Terra", "dw.com", "Correio Braziliense", "MundoBA", "Rádio Itatiaia", "Metro 1", "VEJA", "O Regional Net", "G1", "CNN Brasil", "BBC", "Diário do Grande ABC"]
-publishedAt: "2026-05-31T21:03:26.030Z"
-updatedAt: "2026-05-31T21:03:26.231Z"
+publishedAt: "2026-05-31T21:48:44.143Z"
+updatedAt: "2026-05-31T21:48:44.645Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/ebola-no-brasil-autoridades-apuram-dois-casos-suspeitos-em-rio-e-sp-cover-20260531210326.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/ebola-no-brasil-autoridades-apuram-dois-casos-suspeitos-em-rio-e-sp-cover-20260531214844.avif"
   alt: "Paisagem de Brumadinho, Minas Gerais"
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/ebola-no-brasil-autoridades-apuram-dois-casos-suspeitos-em-rio-e-sp-cover-20260531210326.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/ebola-no-brasil-autoridades-apuram-dois-casos-suspeitos-em-rio-e-sp-cover-20260531214844.avif"
 tags: ["ocorrencias", "ebola", "sabe", "dois", "casos", "suspeitos", "brasil"]
 ---
 
