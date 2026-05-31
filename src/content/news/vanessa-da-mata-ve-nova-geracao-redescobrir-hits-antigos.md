@@ -6,19 +6,19 @@ seoDescription: "Musica: Cantora observa que faixas antigas ganharam novo fôleg
 category: "Musica"
 author: "Redação Novo Alvo"
 sources: ["CNN Brasil", "UOL Splash", "G1 Pop & Arte", "Rolling Stone Brasil", "Tenho Mais Discos Que Amigos", "Metrópoles", "Terra"]
-publishedAt: "2026-05-31T16:43:09.203Z"
-updatedAt: "2026-05-31T16:43:11.365Z"
+publishedAt: "2026-05-31T16:43:13.952Z"
+updatedAt: "2026-05-31T16:43:15.921Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/vanessa-da-mata-ve-nova-geracao-redescobrir-hits-antigos-cover-20260531164311.webp"
+  src: "https://portalnovoalvo.com.br/media/news/vanessa-da-mata-ve-nova-geracao-redescobrir-hits-antigos-cover-20260531164315.webp"
   alt: "Foto: Reprodução/Instagram"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/vanessa-da-mata-ve-nova-geracao-redescobrir-hits-antigos-cover-20260531164311.webp"
+ogImage: "https://portalnovoalvo.com.br/media/news/vanessa-da-mata-ve-nova-geracao-redescobrir-hits-antigos-cover-20260531164315.webp"
 tags: []
 ---
 
