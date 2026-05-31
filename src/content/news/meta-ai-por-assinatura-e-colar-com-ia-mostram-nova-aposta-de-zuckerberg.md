@@ -6,8 +6,8 @@ seoDescription: "Tecnologia: Empresa de Mark Zuckerberg testa novas formas de le
 category: "Tecnologia"
 author: "Redação Novo Alvo"
 sources: ["Pplware", "Seu Crédito Digital", "Canaltech", "Olhar Digital", "Tecnoblog", "Prensa Mercosur", "Conectado News"]
-publishedAt: "2026-05-31T20:54:16.597Z"
-updatedAt: "2026-05-31T20:54:16.792Z"
+publishedAt: "2026-05-31T20:56:45.427Z"
+updatedAt: "2026-05-31T20:56:45.827Z"
 featured: false
 isFeatured: false
 urgent: false
