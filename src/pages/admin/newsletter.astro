@@ -206,6 +206,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       ['Total da base', campaign.total || 0],
       ['Enviados marcados', campaign.sent || 0],
       ['Pendentes', campaign.pending || 0],
+      ['Aberturas registradas', `${formatNumber(campaign.opened || 0)} (${Number(campaign.openRate || 0).toLocaleString('pt-BR')}%)`],
+      ['Cliques registrados', `${formatNumber(campaign.clicked || 0)} (${Number(campaign.clickRate || 0).toLocaleString('pt-BR')}%)`],
       ['Descadastros pos-envio', `${formatNumber(campaign.unsubscribedAfterSend || 0)} (${Number(campaign.unsubscribeRate || 0).toLocaleString('pt-BR')}%)`],
     ];
     const recent = Array.isArray(campaign.recentUnsubscribes) ? campaign.recentUnsubscribes : [];
@@ -260,11 +262,23 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
     const rows = data.emails?.rows || [];
     setCard('Inscritos ativos', data.campaign?.subscribed || data.subscribers?.subscribed || 0);
-    setCard('Enviados campanha', data.campaign?.sent || 0);
+    const localEngagement = data.emails?.localEngagement || {};
+    const resendEvents = data.emails?.eventCounts || {};
+    const sentDenominator = data.campaign?.sent || localEngagement.sent || data.emails?.total || 0;
+    const opened = localEngagement.opened || data.emails?.localEvents?.opened || resendEvents.opened || 0;
+    const clicked = localEngagement.clicked || data.emails?.localEvents?.clicked || resendEvents.clicked || 0;
+    const campaign = {
+      ...(data.campaign || {}),
+      opened,
+      clicked,
+      openRate: localEngagement.openRate || (sentDenominator ? Number(((opened / sentDenominator) * 100).toFixed(2)) : 0),
+      clickRate: localEngagement.clickRate || (sentDenominator ? Number(((clicked / sentDenominator) * 100).toFixed(2)) : 0),
+    };
+    setCard('Enviados campanha', campaign.sent || 0);
     setCard('Pendentes', data.campaign?.pending || 0);
-    setCard('Descadastros', data.campaign?.unsubscribedAfterSend || 0);
+    setCard('Descadastros', campaign.unsubscribedAfterSend || 0);
     renderEmails(rows);
-    renderCampaign(data.campaign || {});
+    renderCampaign(campaign);
     renderMap('[data-newsletter-subscribers]', data.subscribers || {});
     renderBroadcasts(data.broadcasts?.rows || [], data.broadcasts?.error || '');
     if (status) status.textContent = `Atualizado em ${formatDate(data.generatedAt)}.`;

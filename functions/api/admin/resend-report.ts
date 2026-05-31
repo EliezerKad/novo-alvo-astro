@@ -3,7 +3,9 @@ type D1Database = {
     bind: (...values: unknown[]) => {
       first: <T = unknown>() => Promise<T | null>;
       all: <T = unknown>() => Promise<{ results?: T[] }>;
+      run: () => Promise<unknown>;
     };
+    run: () => Promise<unknown>;
   };
 };
 
@@ -40,6 +42,21 @@ type CampaignTotals = {
 type UnsubscribedRow = {
   email?: string;
   updated_at?: string;
+};
+
+type EventCountRow = {
+  event?: string;
+  total?: number;
+};
+
+type EngagementTotals = {
+  sent?: number;
+  delivered?: number;
+  opened?: number;
+  clicked?: number;
+  bounced?: number;
+  complained?: number;
+  delivery_delayed?: number;
 };
 
 const json = (body: unknown, init: ResponseInit = {}) =>
@@ -79,6 +96,8 @@ const eventLabel = (event: string) => {
   return normalized;
 };
 
+type ResendListResponse = { data?: unknown[]; has_more?: boolean };
+
 const resendFetch = async (apiKey: string, path: string) => {
   const response = await fetch(`https://api.resend.com${path}`, {
     headers: {
@@ -93,7 +112,60 @@ const resendFetch = async (apiKey: string, path: string) => {
       `Resend respondeu ${response.status}`;
     throw new Error(message);
   }
-  return data as { data?: unknown[]; has_more?: boolean };
+  return data as ResendListResponse;
+};
+
+const resendFetchPages = async (apiKey: string, path: string, maxItems = 700) => {
+  const all: unknown[] = [];
+  let after = '';
+  let hasMore = false;
+
+  for (let page = 0; page < Math.ceil(maxItems / 100); page += 1) {
+    const separator = path.includes('?') ? '&' : '?';
+    const response = await resendFetch(apiKey, `${path}${separator}limit=100${after ? `&after=${encodeURIComponent(after)}` : ''}`);
+    const data = Array.isArray(response.data) ? response.data : [];
+    all.push(...data);
+    hasMore = Boolean(response.has_more);
+    const last = data[data.length - 1] as { id?: string } | undefined;
+    after = clean(last?.id, 120);
+    if (!hasMore || !after || all.length >= maxItems) break;
+  }
+
+  return { data: all.slice(0, maxItems), has_more: hasMore && all.length >= maxItems };
+};
+
+const ensureTables = async (db: D1Database) => {
+  await db
+    .prepare(
+      `CREATE TABLE IF NOT EXISTS newsletter_events (
+        id TEXT PRIMARY KEY,
+        resend_email_id TEXT,
+        broadcast_id TEXT,
+        campaign TEXT,
+        email TEXT,
+        event TEXT NOT NULL,
+        subject TEXT,
+        link_url TEXT,
+        raw_payload TEXT,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )`,
+    )
+    .run();
+  await db
+    .prepare(
+      `CREATE TABLE IF NOT EXISTS newsletter_sends (
+        id TEXT PRIMARY KEY,
+        resend_email_id TEXT UNIQUE,
+        email TEXT NOT NULL,
+        subject TEXT,
+        campaign TEXT,
+        provider_status TEXT NOT NULL DEFAULT 'sent',
+        last_event TEXT,
+        sent_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )`,
+    )
+    .run();
 };
 
 export const onRequestGet = async ({ request, env }: { request: Request; env: Env }) => {
@@ -105,10 +177,19 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
 
   const url = new URL(request.url);
   const subjectFilter = clean(url.searchParams.get('subject'), 120).toLowerCase();
+  if (env.EDITORIAL_DB) await ensureTables(env.EDITORIAL_DB).catch(() => null);
 
   try {
-    const [emailsResponse, broadcastsResponse, subscriberTotals, campaignTotals, recentUnsubscribes] = await Promise.all([
-      resendFetch(apiKey, '/emails'),
+    const [
+      emailsResponse,
+      broadcastsResponse,
+      subscriberTotals,
+      campaignTotals,
+      recentUnsubscribes,
+      localEventCounts,
+      localEngagementTotals,
+    ] = await Promise.all([
+      resendFetchPages(apiKey, '/emails', 700),
       resendFetch(apiKey, '/broadcasts').catch((error) => ({ data: [], error: error instanceof Error ? error.message : String(error) })),
       env.EDITORIAL_DB
         ? env.EDITORIAL_DB.prepare(
@@ -149,10 +230,36 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
             .all<UnsubscribedRow>()
             .catch(() => ({ results: [] }))
         : Promise.resolve({ results: [] }),
+      env.EDITORIAL_DB
+        ? env.EDITORIAL_DB.prepare(
+            `SELECT event, COUNT(*) AS total
+               FROM newsletter_events
+              GROUP BY event`,
+          )
+            .bind()
+            .all<EventCountRow>()
+            .catch(() => ({ results: [] }))
+        : Promise.resolve({ results: [] }),
+      env.EDITORIAL_DB
+        ? env.EDITORIAL_DB.prepare(
+            `SELECT
+                COUNT(*) AS sent,
+                SUM(CASE WHEN last_event = 'delivered' THEN 1 ELSE 0 END) AS delivered,
+                SUM(CASE WHEN last_event = 'opened' THEN 1 ELSE 0 END) AS opened,
+                SUM(CASE WHEN last_event = 'clicked' THEN 1 ELSE 0 END) AS clicked,
+                SUM(CASE WHEN last_event = 'bounced' THEN 1 ELSE 0 END) AS bounced,
+                SUM(CASE WHEN last_event = 'complained' THEN 1 ELSE 0 END) AS complained,
+                SUM(CASE WHEN last_event = 'delivery_delayed' THEN 1 ELSE 0 END) AS delivery_delayed
+               FROM newsletter_sends`,
+          )
+            .bind()
+            .first<EngagementTotals>()
+            .catch(() => null)
+        : Promise.resolve(null),
     ]);
 
     const rawEmails = Array.isArray(emailsResponse.data) ? (emailsResponse.data as ResendEmail[]) : [];
-    const emails = rawEmails
+    const normalizedEmails = rawEmails
       .map((email) => {
         const event = eventLabel(email.last_event || '');
         return {
@@ -167,13 +274,33 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
           clicked: event === 'clicked',
         };
       })
-      .filter((email) => !subjectFilter || email.subject.toLowerCase().includes(subjectFilter))
-      .slice(0, 100);
+      .filter((email) => !subjectFilter || email.subject.toLowerCase().includes(subjectFilter));
 
-    const eventCounts = emails.reduce<Record<string, number>>((counts, email) => {
+    const eventCounts = normalizedEmails.reduce<Record<string, number>>((counts, email) => {
       counts[email.lastEvent] = (counts[email.lastEvent] || 0) + 1;
       return counts;
     }, {});
+    const emails = normalizedEmails.slice(0, 100);
+    const localEvents = Object.fromEntries(
+      (localEventCounts.results || []).map((row) => [clean(row.event, 60) || 'unknown', safeNumber(row.total)]),
+    );
+    const localEngagement = {
+      sent: safeNumber(localEngagementTotals?.sent),
+      delivered: safeNumber(localEngagementTotals?.delivered),
+      opened: safeNumber(localEngagementTotals?.opened),
+      clicked: safeNumber(localEngagementTotals?.clicked),
+      bounced: safeNumber(localEngagementTotals?.bounced),
+      complained: safeNumber(localEngagementTotals?.complained),
+      deliveryDelayed: safeNumber(localEngagementTotals?.delivery_delayed),
+      openRate:
+        safeNumber(localEngagementTotals?.sent) > 0
+          ? Number(((safeNumber(localEngagementTotals?.opened) / safeNumber(localEngagementTotals?.sent)) * 100).toFixed(2))
+          : 0,
+      clickRate:
+        safeNumber(localEngagementTotals?.sent) > 0
+          ? Number(((safeNumber(localEngagementTotals?.clicked) / safeNumber(localEngagementTotals?.sent)) * 100).toFixed(2))
+          : 0,
+    };
 
     const subscribers = Object.fromEntries(
       (subscriberTotals.results || []).map((row) => [clean(row.status, 40) || 'unknown', safeNumber(row.total)]),
@@ -182,9 +309,11 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
     return json({
       ok: true,
       emails: {
-        total: emails.length,
+        total: normalizedEmails.length,
         hasMore: Boolean(emailsResponse.has_more),
         eventCounts,
+        localEvents,
+        localEngagement,
         rows: emails,
       },
       broadcasts: {

@@ -76,12 +76,32 @@ const parseJson = (value: string): ResendBatchResponse => {
   }
 };
 
+const ensureNewsletterAnalyticsTables = async (db: D1Database) => {
+  await db
+    .prepare(
+      `CREATE TABLE IF NOT EXISTS newsletter_sends (
+        id TEXT PRIMARY KEY,
+        resend_email_id TEXT UNIQUE,
+        email TEXT NOT NULL,
+        subject TEXT,
+        campaign TEXT,
+        provider_status TEXT NOT NULL DEFAULT 'sent',
+        last_event TEXT,
+        sent_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )`,
+    )
+    .bind()
+    .run();
+};
+
 export const onRequestPost = async ({ request, env }: { request: Request; env: Env }) => {
   const authError = requireAdmin(request, env);
   if (authError) return authError;
 
   const db = env.EDITORIAL_DB;
   if (!db) return json({ ok: false, error: 'Banco nao configurado.' }, { status: 503 });
+  await ensureNewsletterAnalyticsTables(db);
 
   const apiKey = clean(env.RESEND_API_KEY, 500);
   if (!apiKey) return json({ ok: false, error: 'RESEND_API_KEY ausente.' }, { status: 503 });
@@ -217,6 +237,35 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   }
 
   const now = new Date().toISOString();
+  const resendRows = data.data || [];
+  for (const [index, subscriber] of contacts.entries()) {
+    const resendId = clean(resendRows[index]?.id, 120);
+    if (!resendId) continue;
+    await db
+      .prepare(
+        `INSERT INTO newsletter_sends (
+          id, resend_email_id, email, subject, campaign, provider_status, last_event, sent_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, 'sent', 'sent', ?, ?)
+        ON CONFLICT(resend_email_id) DO UPDATE SET
+          email = excluded.email,
+          subject = excluded.subject,
+          campaign = excluded.campaign,
+          provider_status = excluded.provider_status,
+          last_event = COALESCE(newsletter_sends.last_event, excluded.last_event),
+          updated_at = excluded.updated_at`,
+      )
+      .bind(
+        resendId,
+        resendId,
+        subscriber.email,
+        'O que importa, do jeito que da vontade de ler',
+        'first_contact_2026_05_28',
+        now,
+        now,
+      )
+      .run();
+  }
+
   if (!isTestSend) {
     for (const subscriber of contacts) {
       await db

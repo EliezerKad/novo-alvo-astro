@@ -25,6 +25,7 @@ type Subscriber = {
 type EmailResult = {
   sent: boolean;
   reason: string;
+  resendId?: string;
 };
 
 const json = (body: unknown, init: ResponseInit = {}) =>
@@ -172,7 +173,8 @@ const sendWelcomeEmail = async (env: Env, origin: string, subscriber: Subscriber
     return { sent: false, reason: clean((data as { message?: string }).message || response.status, 300) };
   }
 
-  return { sent: true, reason: '' };
+  const data = (await response.json().catch(() => ({}))) as { id?: string; data?: { id?: string } };
+  return { sent: true, reason: '', resendId: clean(data.id || data.data?.id, 120) };
 };
 
 export const onRequestGet = async ({ request, env }: { request: Request; env: Env }) => {
@@ -251,6 +253,32 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
         .prepare('UPDATE newsletter_subscribers SET last_auto_response_at = ?, updated_at = ? WHERE email = ?')
         .bind(now, now, email)
         .run();
+      if (emailResult.resendId) {
+        await db
+          .prepare(
+            `INSERT INTO newsletter_sends (
+              id, resend_email_id, email, subject, campaign, provider_status, last_event, sent_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, 'sent', 'sent', ?, ?)
+            ON CONFLICT(resend_email_id) DO UPDATE SET
+              email = excluded.email,
+              subject = excluded.subject,
+              campaign = excluded.campaign,
+              provider_status = excluded.provider_status,
+              last_event = COALESCE(newsletter_sends.last_event, excluded.last_event),
+              updated_at = excluded.updated_at`,
+          )
+          .bind(
+            emailResult.resendId,
+            emailResult.resendId,
+            email,
+            'O que importa, do jeito que da vontade de ler',
+            'direct_signup',
+            now,
+            now,
+          )
+          .run()
+          .catch(() => null);
+      }
     }
   }
 
