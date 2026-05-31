@@ -1,0 +1,217 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Social X | Portal Novo Alvo" active="social">
+  <section class="space-y-7" data-social-admin>
+    <header class="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/72 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-900/72">
+      <div class="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-red-500/10 blur-3xl"></div>
+      <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div>
+          <span class="text-[10px] font-black uppercase tracking-[0.35em] text-red-600">Distribuicao</span>
+          <h1 class="admin-display mt-3 text-4xl md:text-6xl">Social X</h1>
+          <p class="mt-3 max-w-2xl text-sm font-medium leading-7 text-zinc-500 dark:text-zinc-400">
+            Publique materias no X com texto revisado, link rastreavel e historico no admin. Nada sai automaticamente daqui.
+          </p>
+        </div>
+        <button type="button" data-refresh-social class="rounded-2xl bg-red-600 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-red-600/20 transition hover:-translate-y-0.5 hover:bg-red-700">
+          Atualizar
+        </button>
+      </div>
+    </header>
+
+    <section class="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+      <article class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-5 flex flex-col gap-2 border-b border-zinc-100 pb-4 dark:border-zinc-800 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 class="text-xs font-black uppercase tracking-[0.24em]">Materias publicadas</h2>
+            <p class="mt-2 text-xs font-bold text-zinc-400" data-social-status>Carregando...</p>
+          </div>
+          <span data-x-configured class="rounded-full bg-zinc-100 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-800">X...</span>
+        </div>
+        <div class="space-y-4" data-social-articles></div>
+      </article>
+
+      <aside class="space-y-6">
+        <section class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+          <h2 class="text-xs font-black uppercase tracking-[0.24em]">Editor do post</h2>
+          <p class="mt-3 text-sm font-medium leading-6 text-zinc-500 dark:text-zinc-400" data-selected-title>Selecione uma materia para revisar o texto.</p>
+          <textarea data-post-text class="mt-5 min-h-56 w-full resize-y rounded-3xl border border-zinc-200 bg-white/60 p-4 text-sm font-bold leading-6 outline-none transition focus:border-red-600 dark:border-zinc-800 dark:bg-zinc-950/50" maxlength="280" placeholder="Texto para o X"></textarea>
+          <div class="mt-3 flex items-center justify-between gap-3">
+            <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400" data-char-count>0/280</span>
+            <button type="button" data-post-x class="rounded-2xl bg-zinc-950 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-zinc-950 dark:hover:bg-red-600 dark:hover:text-white" disabled>
+              Publicar no X
+            </button>
+          </div>
+        </section>
+
+        <section class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+          <h2 class="mb-5 text-xs font-black uppercase tracking-[0.24em]">Historico</h2>
+          <div class="space-y-3" data-social-posts></div>
+        </section>
+      </aside>
+    </section>
+  </section>
+</AdminLayout>
+
+<script is:inline>
+  (() => {
+    const token = localStorage.getItem('admin-token') || '';
+    if (!token) {
+      window.location.href = `/redacao/?next=${encodeURIComponent('/admin/social/')}`;
+      return;
+    }
+
+    const state = { articles: [], selected: null };
+    const articleList = document.querySelector('[data-social-articles]');
+    const postList = document.querySelector('[data-social-posts]');
+    const statusNode = document.querySelector('[data-social-status]');
+    const configuredNode = document.querySelector('[data-x-configured]');
+    const selectedTitle = document.querySelector('[data-selected-title]');
+    const textarea = document.querySelector('[data-post-text]');
+    const charCount = document.querySelector('[data-char-count]');
+    const postButton = document.querySelector('[data-post-x]');
+    const refreshButton = document.querySelector('[data-refresh-social]');
+
+    const escapeHtml = (value) =>
+      String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+    const formatDate = (value) => {
+      const date = new Date(value || '');
+      if (Number.isNaN(date.getTime())) return '-';
+      return date.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    };
+
+    const updateCount = () => {
+      const total = String(textarea?.value || '').length;
+      if (charCount) charCount.textContent = `${total}/280`;
+      if (postButton) postButton.disabled = !state.selected || total < 10 || total > 280;
+    };
+
+    const selectArticle = (article) => {
+      state.selected = article;
+      if (selectedTitle) selectedTitle.textContent = article.title || 'Materia selecionada';
+      if (textarea) textarea.value = article.suggestedText || '';
+      updateCount();
+      document.querySelectorAll('[data-select-article]').forEach((button) => {
+        button.setAttribute('aria-pressed', button.dataset.selectArticle === article.id ? 'true' : 'false');
+      });
+    };
+
+    const renderArticles = () => {
+      if (!articleList) return;
+      articleList.innerHTML = state.articles
+        .map(
+          (article) => `
+            <article class="grid gap-4 rounded-3xl border border-zinc-100 bg-white/45 p-4 dark:border-zinc-800 dark:bg-zinc-950/30 md:grid-cols-[88px_1fr_auto] md:items-center">
+              <div class="h-20 w-full overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-900 md:w-22">
+                ${
+                  article.coverUrl
+                    ? `<img src="${escapeHtml(article.coverUrl)}" alt="" class="h-full w-full object-cover" loading="lazy" />`
+                    : `<div class="flex h-full items-center justify-center text-[9px] font-black uppercase tracking-widest text-zinc-300">Sem capa</div>`
+                }
+              </div>
+              <div class="min-w-0">
+                <span class="text-[8px] font-black uppercase tracking-widest text-red-600">${escapeHtml(article.category || 'Editorial')}</span>
+                <h3 class="mt-1 line-clamp-2 text-lg font-black leading-tight">${escapeHtml(article.title)}</h3>
+                <p class="mt-2 line-clamp-2 text-xs font-medium leading-5 text-zinc-500">${escapeHtml(article.summary || '')}</p>
+              </div>
+              <button type="button" data-select-article="${escapeHtml(article.id)}" class="rounded-2xl ${article.alreadyPosted ? 'border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300' : 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950'} px-4 py-3 text-[9px] font-black uppercase tracking-widest transition hover:bg-red-600 hover:text-white">
+                ${article.alreadyPosted ? 'Ja postada' : 'Preparar'}
+              </button>
+            </article>
+          `,
+        )
+        .join('');
+    };
+
+    const renderPosts = (posts) => {
+      if (!postList) return;
+      postList.innerHTML = posts.length
+        ? posts
+            .map(
+              (post) => `
+                <article class="rounded-2xl border border-zinc-100 bg-white/45 p-4 dark:border-zinc-800 dark:bg-zinc-950/30">
+                  <div class="flex items-start justify-between gap-3">
+                    <strong class="line-clamp-2 text-sm font-black">${escapeHtml(post.articleTitle || post.articleSlug)}</strong>
+                    <span class="rounded-full bg-zinc-100 px-3 py-1.5 text-[8px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-800">${escapeHtml(post.status)}</span>
+                  </div>
+                  <p class="mt-2 line-clamp-3 text-xs font-medium leading-5 text-zinc-500">${escapeHtml(post.text)}</p>
+                  <p class="mt-2 text-[10px] font-bold text-zinc-400">${formatDate(post.postedAt || post.createdAt)} ${post.tweetId ? `• ${escapeHtml(post.tweetId)}` : ''}</p>
+                  ${post.error ? `<p class="mt-2 text-[10px] font-bold text-red-600">${escapeHtml(post.error)}</p>` : ''}
+                </article>
+              `,
+            )
+            .join('')
+        : '<p class="text-sm font-bold text-zinc-400">Nenhum post registrado ainda.</p>';
+    };
+
+    const load = async () => {
+      if (statusNode) statusNode.textContent = 'Buscando materias e historico...';
+      const response = await fetch('/api/admin/social', {
+        headers: { authorization: `Bearer ${token}` },
+        cache: 'no-store',
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) throw new Error(data.error || 'Falha ao carregar Social X.');
+      state.articles = Array.isArray(data.articles) ? data.articles : [];
+      renderArticles();
+      renderPosts(Array.isArray(data.posts) ? data.posts : []);
+      if (statusNode) statusNode.textContent = `${state.articles.length} materias recentes prontas para distribuir.`;
+      if (configuredNode) {
+        configuredNode.textContent = data.xConfigured ? 'X configurado' : 'Secrets ausentes';
+        configuredNode.className = `rounded-full px-3 py-2 text-[9px] font-black uppercase tracking-widest ${
+          data.xConfigured ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
+        }`;
+      }
+    };
+
+    articleList?.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-select-article]');
+      if (!button) return;
+      const article = state.articles.find((item) => item.id === button.dataset.selectArticle);
+      if (article) selectArticle(article);
+    });
+
+    textarea?.addEventListener('input', updateCount);
+    refreshButton?.addEventListener('click', () => load().catch((error) => {
+      if (statusNode) statusNode.textContent = error.message || 'Erro ao atualizar.';
+    }));
+
+    postButton?.addEventListener('click', async () => {
+      if (!state.selected || !textarea) return;
+      const confirmed = window.confirm('Publicar este texto agora no X do Portal Novo Alvo?');
+      if (!confirmed) return;
+      postButton.disabled = true;
+      postButton.textContent = 'Publicando...';
+      try {
+        const response = await fetch('/api/admin/social', {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${token}`,
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({ action: 'post', articleId: state.selected.id, text: textarea.value }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.ok) throw new Error(data.detail || data.error || 'X nao aceitou o post.');
+        if (statusNode) statusNode.textContent = `Publicado no X: ${data.post?.tweetId || 'ok'}`;
+        await load();
+      } catch (error) {
+        if (statusNode) statusNode.textContent = error.message || 'Falha ao publicar no X.';
+      } finally {
+        postButton.textContent = 'Publicar no X';
+        updateCount();
+      }
+    });
+
+    load().catch((error) => {
+      if (statusNode) statusNode.textContent = error.message || 'Erro ao carregar.';
+    });
+  })();
+</script>
