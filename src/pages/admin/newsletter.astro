@@ -69,6 +69,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </section>
 
         <section class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+          <h2 class="mb-5 text-xs font-black uppercase tracking-[0.24em]">Quem abriu/clicou</h2>
+          <div class="space-y-3" data-newsletter-engagement>
+            <p class="text-sm font-bold text-zinc-400">Carregando engajamento...</p>
+          </div>
+        </section>
+
+        <section class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
           <h2 class="mb-5 text-xs font-black uppercase tracking-[0.24em]">Base local</h2>
           <div class="space-y-3" data-newsletter-subscribers>
             <p class="text-sm font-bold text-zinc-400">Carregando inscritos...</p>
@@ -244,6 +251,34 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     `;
   };
 
+  const renderEngagement = (rows) => {
+    const root = document.querySelector('[data-newsletter-engagement]');
+    if (!root) return;
+    if (!Array.isArray(rows) || rows.length === 0) {
+      root.innerHTML = '<p class="text-sm font-bold text-zinc-400">Nenhuma abertura ou clique registrado ainda.</p>';
+      return;
+    }
+    root.innerHTML = rows
+      .map((item) => {
+        const label = item.event === 'clicked' ? 'clique' : 'abertura';
+        const tone =
+          item.event === 'clicked'
+            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300'
+            : 'bg-blue-100 text-blue-700 dark:bg-blue-400/10 dark:text-blue-300';
+        return `
+          <div class="rounded-2xl bg-white/55 px-4 py-3 dark:bg-zinc-950/35">
+            <div class="flex items-start justify-between gap-3">
+              <p class="min-w-0 truncate text-xs font-black text-zinc-800 dark:text-zinc-100">${escapeHtml(item.email)}</p>
+              <span class="shrink-0 rounded-full px-2.5 py-1 text-[8px] font-black uppercase tracking-widest ${tone}">${label}</span>
+            </div>
+            <p class="mt-1 text-[10px] font-bold uppercase tracking-widest text-zinc-400">${escapeHtml(formatDate(item.createdAt))}</p>
+            ${item.linkUrl ? `<p class="mt-1 truncate text-[10px] font-bold text-zinc-400">${escapeHtml(item.linkUrl)}</p>` : ''}
+          </div>
+        `;
+      })
+      .join('');
+  };
+
   const loadReport = async () => {
     const status = document.querySelector('[data-newsletter-status]');
     const filter = document.querySelector('[data-newsletter-filter]');
@@ -279,6 +314,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     setCard('Descadastros', campaign.unsubscribedAfterSend || 0);
     renderEmails(rows);
     renderCampaign(campaign);
+    renderEngagement(data.emails?.recentEngagement || []);
     renderMap('[data-newsletter-subscribers]', data.subscribers || {});
     renderBroadcasts(data.broadcasts?.rows || [], data.broadcasts?.error || '');
     if (status) status.textContent = `Atualizado em ${formatDate(data.generatedAt)}.`;

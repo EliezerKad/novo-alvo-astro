@@ -4,6 +4,7 @@ type D1Database = {
       first: <T = unknown>() => Promise<T | null>;
       run: () => Promise<unknown>;
     };
+    run: () => Promise<unknown>;
   };
 };
 
@@ -48,6 +49,67 @@ const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(value);
 
 const titleCase = (value: string) => (value ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : '');
 
+const ensureNewsletterAnalyticsTables = async (db: D1Database) => {
+  await db
+    .prepare(
+      `CREATE TABLE IF NOT EXISTS newsletter_events (
+        id TEXT PRIMARY KEY,
+        resend_email_id TEXT,
+        broadcast_id TEXT,
+        campaign TEXT,
+        email TEXT,
+        event TEXT NOT NULL,
+        subject TEXT,
+        link_url TEXT,
+        raw_payload TEXT,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )`,
+    )
+    .run();
+};
+
+const recordNewsletterEvent = async (
+  db: D1Database,
+  event: 'opened' | 'clicked',
+  subscriber: Pick<Subscriber, 'email' | 'unsub_token'>,
+  linkUrl = '',
+) => {
+  const now = new Date().toISOString();
+  const eventId = [subscriber.unsub_token, event, linkUrl, now].join('|');
+  await ensureNewsletterAnalyticsTables(db);
+  await db
+    .prepare(
+      `INSERT OR IGNORE INTO newsletter_events (
+        id, campaign, email, event, subject, link_url, raw_payload, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .bind(
+      eventId,
+      'first_contact_2026_05_28',
+      subscriber.email,
+      event,
+      'O que importa, do jeito que da vontade de ler',
+      linkUrl,
+      JSON.stringify({ source: 'portal_tracker', token: subscriber.unsub_token, event, linkUrl }).slice(0, 8000),
+      now,
+    )
+    .run();
+};
+
+const trackingPixel = () => {
+  const bytes = Uint8Array.from([
+    71, 73, 70, 56, 57, 97, 1, 0, 1, 0, 128, 0, 0, 255, 255, 255, 0, 0, 0, 33, 249, 4, 1, 0, 0, 0, 0, 44, 0,
+    0, 0, 0, 1, 0, 1, 0, 0, 2, 2, 68, 1, 0, 59,
+  ]);
+  return new Response(bytes, {
+    headers: {
+      'content-type': 'image/gif',
+      'cache-control': 'no-store, no-cache, must-revalidate, max-age=0',
+      pragma: 'no-cache',
+    },
+  });
+};
+
 const inferFirstName = (email: string) => {
   const local = clean(email.split('@')[0], 80)
     .normalize('NFD')
@@ -90,6 +152,8 @@ export const welcomeHtml = (origin: string, token: string, email: string) => {
   const firstName = inferFirstName(email);
   const greeting = firstName ? `Ol&aacute;, ${firstName}.` : 'Ol&aacute;.';
   const unsubscribeUrl = `${origin}/api/newsletter?unsubscribe=${encodeURIComponent(token)}`;
+  const openUrl = `${origin}/api/newsletter?open=${encodeURIComponent(token)}`;
+  const portalUrl = `${origin}/api/newsletter?click=${encodeURIComponent(token)}&to=${encodeURIComponent(`${origin}/`)}`;
   const logoSymbolUrl = `${origin}/favicon.svg`;
 
   return `
@@ -119,7 +183,7 @@ export const welcomeHtml = (origin: string, token: string, email: string) => {
         <p style="margin:0 0 30px;font-size:16px;line-height:1.78;color:#2b2b2b">A ideia n&atilde;o &eacute; correr atr&aacute;s de cada tend&ecirc;ncia, nem repetir o que aparece em todo lugar. &Eacute; olhar para os fatos com cuidado, escolher boas pautas e transformar informa&ccedil;&atilde;o em uma leitura &uacute;til, clara e poss&iacute;vel de acompanhar.</p>
 
         <p style="margin:0">
-          <a href="${origin}/" style="display:inline-block;background:#8A1F2D;color:#fff;text-decoration:none;font-weight:800;border-radius:999px;padding:15px 22px">Acessar o portal</a>
+          <a href="${portalUrl}" style="display:inline-block;background:#8A1F2D;color:#fff;text-decoration:none;font-weight:800;border-radius:999px;padding:15px 22px">Acessar o portal</a>
         </p>
       </div>
 
@@ -138,6 +202,7 @@ export const welcomeHtml = (origin: string, token: string, email: string) => {
         Se n&atilde;o quiser mais receber nossas mensagens, pode
         <a href="${unsubscribeUrl}" style="color:#8A1F2D;text-decoration:underline">se descadastrar aqui</a>.
       </p>
+      <img src="${openUrl}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;max-width:1px;max-height:1px;opacity:0;overflow:hidden;border:0;outline:none">
     </div>
   </div>
 `;
@@ -182,6 +247,30 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
   if (!db) return json({ ok: false, error: 'Banco nao configurado.' }, { status: 503 });
 
   const url = new URL(request.url);
+  const openToken = clean(url.searchParams.get('open'), 120);
+  const clickToken = clean(url.searchParams.get('click'), 120);
+
+  if (openToken || clickToken) {
+    const token = openToken || clickToken;
+    const subscriber = await db
+      .prepare('SELECT id, email, status, unsub_token, last_auto_response_at FROM newsletter_subscribers WHERE unsub_token = ? LIMIT 1')
+      .bind(token)
+      .first<Subscriber>()
+      .catch(() => null);
+
+    if (subscriber?.email) {
+      const destination = clean(url.searchParams.get('to'), 1000);
+      await recordNewsletterEvent(db, openToken ? 'opened' : 'clicked', subscriber, destination).catch(() => null);
+      if (clickToken) {
+        const target = destination && destination.startsWith(url.origin) ? destination : `${url.origin}/`;
+        return Response.redirect(target, 302);
+      }
+    }
+
+    if (openToken) return trackingPixel();
+    return Response.redirect(`${url.origin}/`, 302);
+  }
+
   const token = clean(url.searchParams.get('unsubscribe'), 120);
   if (!token) return json({ ok: false, error: 'Parametro ausente.' }, { status: 400 });
 

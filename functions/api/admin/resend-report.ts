@@ -49,6 +49,13 @@ type EventCountRow = {
   total?: number;
 };
 
+type EventRow = {
+  email?: string;
+  event?: string;
+  link_url?: string;
+  created_at?: string;
+};
+
 type EngagementTotals = {
   sent?: number;
   delivered?: number;
@@ -188,6 +195,7 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
       recentUnsubscribes,
       localEventCounts,
       localEngagementTotals,
+      recentEngagement,
     ] = await Promise.all([
       resendFetchPages(apiKey, '/emails', 700),
       resendFetch(apiKey, '/broadcasts').catch((error) => ({ data: [], error: error instanceof Error ? error.message : String(error) })),
@@ -256,6 +264,18 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
             .first<EngagementTotals>()
             .catch(() => null)
         : Promise.resolve(null),
+      env.EDITORIAL_DB
+        ? env.EDITORIAL_DB.prepare(
+            `SELECT email, event, link_url, created_at
+               FROM newsletter_events
+              WHERE event IN ('opened', 'clicked')
+              ORDER BY created_at DESC
+              LIMIT 30`,
+          )
+            .bind()
+            .all<EventRow>()
+            .catch(() => ({ results: [] }))
+        : Promise.resolve({ results: [] }),
     ]);
 
     const rawEmails = Array.isArray(emailsResponse.data) ? (emailsResponse.data as ResendEmail[]) : [];
@@ -314,6 +334,12 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
         eventCounts,
         localEvents,
         localEngagement,
+        recentEngagement: (recentEngagement.results || []).map((row) => ({
+          email: clean(row.email, 254),
+          event: clean(row.event, 60),
+          linkUrl: clean(row.link_url, 1000),
+          createdAt: clean(row.created_at, 80),
+        })),
         rows: emails,
       },
       broadcasts: {
