@@ -6,19 +6,19 @@ seoDescription: "Esportes: Acelino Popó Freitas supera Whindersson Nunes em rev
 category: "Esportes"
 author: "Redação Novo Alvo"
 sources: ["SpaceMoney", "GE", "CNN Brasil", "UOL Esporte", "Metrópoles", "ESPN", "Terra"]
-publishedAt: "2026-05-31T22:51:56.902Z"
-updatedAt: "2026-05-31T22:51:59.751Z"
+publishedAt: "2026-05-31T22:54:10.339Z"
+updatedAt: "2026-05-31T22:54:13.383Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/popo-vence-whindersson-em-revanche-e-transforma-luta-em-evento-de-cultura-pop-cover-20260531225159.webp"
+  src: "https://portalnovoalvo.com.br/media/news/popo-vence-whindersson-em-revanche-e-transforma-luta-em-evento-de-cultura-pop-cover-20260531225413.webp"
   alt: "Popó e Whindersson Nunes sobre revanche no boxe Foto: Reprodução/Redes Sociais"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/popo-vence-whindersson-em-revanche-e-transforma-luta-em-evento-de-cultura-pop-cover-20260531225159.webp"
+ogImage: "https://portalnovoalvo.com.br/media/news/popo-vence-whindersson-em-revanche-e-transforma-luta-em-evento-de-cultura-pop-cover-20260531225413.webp"
 tags: []
 ---
 
