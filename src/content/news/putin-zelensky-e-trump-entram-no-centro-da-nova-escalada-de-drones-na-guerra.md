@@ -6,8 +6,8 @@ seoDescription: "Putin, Zelensky e Trump entram no centro da nova escalada da gu
 category: "Mundo"
 author: "Redação Novo Alvo"
 sources: ["Reuters", "Euronews", "BBC", "The Guardian", "CNN Brasil", "UOL", "RTP"]
-publishedAt: "2026-05-31T16:18:49.967Z"
-updatedAt: "2026-05-31T16:18:50.376Z"
+publishedAt: "2026-05-31T16:43:08.963Z"
+updatedAt: "2026-05-31T16:43:09.494Z"
 featured: false
 isFeatured: false
 urgent: false
