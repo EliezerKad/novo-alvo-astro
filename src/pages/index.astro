@@ -235,25 +235,35 @@ const isCategoryView = !!category && category !== 'Início';
                     </div>
                   </div>
 
-                  <div class="grid gap-5">
+                  <div class="grid gap-6">
                     {[
-                      ['Em alta 24h', 'Movimento recente', 'data-trending-24-list'],
-                      ['Mais lidas 7 dias', 'Semana', 'data-most-7-list'],
-                      ['Mais lidas geral', 'Histórico', 'data-most-all-list'],
-                    ].map(([title, label, attr]) => (
+                      ['Em alta 24h', 'Movimento recente', 'data-trending-24-list', true],
+                      ['Mais lidas 7 dias', 'Semana', 'data-most-7-list', true],
+                      ['Mais lidas geral', 'Histórico', 'data-most-all-list', false],
+                    ].map(([title, label, attr, withImage]) => (
                       <section class="overflow-hidden rounded-[1.55rem] border border-black/10 bg-white shadow-[0_18px_50px_rgba(16,16,16,0.055)] dark:border-zinc-800 dark:bg-zinc-900 md:rounded-[1.875rem]">
-                        <div class="flex items-center justify-between gap-3 border-b border-black/10 px-5 py-4 dark:border-zinc-800">
+                        <div class="flex items-center justify-between gap-3 border-b border-black/10 px-5 py-5 dark:border-zinc-800">
                           <h3 class="text-base font-black leading-none tracking-tighter text-zinc-950 dark:text-zinc-50">{title}</h3>
                           <span class="text-[9px] font-black uppercase tracking-[0.1em] text-[#8A1F2D]">{label}</span>
                         </div>
-                        <div class="px-5 py-2" {...{ [attr]: true }}>
+                        <div class="px-5 py-3" {...{ [String(attr)]: true }}>
                           {mostRead.slice(0, 4).map((article) => (
-                            <a href={`/noticia/${article.slug}/`} class="group grid grid-cols-[minmax(0,1fr)_auto] gap-3 border-b border-black/10 py-3 last:border-b-0 dark:border-zinc-800">
+                            <a href={`/noticia/${article.slug}/`} class={`group grid ${withImage ? 'grid-cols-[76px_minmax(0,1fr)]' : 'grid-cols-[minmax(0,1fr)_auto]'} gap-3 border-b border-black/10 py-4 last:border-b-0 dark:border-zinc-800`}>
+                              {withImage && (
+                                <div class="h-[62px] w-[76px] overflow-hidden rounded-2xl bg-[#ebe8df] dark:bg-zinc-800">
+                                  {article.imageUrl ? (
+                                    <img src={article.imageUrl} alt={article.title} class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
+                                  ) : (
+                                    <div class="grid h-full place-items-center text-zinc-300"><Icon name="image" class="h-5 w-5 opacity-30" /></div>
+                                  )}
+                                </div>
+                              )}
                               <div class="min-w-0">
                                 <div class="mb-1 text-[8px] font-black uppercase tracking-[0.12em] text-[#8A1F2D]">{displayCategory(article.category)}</div>
                                 <h4 class="line-clamp-2 text-sm font-black leading-tight tracking-[-0.02em] text-zinc-950 group-hover:text-[#8A1F2D] dark:text-zinc-50">{article.title}</h4>
+                                {withImage && <span class="mt-1 block text-xs font-black text-zinc-400" data-live-view-count={article.slug}>{article.views || 0} views</span>}
                               </div>
-                              <span class="shrink-0 text-xs font-black text-zinc-400" data-live-view-count={article.slug}>{article.views || 0} views</span>
+                              {!withImage && <span class="shrink-0 text-xs font-black text-zinc-400" data-live-view-count={article.slug}>{article.views || 0} views</span>}
                             </a>
                           ))}
                         </div>
@@ -305,15 +315,21 @@ const isCategoryView = !!category && category !== 'Início';
                       `).join('');
                       window.__novoAlvoHydrateViews?.(list);
                     };
-                    const renderCompact = (list, articles) => {
+                    const renderCompact = (list, articles, withImage = false) => {
                       if (!list || !articles.length) return;
                       list.innerHTML = articles.slice(0, 4).map((article) => `
-                        <a href="/noticia/${encodeURIComponent(article.slug)}/" class="group grid grid-cols-[minmax(0,1fr)_auto] gap-3 border-b border-black/10 py-3 last:border-b-0 dark:border-zinc-800">
+                        <a href="/noticia/${encodeURIComponent(article.slug)}/" class="group grid ${withImage ? 'grid-cols-[76px_minmax(0,1fr)]' : 'grid-cols-[minmax(0,1fr)_auto]'} gap-3 border-b border-black/10 py-4 last:border-b-0 dark:border-zinc-800">
+                          ${withImage ? `
+                            <div class="h-[62px] w-[76px] overflow-hidden rounded-2xl bg-[#ebe8df] dark:bg-zinc-800">
+                              ${article.cover_url ? `<img src="${escapeHtml(article.cover_url)}" alt="${escapeHtml(article.cover_alt || article.title)}" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />` : `<div class="grid h-full place-items-center text-zinc-300"></div>`}
+                            </div>
+                          ` : ''}
                           <div class="min-w-0">
                             <div class="mb-1 text-[8px] font-black uppercase tracking-[0.12em] text-[#8A1F2D]">${escapeHtml(categoryLabel(article.category))}</div>
                             <h4 class="line-clamp-2 text-sm font-black leading-tight tracking-[-0.02em] text-zinc-950 group-hover:text-[#8A1F2D] dark:text-zinc-50">${escapeHtml(article.title)}</h4>
+                            ${withImage ? `<span class="mt-1 block text-xs font-black text-zinc-400" data-live-view-count="${escapeHtml(article.slug)}">${Number(article.total_views ?? article.views ?? 0)} views</span>` : ''}
                           </div>
-                          <span class="shrink-0 text-xs font-black text-zinc-400" data-live-view-count="${escapeHtml(article.slug)}">${Number(article.total_views ?? article.views ?? 0)} views</span>
+                          ${withImage ? '' : `<span class="shrink-0 text-xs font-black text-zinc-400" data-live-view-count="${escapeHtml(article.slug)}">${Number(article.total_views ?? article.views ?? 0)} views</span>`}
                         </a>
                       `).join('');
                       window.__novoAlvoHydrateViews?.(list);
@@ -326,8 +342,8 @@ const isCategoryView = !!category && category !== 'Início';
                       fetchArticles('/api/public/articles?limit=4&sort=views&period=all'),
                     ]).then(([latest, hot24, top7, topAll]) => {
                       renderLatest(document.querySelector('[data-latest-news-list]'), latest);
-                      renderCompact(document.querySelector('[data-trending-24-list]'), hot24);
-                      renderCompact(document.querySelector('[data-most-7-list]'), top7);
+                      renderCompact(document.querySelector('[data-trending-24-list]'), hot24, true);
+                      renderCompact(document.querySelector('[data-most-7-list]'), top7, true);
                       renderCompact(document.querySelector('[data-most-all-list]'), topAll);
                     }).catch(() => {});
                   })();
