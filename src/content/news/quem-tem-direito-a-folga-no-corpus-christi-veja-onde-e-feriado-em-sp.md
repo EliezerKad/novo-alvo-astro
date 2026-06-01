@@ -7,18 +7,18 @@ category: "Brasil"
 author: "Redação Novo Alvo"
 sources: ["Metrópoles", "vtvnews.com.br", "ContilNet Notícias", "Sim Notícias", "Agência GBC", "Campo Grande News", "Jornal do Brasil", "O POVO", "O Globo", "sctododia", "Correio Braziliense", "G1", "Diário da Região"]
 publishedAt: "2026-06-01T20:46:50.654Z"
-updatedAt: "2026-06-01T21:17:03.469Z"
+updatedAt: "2026-06-01T21:17:07.692Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/quem-tem-direito-a-folga-no-corpus-christi-veja-onde-e-feriado-em-sp-cover-20260601211703.webp"
+  src: "https://portalnovoalvo.com.br/media/news/quem-tem-direito-a-folga-no-corpus-christi-veja-onde-e-feriado-em-sp-cover-20260601211707.webp"
   alt: "Foto: JSB Co./Unplash"
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/quem-tem-direito-a-folga-no-corpus-christi-veja-onde-e-feriado-em-sp-cover-20260601211703.webp"
+ogImage: "https://portalnovoalvo.com.br/media/news/quem-tem-direito-a-folga-no-corpus-christi-veja-onde-e-feriado-em-sp-cover-20260601211707.webp"
 tags: ["brasil", "quem", "direito", "folga", "corpus", "christi", "feriado"]
 ---
 
