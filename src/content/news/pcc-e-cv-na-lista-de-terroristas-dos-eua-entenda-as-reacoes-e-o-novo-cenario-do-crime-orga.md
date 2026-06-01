@@ -7,11 +7,11 @@ category: "Brasil"
 author: "Redação Novo Alvo"
 sources: ["Ponte Jornalismo", "Brasil 247", "PortalRBV", "Poder360", "O Antagonista", "CartaCapital", "Gazeta Digital", "Jornal da Cidade Online", "Valor Econômico", "Revista Fórum", "Portal N10", "Tribuna do Norte", "viva.com.br", "Mais Goiás"]
 publishedAt: "2026-05-31T13:50:15.336Z"
-updatedAt: "2026-05-31T13:50:17.370Z"
+updatedAt: "2026-06-01T03:49:59.172Z"
 featured: false
 isFeatured: false
 urgent: false
-homeSection: "now"
+homeSection: ""
 views: 0
 cover:
   src: "https://portalnovoalvo.com.br/media/news/pcc-e-cv-na-lista-de-terroristas-dos-eua-entenda-as-reacoes-e-o-novo-cenario-do-crime-orga-cover-20260531135017.jpg"
