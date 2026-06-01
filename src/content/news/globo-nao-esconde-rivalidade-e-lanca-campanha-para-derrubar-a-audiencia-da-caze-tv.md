@@ -6,19 +6,19 @@ seoDescription: "Entretenimento: Emissora aposta em novas estratégias para atra
 category: "Entretenimento"
 author: "Redação Novo Alvo"
 sources: ["RD1", "O TEMPO", "Notícias da TV", "Hugo Gloss", "purepeople.com.br", "papelpop", "NaTelinha", "AdoroCinema"]
-publishedAt: "2026-06-01T20:39:39.870Z"
-updatedAt: "2026-06-01T20:39:40.495Z"
+publishedAt: "2026-06-01T20:39:49.240Z"
+updatedAt: "2026-06-01T20:39:49.460Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/globo-nao-esconde-rivalidade-e-lanca-campanha-para-derrubar-a-audiencia-da-caze-tv-cover-20260601203940.webp"
+  src: "https://portalnovoalvo.com.br/media/news/globo-nao-esconde-rivalidade-e-lanca-campanha-para-derrubar-a-audiencia-da-caze-tv-cover-20260601203949.webp"
   alt: "Fred+ 10 e Casemiro Miguel: Reprodução/Youtube"
   caption: "Credito: Unsplash"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/globo-nao-esconde-rivalidade-e-lanca-campanha-para-derrubar-a-audiencia-da-caze-tv-cover-20260601203940.webp"
+ogImage: "https://portalnovoalvo.com.br/media/news/globo-nao-esconde-rivalidade-e-lanca-campanha-para-derrubar-a-audiencia-da-caze-tv-cover-20260601203949.webp"
 tags: ["entretenimento", "globo", "esconde", "rivalidade", "lanca", "campanha", "derrubar", "audiencia", "caze"]
 ---
 
