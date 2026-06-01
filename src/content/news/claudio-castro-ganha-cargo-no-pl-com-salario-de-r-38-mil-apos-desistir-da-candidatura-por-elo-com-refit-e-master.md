@@ -6,8 +6,8 @@ seoDescription: "Politica: Governador do Rio terá função no partido depois de
 category: "Politica"
 author: "Redação Novo Alvo"
 sources: ["Revista Fórum", "portal lj", "VEJA", "Metrópoles", "O Cafezinho", "Brasil de Fato · RSS direto", "Brasil de Fato", "A TARDE"]
-publishedAt: "2026-06-01T19:26:16.647Z"
-updatedAt: "2026-06-01T19:26:16.830Z"
+publishedAt: "2026-06-01T19:26:18.401Z"
+updatedAt: "2026-06-01T19:26:18.449Z"
 featured: false
 isFeatured: false
 urgent: false
