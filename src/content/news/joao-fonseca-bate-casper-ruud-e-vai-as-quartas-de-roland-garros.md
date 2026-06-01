@@ -6,8 +6,8 @@ seoDescription: "Esportes: Brasileiro de 19 anos venceu Casper Ruud por 3 sets a
 category: "Esportes"
 author: "Redação Novo Alvo"
 sources: ["Roland-Garros", "Agência Brasil", "ge", "UOL Esporte", "Euronews", "AS", "El País", "Olympics.com"]
-publishedAt: "2026-06-01T16:58:00.011Z"
-updatedAt: "2026-06-01T16:58:01.755Z"
+publishedAt: "2026-06-01T17:03:19.020Z"
+updatedAt: "2026-06-01T17:03:20.849Z"
 featured: false
 isFeatured: false
 urgent: false
