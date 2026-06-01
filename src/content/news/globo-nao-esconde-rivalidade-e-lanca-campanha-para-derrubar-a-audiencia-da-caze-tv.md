@@ -6,8 +6,8 @@ seoDescription: "Entretenimento: Emissora aposta em novas estratégias para atra
 category: "Entretenimento"
 author: "Redação Novo Alvo"
 sources: ["RD1", "O TEMPO", "Notícias da TV", "Hugo Gloss", "purepeople.com.br", "papelpop", "NaTelinha", "AdoroCinema"]
-publishedAt: "2026-06-01T20:39:39.946Z"
-updatedAt: "2026-06-01T20:39:40.264Z"
+publishedAt: "2026-06-01T20:39:39.870Z"
+updatedAt: "2026-06-01T20:39:40.495Z"
 featured: false
 isFeatured: false
 urgent: false
