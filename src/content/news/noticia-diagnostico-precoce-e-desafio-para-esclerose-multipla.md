@@ -6,19 +6,19 @@ seoDescription: "Saude: Dia Mundial da Esclerose Múltipla reforça a importânc
 category: "Saude"
 author: "Redação Novo Alvo"
 sources: ["BH Eventos", "News Rondônia", "Idest", "Fala Você Notícias", "RCN 67", "Notícias de Três Lagoas - Rádio Caçula", "band.com.br", "Agência Brasil", "Correio do Povo", "CNN Brasil", "Diário da Guanabara", "R7", "jornaltribuna.com.br"]
-publishedAt: "2026-06-01T11:20:21.247Z"
-updatedAt: "2026-06-01T11:20:21.661Z"
+publishedAt: "2026-06-01T11:27:52.485Z"
+updatedAt: "2026-06-01T11:27:52.830Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/noticia-diagnostico-precoce-e-desafio-para-esclerose-multipla-cover-20260601112021.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/noticia-diagnostico-precoce-e-desafio-para-esclerose-multipla-cover-20260601112752.avif"
   alt: "Foto de Shawn Day na Unsplash"
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/noticia-diagnostico-precoce-e-desafio-para-esclerose-multipla-cover-20260601112021.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/noticia-diagnostico-precoce-e-desafio-para-esclerose-multipla-cover-20260601112752.avif"
 tags: ["saude", "diagnostico", "precoce", "desafio", "esclerose", "multipla"]
 ---
 
