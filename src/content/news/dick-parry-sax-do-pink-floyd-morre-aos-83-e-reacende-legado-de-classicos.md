@@ -2,8 +2,8 @@
 title: "Dick Parry, sax do Pink Floyd, morre aos 83 e reacende legado de clássicos"
 slug: "dick-parry-sax-do-pink-floyd-morre-aos-83-e-reacende-legado-de-classicos"
 summary: "Parceiro de David Gilmour e presença marcante em álbuns do Pink Floyd, Dick Parry morreu aos 83 anos e voltou ao centro das homenagens de fãs do rock."
-seoDescription: "Entretenimento: Parceiro de David Gilmour e presença marcante em álbuns do Pink Floyd, Dick Parry morreu aos 83 anos e voltou ao centro das homenagens de…"
-category: "Entretenimento"
+seoDescription: "Ocorrencias: Parceiro de David Gilmour e presença marcante em álbuns do Pink Floyd, Dick Parry morreu aos 83 anos e voltou ao centro das homenagens de…"
+category: "Ocorrencias"
 author: "Redação Novo Alvo"
 sources: ["https://www.cnnbrasil.com.br/entretenimento/morre-dick-parry-saxofonista-do-pink-floyd-aos-83-anos/", "https://www.otempo.com.br/entretenimento/2026/5/23/morre-dick-parry-saxofonista-do-pink-floyd-aos-83-anos", "https://www.em.com.br/cultura/2026/05/7426546-morre-saxofonista-do-pink-floyd.html"]
 publishedAt: "2026-05-25T13:09:46.349Z"
