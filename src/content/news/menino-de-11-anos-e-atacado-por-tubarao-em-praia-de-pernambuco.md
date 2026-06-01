@@ -6,8 +6,8 @@ seoDescription: "Ocorrencias: João Lucas Nemézio, de 11 anos, foi mordido por 
 category: "Ocorrencias"
 author: "Redação Novo Alvo"
 sources: ["G1", "VEJA", "UOL Notícias", "Diário da Manhã", "Nill Júnior", "TMC", "Portal 96FM", "Pernambuco Notícias"]
-publishedAt: "2026-06-01T03:50:40.101Z"
-updatedAt: "2026-06-01T03:50:40.141Z"
+publishedAt: "2026-06-01T04:54:51.473Z"
+updatedAt: "2026-06-01T04:54:51.616Z"
 featured: false
 isFeatured: false
 urgent: false
