@@ -2,23 +2,23 @@
 title: "Tela Brasil: como acessar a “Netflix brasileira” gratuita"
 slug: "tela-brasil-como-acessar-a-netflix-brasileira-gratuita"
 summary: "Plataforma pública de streaming reúne centenas de filmes, séries, curtas e documentários nacionais, com acesso gratuito por conta gov.br."
-seoDescription: "Tela Brasil, apelidado de Netflix brasileira, reúne filmes, séries e documentários nacionais gratuitos com acesso por conta gov.br."
+seoDescription: "Cultura: Plataforma pública de streaming reúne centenas de filmes, séries, curtas e documentários nacionais, com acesso gratuito por conta gov.br."
 category: "Cultura"
 author: "Redação Novo Alvo"
 sources: ["Agência Brasil", "Portal Tela", "Band", "Metrópoles", "BNews", "GCMais", "Farol da Bahia", "Diário do Grande ABC"]
 publishedAt: "2026-06-01T12:34:33.229Z"
-updatedAt: "2026-06-01T12:34:33.363Z"
+updatedAt: "2026-06-01T12:36:54.476Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://picsum.photos/seed/draft:netflix-brasileira-estreia-hoje-saiba-como-acessar-e-o-que-assistir/1600/900"
-  alt: "Tela Brasil, plataforma pública de streaming dedicada ao audiovisual brasileiro."
+  src: "https://portalnovoalvo.com.br/media/news/tela-brasil-como-acessar-a-netflix-brasileira-gratuita-cover-20260601123654.png"
+  alt: "Reprodução/Gov.br"
   caption: ""
-  layout: "none"
-ogImage: "https://picsum.photos/seed/draft:netflix-brasileira-estreia-hoje-saiba-como-acessar-e-o-que-assistir/1600/900"
+  layout: "full"
+ogImage: "https://portalnovoalvo.com.br/media/news/tela-brasil-como-acessar-a-netflix-brasileira-gratuita-cover-20260601123654.png"
 tags: ["cultura", "tela-brasil", "streaming", "cinema-brasileiro", "netflix-brasileira", "gov-br"]
 ---
 
