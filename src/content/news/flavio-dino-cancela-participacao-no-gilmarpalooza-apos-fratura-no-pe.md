@@ -6,8 +6,8 @@ seoDescription: "Politica: Ministro do STF, Flávio Dino, desiste de participar 
 category: "Politica"
 author: "Redação Novo Alvo"
 sources: ["Portal 98 FM Natal", "CNN Brasil", "TV Pampa", "Imirante.com", "Diário da Guanabara", "Rádio Itatiaia", "JOTA", "O Globo"]
-publishedAt: "2026-06-01T16:58:00.011Z"
-updatedAt: "2026-06-01T16:58:00.167Z"
+publishedAt: "2026-06-01T17:03:19.020Z"
+updatedAt: "2026-06-01T17:03:19.212Z"
 featured: false
 isFeatured: false
 urgent: false
