@@ -6,8 +6,8 @@ seoDescription: "Futebol: Mesmo sem entrar em campo contra o Panamá, Neymar mob
 category: "Futebol"
 author: "Redação Novo Alvo"
 sources: ["UOL Esporte", "Reuters", "ge", "ESPN Brasil", "Lance!", "Terra", "CNN Brasil", "Itatiaia"]
-publishedAt: "2026-06-01T22:27:39.436Z"
-updatedAt: "2026-06-01T22:27:40.804Z"
+publishedAt: "2026-06-01T22:27:42.283Z"
+updatedAt: "2026-06-01T22:27:43.215Z"
 featured: false
 isFeatured: false
 urgent: false
