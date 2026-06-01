@@ -6,8 +6,8 @@ seoDescription: "Famosos: A cantora Dua Lipa e o ator Callum Turner oficializara
 category: "Famosos"
 author: "Redação Novo Alvo"
 sources: ["Tribuna Online", "Jornal de Brasília", "Notícias ao Minuto Brasil", "UOL", "Gazeta de São Paulo", "Hugo Gloss", "Folha Vitória", "Terra", "band.com.br", "VEJA", "vtvnews.com.br", "CARAS Brasil"]
-publishedAt: "2026-06-01T00:07:53.947Z"
-updatedAt: "2026-06-01T00:07:56.924Z"
+publishedAt: "2026-06-01T00:07:54.419Z"
+updatedAt: "2026-06-01T00:07:57.738Z"
 featured: false
 isFeatured: false
 urgent: false
