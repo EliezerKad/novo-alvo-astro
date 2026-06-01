@@ -6,8 +6,8 @@ seoDescription: "Mundo: O Ministério das Relações Exteriores da Colômbia acu
 category: "Mundo"
 author: "Redação Novo Alvo"
 sources: ["Estadão", "Correio do Povo", "noticiasdoplanalto.com.br", "Terra", "SpaceMoney", "Exame", "Jovem Pan", "AM POST", "UOL Notícias"]
-publishedAt: "2026-06-01T22:27:39.435Z"
-updatedAt: "2026-06-01T22:27:39.823Z"
+publishedAt: "2026-06-01T22:27:42.283Z"
+updatedAt: "2026-06-01T22:27:42.313Z"
 featured: false
 isFeatured: false
 urgent: false
