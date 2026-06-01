@@ -6,8 +6,8 @@ seoDescription: "Futebol: Seleção venceu por 6 a 2 no Maracanã, em último jo
 category: "Futebol"
 author: "Redação Novo Alvo"
 sources: ["CBF", "CNN Brasil", "UOL Esporte", "Reuters", "Band", "Metro1", "GCMais", "Diário Gaúcho"]
-publishedAt: "2026-06-01T10:07:32.537Z"
-updatedAt: "2026-06-01T10:07:32.702Z"
+publishedAt: "2026-06-01T10:40:57.896Z"
+updatedAt: "2026-06-01T10:40:58.383Z"
 featured: false
 isFeatured: false
 urgent: false
