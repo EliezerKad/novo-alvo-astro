@@ -6,8 +6,8 @@ seoDescription: "Tela Brasil, apelidado de Netflix brasileira, reúne filmes, s�
 category: "Cultura"
 author: "Redação Novo Alvo"
 sources: ["Agência Brasil", "Portal Tela", "Band", "Metrópoles", "BNews", "GCMais", "Farol da Bahia", "Diário do Grande ABC"]
-publishedAt: "2026-06-01T12:34:30.751Z"
-updatedAt: "2026-06-01T12:34:30.886Z"
+publishedAt: "2026-06-01T12:34:33.229Z"
+updatedAt: "2026-06-01T12:34:33.363Z"
 featured: false
 isFeatured: false
 urgent: false
