@@ -167,23 +167,51 @@ const STOP_WORDS = new Set([
   'a',
   'ao',
   'aos',
+  'abordagem',
+  'agente',
+  'agora',
+  'ainda',
+  'ativo',
   'as',
+  'ate',
+  'causa',
   'com',
   'como',
+  'concreta',
+  'consequencia',
   'contra',
   'da',
   'das',
   'de',
+  'deve',
   'do',
   'dos',
   'e',
   'em',
   'entre',
+  'envolve',
+  'estrategico',
+  'fato',
+  'ganha',
+  'google',
+  'ia',
+  'identificar',
+  'imediata',
+  'leitor',
+  'mais',
+  'mistura',
+  'muda',
   'na',
   'nas',
   'no',
+  'nova',
+  'novas',
+  'novo',
+  'novos',
+  'no',
   'nos',
   'o',
+  'ou',
   'os',
   'para',
   'por',
@@ -196,24 +224,41 @@ const STOP_WORDS = new Set([
   'suas',
   'seu',
   'seus',
+  'site',
+  'titulo',
+  'titulo',
+  'ultima',
+  'ultimo',
   'um',
   'uma',
+  'veja',
 ]);
+
+const stripEditorialBoilerplate = (value) =>
+  String(value || '')
+    .replace(/o fato central envolve\s+/gi, ' ')
+    .replace(/a abordagem editorial deve identificar o agente ativo, a causa imediata e a consequencia concreta para o leitor\.?/gi, ' ')
+    .replace(/o que muda para o consumidor\.?/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const tokenText = (value) =>
+  stripEditorialBoilerplate(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\bdjoko\b/g, 'djokovic')
+    .replace(/\basteroides\b/g, 'asteroide')
+    .replace(/\baproximacoes?\b/g, 'aproximacao')
+    .replace(/\bpassagens?\b/g, 'passagem')
+    .replace(/\bconselho nacional de justica\b/g, 'cnj')
+    .replace(/\binteligencia artificial\b/g, 'ia')
+    .replace(/\bvirada cultural\b/g, 'viradacultural')
+    .replace(/[^a-z0-9]+/g, ' ');
 
 const subjectTokens = (value) =>
   new Set(
-    String(value || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .replace(/\bdjoko\b/g, 'djokovic')
-      .replace(/\basteroides\b/g, 'asteroide')
-      .replace(/\baproximacoes?\b/g, 'aproximacao')
-      .replace(/\bpassagens?\b/g, 'passagem')
-      .replace(/\bconselho nacional de justica\b/g, 'cnj')
-      .replace(/\binteligencia artificial\b/g, 'ia')
-      .replace(/\bvirada cultural\b/g, 'viradacultural')
-      .replace(/[^a-z0-9]+/g, ' ')
+    tokenText(value)
       .split(/\s+/)
       .map((token) => token.trim())
       .filter((token) => token.length >= 3 && !STOP_WORDS.has(token)),
@@ -350,9 +395,23 @@ const listNewPitchesFromD1 = () =>
      LIMIT 100`,
   );
 
+const pitchTokenText = (pitch) => {
+  const tags = (() => {
+    try {
+      const parsed = JSON.parse(pitch.tags || '[]');
+      return Array.isArray(parsed) ? parsed.join(' ') : '';
+    } catch {
+      return pitch.tags || '';
+    }
+  })();
+  return `${pitch.category || ''} ${pitch.cluster_key || ''} ${pitch.title || ''} ${pitch.keywords || ''} ${tags}`;
+};
+
+const articleTokenText = (article) => `${article.category || ''} ${article.title || ''} ${article.summary || ''}`;
+
 const toPublishedSubject = (article) => ({
   ...article,
-  tokens: subjectTokens(`${article.category || ''} ${article.title || ''} ${article.summary || ''}`),
+  tokens: subjectTokens(articleTokenText(article)),
 });
 
 const listPublishedSubjects = async () => {
@@ -376,12 +435,10 @@ const listPublishedSubjects = async () => {
 };
 
 const duplicateForPitch = (pitch, publishedSubjects) => {
-  const pitchTokens = subjectTokens(
-    `${pitch.category || ''} ${pitch.cluster_key || ''} ${pitch.title || ''} ${pitch.summary || ''} ${pitch.keywords || ''} ${pitch.tags || ''}`,
-  );
+  const pitchTokens = subjectTokens(pitchTokenText(pitch));
   for (const article of publishedSubjects) {
     const score = overlapScore(pitchTokens, article.tokens);
-    if (score.overlap >= 4 && score.ratio >= 0.46) return { article, score };
+    if (score.overlap >= 4 && score.ratio >= 0.6) return { article, score };
   }
   return null;
 };
