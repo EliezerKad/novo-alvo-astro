@@ -204,21 +204,6 @@ const fallbackToAssets = async (request: Request, env: Env) => {
   return response;
 };
 
-const formatPublished = (value: string) => {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-
-  try {
-    return new Intl.DateTimeFormat('pt-BR', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-      timeZone: 'America/Sao_Paulo',
-    }).format(date);
-  } catch {
-    return date.toISOString();
-  }
-};
-
 const formatEditorialDate = (value: string) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
@@ -395,31 +380,6 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
     inLanguage: 'pt-BR',
   };
 
-  const relatedHtml = related.length
-    ? `<section class="related" aria-label="Matérias relacionadas">
-        <div class="related-head">
-          <span></span>
-          <h2>Relacionadas</h2>
-        </div>
-        <div class="related-track">
-          ${related
-            .map((item) => {
-              const itemUrl = `/noticia/${encodeURIComponent(item.slug || '')}/`;
-              const itemImage = item.cover_url || `${CANONICAL_ORIGIN}/og-default.svg`;
-              return `<a class="related-card" href="${itemUrl}">
-                <img src="${escapeHtml(itemImage)}" alt="${escapeHtml(item.cover_alt || item.title)}" loading="lazy" onerror="this.onerror=null;this.src='/og-default.svg';" />
-                <div>
-                  <span>${escapeHtml(displayCategory(item.category || article.category))}</span>
-                  <h3>${escapeHtml(item.title)}</h3>
-                  <p>${escapeHtml(item.summary || '')}</p>
-                </div>
-              </a>`;
-            })
-            .join('')}
-        </div>
-      </section>`
-    : '';
-
   const sourcesHtml = sources.length
     ? `<div class="mt-8 flex flex-col gap-3 border-t border-black/10 pt-5 dark:border-zinc-800 md:mt-10 md:flex-row md:items-start md:gap-4">
           <span class="shrink-0 text-[9px] font-black uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-600">Fontes:</span>
@@ -567,95 +527,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
     <script type="application/ld+json">${JSON.stringify(schema).replace(/</g, '\\u003c')}</script>
     ${shellAssets}
     ${dynamicArticleStyle}
-    <template data-disabled-legacy-dynamic-style>
-      :root { color-scheme: light dark; --red:#8A1F2D; --ink:#101010; --muted:#71717a; --line:rgba(16,16,16,.10); --paper:#f5f3ee; }
-      * { box-sizing:border-box; }
-      body { margin:0; font-family:Inter,system-ui,sans-serif; background:var(--paper); color:var(--ink); }
-      .article-page { min-height:100vh; padding-bottom:5rem; background:var(--paper); color:var(--ink); transition:background .3s ease,color .3s ease; }
-      .topbar { position:fixed; inset:0 0 auto; z-index:40; border-bottom:1px solid var(--line); background:rgba(255,255,255,.82); backdrop-filter:blur(20px); }
-      .topbar-inner { max-width:1280px; margin:auto; padding:14px 16px; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; }
-      .brand { display:flex; align-items:center; justify-content:center; gap:8px; color:inherit; text-decoration:none; font-family:"Playfair Display",Georgia,serif; font-size:1.7rem; font-weight:900; letter-spacing:-.06em; line-height:1; }
-      .brand img { width:34px; height:34px; }
-      .top-actions { display:flex; align-items:center; gap:8px; }
-      .top-actions:first-child { justify-content:flex-start; }
-      .top-actions:last-child { justify-content:flex-end; }
-      .pill-link { display:inline-flex; min-height:40px; align-items:center; justify-content:center; border:1px solid var(--line); border-radius:14px; padding:0 14px; text-decoration:none; color:#52525b; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.12em; transition:.25s ease; }
-      .pill-link:hover { border-color:var(--red); color:var(--red); background:rgba(138,31,45,.06); }
-      .crumbs { max-width:1240px; margin:0 auto; padding:0; display:flex; gap:10px; align-items:center; color:#71717a; font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
-      .article-page > .crumbs { display:none; }
-      .crumbs a { color:#71717a; text-decoration:none; }
-      main { max-width:1240px; margin:auto; padding:120px 12px 80px; }
-      .meta { margin-top:28px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; color:#71717a; font-size:11px; font-weight:900; }
-      .meta span { display:inline-flex; min-height:40px; align-items:center; border:1px solid var(--line); border-radius:999px; background:#fff; padding:0 14px; box-shadow:0 8px 24px rgba(16,16,16,.035); }
-      .meta .cat { border-color:transparent; background:rgba(138,31,45,.10); color:var(--red); text-transform:uppercase; letter-spacing:.08em; }
-      h1 { margin:34px 0 0; max-width:980px; font-family:Inter,system-ui,sans-serif; font-size:clamp(2.65rem,10.5vw,5.875rem); font-weight:950; line-height:.9; letter-spacing:-.088em; color:#101010; }
-      .summary { margin-top:24px; max-width:760px; color:#52525b; font-size:clamp(1.12rem,2.2vw,1.5rem); font-weight:500; line-height:1.5; font-style:normal; }
-      .byline { margin-top:24px; display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:1.25rem; background:#fff; padding:12px 16px; color:#18181b; font-size:12px; font-weight:900; box-shadow:0 18px 50px rgba(16,16,16,.055); }
-      .hero-figure { margin:38px 0 64px; max-width:900px; }
-      .hero-figure div { min-height:280px; overflow:hidden; border-radius:1.6rem; background:#ebe8df; box-shadow:0 24px 70px rgba(16,16,16,.12); aspect-ratio:16/9; }
-      .hero-figure img { display:block; width:100%; height:100%; object-fit:cover; }
-      figcaption { margin-top:12px; color:#71717a; font-size:12px; font-weight:800; line-height:1.5; }
-      .content { max-width:760px; font-family:Inter,system-ui,sans-serif; overflow-wrap:anywhere; }
-      .content p { margin:0 0 1.55rem; color:#292927; font-size:clamp(1.05rem,1.35vw,1.2rem); font-weight:400; line-height:1.82; letter-spacing:-.01em; }
-      .content h2 { margin:2.75rem 0 1rem; color:#101010; font-family:Inter,system-ui,sans-serif; font-size:clamp(1.32rem,2.4vw,1.72rem); font-weight:950; line-height:1.08; letter-spacing:-.055em; }
-      .content h3 { margin:2.15rem 0 .85rem; color:#101010; font-family:Inter,system-ui,sans-serif; font-size:clamp(1.12rem,1.9vw,1.36rem); font-weight:900; line-height:1.16; letter-spacing:-.04em; }
-      .content img { max-width:100%; border-radius:28px; }
-      .content figure { margin:3rem 0; }
-      .content a { color:var(--red); font-weight:700; }
-      .content blockquote { margin:3rem 0 0; border-left:4px solid var(--red); border-radius:0 1.25rem 1.25rem 0; background:rgba(138,31,45,.08); padding:1.15rem 1.25rem; color:#18181b; font-family:Inter,system-ui,sans-serif; font-size:clamp(1.05rem,1.35vw,1.2rem); font-weight:400; line-height:1.82; letter-spacing:-.01em; }
-      .content blockquote strong:first-child { font-weight:900; }
-      .content blockquote p { margin:0; color:inherit; font-size:inherit; font-weight:400; line-height:inherit; }
-      .share { max-width:760px; margin:44px 0 0; padding-top:28px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:18px; }
-      .share-label { color:#a1a1aa; font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:.22em; }
-      .share-links { display:flex; gap:10px; }
-      .share-links a { width:44px; height:44px; display:grid; place-items:center; border-radius:14px; background:#f4f4f5; color:#18181b; text-decoration:none; font-weight:900; transition:.25s ease; }
-      .share-links a:hover { background:var(--red); color:white; transform:translateY(-2px); }
-      .sources { max-width:760px; margin:48px 0 0; padding-top:24px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-      .sources span, .sources a { border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.45); padding:7px 10px; color:#71717a; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.12em; text-decoration:none; }
-      .ad-slot { max-width:728px; min-height:90px; margin:54px 0; border:1px dashed var(--line); border-radius:1.5rem; display:grid; place-items:center; color:#d4d4d8; font-size:8px; font-weight:900; letter-spacing:.35em; text-transform:uppercase; background:#fafafa; }
-      .related { margin:72px 0 0; max-width:980px; }
-      .related-head { display:flex; align-items:center; gap:14px; border-bottom:1px solid var(--line); padding-bottom:14px; }
-      .related-head span { width:22px; height:22px; border-radius:999px; background:var(--red); box-shadow:0 0 34px rgba(220,38,38,.35); }
-      .related-head h2 { margin:0; font-family:Inter,system-ui,sans-serif; font-size:12px; line-height:1; letter-spacing:.22em; text-transform:uppercase; }
-      .related-track { margin-top:28px; display:grid; grid-auto-flow:column; grid-auto-columns:minmax(260px,1fr); gap:18px; overflow-x:auto; scroll-snap-type:x mandatory; padding:4px 2px 18px; }
-      .related-card { min-width:0; scroll-snap-align:start; overflow:hidden; border:1px solid var(--line); border-radius:28px; background:#fff; color:inherit; text-decoration:none; box-shadow:0 24px 70px rgba(15,23,42,.08); transition:.35s ease; }
-      .related-card:hover { transform:translateY(-3px); box-shadow:0 28px 90px rgba(220,38,38,.12); }
-      .related-card img { width:100%; height:160px; object-fit:cover; display:block; transition:.6s ease; }
-      .related-card:hover img { transform:scale(1.045); }
-      .related-card div { padding:18px; }
-      .related-card span { color:var(--red); font-size:9px; font-weight:900; letter-spacing:.16em; text-transform:uppercase; }
-      .related-card h3 { margin:10px 0 8px; font-family:"Playfair Display",Georgia,serif; font-size:1.55rem; line-height:1; letter-spacing:-.04em; font-style:italic; }
-      .related-card p { margin:0; color:#71717a; font-size:.88rem; line-height:1.55; }
-      .home-bottom { margin:54px 0 0; width:56px; height:56px; border-radius:22px; background:#18181b; color:white; display:grid; place-items:center; text-decoration:none; box-shadow:0 18px 48px rgba(15,23,42,.24); transition:.3s ease; }
-      .home-bottom:hover { background:var(--red); transform:translateY(-2px); }
-      footer { border-top:1px solid var(--line); padding:34px 20px; color:#a1a1aa; font-size:10px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; }
-      @media (max-width:720px) {
-        .topbar-inner { padding:12px 16px; grid-template-columns:auto 1fr auto; }
-        .brand { font-size:1.25rem; }
-        .brand img { width:30px; height:30px; }
-        .pill-link { min-height:36px; padding:0 11px; font-size:9px; }
-        main { padding:96px 18px 78px; }
-        h1 { font-size:clamp(2.8rem,14vw,4.7rem); }
-        .hero-figure { margin:36px 0; }
-        .hero-figure div { border-radius:1.35rem; aspect-ratio:4/3; }
-        .related-track { grid-auto-columns:82%; }
-      }
-      @media (prefers-color-scheme:dark) {
-        :root { --line:#27272a; }
-        body, .article-page { background:linear-gradient(180deg,#080809 0%,#141416 50%,#080809 100%); color:#fafafa; }
-        .topbar { background:rgba(9,9,11,.82); }
-        .pill-link { color:#d4d4d8; }
-        h1, .content h2, .content h3 { color:#fafafa; }
-        .summary { color:#a1a1aa; }
-        .byline, .meta span { border-color:#27272a; background:#18181b; color:#e4e4e7; }
-        .content p { color:#d4d4d8; }
-        .content blockquote { background:rgba(138,31,45,.18); color:#f4f4f5; }
-        .share-links a, .ad-slot { background:#18181b; color:#e4e4e7; }
-        .sources span, .sources a { border-color:#27272a; background:rgba(24,24,27,.60); }
-        .related-card { background:#09090b; }
-        .related-card p { color:#a1a1aa; }
-      }
-    </template>
+
   </head>
   <body>
     <article class="min-h-screen bg-[#f5f3ee] pb-20 text-[#101010] transition-colors duration-300 dark:bg-[linear-gradient(180deg,#080809_0%,#141416_50%,#080809_100%)] dark:text-zinc-50">
@@ -736,56 +608,6 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
         ${recommendationsHtml}
       </section>
     </article>
-    <div class="article-page" style="display:none">
-      <header class="topbar">
-        <nav class="topbar-inner">
-          <div class="top-actions"><a href="/" class="pill-link">Voltar</a></div>
-          <a href="/" class="brand"><img src="/favicon.svg" alt="" /> NOVO ALVO</a>
-          <div class="top-actions">
-            <a href="/buscar/" class="pill-link">Buscar</a>
-            <a href="/" class="pill-link">Início</a>
-          </div>
-        </nav>
-      </header>
-      <div class="crumbs">
-        <a href="/">Início</a>
-        <span>/</span>
-        <span>${escapeHtml(displayCategory(article.category))}</span>
-      </div>
-      <main>
-        <article>
-          <div class="crumbs">
-            <a href="/">Inicio</a>
-            <span>/</span>
-            <span>${escapeHtml(displayCategory(article.category))}</span>
-          </div>
-          <div class="meta">
-            <span class="cat">${escapeHtml(displayCategory(article.category))}</span>
-            <span>${escapeHtml(formatPublished(published))}</span>
-            <span data-live-view-count="${escapeHtml(article.slug)}">0 views</span>
-            <span>${escapeHtml(String(article.reading_minutes || 1))} min de leitura</span>
-          </div>
-          <h1>${escapeHtml(article.title)}</h1>
-          <p class="summary">${escapeHtml(article.summary || description)}</p>
-          <p class="byline">Por ${escapeHtml(article.author || 'Redação Novo Alvo')}</p>
-          ${coverHtml}
-          <div class="content">${cleanBody || `<p>${escapeHtml(article.summary || '')}</p>`}</div>
-          <div class="share">
-            <span class="share-label">Compartilhar matéria</span>
-            <div class="share-links">
-              <a href="https://wa.me/?text=${encodeURIComponent(`${article.title} - ${canonical}`)}" target="_blank" rel="noopener noreferrer" title="WhatsApp">W</a>
-              <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=${encodeURIComponent(canonical)}" target="_blank" rel="noopener noreferrer" title="X">X</a>
-              <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonical)}" target="_blank" rel="noopener noreferrer" title="Facebook">F</a>
-            </div>
-          </div>
-          ${sourcesHtml}
-          <div class="ad-slot">Publicidade</div>
-          ${relatedHtml}
-          <a href="/" class="home-bottom" aria-label="Voltar para a home">⌂</a>
-        </article>
-      </main>
-      <footer>Portal Novo Alvo - Notícias, fatos e impacto</footer>
-    </div>
     <script>
       (() => {
         const nodes = Array.from(document.querySelectorAll('[data-live-view-count]'));
