@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const loadLocalEnv = (filePath) => {
@@ -29,6 +29,30 @@ const FETCH_TIMEOUT_MS = Number(process.env.AUTOMATION_FETCH_TIMEOUT_MS || 20000
 const D1_TIMEOUT_MS = Number(process.env.AUTOMATION_D1_TIMEOUT_MS || 180000);
 const bundledNpm = resolve('..', '.tools', 'node-v24.15.0-win-x64', process.platform === 'win32' ? 'npm.cmd' : 'bin/npm');
 const npmCommand = process.env.NPM_CMD || (existsSync(bundledNpm) ? bundledNpm : process.platform === 'win32' ? 'npm.cmd' : 'npm');
+const localWranglerCandidates = [
+  resolve('node_modules', '.bin', process.platform === 'win32' ? 'wrangler.cmd' : 'wrangler'),
+  resolve('..', 'node_modules', '.bin', process.platform === 'win32' ? 'wrangler.cmd' : 'wrangler'),
+];
+
+const findCachedWrangler = () => {
+  const npxCacheDir = resolve('..', '.npm-cache', '_npx');
+  if (!existsSync(npxCacheDir)) return '';
+  for (const entry of readdirSync(npxCacheDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const candidate = resolve(
+      npxCacheDir,
+      entry.name,
+      'node_modules',
+      '.bin',
+      process.platform === 'win32' ? 'wrangler.cmd' : 'wrangler',
+    );
+    if (existsSync(candidate)) return candidate;
+  }
+  return '';
+};
+
+const wranglerCommand = process.env.WRANGLER_CMD || localWranglerCandidates.find((candidate) => existsSync(candidate)) || findCachedWrangler();
+const wranglerLogPath = resolve('.wrangler', 'logs');
 
 const fetchWithTimeout = async (url, options = {}) => {
   const controller = new AbortController();
@@ -205,26 +229,50 @@ const overlapScore = (left, right) => {
 };
 
 const d1 = (command) => {
-  const env = { ...process.env, npm_config_cache: process.env.npm_config_cache || resolve('..', '.npm-cache') };
+  mkdirSync(wranglerLogPath, { recursive: true });
+  const tmpDir = resolve('.wrangler', 'tmp');
+  mkdirSync(tmpDir, { recursive: true });
+  const env = {
+    ...process.env,
+    npm_config_cache: process.env.npm_config_cache || resolve('..', '.npm-cache'),
+    WRANGLER_LOG_PATH: process.env.WRANGLER_LOG_PATH || wranglerLogPath,
+    WRANGLER_SEND_METRICS: process.env.WRANGLER_SEND_METRICS || 'false',
+  };
   const normalizedCommand = command.replace(/\s+/g, ' ').trim();
-  const psCommand = `& '${npmCommand.replace(/'/g, "''")}' exec wrangler -- d1 execute ${D1_DATABASE} --remote --json --command @'
-${normalizedCommand}
-'@`;
+  const executable = wranglerCommand || npmCommand;
+  const args = wranglerCommand
+    ? ['d1', 'execute', D1_DATABASE, '--remote', '--json', '--command', normalizedCommand]
+    : ['exec', 'wrangler', '--', 'd1', 'execute', D1_DATABASE, '--remote', '--json', '--command', normalizedCommand];
   const output =
     process.platform === 'win32'
-      ? execFileSync(
-          'powershell.exe',
-          ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', psCommand],
-          { encoding: 'utf8', env, timeout: D1_TIMEOUT_MS },
-        )
-      : execFileSync(
-          npmCommand,
-          ['exec', 'wrangler', '--', 'd1', 'execute', D1_DATABASE, '--remote', '--json', '--command', normalizedCommand],
-          { encoding: 'utf8', env, timeout: D1_TIMEOUT_MS },
-        );
+      ? (() => {
+          const ps1Path = resolve(tmpDir, `automation-editorial-${Date.now()}-${Math.random().toString(36).slice(2)}.ps1`);
+          const escapedExecutable = executable.replace(/'/g, "''");
+          const escapedArgs = args.map((value) => `'${String(value).replace(/'/g, "''")}'`).join(', ');
+          writeFileSync(
+            ps1Path,
+            `$ErrorActionPreference = 'Stop'\n& '${escapedExecutable}' @(${escapedArgs})\n`,
+            'utf8',
+          );
+          try {
+            return execFileSync('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', ps1Path], {
+              encoding: 'utf8',
+              env,
+              timeout: D1_TIMEOUT_MS,
+            });
+          } finally {
+            rmSync(ps1Path, { force: true });
+          }
+        })()
+      : execFileSync(executable, args, {
+          encoding: 'utf8',
+          env,
+          timeout: D1_TIMEOUT_MS,
+        });
   const jsonStart = output.indexOf('[');
   const jsonText = jsonStart >= 0 ? output.slice(jsonStart) : output;
-  const chunks = JSON.parse(jsonText);
+  const parsed = JSON.parse(jsonText);
+  const chunks = Array.isArray(parsed) ? parsed : [parsed];
   return chunks.flatMap((chunk) => chunk?.results || []);
 };
 
