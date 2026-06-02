@@ -6,19 +6,19 @@ seoDescription: "Lifestyle: Estudos recentes mostram que bem-estar, estabilidade
 category: "Lifestyle"
 author: "Redação Novo Alvo"
 sources: ["CNN Brasil", "Wellhub", "Cia de Talentos", "Ministério da Previdência Social", "Folha de S.Paulo", "Vidalink", "OMS", "OPAS"]
-publishedAt: "2026-06-02T01:18:25.887Z"
-updatedAt: "2026-06-02T01:18:27.524Z"
+publishedAt: "2026-06-02T01:21:25.012Z"
+updatedAt: "2026-06-02T01:21:26.953Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/millennials-e-gen-z-colocam-saude-mental-no-centro-da-rotina-de-trabalho-cover-20260602011827.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/millennials-e-gen-z-colocam-saude-mental-no-centro-da-rotina-de-trabalho-cover-20260602012126.avif"
   alt: "Foto:  Paul Schafer/Unplash"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/millennials-e-gen-z-colocam-saude-mental-no-centro-da-rotina-de-trabalho-cover-20260602011827.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/millennials-e-gen-z-colocam-saude-mental-no-centro-da-rotina-de-trabalho-cover-20260602012126.avif"
 tags: ["lifestyle", "saude-mental", "gen-z", "millennials", "trabalho", "bem-estar"]
 ---
 
