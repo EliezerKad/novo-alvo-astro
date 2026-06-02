@@ -6,8 +6,8 @@ seoDescription: "Ocorrencias: João Lucas Nemézio, de 11 anos, segue internado 
 category: "Ocorrencias"
 author: "Redação Novo Alvo"
 sources: ["O Globo", "UOL Notícias", "Correio Braziliense", "Bnews", "Tribuna do Norte", "Folha PE", "Revista Oeste", "Diario de Pernambuco"]
-publishedAt: "2026-06-02T11:34:09.032Z"
-updatedAt: "2026-06-02T11:38:17.655Z"
+publishedAt: "2026-06-02T12:28:15.956Z"
+updatedAt: "2026-06-02T12:28:16.001Z"
 featured: false
 isFeatured: false
 urgent: false
