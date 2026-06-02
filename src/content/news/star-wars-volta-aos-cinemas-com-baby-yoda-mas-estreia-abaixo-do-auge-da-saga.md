@@ -6,8 +6,8 @@ seoDescription: "Cinema: O Mandaloriano e Grogu abriu com estimativa global de U
 category: "Cinema"
 author: "Redação Novo Alvo"
 sources: ["Reuters", "UOL Splash", "CNN Brasil", "Omelete", "Variety", "The Hollywood Reporter", "Deadline", "Collider"]
-publishedAt: "2026-06-02T01:21:25.012Z"
-updatedAt: "2026-06-02T01:21:25.376Z"
+publishedAt: "2026-06-02T01:21:29.800Z"
+updatedAt: "2026-06-02T01:21:29.938Z"
 featured: false
 isFeatured: false
 urgent: false
