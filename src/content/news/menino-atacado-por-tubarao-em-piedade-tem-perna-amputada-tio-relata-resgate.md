@@ -2,23 +2,23 @@
 title: "Menino atacado por tubarão em Piedade tem perna amputada; tio relata resgate"
 slug: "menino-atacado-por-tubarao-em-piedade-tem-perna-amputada-tio-relata-resgate"
 summary: "João Lucas Nemézio, de 11 anos, segue internado na UTI após ataque de tubarão em Piedade. Tio que fez o resgate relatou que o menino pedia para não morrer."
-seoDescription: "João Lucas Nemézio, menino de 11 anos atacado por tubarão em Piedade, teve a perna amputada e segue internado na UTI no Recife."
+seoDescription: "Ocorrencias: João Lucas Nemézio, de 11 anos, segue internado na UTI após ataque de tubarão em Piedade. Tio que fez o resgate relatou que o menino pedia para…"
 category: "Ocorrencias"
 author: "Redação Novo Alvo"
 sources: ["O Globo", "UOL Notícias", "Correio Braziliense", "Bnews", "Tribuna do Norte", "Folha PE", "Revista Oeste", "Diario de Pernambuco"]
 publishedAt: "2026-06-02T11:34:09.032Z"
-updatedAt: "2026-06-02T11:34:09.223Z"
+updatedAt: "2026-06-02T11:38:17.655Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://picsum.photos/seed/draft:so-pedia-para-eu-nao-deixar-ele-morrer-diz-tio-de-crianca-atacada-por-tuba/1600/900"
-  alt: "Praia de Piedade, em Jaboatão dos Guararapes, onde menino foi atacado por tubarão."
+  src: "https://portalnovoalvo.com.br/media/news/menino-atacado-por-tubarao-em-piedade-tem-perna-amputada-tio-relata-resgate-cover-20260602113817.jpg"
+  alt: "Foto: Reprodução Redes Sociais"
   caption: "Credito: Unsplash"
-  layout: "none"
-ogImage: "https://picsum.photos/seed/draft:so-pedia-para-eu-nao-deixar-ele-morrer-diz-tio-de-crianca-atacada-por-tuba/1600/900"
+  layout: "full"
+ogImage: "https://portalnovoalvo.com.br/media/news/menino-atacado-por-tubarao-em-piedade-tem-perna-amputada-tio-relata-resgate-cover-20260602113817.jpg"
 tags: ["ocorrencias", "tubarao", "praia-de-piedade", "pernambuco", "joao-lucas-nemezio", "jaboatao-dos-guararapes"]
 ---
 
