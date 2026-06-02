@@ -2,23 +2,23 @@
 title: "Tempo negativo: estudo quântico reacende debate sobre os limites da física"
 slug: "tempo-negativo-estudo-quantico-reacende-debate-sobre-os-limites-da-fisica"
 summary: "Experimentos em óptica quântica voltaram a chamar atenção ao sugerir comportamentos contraintuitivos na interação entre luz e matéria."
-seoDescription: "Estudo sobre tempo negativo em sistemas quânticos reacende debate sobre os limites da física e a forma como medimos luz e matéria."
+seoDescription: "Ciencia: Experimentos em óptica quântica voltaram a chamar atenção ao sugerir comportamentos contraintuitivos na interação entre luz e matéria."
 category: "Ciencia"
 author: "Redação Novo Alvo"
 sources: ["Scientific American", "UOL Tilt", "Revista Pesquisa Fapesp", "ScienceAlert", "New Scientist", "Nature", "Live Science", "BBC Science Focus"]
 publishedAt: "2026-06-02T18:33:12.023Z"
-updatedAt: "2026-06-02T18:33:12.206Z"
+updatedAt: "2026-06-02T21:41:26.062Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://picsum.photos/seed/draft:tempo-negativo-estudo-quantico-reacende-debate-sobre-os-limites-da-fisica/1600/900"
-  alt: "Tempo negativo: estudo quântico reacende debate sobre os limites da física"
+  src: "https://portalnovoalvo.com.br/uploads/news/tempo-negativo-estudo-quantico-reacende-debate-sobre-os-limites-da-fisica-cover-20260602214126.avif"
+  alt: "Foto de Compagnons na Unsplash"
   caption: ""
-  layout: "none"
-ogImage: "https://picsum.photos/seed/draft:tempo-negativo-estudo-quantico-reacende-debate-sobre-os-limites-da-fisica/1600/900"
+  layout: "full"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/tempo-negativo-estudo-quantico-reacende-debate-sobre-os-limites-da-fisica-cover-20260602214126.avif"
 tags: ["ciencia", "fisica-quantica", "tempo-negativo", "pesquisa", "tecnologia"]
 ---
 
