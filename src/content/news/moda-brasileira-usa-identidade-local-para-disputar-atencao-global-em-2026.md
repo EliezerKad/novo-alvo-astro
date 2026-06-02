@@ -6,8 +6,8 @@ seoDescription: "Moda brasileira aposta em identidade local, sustentabilidade e 
 category: "Moda"
 author: "Redação Novo Alvo"
 sources: ["Vogue Brasil", "FFW", "Elle Brasil", "Forbes Brasil", "Propmark", "Exame", "O Globo", "Estadão"]
-publishedAt: "2026-06-02T19:10:18.681Z"
-updatedAt: "2026-06-02T19:10:19.119Z"
+publishedAt: "2026-06-02T19:19:38.591Z"
+updatedAt: "2026-06-02T19:19:38.734Z"
 featured: false
 isFeatured: false
 urgent: false
