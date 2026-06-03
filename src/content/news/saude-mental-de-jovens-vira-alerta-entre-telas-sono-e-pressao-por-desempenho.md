@@ -6,19 +6,19 @@ seoDescription: "Saude: Especialistas apontam que rotina digital intensa, pouco 
 category: "Saude"
 author: "Redação Novo Alvo"
 sources: ["OMS", "OPAS", "Ministério da Saúde", "CNN Brasil", "UOL VivaBem", "Fiocruz", "Sociedade Brasileira de Pediatria", "Unicef"]
-publishedAt: "2026-06-03T16:07:50.850Z"
-updatedAt: "2026-06-03T16:07:50.999Z"
+publishedAt: "2026-06-03T16:08:47.607Z"
+updatedAt: "2026-06-03T16:08:47.753Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/saude-mental-de-jovens-vira-alerta-entre-telas-sono-e-pressao-por-desempenho-cover-20260603160750.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/saude-mental-de-jovens-vira-alerta-entre-telas-sono-e-pressao-por-desempenho-cover-20260603160847.avif"
   alt: "Foto de Mia Anderson na Unsplash"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/saude-mental-de-jovens-vira-alerta-entre-telas-sono-e-pressao-por-desempenho-cover-20260603160750.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/saude-mental-de-jovens-vira-alerta-entre-telas-sono-e-pressao-por-desempenho-cover-20260603160847.avif"
 tags: ["saude", "saude-mental", "jovens", "adolescentes", "telas", "sono"]
 ---
 
