@@ -51,211 +51,130 @@ const canonical = new URL('/buscar', Astro.site ?? Astro.url.origin).href;
   description="Busque notícias, categorias, temas e coberturas editoriais no Portal Novo Alvo."
   canonical={canonical}
 >
-  <div class="min-h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300">
+  <div class="min-h-screen bg-[#f5f3ee] transition-colors duration-300 dark:bg-zinc-950">
     <Navbar tickerArticles={tickerArticles} categories={categoriesList} subCategories={subCategoriesList} />
 
-    <main class="max-w-7xl mx-auto px-4 mt-8 mb-20 transition-all duration-500">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <div class="lg:col-span-9 space-y-12">
-          <header class="space-y-6">
-            <div class="space-y-2">
-              <span class="text-[10px] font-black uppercase tracking-[0.4em] text-red-600">Busca editorial</span>
-              <h1 data-search-title class="text-3xl md:text-4xl font-serif font-black italic tracking-tighter text-zinc-900 dark:text-zinc-50">
-                Buscar notícias
-              </h1>
-              <p class="text-zinc-500 dark:text-zinc-400 text-sm md:text-base font-medium leading-relaxed max-w-2xl">
-                Pesquise por temas, categorias, autores, tags e conteúdo das matérias publicadas no Portal Novo Alvo.
-              </p>
-            </div>
+    <main class="mx-auto mb-20 mt-8 max-w-7xl px-4">
+      <div class="grid grid-cols-1 gap-8 lg:grid-cols-12 xl:gap-12">
+        <div class="space-y-8 lg:col-span-8 xl:col-span-9">
+          <header class="rounded-[1.35rem] border border-black/10 bg-white/75 p-5 shadow-[0_22px_80px_rgba(16,16,16,0.06)] backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/70 md:rounded-[1.75rem] md:p-8">
+            <span class="text-[10px] font-black uppercase tracking-[0.34em] text-[#8A1F2D]">Busca editorial</span>
+            <h1 data-search-title class="mt-3 max-w-4xl text-[clamp(2.25rem,6vw,4.8rem)] font-sans font-black leading-[0.92] tracking-[-0.075em] text-zinc-950 dark:text-zinc-50">
+              Buscar notícias
+            </h1>
+            <p class="mt-4 max-w-2xl text-sm font-semibold leading-6 text-zinc-500 dark:text-zinc-400 md:text-base">
+              Encontre matérias por tema, pessoa, categoria ou contexto. O ranking lateral acompanha a busca e prioriza os resultados mais vistos.
+            </p>
 
-            <form action="/buscar" method="get" role="search" class="relative max-w-2xl">
-              <Icon name="search" class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-              <input
-                type="search"
-                name="q"
-                placeholder="Digite sua busca..."
-                data-search-input
-                class="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl pl-14 pr-32 py-5 text-sm font-bold text-zinc-900 dark:text-white outline-none focus:border-red-600 focus:ring-4 focus:ring-red-600/10 transition-all"
-              />
+            <form action="/buscar" method="get" role="search" class="mt-7 flex max-w-3xl items-center gap-2 rounded-[1.15rem] border border-black/10 bg-[#f5f3ee] p-2 dark:border-zinc-800 dark:bg-zinc-950/70">
+              <label class="relative min-w-0 flex-1">
+                <span class="sr-only">Digite sua busca</span>
+                <Icon name="search" class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
+                <input
+                  type="search"
+                  name="q"
+                  placeholder="Digite sua busca..."
+                  data-search-input
+                  class="h-14 w-full rounded-[0.9rem] border-0 bg-transparent pl-12 pr-3 text-sm font-black text-zinc-950 outline-none placeholder:text-zinc-400 dark:text-white"
+                />
+              </label>
               <button
                 type="submit"
-                class="absolute right-2 top-1/2 -translate-y-1/2 rounded-xl bg-red-600 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white hover:bg-red-700 transition-colors"
+                class="h-12 shrink-0 rounded-[0.85rem] bg-[#8A1F2D] px-5 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_14px_30px_rgba(138,31,45,0.18)] transition hover:-translate-y-0.5 hover:bg-[#6f1723]"
               >
                 Buscar
               </button>
             </form>
           </header>
 
-          <div data-search-status class="hidden flex items-center justify-between border-y border-zinc-200 dark:border-zinc-800 py-4">
-            <p data-search-count class="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-400"></p>
-            <a href="/buscar" class="text-[10px] font-black uppercase tracking-widest text-red-600 hover:text-red-700">
+          <div data-search-status class="hidden items-center justify-between rounded-2xl border border-black/10 bg-white/65 px-5 py-4 dark:border-zinc-800 dark:bg-zinc-900/60">
+            <p data-search-count class="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-400"></p>
+            <a href="/buscar" class="text-[10px] font-black uppercase tracking-widest text-[#8A1F2D] hover:text-[#6f1723]">
               Limpar busca
             </a>
           </div>
 
-          <div data-search-loading class="hidden space-y-8" aria-live="polite">
-            <div class="flex items-center gap-3 border-b-2 border-red-600 pb-3">
-              <span class="h-2 w-2 rounded-full bg-red-600 animate-pulse"></span>
-              <h2 class="uppercase text-xs font-black tracking-[0.2em] italic text-zinc-900 dark:text-zinc-50">
+          <div data-search-loading class="hidden space-y-5" aria-live="polite">
+            <div class="flex items-center gap-3 border-b border-[#8A1F2D] pb-3">
+              <span class="h-2 w-2 animate-pulse rounded-full bg-[#8A1F2D]"></span>
+              <h2 class="text-xs font-black uppercase tracking-[0.22em] text-zinc-900 dark:text-zinc-50">
                 Buscando matérias
               </h2>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-              {Array.from({ length: 6 }).map(() => (
-                <article class="space-y-6 animate-pulse">
-                  <div class="aspect-[16/10] rounded-[2rem] bg-zinc-200 dark:bg-zinc-800"></div>
-                  <div class="space-y-3">
-                    <div class="h-2 w-32 rounded-full bg-zinc-200 dark:bg-zinc-800"></div>
-                    <div class="h-5 w-11/12 rounded-full bg-zinc-200 dark:bg-zinc-800"></div>
-                    <div class="h-5 w-8/12 rounded-full bg-zinc-200 dark:bg-zinc-800"></div>
-                    <div class="h-2 w-full rounded-full bg-zinc-100 dark:bg-zinc-900"></div>
-                    <div class="h-2 w-2/3 rounded-full bg-zinc-100 dark:bg-zinc-900"></div>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {Array.from({ length: 4 }).map(() => (
+                <article class="flex gap-4 rounded-[1.25rem] border border-black/10 bg-white/70 p-3 animate-pulse dark:border-zinc-800 dark:bg-zinc-900/70">
+                  <div class="h-28 w-32 shrink-0 rounded-2xl bg-zinc-200 dark:bg-zinc-800"></div>
+                  <div class="flex-1 space-y-3 py-2">
+                    <div class="h-2 w-24 rounded-full bg-zinc-200 dark:bg-zinc-800"></div>
+                    <div class="h-4 w-11/12 rounded-full bg-zinc-200 dark:bg-zinc-800"></div>
+                    <div class="h-4 w-8/12 rounded-full bg-zinc-200 dark:bg-zinc-800"></div>
+                    <div class="h-2 w-full rounded-full bg-zinc-100 dark:bg-zinc-800"></div>
                   </div>
                 </article>
               ))}
             </div>
           </div>
 
-          <div data-search-results class="hidden space-y-8">
-            <div class="flex items-center gap-3 border-b-2 border-red-600 pb-3">
-              <Icon name="trending" class="w-5 h-5 text-red-600" />
-              <h2 class="uppercase text-xs font-black tracking-[0.2em] italic text-zinc-900 dark:text-zinc-50">
+          <div data-search-results class="hidden space-y-6">
+            <div class="flex items-center gap-3 border-b border-[#8A1F2D] pb-3">
+              <Icon name="trending" class="h-5 w-5 text-[#8A1F2D]" />
+              <h2 class="text-xs font-black uppercase tracking-[0.22em] text-zinc-900 dark:text-zinc-50">
                 Pulso da busca
               </h2>
             </div>
-            <div data-search-grid class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
+            <div data-search-grid class="grid grid-cols-1 gap-4 md:grid-cols-2"></div>
           </div>
 
-          <section data-search-empty class="hidden rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-10 text-center">
-            <h2 class="text-3xl md:text-4xl font-serif font-black italic tracking-tighter text-zinc-900 dark:text-zinc-50">
+          <section data-search-empty class="hidden rounded-[1.35rem] border border-black/10 bg-white/75 p-10 text-center dark:border-zinc-800 dark:bg-zinc-900/70">
+            <h2 class="text-3xl font-sans font-black tracking-[-0.055em] text-zinc-950 dark:text-zinc-50 md:text-4xl">
               Nenhum resultado encontrado
             </h2>
-            <p class="mt-3 text-sm text-zinc-500 dark:text-zinc-400 font-medium">
+            <p class="mt-3 text-sm font-semibold text-zinc-500 dark:text-zinc-400">
               Tente buscar por uma palavra mais curta, categoria ou tema relacionado.
             </p>
           </section>
 
-          <script id="search-data" type="application/json" is:inline set:html={JSON.stringify(searchDocuments)}></script>
-          <script is:inline>
-            (() => {
-              const dataEl = document.getElementById('search-data');
-              if (!dataEl) return;
-              const articles = JSON.parse(dataEl.textContent || '[]');
-              const params = new URLSearchParams(window.location.search);
-              const query = (params.get('q') || '').trim();
-              const normalize = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-              const terms = normalize(query).split(/\s+/).filter(Boolean);
-              const title = document.querySelector('[data-search-title]');
-              const input = document.querySelector('[data-search-input]');
-              const status = document.querySelector('[data-search-status]');
-              const count = document.querySelector('[data-search-count]');
-              const results = document.querySelector('[data-search-results]');
-              const grid = document.querySelector('[data-search-grid]');
-              const empty = document.querySelector('[data-search-empty]');
-              const loading = document.querySelector('[data-search-loading]');
-              const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (char) => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;',
-              })[char]);
-              const formatDate = (value) => {
-                try {
-                  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date(value));
-                } catch {
-                  return '';
-                }
-              };
-              const scoreArticle = (article) => terms.reduce((total, term) => {
-                let next = total;
-                const title = normalize(article.title || '');
-                const summary = normalize(article.summary || '');
-                const category = normalize([article.category, article.subcategory || ''].join(' '));
-                const author = normalize(article.author || '');
-                const tags = normalize((article.tags || []).join(' '));
-                if (title.includes(term)) next += 12;
-                if (summary.includes(term)) next += 7;
-                if (category.includes(term)) next += 4;
-                if (tags.includes(term)) next += 4;
-                if (author.includes(term)) next += 2;
-                if ((article.searchText || '').includes(term)) next += 1;
-                return next;
-              }, 0);
-              const renderCard = (article) => `
-                <a href="/noticia/${encodeURIComponent(article.slug)}" class="group space-y-6">
-                  <div class="aspect-[16/10] rounded-[2rem] overflow-hidden bg-zinc-100 dark:bg-zinc-800 relative shadow-md group-hover:shadow-xl transition-all">
-                    ${article.imageUrl ? `
-                      <img src="${escapeHtml(article.imageUrl)}" class="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105" alt="${escapeHtml(article.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
-                    ` : '<div class="w-full h-full bg-zinc-100 dark:bg-zinc-800"></div>'}
-                  </div>
-                  <div class="space-y-3">
-                    <div class="flex items-center gap-3 text-[8px] font-black uppercase tracking-widest text-zinc-400">
-                      <span>${escapeHtml(article.category)}</span>
-                      <span class="border-l border-zinc-200 dark:border-zinc-800 pl-3">${formatDate(article.publishedAt)}</span>
-                    </div>
-                    <h3 class="text-2xl font-serif font-black leading-tight tracking-tighter text-zinc-900 dark:text-zinc-50 group-hover:text-red-700 dark:group-hover:text-red-400 transition-colors">
-                      ${escapeHtml(article.title)}
-                    </h3>
-                    <p class="text-zinc-500 dark:text-zinc-400 text-[11px] font-medium leading-relaxed italic line-clamp-3">
-                      ${escapeHtml(article.summary)}
-                    </p>
-                  </div>
-                </a>
-              `;
-
-              if (input) input.value = query;
-              if (!query || !terms.length) return;
-
-              if (title) title.textContent = `Resultados para "${query}"`;
-              if (loading) loading.classList.remove('hidden');
-
-              const matches = articles
-                .map((article) => ({ article, score: scoreArticle(article) }))
-                .filter((item) => item.score > 0)
-                .sort((a, b) => b.score - a.score || new Date(b.article.publishedAt).getTime() - new Date(a.article.publishedAt).getTime());
-              const visible = matches.slice(0, 30).map((item) => item.article);
-
-              if (status) status.classList.remove('hidden');
-              if (count) {
-                count.textContent = matches.length === 1
-                  ? '1 matéria relacionada'
-                  : `${Math.min(matches.length, 30)} matérias relacionadas${matches.length > 30 ? ' · exibindo as 30 mais relevantes' : ''}`;
-              }
-
-              if (!visible.length) {
-                if (loading) loading.classList.add('hidden');
-                if (empty) empty.classList.remove('hidden');
-                return;
-              }
-
-              if (grid) grid.innerHTML = visible.map(renderCard).join('');
-              if (loading) loading.classList.add('hidden');
-              if (results) results.classList.remove('hidden');
-            })();
-          </script>
-
-          <div class="py-4 border-y border-zinc-100 dark:border-zinc-800">
-            <AdCard label="Publicidade" class="min-h-[120px] md:min-h-[160px] w-full" />
+          <div class="border-y border-black/10 py-4 dark:border-zinc-800">
+            <AdCard label="Publicidade" class="min-h-[120px] w-full md:min-h-[160px]" />
           </div>
         </div>
 
-        <aside class="lg:col-span-3 lg:pl-10 lg:border-l border-zinc-200 dark:border-zinc-800 transition-colors duration-300 relative h-full">
-          <div class="space-y-12 h-full flex flex-col">
-            <section class="space-y-8 flex-shrink-0">
-              <div class="flex items-center gap-3 mb-4 border-b-2 border-red-600 pb-3">
-                <Icon name="trending" class="w-5 h-5 text-red-600" />
-                <h3 class="uppercase text-xs font-black tracking-[0.2em] italic text-zinc-900 dark:text-zinc-50">
-                  MAIS ACESSADAS
-                </h3>
+        <aside class="relative h-full lg:col-span-4 xl:col-span-3">
+          <div class="space-y-8">
+            <section data-search-ranking-section class="rounded-[1.35rem] border border-black/10 bg-white/75 p-5 shadow-[0_22px_70px_rgba(16,16,16,0.05)] dark:border-zinc-800 dark:bg-zinc-900/70 md:p-6">
+              <div class="mb-5 border-b border-[#8A1F2D] pb-4">
+                <div class="flex items-center gap-2">
+                  <Icon name="trending" class="h-4 w-4 text-[#8A1F2D]" />
+                  <h3 data-search-ranking-title class="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-900 dark:text-zinc-50">
+                    Ranking da busca
+                  </h3>
+                </div>
+                <p data-search-ranking-subtitle class="mt-2 text-[11px] font-semibold leading-5 text-zinc-400">
+                  Mais vistas entre os resultados encontrados.
+                </p>
               </div>
-              <div class="space-y-8">
+              <div data-search-ranking class="space-y-4">
                 {mostRead.map((article, index) => <ArticleCard article={article} variant="side" index={index} />)}
+              </div>
+              <div data-search-ranking-empty class="hidden rounded-2xl bg-[#f5f3ee] p-5 text-sm font-bold leading-6 text-zinc-500 dark:bg-zinc-950 dark:text-zinc-400">
+                Nenhum item relacionado para ranquear nessa busca.
               </div>
             </section>
 
-            <div class="sticky top-28 transition-[top] duration-700 ease-in-out space-y-10 h-fit pb-10 z-10">
-              <div class="h-[500px] w-full shrink-0">
+            <section class="rounded-[1.35rem] border border-black/10 bg-white/60 p-5 dark:border-zinc-800 dark:bg-zinc-900/60">
+              <h3 class="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400">Buscas úteis</h3>
+              <div class="mt-4 flex flex-wrap gap-2">
+                {['Brasil', 'Famosos', 'Música', 'Neymar', 'Saúde', 'Tecnologia'].map((term) => (
+                  <a href={`/buscar?q=${encodeURIComponent(term)}`} class="rounded-full border border-black/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-[#8A1F2D]/30 hover:text-[#8A1F2D] dark:border-zinc-800">
+                    {term}
+                  </a>
+                ))}
+              </div>
+            </section>
+
+            <div class="sticky top-28 space-y-8 pb-10">
+              <div class="h-[420px] w-full">
                 <AdCard label="Publicidade Lateral" class="h-full w-full" />
               </div>
               <NewsletterBlock compact />
@@ -264,5 +183,153 @@ const canonical = new URL('/buscar', Astro.site ?? Astro.url.origin).href;
         </aside>
       </div>
     </main>
+
+    <script id="search-data" type="application/json" is:inline set:html={JSON.stringify(searchDocuments)}></script>
+    <script is:inline>
+      (() => {
+        const dataEl = document.getElementById('search-data');
+        if (!dataEl) return;
+
+        const articles = JSON.parse(dataEl.textContent || '[]');
+        const params = new URLSearchParams(window.location.search);
+        const query = (params.get('q') || '').trim();
+        const normalize = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+        const terms = normalize(query).split(/\s+/).filter(Boolean);
+        const title = document.querySelector('[data-search-title]');
+        const input = document.querySelector('[data-search-input]');
+        const status = document.querySelector('[data-search-status]');
+        const count = document.querySelector('[data-search-count]');
+        const results = document.querySelector('[data-search-results]');
+        const grid = document.querySelector('[data-search-grid]');
+        const empty = document.querySelector('[data-search-empty]');
+        const loading = document.querySelector('[data-search-loading]');
+        const ranking = document.querySelector('[data-search-ranking]');
+        const rankingTitle = document.querySelector('[data-search-ranking-title]');
+        const rankingSubtitle = document.querySelector('[data-search-ranking-subtitle]');
+        const rankingEmpty = document.querySelector('[data-search-ranking-empty]');
+        const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (char) => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+        })[char]);
+        const categoryLabel = (value) => ({
+          Politica: 'Política',
+          Saude: 'Saúde',
+          Musica: 'Música',
+          Educacao: 'Educação',
+          Ciencia: 'Ciência',
+          Ocorrencias: 'Ocorrências',
+        }[value] || value || '');
+        const formatDate = (value) => {
+          try {
+            return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date(value));
+          } catch {
+            return '';
+          }
+        };
+        const scoreArticle = (article) => terms.reduce((total, term) => {
+          let next = total;
+          const articleTitle = normalize(article.title);
+          const summary = normalize(article.summary);
+          const category = normalize([article.category, article.subcategory || ''].join(' '));
+          const author = normalize(article.author);
+          const tags = normalize((article.tags || []).join(' '));
+          if (articleTitle.includes(term)) next += 14;
+          if (summary.includes(term)) next += 7;
+          if (category.includes(term)) next += 5;
+          if (tags.includes(term)) next += 4;
+          if (author.includes(term)) next += 2;
+          if ((article.searchText || '').includes(term)) next += 1;
+          return next;
+        }, 0);
+        const viewCount = (article) => Number(article.views || 0);
+        const renderCard = (article) => `
+          <a href="/noticia/${encodeURIComponent(article.slug)}" class="group grid grid-cols-[112px_1fr] gap-4 rounded-[1.25rem] border border-black/10 bg-white/74 p-3 shadow-[0_14px_42px_rgba(16,16,16,0.04)] transition hover:-translate-y-0.5 hover:border-[#8A1F2D]/25 hover:shadow-[0_20px_60px_rgba(16,16,16,0.08)] dark:border-zinc-800 dark:bg-zinc-900/70 sm:grid-cols-[150px_1fr]">
+            <div class="aspect-[4/3] overflow-hidden rounded-2xl bg-[#ebe8df] dark:bg-zinc-800">
+              ${article.imageUrl ? `
+                <img src="${escapeHtml(article.imageUrl)}" class="h-full w-full object-cover transition-transform duration-[1.4s] group-hover:scale-105" alt="${escapeHtml(article.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
+              ` : '<div class="h-full w-full bg-zinc-100 dark:bg-zinc-800"></div>'}
+            </div>
+            <div class="min-w-0 py-1">
+              <div class="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[8px] font-black uppercase tracking-widest text-zinc-400">
+                <span>${escapeHtml(categoryLabel(article.category))}</span>
+                <span class="border-l border-black/10 pl-3 dark:border-zinc-800">${formatDate(article.publishedAt)}</span>
+                <span class="border-l border-black/10 pl-3 dark:border-zinc-800" data-live-view-count="${escapeHtml(article.slug)}">${viewCount(article)} views</span>
+              </div>
+              <h3 class="line-clamp-3 text-[1.18rem] font-sans font-black leading-[1.02] tracking-[-0.055em] text-zinc-950 transition group-hover:text-[#8A1F2D] dark:text-zinc-50 md:text-[1.35rem]">
+                ${escapeHtml(article.title)}
+              </h3>
+              <p class="mt-2 line-clamp-2 text-xs font-semibold leading-5 text-zinc-500 dark:text-zinc-400">
+                ${escapeHtml(article.summary)}
+              </p>
+            </div>
+          </a>
+        `;
+        const renderRankingItem = (article, index) => `
+          <a href="/noticia/${encodeURIComponent(article.slug)}" class="group flex gap-3 rounded-2xl p-2 transition hover:bg-[#f5f3ee] dark:hover:bg-zinc-950">
+            <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-950 text-[10px] font-black text-white dark:bg-zinc-50 dark:text-zinc-950">${index + 1}</div>
+            <div class="h-16 w-20 shrink-0 overflow-hidden rounded-2xl bg-[#ebe8df] dark:bg-zinc-800">
+              ${article.imageUrl ? `<img src="${escapeHtml(article.imageUrl)}" class="h-full w-full object-cover transition duration-700 group-hover:scale-105" alt="${escapeHtml(article.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />` : ''}
+            </div>
+            <div class="min-w-0 flex-1">
+              <span class="text-[8px] font-black uppercase tracking-widest text-[#8A1F2D]">${escapeHtml(categoryLabel(article.category))}</span>
+              <h4 class="mt-1 line-clamp-2 text-sm font-black leading-[1.08] tracking-[-0.045em] text-zinc-950 transition group-hover:text-[#8A1F2D] dark:text-zinc-50">
+                ${escapeHtml(article.title)}
+              </h4>
+              <div class="mt-1 text-[9px] font-black uppercase tracking-widest text-zinc-400" data-live-view-count="${escapeHtml(article.slug)}">
+                ${viewCount(article)} views
+              </div>
+            </div>
+          </a>
+        `;
+
+        if (input) input.value = query;
+
+        if (!query || !terms.length) {
+          if (rankingTitle) rankingTitle.textContent = 'Mais acessadas';
+          if (rankingSubtitle) rankingSubtitle.textContent = 'Ranking geral do portal.';
+          return;
+        }
+
+        if (title) title.textContent = `Resultados para "${query}"`;
+        if (loading) loading.classList.remove('hidden');
+
+        const matches = articles
+          .map((article) => ({ article, score: scoreArticle(article) }))
+          .filter((item) => item.score > 0)
+          .sort((a, b) => b.score - a.score || new Date(b.article.publishedAt).getTime() - new Date(a.article.publishedAt).getTime());
+        const visible = matches.slice(0, 30).map((item) => item.article);
+        const ranked = [...matches]
+          .sort((a, b) => viewCount(b.article) - viewCount(a.article) || b.score - a.score || new Date(b.article.publishedAt).getTime() - new Date(a.article.publishedAt).getTime())
+          .slice(0, 5)
+          .map((item) => item.article);
+
+        if (status) status.classList.remove('hidden');
+        if (count) {
+          count.textContent = matches.length === 1
+            ? '1 matéria relacionada'
+            : `${Math.min(matches.length, 30)} matérias relacionadas${matches.length > 30 ? ' · exibindo as 30 mais relevantes' : ''}`;
+        }
+        if (rankingTitle) rankingTitle.textContent = 'Ranking da busca';
+        if (rankingSubtitle) rankingSubtitle.textContent = `Mais vistas relacionadas a "${query}".`;
+
+        if (!visible.length) {
+          if (loading) loading.classList.add('hidden');
+          if (empty) empty.classList.remove('hidden');
+          if (ranking) ranking.innerHTML = '';
+          if (rankingEmpty) rankingEmpty.classList.remove('hidden');
+          return;
+        }
+
+        if (grid) grid.innerHTML = visible.map(renderCard).join('');
+        if (ranking) ranking.innerHTML = ranked.map(renderRankingItem).join('');
+        if (rankingEmpty) rankingEmpty.classList.toggle('hidden', ranked.length > 0);
+        if (loading) loading.classList.add('hidden');
+        if (results) results.classList.remove('hidden');
+        if (window.__novoAlvoHydrateViews) void window.__novoAlvoHydrateViews(document);
+      })();
+    </script>
   </div>
 </BaseLayout>
