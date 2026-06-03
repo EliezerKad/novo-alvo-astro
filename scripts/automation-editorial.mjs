@@ -394,11 +394,18 @@ const buildRecentCategoryCounts = async () => {
 
 const listQueued = () =>
   d1(
-    `SELECT q.id, q.pitch_id, q.status, q.category, q.publish_after, p.title, p.score, p.source_count
-     FROM editorial_queue q
-     LEFT JOIN editorial_pitches p ON p.id = q.pitch_id
-     WHERE q.status = 'queued'
-     ORDER BY q.publish_after ASC`,
+    `SELECT editorial_queue.id,
+            editorial_queue.pitch_id,
+            editorial_queue.status,
+            editorial_queue.category,
+            editorial_queue.publish_after,
+            editorial_pitches.title,
+            editorial_pitches.score,
+            editorial_pitches.source_count
+     FROM editorial_queue
+     LEFT JOIN editorial_pitches ON editorial_pitches.id = editorial_queue.pitch_id
+     WHERE editorial_queue.status = 'queued'
+     ORDER BY editorial_queue.publish_after ASC`,
   );
 
 const listNewPitchesFromD1 = () =>
