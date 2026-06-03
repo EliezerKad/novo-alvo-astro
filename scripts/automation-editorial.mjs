@@ -284,12 +284,12 @@ const d1 = (command) => {
     WRANGLER_SEND_METRICS: process.env.WRANGLER_SEND_METRICS || 'false',
   };
   const normalizedCommand = command.replace(/\s+/g, ' ').trim();
-  const executable = wranglerCommand || npmCommand;
-  const args = wranglerCommand
-    ? ['d1', 'execute', D1_DATABASE, '--remote', '--json', '--command', normalizedCommand]
-    : ['exec', 'wrangler', '--', 'd1', 'execute', D1_DATABASE, '--remote', '--json', '--command', normalizedCommand];
-  const output =
-    process.platform === 'win32'
+  const executeD1 = () => {
+    const executable = wranglerCommand || npmCommand;
+    const args = wranglerCommand
+      ? ['d1', 'execute', D1_DATABASE, '--remote', '--json', '--command', normalizedCommand]
+      : ['exec', 'wrangler', '--', 'd1', 'execute', D1_DATABASE, '--remote', '--json', '--command', normalizedCommand];
+    return process.platform === 'win32'
       ? (() => {
           const ps1Path = resolve(tmpDir, `automation-editorial-${Date.now()}-${Math.random().toString(36).slice(2)}.ps1`);
           const escapedExecutable = executable.replace(/'/g, "''");
@@ -314,11 +314,25 @@ const d1 = (command) => {
           env,
           timeout: D1_TIMEOUT_MS,
         });
-  const jsonStart = output.indexOf('[');
-  const jsonText = jsonStart >= 0 ? output.slice(jsonStart) : output;
-  const parsed = JSON.parse(jsonText);
-  const chunks = Array.isArray(parsed) ? parsed : [parsed];
-  return chunks.flatMap((chunk) => chunk?.results || []);
+  };
+
+  let lastError;
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      const output = executeD1();
+      const jsonStart = Math.max(output.indexOf('['), output.indexOf('{'));
+      const jsonText = jsonStart >= 0 ? output.slice(jsonStart) : output;
+      const parsed = JSON.parse(jsonText);
+      const chunks = Array.isArray(parsed) ? parsed : [parsed];
+      const apiError = chunks.find((chunk) => chunk?.error);
+      if (apiError) throw new Error(apiError.error?.text || 'wrangler d1 retornou erro');
+      return chunks.flatMap((chunk) => chunk?.results || []);
+    } catch (error) {
+      lastError = error;
+      if (attempt >= 2) break;
+    }
+  }
+  throw lastError;
 };
 
 const sourcePublishers = (pitch) => {
@@ -376,9 +390,9 @@ const buildRecentCategoryCounts = async () => {
 
 const listQueued = () =>
   d1(
-    `SELECT q.id, q.status, q.category, q.publish_after, p.title, p.score, p.source_count
+    `SELECT q.id, q.pitch_id, q.status, q.category, q.publish_after, p.title, p.score, p.source_count
      FROM editorial_queue q
-     JOIN editorial_pitches p ON p.id = q.pitch_id
+     LEFT JOIN editorial_pitches p ON p.id = q.pitch_id
      WHERE q.status = 'queued'
      ORDER BY q.publish_after ASC`,
   );
