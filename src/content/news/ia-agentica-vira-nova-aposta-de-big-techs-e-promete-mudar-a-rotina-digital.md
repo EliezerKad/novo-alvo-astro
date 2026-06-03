@@ -6,19 +6,19 @@ seoDescription: "Tecnologia: Google, OpenAI, Microsoft e Meta aceleram ferrament
 category: "Tecnologia"
 author: "Redação Novo Alvo"
 sources: ["The Verge", "TechCrunch", "MIT Technology Review", "Wired", "Google", "Microsoft", "OpenAI", "Meta"]
-publishedAt: "2026-06-03T00:51:00.353Z"
-updatedAt: "2026-06-03T00:51:00.776Z"
+publishedAt: "2026-06-03T00:51:03.524Z"
+updatedAt: "2026-06-03T00:51:03.671Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/ia-agentica-vira-nova-aposta-de-big-techs-e-promete-mudar-a-rotina-digital-cover-20260603005100.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/ia-agentica-vira-nova-aposta-de-big-techs-e-promete-mudar-a-rotina-digital-cover-20260603005103.avif"
   alt: "Foto de Aerps.com na Unsplash"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/ia-agentica-vira-nova-aposta-de-big-techs-e-promete-mudar-a-rotina-digital-cover-20260603005100.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/ia-agentica-vira-nova-aposta-de-big-techs-e-promete-mudar-a-rotina-digital-cover-20260603005103.avif"
 tags: ["tecnologia", "inteligencia-artificial", "openai", "google", "microsoft", "meta"]
 ---
 
