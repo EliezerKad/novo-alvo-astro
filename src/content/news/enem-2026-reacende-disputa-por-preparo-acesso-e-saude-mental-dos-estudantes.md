@@ -6,19 +6,19 @@ seoDescription: "Educacao: Com inscrições e calendário no radar, exame volta 
 category: "Educacao"
 author: "Redação Novo Alvo"
 sources: ["MEC", "Inep", "Agência Brasil", "G1", "UOL Educação", "CNN Brasil", "Todos Pela Educação", "Correio Braziliense"]
-publishedAt: "2026-06-03T00:48:00.669Z"
-updatedAt: "2026-06-03T00:48:01.129Z"
+publishedAt: "2026-06-03T00:48:03.260Z"
+updatedAt: "2026-06-03T00:48:03.301Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/enem-2026-reacende-disputa-por-preparo-acesso-e-saude-mental-dos-estudantes-cover-20260603004801.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/enem-2026-reacende-disputa-por-preparo-acesso-e-saude-mental-dos-estudantes-cover-20260603004803.avif"
   alt: "Foto de Feliphe Schiarolli na Unsplash"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/enem-2026-reacende-disputa-por-preparo-acesso-e-saude-mental-dos-estudantes-cover-20260603004801.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/enem-2026-reacende-disputa-por-preparo-acesso-e-saude-mental-dos-estudantes-cover-20260603004803.avif"
 tags: ["educacao", "enem", "ensino-medio", "estudantes", "saude-mental"]
 ---
 
