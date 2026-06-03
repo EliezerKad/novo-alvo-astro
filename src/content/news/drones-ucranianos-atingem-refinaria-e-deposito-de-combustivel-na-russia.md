@@ -2,29 +2,29 @@
 title: "Drones ucranianos atacam refinaria e depósito de combustível na Rússia"
 slug: "drones-ucranianos-atingem-refinaria-e-deposito-de-combustivel-na-russia"
 summary: "Ataques com drones ucranianos atingiram uma refinaria de petróleo e um depósito de combustível na Rússia, em uma nova escalada da guerra que busca atingir a infraestrutura energética do país."
-seoDescription: "Ataques com drones ucranianos atingiram uma refinaria de petróleo e um depósito de combustível na Rússia, em uma nova escalada da guerra que busca atingir"
+seoDescription: "Mundo: Ataques com drones ucranianos atingiram uma refinaria de petróleo e um depósito de combustível na Rússia, em uma nova escalada da guerra que busca…"
 category: "Mundo"
 author: "Redação Novo Alvo"
 sources: ["CNN Brasil", "O Globo", "Terra", "Gazeta do Povo", "DW", "GZH", "Estado de Minas", "Jovem Pan"]
 publishedAt: "2026-06-03T20:04:08.113Z"
-updatedAt: "2026-06-03T20:04:20.606Z"
+updatedAt: "2026-06-03T20:28:09.408Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://source.unsplash.com/1600x900/?drones%2Cucranianos%2Catingem%2Crefinaria%2Cdeposito%2Ccombustivel%2Cworld%2Ccity%2Cgeopolitics"
-  alt: "Representação visual de drones sobrevoando uma área industrial com fumaça."
-  caption: "Unsplash"
+  src: "https://portalnovoalvo.com.br/media/news/drones-ucranianos-atingem-refinaria-e-deposito-de-combustivel-na-russia-cover-20260603202809.webp"
+  alt: "(Créditos: GETTY IMAGES)"
+  caption: "Credito: Unsplash"
   layout: "full"
-ogImage: "https://source.unsplash.com/1600x900/?drones%2Cucranianos%2Catingem%2Crefinaria%2Cdeposito%2Ccombustivel%2Cworld%2Ccity%2Cgeopolitics"
+ogImage: "https://portalnovoalvo.com.br/media/news/drones-ucranianos-atingem-refinaria-e-deposito-de-combustivel-na-russia-cover-20260603202809.webp"
 tags: ["mundo", "drones", "ucranianos", "atingem", "refinaria", "deposito", "combustivel", "russia"]
 ---
 
 <p>Drones ucranianos realizaram uma nova onda de ataques contra o território russo entre a noite de sábado (30) e a madrugada deste domingo (31), atingindo uma refinaria de petróleo, um depósito de combustível e uma estação de bombeamento de oleoduto, segundo autoridades russas e ucranianas.</p><p>A ofensiva faz parte das estratégias ucranianas para atingir a infraestrutura energética da Rússia, inclusive em áreas distantes da linha de frente da guerra.</p>
 <h2>Refinaria de Saratov atingida</h2>
-<p>De acordo com o &quot;Estado-Maior das Forças Armadas da Ucrânia&quot;, a refinaria de petróleo de Saratov, situada às margens do rio Volga, foi atingida durante a operação, provocando um grande incêndio.</p><p>O governador da região, Roman Busargin, afirmou que houve danos à “infraestrutura civil”, sem detalhar quais estruturas foram afetadas.</p>
+<p>De acordo com o "Estado-Maior das Forças Armadas da Ucrânia", a refinaria de petróleo de Saratov, situada às margens do rio Volga, foi atingida durante a operação, provocando um grande incêndio.</p><p>O governador da região, Roman Busargin, afirmou que houve danos à “infraestrutura civil”, sem detalhar quais estruturas foram afetadas.</p>
 <h2>Ataques em múltiplas regiões</h2>
 <p>Os ataques ocorreram em diversas regiões da Rússia, visando alvos estratégicos e a infraestrutura de energia do país.</p><p>A campanha crescente de ataques contra a infraestrutura energética tem se intensificado, com alvos localizados a centenas de quilômetros dentro do território russo.</p>
 <h2>Contexto da guerra</h2>
