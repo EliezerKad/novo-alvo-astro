@@ -6,8 +6,8 @@ seoDescription: "Jade Picon, Maisa e Giovanna Lancellotti ajudam a recolocar o b
 category: "Moda"
 author: "Redacao Novo Alvo"
 sources: ["Vogue Brasil", "Quem", "Gshow", "CNN Brasil", "UOL Splash", "Marie Claire Brasil", "Elle Brasil", "L'Officiel Brasil"]
-publishedAt: "2026-06-03T00:48:00.673Z"
-updatedAt: "2026-06-03T00:48:02.462Z"
+publishedAt: "2026-06-03T00:48:03.260Z"
+updatedAt: "2026-06-03T00:48:05.305Z"
 featured: false
 isFeatured: false
 urgent: false
