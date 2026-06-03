@@ -66,6 +66,7 @@ const fetchWithTimeout = async (url, options = {}) => {
 
 const isNetworkError = (error) =>
   error?.name === 'AbortError' ||
+  String(error?.message || '').includes('timeout apos') ||
   String(error?.message || '').includes('fetch failed') ||
   String(error?.cause?.code || '').includes('EACCES');
 
@@ -321,7 +322,10 @@ const d1 = (command) => {
     try {
       const output = executeD1();
       const jsonStart = Math.max(output.indexOf('['), output.indexOf('{'));
-      const jsonText = jsonStart >= 0 ? output.slice(jsonStart) : output;
+      const jsonLead = jsonStart >= 0 ? output.slice(jsonStart) : output;
+      const jsonEnd =
+        jsonLead.trimStart().startsWith('[') ? jsonLead.lastIndexOf(']') + 1 : jsonLead.lastIndexOf('}') + 1;
+      const jsonText = jsonEnd > 0 ? jsonLead.slice(0, jsonEnd) : jsonLead;
       const parsed = JSON.parse(jsonText);
       const chunks = Array.isArray(parsed) ? parsed : [parsed];
       const apiError = chunks.find((chunk) => chunk?.error);
