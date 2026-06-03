@@ -2,12 +2,12 @@
 title: "Anvisa determina recolhimento de lote de água Crystal por bactéria"
 slug: "anvisa-manda-recolher-lote-de-agua-crystal-com-bacteria"
 summary: "Agência Nacional de Vigilância Sanitária identifica contaminação em água mineral da marca Crystal e ordena retirada de lote específico do mercado."
-seoDescription: "Saude: Agência Nacional de Vigilância Sanitária identifica contaminação em água mineral da marca Crystal e ordena retirada de lote específico do mercado."
-category: "Saude"
+seoDescription: "Ocorrencias: Agência Nacional de Vigilância Sanitária identifica contaminação em água mineral da marca Crystal e ordena retirada de lote específico do…"
+category: "Ocorrencias"
 author: "Redação Novo Alvo"
 sources: ["Guararema News", "SCC10", "Metro 1", "Gazeta Brasil", "Campo Grande News", "Jornal da Comarca", "Tribuna do Paraná", "Notícias ao Minuto Brasil", "Estadão", "JOTA", "Seu Dinheiro", "Blog do Ricardo Antunes", "VEJA", "CNN Brasil"]
 publishedAt: "2026-06-03T16:04:10.748Z"
-updatedAt: "2026-06-03T16:04:11.162Z"
+updatedAt: "2026-06-03T16:07:42.201Z"
 featured: false
 isFeatured: false
 urgent: false
