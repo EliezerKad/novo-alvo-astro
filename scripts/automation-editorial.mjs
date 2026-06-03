@@ -321,7 +321,8 @@ const d1 = (command) => {
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     try {
       const output = executeD1();
-      const jsonStart = Math.max(output.indexOf('['), output.indexOf('{'));
+      const jsonStartCandidates = [output.indexOf('['), output.indexOf('{')].filter((index) => index >= 0);
+      const jsonStart = jsonStartCandidates.length ? Math.min(...jsonStartCandidates) : -1;
       const jsonLead = jsonStart >= 0 ? output.slice(jsonStart) : output;
       const jsonEnd =
         jsonLead.trimStart().startsWith('[') ? jsonLead.lastIndexOf(']') + 1 : jsonLead.lastIndexOf('}') + 1;
