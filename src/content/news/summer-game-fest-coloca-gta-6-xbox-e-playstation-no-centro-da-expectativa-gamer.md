@@ -6,8 +6,8 @@ seoDescription: "Games: Semana de anúncios reacende apostas sobre trailers, dat
 category: "Games"
 author: "Redação Novo Alvo"
 sources: ["The Game Awards", "IGN Brasil", "MeuPlayStation", "Adrenaline", "VGC", "The Verge", "Polygon", "Eurogamer"]
-publishedAt: "2026-06-03T00:49:34.803Z"
-updatedAt: "2026-06-03T00:49:35.220Z"
+publishedAt: "2026-06-03T00:49:37.560Z"
+updatedAt: "2026-06-03T00:49:37.703Z"
 featured: false
 isFeatured: false
 urgent: false
