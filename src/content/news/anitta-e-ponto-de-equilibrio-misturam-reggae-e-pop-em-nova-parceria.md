@@ -2,13 +2,13 @@
 title: "Anitta e Ponto de Equilíbrio misturam reggae e pop em nova parceria"
 slug: "anitta-e-ponto-de-equilibrio-misturam-reggae-e-pop-em-nova-parceria"
 summary: "A união de Anitta com o Ponto de Equilíbrio aproxima pop, reggae e memória afetiva brasileira em uma estratégia que mira rádio, streaming e redes sociais."
-seoDescription: "A união de Anitta com o Ponto de Equilíbrio aproxima pop, reggae e memória afetiva brasileira em uma estratégia que mira rádio, streaming e redes sociais."
+seoDescription: "Musica: A união de Anitta com o Ponto de Equilíbrio aproxima pop, reggae e memória afetiva brasileira em uma estratégia que mira rádio, streaming e redes…"
 category: "Musica"
 author: "Redação Novo Alvo"
 sources: ["POPline", "Rolling Stone Brasil", "Billboard Brasil", "Tenho Mais Discos Que Amigos", "Quem", "CNN Brasil", "Gshow"]
 publishedAt: "2026-06-04T22:34:10.593Z"
-updatedAt: "2026-06-04T22:34:10.808Z"
-featured: false
+updatedAt: "2026-06-04T23:39:26.484Z"
+featured: true
 isFeatured: false
 urgent: false
 homeSection: ""
