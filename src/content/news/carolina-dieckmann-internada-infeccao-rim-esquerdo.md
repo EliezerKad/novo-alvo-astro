@@ -1,8 +1,8 @@
 ---
-title: "Carolina Dieckmmann revela internação por infecção no rim"
-slug: "carolina-dieckmmann-internada-infeccao-rim-esquerdo"
+title: "Carolina Dieckmann revela internação por infecção no rim"
+slug: "carolina-dieckmann-internada-infeccao-rim-esquerdo"
 summary: "Atriz contou que está internada há quatro dias para tratar infecção avançada no rim esquerdo e recebeu mensagens de apoio de famosos."
-seoDescription: "Carolina Dieckmmann revelou internação por infecção avançada no rim esquerdo e recebeu apoio de famosos nas redes sociais."
+seoDescription: "Carolina Dieckmann revelou internação por infecção avançada no rim esquerdo e recebeu apoio de famosos nas redes sociais."
 category: "Famosos"
 author: "Redação Novo Alvo"
 sources: ["Alô Alô Bahia", "Rádio Itatiaia", "Instagram"]
@@ -14,15 +14,15 @@ urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/carolina-dieckmmann-internada-infeccao-rim-esquerdo-cover-20260603193101.webp"
-  alt: "Carolina Dieckmmann em registro publicado nas redes sociais"
+  src: "https://portalnovoalvo.com.br/media/news/carolina-dieckmann-internada-infeccao-rim-esquerdo-cover-20260603193101.webp"
+  alt: "Carolina Dieckmann em registro publicado nas redes sociais"
   caption: "Reprodução/Instagram"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/carolina-dieckmmann-internada-infeccao-rim-esquerdo-cover-20260603193101.webp"
-tags: ["Carolina Dieckmmann", "Famosos", "Instagram", "Vale Tudo", "Saúde"]
+ogImage: "https://portalnovoalvo.com.br/media/news/carolina-dieckmann-internada-infeccao-rim-esquerdo-cover-20260603193101.webp"
+tags: ["Carolina Dieckmann", "Famosos", "Instagram", "Vale Tudo", "Saúde"]
 ---
 
-<p>Carolina Dieckmmann revelou nesta quarta-feira, 3 de junho de 2026, que está internada há quatro dias para tratar uma infecção avançada no rim esquerdo. A atriz compartilhou o relato nas redes sociais e explicou que precisou iniciar tratamento com antibiótico na veia.</p>
+<p>Carolina Dieckmann revelou nesta quarta-feira, 3 de junho de 2026, que está internada há quatro dias para tratar uma infecção avançada no rim esquerdo. A atriz compartilhou o relato nas redes sociais e explicou que precisou iniciar tratamento com antibiótico na veia.</p>
 <p>Segundo informações publicadas por Alô Alô Bahia e Rádio Itatiaia, Carolina contou que descobriu o quadro pouco antes de embarcar para uma viagem longa, rumo a um destino remoto. A decisão de procurar atendimento antes de viajar, de acordo com o relato dela, evitou que a situação se agravasse longe de assistência médica.</p>
 <h2>O que Carolina contou</h2>
 <p>No vídeo publicado no Instagram, a atriz disse que descobriu uma infecção no rim esquerdo que já estava avançada. Ela afirmou que segue internada para receber medicação intravenosa e que ainda não tinha previsão de alta naquele momento.</p>

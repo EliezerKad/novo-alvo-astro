@@ -4,7 +4,7 @@ slug: "entre-telas-e-ansiedade-saude-mental-vira-criterio-de-qualidade-de-vida"
 summary: "O debate sobre bem-estar deixou de ser nicho e entrou na rotina de quem tenta equilibrar trabalho, redes, família, sono e excesso de informação."
 seoDescription: "O debate sobre bem-estar deixou de ser nicho e entrou na rotina de quem tenta equilibrar trabalho, redes, família, sono e excesso de informação."
 category: "Lifestyle"
-author: "Redacao Novo Alvo"
+author: "Reda��o Novo Alvo"
 sources: ["Organização Mundial da Saúde", "OPAS", "Ministério da Saúde", "Cetic.br", "NIC.br", "Sociedade Brasileira de Psicologia", "Unicef"]
 publishedAt: "2026-05-27T23:38:23.382Z"
 updatedAt: "2026-05-27T23:38:26.398Z"
@@ -31,7 +31,7 @@ tags: ["lifestyle", "saude mental", "bem-estar", "telas", "rotina"]
 <p>Esse movimento também explica o interesse por comunidades menores, newsletters, clubes de leitura, grupos de caminhada, terapia, esporte e práticas de atenção. Depois de anos de feed infinito, muita gente passou a valorizar ambientes com contexto, curadoria e pausa.</p>
 <p>Há uma dimensão social nisso. Nem todo mundo pode simplesmente desligar. Pessoas em trabalhos precarizados, cuidadores, estudantes em pressão de vestibular e profissionais conectados por obrigação precisam de soluções coletivas, não apenas conselhos individuais.</p>
 <h2>Qualidade de vida é política também</h2>
-<p>Falar de sono, ansiedade e excesso de tela não é fugir da notícia dura. É reconhecer que as condições de vida moldam a forma como as pessoas participam da sociedade. Quem vive exausto lê pior, decide pior, se informa pior e se protege menos.</p>
+<p>Falar de sono, ansiedade e excesso de tela não é fugir da notícia dura. �0 reconhecer que as condições de vida moldam a forma como as pessoas participam da sociedade. Quem vive exausto lê pior, decide pior, se informa pior e se protege menos.</p>
 <p>Por isso, o tema aproxima saúde, trabalho, educação e cultura. Uma cidade com espaços públicos, transporte decente, segurança, lazer acessível e informação confiável produz mais bem-estar do que qualquer lista de hábitos perfeitos.</p>
 <p>O novo luxo cotidiano talvez seja simples: ter tempo de pensar, relações que não dependam de performance e um ambiente informacional que ajude a entender o mundo em vez de apenas assustar.</p>
 <h2>O que acompanhar a partir daqui</h2>

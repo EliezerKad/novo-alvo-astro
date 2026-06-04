@@ -4,7 +4,7 @@ slug: "volei-brasileiro-inicia-novo-ciclo-sob-pressao-por-resultado-e-renovacao"
 summary: "Entre Liga das Nações, renovação de elenco e expectativa olímpica, a seleção volta à quadra tentando equilibrar tradição e futuro."
 seoDescription: "Entre Liga das Nações, renovação de elenco e expectativa olímpica, a seleção volta à quadra tentando equilibrar tradição e futuro."
 category: "Esportes"
-author: "Redacao Novo Alvo"
+author: "Reda��o Novo Alvo"
 sources: ["CBV", "Volleyball World", "Comitê Olímpico do Brasil", "ge", "UOL Esporte", "ESPN Brasil", "Agência Brasil"]
 publishedAt: "2026-05-28T21:04:26.385Z"
 updatedAt: "2026-05-28T21:04:29.262Z"

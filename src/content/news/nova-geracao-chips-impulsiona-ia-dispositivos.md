@@ -5,7 +5,7 @@ summary: "Fabricantes apostam em processamento local para reduzir latencia e amp
 seoDescription: "Nova geracao de chips acelera inteligencia artificial em dispositivos pessoais com processamento local."
 category: "Tecnologia"
 subcategory: "Ciencia"
-author: "Redacao Novo Alvo"
+author: "Redação Novo Alvo"
 sources:
   - "Fabricantes de semicondutores"
   - "Analistas de tecnologia"

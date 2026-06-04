@@ -28,7 +28,7 @@ const { compact = false, class: className = '' } = Astro.props;
 
     <div class="hidden rounded-[1.15rem] border border-emerald-300/25 bg-emerald-400/10 p-4 text-sm font-bold leading-6 text-emerald-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]" data-newsletter-confirmation>
       <span class="block text-[9px] font-black uppercase tracking-[0.22em] text-emerald-200">Inscricao confirmada</span>
-      <span class="mt-1 block" data-newsletter-confirmation-message>Voce esta na lista. Enviamos uma mensagem de boas-vindas.</span>
+      <span class="mt-1 block" data-newsletter-confirmation-message>Você está na lista. Enviamos uma mensagem de boas-vindas.</span>
     </div>
 
     <form class="relative" data-newsletter-form>
@@ -85,8 +85,8 @@ const { compact = false, class: className = '' } = Astro.props;
           confirmation.classList.remove('hidden');
           if (confirmationMessage) {
             confirmationMessage.textContent = data.emailSent
-              ? 'Voce esta na lista. Enviamos uma mensagem de boas-vindas para seu e-mail.'
-              : 'Voce esta na lista. A mensagem de boas-vindas sera enviada em breve.';
+              ? 'Você está na lista. Enviamos uma mensagem de boas-vindas para seu e-mail.'
+              : 'Você está na lista. A mensagem de boas-vindas será enviada em breve.';
           }
         }
       } catch (error) {

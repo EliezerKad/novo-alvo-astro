@@ -4,7 +4,7 @@ slug: "ensino-medio-volta-ao-centro-da-cobranca-por-proposito-trabalho-e-tecnolo
 summary: "A escola que recebe adolescentes conectados precisa responder a perguntas práticas sobre futuro sem abandonar formação crítica."
 seoDescription: "A escola que recebe adolescentes conectados precisa responder a perguntas práticas sobre futuro sem abandonar formação crítica."
 category: "Educacao"
-author: "Redacao Novo Alvo"
+author: "Reda��o Novo Alvo"
 sources: ["Ministério da Educação", "Inep", "Todos Pela Educação", "Unesco", "Cetic.br", "Agência Brasil", "Conselho Nacional de Educação"]
 publishedAt: "2026-05-29T05:03:53.238Z"
 updatedAt: "2026-05-29T05:03:55.458Z"
@@ -24,7 +24,7 @@ tags: ["educacao", "ensino medio", "juventude", "tecnologia", "trabalho"]
 
 <h2>A pergunta mudou</h2>
 <p>O ensino médio voltou ao centro do debate porque a pergunta dos estudantes mudou. Não basta mais dizer que a escola prepara para o futuro. O adolescente quer entender que futuro é esse, como chega lá e por que precisa aprender conteúdos que parecem distantes da vida real.</p>
-<p>Essa cobrança não é falta de interesse. É sinal de uma geração que vê trabalho, tecnologia, renda e crise climática atravessando o cotidiano desde cedo. A escola precisa responder com repertório, não apenas com promessa.</p>
+<p>Essa cobrança não é falta de interesse. �0 sinal de uma geração que vê trabalho, tecnologia, renda e crise climática atravessando o cotidiano desde cedo. A escola precisa responder com repertório, não apenas com promessa.</p>
 <p>O desafio é aproximar currículo, projeto de vida, ciência, cultura digital e formação profissional sem reduzir educação a treinamento para mercado.</p>
 <h2>Tecnologia não resolve sozinha</h2>
 <p>Ferramentas digitais podem ajudar, mas não substituem vínculo, leitura, escrita e presença docente. A escola conectada precisa ensinar a pensar com tecnologia e também a desconfiar dela quando necessário.</p>

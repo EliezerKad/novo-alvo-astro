@@ -755,8 +755,8 @@ const factSignalsFrom = (value: string) => {
     ...text.matchAll(/\b(?:segunda|ter[cç]a|quarta|quinta|sexta|s[aá]bado|domingo)\s*\(\d{1,2}\)|\b\d{1,2}\s+de\s+[a-zç]+|\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/gi),
   ].map((match) => match[0]);
   const largeValues = [
-    ...text.matchAll(/\b\d[\d.,]*\s*(?:bilh[oÃµ]es|milh[oÃµ]es|trilh[oÃµ]es)\s+de\s+(?:d[oÃó]lares|euros|reais|yuan|rublos)\b/gi),
-    ...text.matchAll(/(?:R\$|US\$|€)\s?\d[\d.,]*(?:\s?(?:mil|milh[oÃµ]es|bilh[oÃµ]es|trilh[oÃµ]es))?/gi),
+    ...text.matchAll(/\b\d[\d.,]*\s*(?:bilh[oõ]es|milh[oõ]es|trilh[oõ]es)\s+de\s+(?:d[oó]lares|euros|reais|yuan|rublos)\b/gi),
+    ...text.matchAll(/(?:R\$|US\$|€)\s?\d[\d.,]*(?:\s?(?:mil|milh[oõ]es|bilh[oõ]es|trilh[oõ]es))?/gi),
   ].map((match) => match[0]);
   const years = [...text.matchAll(/\b20\d{2}\b/g)].map((match) => match[0]);
   const names = [
@@ -818,12 +818,12 @@ const requiredNamesFromSources = (sources: unknown[], row: QueueRow) => {
   const scored = new Map<string, { name: string; score: number }>();
   const stop = /^(Policia Civil|Rio de Janeiro|Zona Sul|Ipanema|Vinicius de Moraes|Visconde de Piraja|Jornal de Brasilia|Portal Novo Alvo|Leia Tambem)$/i;
   const nameNoise =
-    /^(?:VIP|Atriz|Ator|Artista|Serie|S[eÃ©]rie|Elenco|Filme|Cinema|Famosos|Personagem|Temporada|Saiba|Veja|Entenda)\b|\b(?:de|da|do|das|dos|e|em|para|por|com|sobre|VIP|Atriz|Ator|Artista|Serie|S[eÃ©]rie|Elenco|Filme|Cinema|Famosos|Personagem|Temporada)$/i;
+    /^(?:VIP|Atriz|Ator|Artista|Serie|S[eé]rie|Elenco|Filme|Cinema|Famosos|Personagem|Temporada|Saiba|Veja|Entenda)\b|\b(?:de|da|do|das|dos|e|em|para|por|com|sobre|VIP|Atriz|Ator|Artista|Serie|S[eé]rie|Elenco|Filme|Cinema|Famosos|Personagem|Temporada)$/i;
   const meaningfulNameParts = (value: string) =>
     value
       .split(/\s+/)
-      .filter((part) => /^[A-ZÃÃ€Ã‚ÃƒÃ‰ÃˆÃŠÃÃÃ“Ã”Ã•Ã–ÃšÃ‡][A-Za-zÃÃ€Ã‚ÃƒÃ‰ÃˆÃŠÃÃÃ“Ã”Ã•Ã–ÃšÃ‡Ã¡Ã Ã¢Ã£Ã©Ã¨ÃªÃ­Ã¯Ã³Ã´ÃµÃ¶ÃºÃ§]{2,}$/.test(part))
-      .filter((part) => !/^(?:VIP|Atriz|Ator|Artista|Serie|S[eÃ©]rie|Elenco|Filme|Cinema|Famosos|Personagem|Temporada|Saiba|Veja|Entenda)$/i.test(part));
+      .filter((part) => /^[A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇ][A-Za-zÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇáàâãéèêíïóôõöúç]{2,}$/.test(part))
+      .filter((part) => !/^(?:VIP|Atriz|Ator|Artista|Serie|S[eé]rie|Elenco|Filme|Cinema|Famosos|Personagem|Temporada|Saiba|Veja|Entenda)$/i.test(part));
   for (const match of matches) {
     const name = plain(match[0], 120).replace(/\s+/g, ' ').trim();
     const key = normalizeForPresence(name);
@@ -1413,7 +1413,7 @@ MICRO-PERSONAS DE ELITE:
   4. Scouting Neural: talentos subvalorizados, rastro tatico e probabilidade.
 - TECNOLOGIA:
   1. Infraestrutura e IA: latencia, dados, chips, data centers e soberania de hardware.
-  2. Seguranca Cibernetica: vulnerabilidades, incidentes, Zero-Day e resposta de rede.
+  2. Segurança Cibernética: vulnerabilidades, incidentes, Zero-Day e resposta de rede.
   3. Economia Digital: M&A, rodadas de investimento e dominacao de mercado.
   4. Consumo e Gadgets: utilidade real, specs e revisao imparcial sem hype.
 - ECONOMIA:
@@ -1864,7 +1864,7 @@ const buildArticlePayloadFromDraft = async (db: D1Database, row: QueueRow) => {
     summary: clean(draft.summary, 700),
     bodyHtml: clean(draft.body_html, 250000),
     category: clean(draft.category, 80) || row.category || 'Brasil',
-    author: clean(draft.author, 120) || 'Redacao Novo Alvo',
+    author: clean(draft.author, 120) || 'Redação Novo Alvo',
     status: 'published',
     coverUrl: clean(draft.cover_url, 1200),
     coverAlt: clean(draft.cover_alt, 240) || clean(draft.title, 220),

@@ -1,11 +1,11 @@
 ---
 title: "Sociedade Brasileira de Mastologia (SBM) e os desafios das fake-news"
 slug: "sociedade-brasileira-de-mastologia-sbm-e-os-desafios-das-fake-news"
-summary: "A Sociedade Brasileira de Mastologia (SBM) intensifica suas ações de combate à desinformação sobre câncer de mama, diante de um aumento de 70% nos casos de notícias falsas."
-seoDescription: "Brasil: A Sociedade Brasileira de Mastologia (SBM) intensifica suas ações de combate à desinformação sobre câncer de mama, diante de um aumento de 70% nos…"
+summary: "A Sociedade Brasileira de Mastologia (SBM) intensifica suas a��es de combate � desinforma��o sobre c�ncer de mama, diante de um aumento de 70% nos casos de not�cias falsas."
+seoDescription: "Brasil: A Sociedade Brasileira de Mastologia (SBM) intensifica suas a��es de combate � desinforma��o sobre c�ncer de mama, diante de um aumento de 70% nos&"
 category: "Brasil"
-author: "Redação Novo Alvo"
-sources: ["CartaCapital", "o progresso", "Estadão", "Francês News", "A Hora do Sul", "ABC Repórter", "Âncora 1", "radiomaringa.com.br", "MidiaNews", "O NORTÃO", "LUSA", "Fala Regional", "Saiba Mais", "O Globo"]
+author: "Reda��o Novo Alvo"
+sources: ["CartaCapital", "o progresso", "Estad�o", "Franc�s News", "A Hora do Sul", "ABC Rep�rter", "�ncora 1", "radiomaringa.com.br", "MidiaNews", "O NORT�O", "LUSA", "Fala Regional", "Saiba Mais", "O Globo"]
 publishedAt: "2026-05-18T02:34:44.189Z"
 updatedAt: "2026-05-19T23:35:15.440Z"
 featured: false
@@ -22,13 +22,13 @@ ogImage: "https://portalnovoalvo.com.br/uploads/news/sociedade-brasileira-de-mas
 tags: ["brasil", "sociedade"]
 ---
 
-<p>A Sociedade Brasileira de Mastologia (SBM) anunciou a intensificação de suas campanhas de conscientização e combate à desinformação sobre o câncer de mama.</p><p>A medida surge em resposta a um alarmante aumento de 70% na circulação de notícias falsas relacionadas à doença, segundo dados da própria entidade.</p>
-<h2>Desinformação como obstáculo ao diagnóstico</h2>
-<p>A proliferação de informações incorretas tem se tornado um obstáculo significativo para o diagnóstico precoce e o tratamento eficaz do câncer de mama.</p><p>A SBM aponta que muitas dessas notícias falsas promovem métodos de prevenção não comprovados cientificamente ou sugerem curas milagrosas, desencorajando pacientes a buscarem acompanhamento médico adequado.</p>
-<h2>Ações de combate à desinformação</h2>
-<p>Para reverter esse quadro, a SBM tem ampliado suas ações, que incluem a divulgação de material educativo em suas plataformas digitais, a realização de webinars com especialistas e a parceria com veículos de comunicação para disseminar informações baseadas em evidências científicas.</p><p>O objetivo é alcançar o maior número possível de pessoas, especialmente aquelas com menor acesso a fontes confiáveis de saúde.</p>
-<h2>Importância da consulta médica</h2>
-<p>A entidade reforça a importância da consulta regular com mastologistas e outros profissionais de saúde.</p><p>Apenas um médico qualificado pode realizar o diagnóstico correto, indicar os exames necessários e propor o tratamento mais adequado para cada caso, levando em consideração as particularidades de cada paciente.</p>
-<h2>Câncer de mama: um desafio contínuo</h2>
-<p>O câncer de mama é o tipo mais comum da doença entre as mulheres no Brasil e no mundo, excluindo os tumores de pele não melanoma.</p><p>Apesar dos avanços na medicina, a desinformação continua sendo um fator de risco que precisa ser combatido ativamente pela sociedade e pelas instituições de saúde.</p>
-<blockquote><strong>Por que isso importa?</strong> A disseminação de notícias falsas sobre o câncer de mama representa um grave risco à saúde pública, podendo levar a diagnósticos tardios e tratamentos ineficazes. A atuação da Sociedade Brasileira de Mastologia é crucial para garantir que a população tenha acesso a informações precisas e baseadas em ciência, promovendo a prevenção e o cuidado adequado contra a doença.</blockquote>
+<p>A Sociedade Brasileira de Mastologia (SBM) anunciou a intensifica��o de suas campanhas de conscientiza��o e combate � desinforma��o sobre o c�ncer de mama.</p><p>A medida surge em resposta a um alarmante aumento de 70% na circula��o de not�cias falsas relacionadas � doen�a, segundo dados da pr�pria entidade.</p>
+<h2>Desinforma��o como obst�culo ao diagn�stico</h2>
+<p>A prolifera��o de informa��es incorretas tem se tornado um obst�culo significativo para o diagn�stico precoce e o tratamento eficaz do c�ncer de mama.</p><p>A SBM aponta que muitas dessas not�cias falsas promovem m�todos de preven��o n�o comprovados cientificamente ou sugerem curas milagrosas, desencorajando pacientes a buscarem acompanhamento m�dico adequado.</p>
+<h2>A��es de combate � desinforma��o</h2>
+<p>Para reverter esse quadro, a SBM tem ampliado suas a��es, que incluem a divulga��o de material educativo em suas plataformas digitais, a realiza��o de webinars com especialistas e a parceria com ve�culos de comunica��o para disseminar informa��es baseadas em evid�ncias cient�ficas.</p><p>O objetivo � alcan�ar o maior n�mero poss�vel de pessoas, especialmente aquelas com menor acesso a fontes confi�veis de sa�de.</p>
+<h2>Import�ncia da consulta m�dica</h2>
+<p>A entidade refor�a a import�ncia da consulta regular com mastologistas e outros profissionais de sa�de.</p><p>Apenas um m�dico qualificado pode realizar o diagn�stico correto, indicar os exames necess�rios e propor o tratamento mais adequado para cada caso, levando em considera��o as particularidades de cada paciente.</p>
+<h2>C�ncer de mama: um desafio cont�nuo</h2>
+<p>O c�ncer de mama � o tipo mais comum da doen�a entre as mulheres no Brasil e no mundo, excluindo os tumores de pele n�o melanoma.</p><p>Apesar dos avan�os na medicina, a desinforma��o continua sendo um fator de risco que precisa ser combatido ativamente pela sociedade e pelas institui��es de sa�de.</p>
+<blockquote><strong>Por que isso importa?</strong> A dissemina��o de not�cias falsas sobre o c�ncer de mama representa um grave risco � sa�de p�blica, podendo levar a diagn�sticos tardios e tratamentos ineficazes. A atua��o da Sociedade Brasileira de Mastologia � crucial para garantir que a popula��o tenha acesso a informa��es precisas e baseadas em ci�ncia, promovendo a preven��o e o cuidado adequado contra a doen�a.</blockquote>

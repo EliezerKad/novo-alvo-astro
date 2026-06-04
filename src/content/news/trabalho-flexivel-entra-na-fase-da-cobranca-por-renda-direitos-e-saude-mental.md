@@ -4,7 +4,7 @@ slug: "trabalho-flexivel-entra-na-fase-da-cobranca-por-renda-direitos-e-saude-me
 summary: "A economia de plataformas amadureceu, mas a promessa de autonomia agora enfrenta perguntas sobre proteção social, rotina e futuro profissional."
 seoDescription: "A economia de plataformas amadureceu, mas a promessa de autonomia agora enfrenta perguntas sobre proteção social, rotina e futuro profissional."
 category: "Economia"
-author: "Redacao Novo Alvo"
+author: "Reda��o Novo Alvo"
 sources: ["IBGE", "Ipea", "Organização Internacional do Trabalho", "Ministério do Trabalho e Emprego", "DIEESE", "Fundação Seade", "Agência Brasil"]
 publishedAt: "2026-05-28T01:03:31.870Z"
 updatedAt: "2026-05-28T01:03:32.029Z"
@@ -25,7 +25,7 @@ tags: ["trabalho", "economia", "plataformas", "renda", "saude mental"]
 <h2>A promessa encontrou a conta</h2>
 <p>O trabalho flexível virou parte do vocabulário de uma geração inteira. Entregas, freelas, aplicativos, produção de conteúdo, consultorias, jobs remotos e renda extra ajudaram muita gente a atravessar instabilidade. Mas a fase da euforia cedeu espaço a uma pergunta mais dura: que tipo de futuro se constrói quando a renda depende de demanda, avaliação e algoritmo?</p>
 <p>Para millennials e Gen Z, a autonomia vendida pelas plataformas conversa com o desejo de escapar de modelos rígidos. Ao mesmo tempo, expõe jornadas longas, pouca previsibilidade, pressão por disponibilidade constante e dificuldade de planejar vida financeira.</p>
-<p>A discussão sobre direitos não é nostalgia de emprego antigo. É uma tentativa de atualizar proteção social para um mercado que mudou antes de as regras acompanharem.</p>
+<p>A discussão sobre direitos não é nostalgia de emprego antigo. �0 uma tentativa de atualizar proteção social para um mercado que mudou antes de as regras acompanharem.</p>
 <h2>Renda extra virou renda principal</h2>
 <p>Muita atividade que começou como complemento se tornou fonte central de sustento. Isso muda tudo. Quando o aplicativo paga parte essencial das contas, bloqueios, queda de demanda, aumento de custo e mudanças de regra deixam de ser detalhe técnico e viram risco doméstico.</p>
 <p>A economia também depende desse trabalho. Entregas, mobilidade, serviços digitais e microempreendimentos movimentam consumo e criam conveniência para milhões de pessoas. O debate, portanto, não é contra tecnologia, mas sobre como distribuir riscos.</p>

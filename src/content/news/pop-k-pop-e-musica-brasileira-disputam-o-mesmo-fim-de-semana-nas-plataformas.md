@@ -4,7 +4,7 @@ slug: "pop-k-pop-e-musica-brasileira-disputam-o-mesmo-fim-de-semana-nas-platafor
 summary: "A sexta de lançamentos reforça como artistas, fãs e algoritmos transformaram música nova em evento digital permanente."
 seoDescription: "A sexta de lançamentos reforça como artistas, fãs e algoritmos transformaram música nova em evento digital permanente."
 category: "Musica"
-author: "Redacao Novo Alvo"
+author: "Reda��o Novo Alvo"
 sources: ["Billboard Brasil", "Rolling Stone Brasil", "Spotify Charts", "YouTube Music", "Universal Music Brasil", "Sony Music Brasil", "Warner Music Brasil"]
 publishedAt: "2026-05-28T13:04:30.480Z"
 updatedAt: "2026-05-28T13:04:30.613Z"

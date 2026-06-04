@@ -5,7 +5,7 @@ summary: "Ferramentas de prioridade clinica prometem acelerar encaminhamentos se
 seoDescription: "Hospitais testam triagem digital para ordenar atendimentos, reduzir filas e acelerar fluxos clinicos."
 category: "Saude"
 subcategory: "Tecnologia"
-author: "Redacao Novo Alvo"
+author: "Redação Novo Alvo"
 sources:
   - "Secretarias de saude"
   - "Hospitais participantes"

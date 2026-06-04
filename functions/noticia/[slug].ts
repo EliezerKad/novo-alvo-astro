@@ -486,7 +486,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
           </div>
           <div class="hidden rounded-[1.15rem] border border-emerald-300/25 bg-emerald-400/10 p-4 text-sm font-bold leading-6 text-emerald-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]" data-newsletter-confirmation>
             <span class="block text-[9px] font-black uppercase tracking-[0.22em] text-emerald-200">Inscricao confirmada</span>
-            <span class="mt-1 block" data-newsletter-confirmation-message>Voce esta na lista. Enviamos uma mensagem de boas-vindas.</span>
+            <span class="mt-1 block" data-newsletter-confirmation-message>Você está na lista. Enviamos uma mensagem de boas-vindas.</span>
           </div>
           <form class="relative" data-newsletter-form>
             <input type="email" required name="email" placeholder="seu e-mail" class="h-11 w-full rounded-full border border-white/10 bg-white/[0.08] px-4 pr-24 text-sm font-bold text-white outline-none transition-all placeholder:text-white/35 focus:border-[#f4c8cf]/60 focus:ring-2 focus:ring-[#8A1F2D]/45" />
@@ -576,7 +576,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
             </div>
             <div class="mt-6 inline-flex items-center gap-3 rounded-[1.25rem] border border-black/10 bg-white p-2.5 pr-4 shadow-[0_18px_50px_rgba(16,16,16,0.055)] dark:border-zinc-800 dark:bg-zinc-900 md:mt-8 md:rounded-[1.375rem] md:p-3 md:pr-5">
               <div class="grid h-11 w-11 place-items-center rounded-xl bg-[#8A1F2D] text-xs font-black text-white md:h-12 md:w-12 md:rounded-2xl md:text-sm">NA</div>
-              <div><div class="text-sm font-black text-zinc-950 dark:text-zinc-50">Por ${escapeHtml(article.author || 'Redacao Novo Alvo')}</div><div class="mt-0.5 text-xs font-bold text-zinc-400">Fatos e Impacto 24h</div></div>
+              <div><div class="text-sm font-black text-zinc-950 dark:text-zinc-50">Por ${escapeHtml(article.author || 'Redação Novo Alvo')}</div><div class="mt-0.5 text-xs font-bold text-zinc-400">Fatos e Impacto 24h</div></div>
             </div>
             ${coverHtml}
           </div>
@@ -716,8 +716,8 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
               confirmation.classList.remove('hidden');
               if (confirmationMessage) {
                 confirmationMessage.textContent = data.emailSent
-                  ? 'Voce esta na lista. Enviamos uma mensagem de boas-vindas para seu e-mail.'
-                  : 'Voce esta na lista. A mensagem de boas-vindas sera enviada em breve.';
+                  ? 'Você está na lista. Enviamos uma mensagem de boas-vindas para seu e-mail.'
+                  : 'Você está na lista. A mensagem de boas-vindas será enviada em breve.';
               }
             }
           } catch (error) {

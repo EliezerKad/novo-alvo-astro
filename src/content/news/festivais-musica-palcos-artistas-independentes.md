@@ -1,11 +1,11 @@
 ---
-title: "Festivais de musica anunciam palcos voltados a artistas independentes"
+title: "Festivais de música anunciam palcos voltados a artistas independentes"
 slug: "festivais-musica-palcos-artistas-independentes"
-summary: "Curadorias regionais ganham espaco em eventos de grande porte no segundo semestre."
-seoDescription: "Festivais de musica anunciam palcos para artistas independentes e fortalecem curadorias regionais."
+summary: "Curadorias regionais ganham espaço em eventos de grande porte no segundo semestre."
+seoDescription: "Festivais de música anunciam palcos para artistas independentes e fortalecem curadorias regionais."
 category: "Musica"
 subcategory: "Cultura"
-author: "Redacao Novo Alvo"
+author: "Redação Novo Alvo"
 sources:
   - "Produtoras culturais"
   - "Curadores independentes"
@@ -15,19 +15,19 @@ isFeatured: false
 views: 0
 cover:
   src: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1400&q=80"
-  alt: "Publico em festival de musica"
+  alt: "Público em festival de música"
   caption: "Palcos independentes ampliam a diversidade em grandes festivais."
   layout: "full"
 tags:
-  - "musica"
+  - "música"
   - "cultura"
   - "festivais"
 ---
 
-Festivais de musica anunciaram palcos dedicados a artistas independentes, com curadorias regionais e formatos voltados a descoberta de novos publicos.
+Festivais de música anunciaram palcos dedicados a artistas independentes, com curadorias regionais e formatos voltados à descoberta de novos públicos.
 
-A aposta acompanha o crescimento de cenas locais e a forca das plataformas digitais na formacao de audiencias fora do circuito tradicional.
+A aposta acompanha o crescimento de cenas locais e a força das plataformas digitais na formação de audiências fora do circuito tradicional.
 
 ## Curadoria regional
 
-Produtores afirmam que o modelo aproxima marcas, artistas e comunidades, criando espacos mais diversos dentro dos grandes eventos.
+Produtores afirmam que o modelo aproxima marcas, artistas e comunidades, criando espaços mais diversos dentro dos grandes eventos.

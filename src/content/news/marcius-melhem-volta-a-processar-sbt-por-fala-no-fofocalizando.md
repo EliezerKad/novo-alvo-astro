@@ -4,7 +4,7 @@ slug: "marcius-melhem-volta-a-processar-sbt-por-fala-no-fofocalizando"
 summary: "Humorista pede retratacao e indenizacao de R$ 60 mil em nova acao contra o SBT ligada a declaracao exibida no Fofocalizando."
 seoDescription: "Marcius Melhem move nova acao contra o SBT por fala no Fofocalizando e pede retratacao e indenizacao de R$ 60 mil."
 category: "Famosos"
-author: "Redacao Novo Alvo"
+author: "Redação Novo Alvo"
 sources: ["Portal Tela", "Redacao MT", "Portal Marcia Piovesan", "Super Radio Tupi", "Folha de S.Paulo", "RD1"]
 publishedAt: "2026-06-03T16:15:01.402Z"
 updatedAt: "2026-06-03T16:15:05.286Z"

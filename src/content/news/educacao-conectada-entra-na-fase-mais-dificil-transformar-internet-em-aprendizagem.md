@@ -4,7 +4,7 @@ slug: "educacao-conectada-entra-na-fase-mais-dificil-transformar-internet-em-apr
 summary: "Depois da expansão da conectividade escolar, o desafio passa a ser formar professores, organizar currículo digital e medir impacto real na sala de aula."
 seoDescription: "Depois da expansão da conectividade escolar, o desafio passa a ser formar professores, organizar currículo digital e medir impacto real na sala de aula."
 category: "Educacao"
-author: "Redacao Novo Alvo"
+author: "Redação Novo Alvo"
 sources: ["Ministério da Educação", "Ministério das Comunicações", "Agência Brasil", "Cetic.br", "NIC.br", "Unesco", "Todos Pela Educação"]
 publishedAt: "2026-05-27T17:42:43.958Z"
 updatedAt: "2026-05-27T17:42:45.171Z"
@@ -19,7 +19,7 @@ cover:
   caption: ""
   layout: "full"
 ogImage: "https://portalnovoalvo.com.br/uploads/news/educacao-conectada-entra-na-fase-mais-dificil-transformar-internet-em-aprendizagem-cover-20260527174245.avif"
-tags: ["educacao", "internet", "escola", "professores", "inclusao digital"]
+tags: ["educacao", "internet", "escola", "professores", "inclusão digital"]
 ---
 
 <h2>Conexão não é ponto final</h2>

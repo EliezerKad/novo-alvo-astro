@@ -6,7 +6,7 @@ seoDescription: "Mercado financeiro amplia credito para pequenas empresas com no
 breakingSummary: "Credito para pequenas empresas ganha novas linhas"
 category: "Economia"
 subcategory: "Brasil"
-author: "Redacao Novo Alvo"
+author: "Redação Novo Alvo"
 sources:
   - "Banco Central"
   - "Associacoes comerciais"

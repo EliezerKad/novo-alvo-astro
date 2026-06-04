@@ -4,7 +4,7 @@ slug: "calendario-aperta-clubes-e-transforma-gestao-fisica-em-assunto-central-do
 summary: "Com jogos decisivos, viagens e convocações, o futebol brasileiro entra em uma fase em que elenco, descanso e planejamento pesam tanto quanto escalação."
 seoDescription: "Com jogos decisivos, viagens e convocações, o futebol brasileiro entra em uma fase em que elenco, descanso e planejamento pesam tanto quanto escalação."
 category: "Futebol"
-author: "Redacao Novo Alvo"
+author: "Reda��o Novo Alvo"
 sources: ["CBF", "ge", "ESPN Brasil", "UOL Esporte", "Lance", "Gazeta Esportiva", "Estadão Esportes"]
 publishedAt: "2026-05-28T14:22:08.528Z"
 updatedAt: "2026-05-28T14:22:08.670Z"

@@ -4,7 +4,7 @@ slug: "inflacao-juros-e-renda-apertada-mantem-consumo-brasileiro-em-modo-cautela
 summary: "Mesmo com sinais pontuais de melhora, famílias seguem olhando preço, crédito e renda antes de assumir novos gastos."
 seoDescription: "Mesmo com sinais pontuais de melhora, famílias seguem olhando preço, crédito e renda antes de assumir novos gastos."
 category: "Economia"
-author: "Redacao Novo Alvo"
+author: "Reda��o Novo Alvo"
 sources: ["Banco Central", "IBGE", "Ipea", "FGV Ibre", "Agência Brasil", "Confederação Nacional do Comércio", "Serasa Experian"]
 publishedAt: "2026-05-29T07:04:48.425Z"
 updatedAt: "2026-05-29T07:04:48.809Z"
