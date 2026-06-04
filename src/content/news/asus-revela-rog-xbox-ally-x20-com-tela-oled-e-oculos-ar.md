@@ -6,8 +6,8 @@ seoDescription: "Games: Modelo comemorativo apresentado na Computex 2026 traz pa
 category: "Games"
 author: "Redação Novo Alvo"
 sources: ["ASUS", "GameSpot", "PC Gamer", "GamesRadar", "Windows Central", "Ars Technica", "T3"]
-publishedAt: "2026-06-04T19:58:30.473Z"
-updatedAt: "2026-06-04T19:58:30.618Z"
+publishedAt: "2026-06-04T19:58:43.370Z"
+updatedAt: "2026-06-04T19:58:43.509Z"
 featured: false
 isFeatured: false
 urgent: false
