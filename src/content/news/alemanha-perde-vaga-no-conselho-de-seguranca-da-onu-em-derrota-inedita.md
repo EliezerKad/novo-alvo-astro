@@ -6,8 +6,8 @@ seoDescription: "Mundo: Portugal e Austria receberam mais votos para as vagas da
 category: "Mundo"
 author: "Redação Novo Alvo"
 sources: ["CartaCapital", "UOL", "AFP", "Euronews", "Portugal Global", "DNoticias", "ONU"]
-publishedAt: "2026-06-04T20:55:12.789Z"
-updatedAt: "2026-06-04T20:55:13.980Z"
+publishedAt: "2026-06-04T20:55:15.675Z"
+updatedAt: "2026-06-04T20:55:15.708Z"
 featured: false
 isFeatured: false
 urgent: false
