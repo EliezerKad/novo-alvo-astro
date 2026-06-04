@@ -6,8 +6,8 @@ seoDescription: "Futebol: Com estádios cheios e bilheterias milionárias, Flame
 category: "Futebol"
 author: "Redação Novo Alvo"
 sources: ["ge", "UOL Esporte", "ESPN", "Lance!", "Itatiaia", "Placar", "Conmebol"]
-publishedAt: "2026-06-04T21:39:13.314Z"
-updatedAt: "2026-06-04T21:39:13.344Z"
+publishedAt: "2026-06-04T22:14:36.964Z"
+updatedAt: "2026-06-04T22:14:37.113Z"
 featured: false
 isFeatured: false
 urgent: false
