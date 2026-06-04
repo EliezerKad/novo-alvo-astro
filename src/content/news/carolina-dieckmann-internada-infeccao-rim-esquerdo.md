@@ -14,11 +14,11 @@ urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/carolina-dieckmann-internada-infeccao-rim-esquerdo-cover-20260603193101.webp"
+  src: "https://portalnovoalvo.com.br/media/news/carolina-dieckmmann-internada-infeccao-rim-esquerdo-cover-20260603193101.webp"
   alt: "Carolina Dieckmann em registro publicado nas redes sociais"
   caption: "Reprodução/Instagram"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/carolina-dieckmann-internada-infeccao-rim-esquerdo-cover-20260603193101.webp"
+ogImage: "https://portalnovoalvo.com.br/media/news/carolina-dieckmmann-internada-infeccao-rim-esquerdo-cover-20260603193101.webp"
 tags: ["Carolina Dieckmann", "Famosos", "Instagram", "Vale Tudo", "Saúde"]
 ---
 
