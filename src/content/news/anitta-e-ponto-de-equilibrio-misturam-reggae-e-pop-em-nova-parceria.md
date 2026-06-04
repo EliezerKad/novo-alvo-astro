@@ -6,8 +6,8 @@ seoDescription: "A união de Anitta com o Ponto de Equilíbrio aproxima pop, reg
 category: "Musica"
 author: "Redação Novo Alvo"
 sources: ["POPline", "Rolling Stone Brasil", "Billboard Brasil", "Tenho Mais Discos Que Amigos", "Quem", "CNN Brasil", "Gshow"]
-publishedAt: "2026-06-04T22:32:05.714Z"
-updatedAt: "2026-06-04T22:32:05.811Z"
+publishedAt: "2026-06-04T22:34:10.593Z"
+updatedAt: "2026-06-04T22:34:10.808Z"
 featured: false
 isFeatured: false
 urgent: false
