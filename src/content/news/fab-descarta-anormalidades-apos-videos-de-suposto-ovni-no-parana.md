@@ -6,8 +6,8 @@ seoDescription: "Ocorrencias: Videos gravados em Campo Largo viralizaram nas red
 category: "Ocorrencias"
 author: "Redação Novo Alvo"
 sources: ["Estado de Minas", "SBT News", "Band Parana", "G1", "UOL", "Metropoles", "Correio Braziliense"]
-publishedAt: "2026-06-04T14:52:45.008Z"
-updatedAt: "2026-06-04T14:52:45.191Z"
+publishedAt: "2026-06-04T14:52:47.124Z"
+updatedAt: "2026-06-04T14:52:47.264Z"
 featured: false
 isFeatured: false
 urgent: false
