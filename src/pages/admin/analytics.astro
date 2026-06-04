@@ -101,6 +101,25 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       </article>
     </section>
 
+    <section class="grid grid-cols-1 gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+      <article class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-5 flex flex-col gap-2 border-b border-zinc-100 pb-4 dark:border-zinc-800 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2 class="text-xs font-black uppercase tracking-[0.24em]">Materias mais compartilhadas</h2>
+            <p class="mt-2 text-xs font-bold text-zinc-400" data-share-summary>Calculando compartilhamentos...</p>
+          </div>
+        </div>
+        <div class="space-y-3" data-share-list></div>
+      </article>
+
+      <article class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="mb-5 border-b border-zinc-100 pb-4 dark:border-zinc-800">
+          <h2 class="text-xs font-black uppercase tracking-[0.24em]">Canais de compartilhamento</h2>
+        </div>
+        <div class="space-y-3" data-share-channel-list></div>
+      </article>
+    </section>
+
     <section class="rounded-[2rem] border border-white/80 bg-white/70 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
       <div class="mb-5 border-b border-zinc-100 pb-4 dark:border-zinc-800">
         <h2 class="text-xs font-black uppercase tracking-[0.24em]">Views por hora</h2>
@@ -235,6 +254,49 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         `,
       )
       .join('');
+
+    const sharing = data.sharing || { shares: 0, shareRate: 0, topArticles: [], channels: [] };
+    setText(
+      '[data-share-summary]',
+      `${formatNumber(sharing.shares)} compartilhamentos no periodo / ${String(sharing.shareRate || 0).replace('.', ',')}% das views`,
+    );
+
+    document.querySelector('[data-share-list]').innerHTML = (sharing.topArticles || []).length
+      ? sharing.topArticles
+          .slice(0, 12)
+          .map(
+            (item) => `
+              <a href="/noticia/${encodeURIComponent(item.slug)}/" class="block rounded-2xl border border-zinc-100 bg-white/45 p-4 transition hover:-translate-y-0.5 hover:border-red-200 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-950/30">
+                <span class="text-[8px] font-black uppercase tracking-widest text-red-600">${escapeHtml(item.category)}</span>
+                <div class="mt-2 flex items-start justify-between gap-4">
+                  <strong class="line-clamp-2 text-base font-black leading-tight">${escapeHtml(item.title)}</strong>
+                  <span class="shrink-0 rounded-full bg-zinc-100 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-800">${formatNumber(item.shares)} shares</span>
+                </div>
+                <p class="mt-2 text-[10px] font-bold text-zinc-400">${formatNumber(item.visitors)} visitantes / ultimo share: ${formatDate(item.lastSharedAt)}</p>
+              </a>
+            `,
+          )
+          .join('')
+      : '<div class="rounded-2xl border border-zinc-100 bg-white/45 p-4 text-sm font-bold text-zinc-400 dark:border-zinc-800 dark:bg-zinc-950/30">Ainda nao ha compartilhamentos registrados neste periodo.</div>';
+
+    const channelLabels = { whatsapp: 'WhatsApp', x: 'X / Twitter', facebook: 'Facebook', copy: 'Copiar link', native: 'Compartilhar' };
+    const maxShareChannel = Math.max(...(sharing.channels || []).map((item) => Number(item.shares || 0)), 1);
+    document.querySelector('[data-share-channel-list]').innerHTML = (sharing.channels || []).length
+      ? sharing.channels
+          .map(
+            (item) => `
+              <div class="rounded-2xl border border-zinc-100 bg-white/45 p-4 dark:border-zinc-800 dark:bg-zinc-950/30">
+                <div class="mb-3 flex items-center justify-between gap-3">
+                  <strong class="text-sm font-black">${escapeHtml(channelLabels[item.channel] || item.channel)}</strong>
+                  <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400">${formatNumber(item.shares)} shares</span>
+                </div>
+                ${bar(item.shares, maxShareChannel)}
+                <p class="mt-2 text-[10px] font-bold text-zinc-400">${formatNumber(item.articles)} materias / ${formatNumber(item.visitors)} visitantes / ${item.share}%</p>
+              </div>
+            `,
+          )
+          .join('')
+      : '<div class="rounded-2xl border border-zinc-100 bg-white/45 p-4 text-sm font-bold text-zinc-400 dark:border-zinc-800 dark:bg-zinc-950/30">Os cliques nos botoes vao aparecer aqui.</div>';
   };
 
   document.querySelectorAll('[data-days]').forEach((button) => {

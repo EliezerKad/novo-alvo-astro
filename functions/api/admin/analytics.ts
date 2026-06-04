@@ -54,7 +54,22 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
   const since = new Date(Date.now() - (days - 1) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const previousSince = new Date(Date.now() - (days * 2 - 1) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-  const [totals, rangeTotals, previousTotals, publishedArticles, rangePublishedArticles, hourly, daily, categories, topArticles, visitors, returningVisitors] = await Promise.all([
+  const [
+    totals,
+    rangeTotals,
+    previousTotals,
+    publishedArticles,
+    rangePublishedArticles,
+    hourly,
+    daily,
+    categories,
+    topArticles,
+    visitors,
+    returningVisitors,
+    shareTotals,
+    topSharedArticles,
+    shareChannels,
+  ] = await Promise.all([
     db
       .prepare(
         `SELECT COUNT(*) AS views,
@@ -177,6 +192,46 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
       )
       .bind(since)
       .first(),
+    db
+      .prepare(
+        `SELECT COUNT(*) AS shares,
+                COUNT(DISTINCT visitor_id) AS visitors,
+                COUNT(DISTINCT slug) AS articles
+           FROM article_share_events
+          WHERE substr(shared_at, 1, 10) >= ?`,
+      )
+      .bind(since)
+      .first(),
+    db
+      .prepare(
+        `SELECT COALESCE(a.title, e.slug) AS title,
+                COALESCE(NULLIF(a.category, ''), 'Sem categoria') AS category,
+                e.slug,
+                COUNT(*) AS shares,
+                COUNT(DISTINCT e.visitor_id) AS visitors,
+                MAX(e.shared_at) AS last_shared_at
+           FROM article_share_events e
+           LEFT JOIN articles a ON a.slug = e.slug
+          WHERE substr(e.shared_at, 1, 10) >= ?
+          GROUP BY e.slug, title, category
+          ORDER BY shares DESC, last_shared_at DESC
+          LIMIT 24`,
+      )
+      .bind(since)
+      .all(),
+    db
+      .prepare(
+        `SELECT channel,
+                COUNT(*) AS shares,
+                COUNT(DISTINCT slug) AS articles,
+                COUNT(DISTINCT visitor_id) AS visitors
+           FROM article_share_events
+          WHERE substr(shared_at, 1, 10) >= ?
+          GROUP BY channel
+          ORDER BY shares DESC`,
+      )
+      .bind(since)
+      .all(),
   ]);
 
   const totalViews = num((totals as { views?: number } | null)?.views);
@@ -188,6 +243,7 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
   const rangePublished = num((rangePublishedArticles as { articles?: number } | null)?.articles);
   const rangeVisitors = num((rangeTotals as { visitors?: number } | null)?.visitors);
   const returning = num((returningVisitors as { visitors?: number } | null)?.visitors);
+  const rangeShares = num((shareTotals as { shares?: number } | null)?.shares);
 
   return json({
     ok: true,
@@ -217,6 +273,34 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
       previousViews,
       growth: previousViews > 0 ? Number((((rangeViews - previousViews) / previousViews) * 100).toFixed(1)) : null,
       internalCtr: null,
+    },
+    sharing: {
+      shares: rangeShares,
+      visitors: num((shareTotals as { visitors?: number } | null)?.visitors),
+      articles: num((shareTotals as { articles?: number } | null)?.articles),
+      shareRate: rangeViews > 0 ? Number(((rangeShares / rangeViews) * 100).toFixed(2)) : 0,
+      topArticles: ((topSharedArticles.results || []) as Array<{
+        title?: string;
+        category?: string;
+        slug?: string;
+        shares?: number;
+        visitors?: number;
+        last_shared_at?: string;
+      }>).map((row) => ({
+        title: clean(row.title, 240),
+        category: clean(row.category || 'Sem categoria', 80),
+        slug: clean(row.slug, 180),
+        shares: num(row.shares),
+        visitors: num(row.visitors),
+        lastSharedAt: clean(row.last_shared_at, 80),
+      })),
+      channels: ((shareChannels.results || []) as Array<{ channel?: string; shares?: number; articles?: number; visitors?: number }>).map((row) => ({
+        channel: clean(row.channel, 40),
+        shares: num(row.shares),
+        articles: num(row.articles),
+        visitors: num(row.visitors),
+        share: pct(num(row.shares), rangeShares),
+      })),
     },
     content: {
       publishedArticles: totalPublished,

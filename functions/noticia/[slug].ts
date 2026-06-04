@@ -555,7 +555,7 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
           </a>
           <div class="flex items-center gap-2">
             ${themeToggleButton}
-            <a href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-zinc-100 dark:bg-zinc-800 hover:bg-[#8A1F2D] hover:text-white dark:text-zinc-400" title="Compartilhar">↗</a>
+            <a href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener noreferrer" data-share-channel="whatsapp" data-share-slug="${escapeHtml(article.slug)}" class="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-zinc-100 dark:bg-zinc-800 hover:bg-[#8A1F2D] hover:text-white dark:text-zinc-400" title="Compartilhar">↗</a>
           </div>
         </div>
       </nav>
@@ -585,9 +585,9 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
               <section class="rounded-[1.45rem] border border-black/10 bg-white p-4 shadow-[0_18px_50px_rgba(16,16,16,0.055)] dark:border-zinc-800 dark:bg-zinc-900 md:rounded-[1.75rem] md:p-5">
                 <h2 class="mb-3 text-base font-black tracking-[-0.045em] text-zinc-950 dark:text-zinc-50 md:mb-4 md:text-lg">Compartilhe</h2>
                 <div class="grid gap-2">
-                  <a href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener noreferrer" class="flex h-10 items-center justify-between rounded-full bg-[#8A1F2D] px-4 text-[11px] font-black text-white transition-transform hover:-translate-y-0.5 md:h-11 md:text-xs">WhatsApp <span>→</span></a>
-                  <a href="https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}" target="_blank" rel="noopener noreferrer" class="flex h-10 items-center justify-between rounded-full border border-black/10 bg-[#f5f3ee] px-4 text-[11px] font-black text-zinc-600 transition-all hover:border-[#8A1F2D]/30 hover:text-[#8A1F2D] dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400 md:h-11 md:text-xs">X / Twitter <span>→</span></a>
-                  <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}" target="_blank" rel="noopener noreferrer" class="flex h-10 items-center justify-between rounded-full border border-black/10 bg-[#f5f3ee] px-4 text-[11px] font-black text-zinc-600 transition-all hover:border-[#8A1F2D]/30 hover:text-[#8A1F2D] dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400 md:h-11 md:text-xs">Facebook <span>→</span></a>
+                  <a href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener noreferrer" data-share-channel="whatsapp" data-share-slug="${escapeHtml(article.slug)}" class="flex h-10 items-center justify-between rounded-full bg-[#8A1F2D] px-4 text-[11px] font-black text-white transition-transform hover:-translate-y-0.5 md:h-11 md:text-xs">WhatsApp <span>→</span></a>
+                  <a href="https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}" target="_blank" rel="noopener noreferrer" data-share-channel="x" data-share-slug="${escapeHtml(article.slug)}" class="flex h-10 items-center justify-between rounded-full border border-black/10 bg-[#f5f3ee] px-4 text-[11px] font-black text-zinc-600 transition-all hover:border-[#8A1F2D]/30 hover:text-[#8A1F2D] dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400 md:h-11 md:text-xs">X / Twitter <span>→</span></a>
+                  <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}" target="_blank" rel="noopener noreferrer" data-share-channel="facebook" data-share-slug="${escapeHtml(article.slug)}" class="flex h-10 items-center justify-between rounded-full border border-black/10 bg-[#f5f3ee] px-4 text-[11px] font-black text-zinc-600 transition-all hover:border-[#8A1F2D]/30 hover:text-[#8A1F2D] dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400 md:h-11 md:text-xs">Facebook <span>→</span></a>
                 </div>
               </section>
               <div class="lg:sticky lg:top-28 lg:self-start"><div class="overflow-hidden relative flex flex-col items-center justify-center min-h-[260px] rounded-[1.75rem]"><div class="absolute top-1 left-2 z-10 pointer-events-none"><span class="text-[7px] font-black text-zinc-400 dark:text-zinc-600 uppercase tracking-widest">Publicidade</span></div></div></div>
@@ -641,6 +641,45 @@ export const onRequestGet = async ({ request, env, params }: { request: Request;
             }).catch(() => {});
           }, 1500);
         } catch {}
+      })();
+    </script>
+    <script>
+      (() => {
+        const key = 'novo-alvo-visitor-id';
+        const getVisitorId = () => {
+          try {
+            const existing = localStorage.getItem(key);
+            if (existing) return existing;
+            const next = crypto.randomUUID ? crypto.randomUUID() : 'fallback-' + Date.now() + '-' + Math.random();
+            localStorage.setItem(key, next);
+            return next;
+          } catch {
+            return 'fallback-' + Date.now() + '-' + Math.random();
+          }
+        };
+        const trackShare = (link) => {
+          const body = JSON.stringify({
+            visitorId: getVisitorId(),
+            slug: link.dataset.shareSlug || '',
+            channel: link.dataset.shareChannel || '',
+            path: window.location.pathname,
+          });
+          try {
+            if (navigator.sendBeacon) {
+              navigator.sendBeacon('/api/share', new Blob([body], { type: 'application/json' }));
+              return;
+            }
+          } catch {}
+          fetch('/api/share', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body,
+            keepalive: true,
+          }).catch(() => {});
+        };
+        document.querySelectorAll('[data-share-channel][data-share-slug]').forEach((link) => {
+          link.addEventListener('click', () => trackShare(link));
+        });
       })();
     </script>
     <script>
