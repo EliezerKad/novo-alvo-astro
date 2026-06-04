@@ -1,6 +1,12 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const projectRoot = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
+const repoRoot = resolve(projectRoot, '..');
+const fromProjectRoot = (...parts) => resolve(projectRoot, ...parts);
+const fromRepoRoot = (...parts) => resolve(repoRoot, ...parts);
 
 const loadLocalEnv = (filePath) => {
   if (!existsSync(filePath)) return;
@@ -13,8 +19,8 @@ const loadLocalEnv = (filePath) => {
   }
 };
 
-loadLocalEnv(resolve('.env.automation.local'));
-loadLocalEnv(resolve('.env.local'));
+loadLocalEnv(fromProjectRoot('.env.automation.local'));
+loadLocalEnv(fromProjectRoot('.env.local'));
 
 const PORTAL_ORIGIN = process.env.PORTAL_ORIGIN || 'https://portalnovoalvo.com.br';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
@@ -27,32 +33,39 @@ const MAX_OPEN_QUEUE = Number(process.env.AUTOMATION_MAX_OPEN_QUEUE || 2);
 const RECENT_CATEGORY_HOURS = Number(process.env.AUTOMATION_RECENT_CATEGORY_HOURS || 8);
 const FETCH_TIMEOUT_MS = Number(process.env.AUTOMATION_FETCH_TIMEOUT_MS || 20000);
 const D1_TIMEOUT_MS = Number(process.env.AUTOMATION_D1_TIMEOUT_MS || 180000);
-const bundledNpm = resolve('..', '.tools', 'node-v24.15.0-win-x64', process.platform === 'win32' ? 'npm.cmd' : 'bin/npm');
+const bundledNpm = fromRepoRoot('.tools', 'node-v24.15.0-win-x64', process.platform === 'win32' ? 'npm.cmd' : 'bin/npm');
 const npmCommand = process.env.NPM_CMD || (existsSync(bundledNpm) ? bundledNpm : process.platform === 'win32' ? 'npm.cmd' : 'npm');
 const localWranglerCandidates = [
-  resolve('node_modules', '.bin', process.platform === 'win32' ? 'wrangler.cmd' : 'wrangler'),
-  resolve('..', 'node_modules', '.bin', process.platform === 'win32' ? 'wrangler.cmd' : 'wrangler'),
+  fromProjectRoot('node_modules', '.bin', process.platform === 'win32' ? 'wrangler.cmd' : 'wrangler'),
+  fromRepoRoot('node_modules', '.bin', process.platform === 'win32' ? 'wrangler.cmd' : 'wrangler'),
 ];
 
 const findCachedWrangler = () => {
-  const npxCacheDir = resolve('..', '.npm-cache', '_npx');
-  if (!existsSync(npxCacheDir)) return '';
-  for (const entry of readdirSync(npxCacheDir, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
-    const candidate = resolve(
-      npxCacheDir,
-      entry.name,
-      'node_modules',
-      '.bin',
-      process.platform === 'win32' ? 'wrangler.cmd' : 'wrangler',
-    );
-    if (existsSync(candidate)) return candidate;
+  const cacheRoots = [
+    fromRepoRoot('.npm-cache'),
+    fromProjectRoot('.npm-cache'),
+    process.env.npm_config_cache,
+  ].filter(Boolean);
+  for (const cacheRoot of [...new Set(cacheRoots)]) {
+    const npxCacheDir = resolve(cacheRoot, '_npx');
+    if (!existsSync(npxCacheDir)) continue;
+    for (const entry of readdirSync(npxCacheDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const candidate = resolve(
+        npxCacheDir,
+        entry.name,
+        'node_modules',
+        '.bin',
+        process.platform === 'win32' ? 'wrangler.cmd' : 'wrangler',
+      );
+      if (existsSync(candidate)) return candidate;
+    }
   }
   return '';
 };
 
 const wranglerCommand = process.env.WRANGLER_CMD || localWranglerCandidates.find((candidate) => existsSync(candidate)) || findCachedWrangler();
-const wranglerLogPath = resolve('.wrangler', 'logs');
+const wranglerLogPath = fromProjectRoot('.wrangler', 'logs');
 
 const fetchWithTimeout = async (url, options = {}) => {
   const controller = new AbortController();
@@ -276,11 +289,11 @@ const overlapScore = (left, right) => {
 
 const d1 = (command) => {
   mkdirSync(wranglerLogPath, { recursive: true });
-  const tmpDir = resolve('.wrangler', 'tmp');
+  const tmpDir = fromProjectRoot('.wrangler', 'tmp');
   mkdirSync(tmpDir, { recursive: true });
   const env = {
     ...process.env,
-    npm_config_cache: process.env.npm_config_cache || resolve('..', '.npm-cache'),
+    npm_config_cache: fromRepoRoot('.npm-cache'),
     WRANGLER_LOG_PATH: process.env.WRANGLER_LOG_PATH || wranglerLogPath,
     WRANGLER_SEND_METRICS: process.env.WRANGLER_SEND_METRICS || 'false',
   };
