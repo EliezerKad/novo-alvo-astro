@@ -6,8 +6,8 @@ seoDescription: "Politica: Senador Flávio Bolsonaro critica postura do presiden
 category: "Politica"
 author: "Redação Novo Alvo"
 sources: ["Jovem Pan", "Metropoles · RSS direto", "Terra", "Correio Braziliense", "Valor Econômico", "Revista Fórum", "VEJA", "Nexo Jornal", "Poder360", "NSC Total", "CartaCapital"]
-publishedAt: "2026-06-04T13:52:51.509Z"
-updatedAt: "2026-06-04T13:52:51.671Z"
+publishedAt: "2026-06-04T14:00:13.894Z"
+updatedAt: "2026-06-04T14:00:14.042Z"
 featured: false
 isFeatured: false
 urgent: false
