@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -297,6 +297,13 @@ const d1 = (command) => {
     WRANGLER_LOG_PATH: process.env.WRANGLER_LOG_PATH || wranglerLogPath,
     WRANGLER_SEND_METRICS: process.env.WRANGLER_SEND_METRICS || 'false',
   };
+  const childEnv = wranglerCommand
+    ? {
+        ...process.env,
+        WRANGLER_LOG_PATH: process.env.WRANGLER_LOG_PATH || wranglerLogPath,
+        WRANGLER_SEND_METRICS: process.env.WRANGLER_SEND_METRICS || 'false',
+      }
+    : env;
   const normalizedCommand = command.replace(/\s+/g, ' ').trim();
   const executeD1 = () => {
     const executable = wranglerCommand || npmCommand;
@@ -305,27 +312,18 @@ const d1 = (command) => {
       : ['exec', 'wrangler', '--', 'd1', 'execute', D1_DATABASE, '--remote', '--json', '--command', normalizedCommand];
     return process.platform === 'win32'
       ? (() => {
-          const ps1Path = resolve(tmpDir, `automation-editorial-${Date.now()}-${Math.random().toString(36).slice(2)}.ps1`);
           const escapedExecutable = executable.replace(/'/g, "''");
           const escapedArgs = args.map((value) => `'${String(value).replace(/'/g, "''")}'`).join(', ');
-          writeFileSync(
-            ps1Path,
-            `$ErrorActionPreference = 'Stop'\n& '${escapedExecutable}' @(${escapedArgs})\n`,
-            'utf8',
-          );
-          try {
-            return execFileSync('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', ps1Path], {
-              encoding: 'utf8',
-              env,
-              timeout: D1_TIMEOUT_MS,
-            });
-          } finally {
-            rmSync(ps1Path, { force: true });
-          }
+          const commandText = `& '${escapedExecutable}' @(${escapedArgs})`;
+          return execFileSync('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', commandText], {
+            encoding: 'utf8',
+            env: childEnv,
+            timeout: D1_TIMEOUT_MS,
+          });
         })()
       : execFileSync(executable, args, {
           encoding: 'utf8',
-          env,
+          env: childEnv,
           timeout: D1_TIMEOUT_MS,
         });
   };
