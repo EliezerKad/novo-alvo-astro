@@ -6,8 +6,8 @@ seoDescription: "Áudio vazado de Mano Brown cobrando Ice Blue após foto com Gu
 category: "Musica"
 author: "Redação Novo Alvo"
 sources: ["Instagram", "Damassaclan", "Spinardi", "GR6", "Racionais MCs"]
-publishedAt: "2026-06-05T14:03:51.999Z"
-updatedAt: "2026-06-05T14:03:52.163Z"
+publishedAt: "2026-06-05T14:03:55.032Z"
+updatedAt: "2026-06-05T14:03:55.175Z"
 featured: false
 isFeatured: false
 urgent: false
