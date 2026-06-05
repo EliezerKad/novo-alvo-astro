@@ -110,14 +110,6 @@ const parseDate = (value) => {
 };
 
 const sqlString = (value) => `'${String(value || '').replace(/'/g, "''")}'`;
-const slugify = (value) =>
-  String(value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 120);
 
 const CATEGORY_DAILY_TARGETS = {
   Brasil: 4,
@@ -557,114 +549,43 @@ const fetchImages = async (pitch) => {
   }
 };
 
-const buildDraftArticle = async (pitch) => {
-  const params = new URLSearchParams({ id: pitch.id, clusterKey: pitch.cluster_key || '', title: pitch.title || '' });
-  const data = await requestJson(`/api/admin/pitch-draft?${params.toString()}`);
-  const article = data.article || {};
-  const bodyHtml = String(article.bodyHtml || '').trim();
-  if (data.generatedWithAi === false || !bodyHtml) {
-    throw new Error(data.generationError || 'rascunho sem corpo publicavel');
-  }
-  const title = String(article.title || pitch.title || 'Materia sem titulo').trim();
-  const slug = String(article.slug || slugify(title) || slugify(pitch.id) || `draft-${Date.now()}`);
-  return {
-    id: String(article.id || `draft:${slug}`),
-    slug,
-    title,
-    summary: String(article.summary || pitch.summary || '').trim(),
-    bodyHtml,
-    category: String(article.category || pitch.category || 'Brasil').trim(),
-    author: String(article.author || 'Redacao Novo Alvo').trim(),
-    status: 'draft',
-    coverUrl: String(article.coverUrl || '').trim(),
-    coverAlt: String(article.coverAlt || title).trim(),
-    coverCaption: String(article.coverCaption || '').trim(),
-    seoDescription: String(article.seoDescription || article.summary || pitch.summary || '').trim(),
-    keywords: String(article.keywords || pitch.keywords || '').trim(),
-    tags: Array.isArray(article.tags) ? article.tags : [],
-    sources: Array.isArray(article.sources) ? article.sources : [],
-    media: Array.isArray(article.media) ? article.media : [],
-    readingMinutes: Number(article.readingMinutes || 0),
-  };
-};
-
-const saveDraftArticle = async (article) => {
-  const data = await requestJson('/api/admin/articles', {
-    method: 'POST',
-    body: JSON.stringify(article),
-  });
-  return String(data.article?.id || article.id || '');
-};
-
-const nextPublishAfterForCategory = (category) => {
-  const lastQueued = d1(
-    `SELECT publish_after
-     FROM editorial_queue
-     WHERE category = ${sqlString(category)} AND status = 'queued'
-     ORDER BY publish_after DESC
-     LIMIT 1`,
-  )[0];
-  const lastArticle = d1(
-    `SELECT published_at
-     FROM articles
-     WHERE category = ${sqlString(category)}
-       AND COALESCE(NULLIF(published_at, ''), '') != ''
-     ORDER BY published_at DESC
-     LIMIT 1`,
-  )[0];
-  const gapMinutes = 60;
-  const baseTime = Math.max(Date.now(), parseDate(lastQueued?.publish_after), parseDate(lastArticle?.published_at));
-  return {
-    gapMinutes,
-    publishAfter: new Date(baseTime + gapMinutes * 60 * 1000).toISOString(),
-  };
-};
-
 const enqueuePitch = async (pitch, apiAvailable) => {
   const now = new Date().toISOString();
   if (apiAvailable) {
-    const article = await buildDraftArticle(pitch);
-    const draftArticleId = await saveDraftArticle(article);
     const data = await requestJson('/api/admin/pitches', {
       method: 'PATCH',
       body: JSON.stringify({
         id: pitch.id,
         clusterKey: pitch.cluster_key,
-        status: 'queued',
+        status: 'reviewed',
         category: pitch.category,
-        draftArticleId,
       }),
     });
     return {
-      id: String(data.queue?.id || `queue:${pitch.id}`),
-      mode: 'queued-api',
-      publishAfter: String(data.queue?.publishAfter || ''),
-      gapMinutes: Number(data.queue?.gapMinutes || 0),
-      draftArticleId,
+      id: String(data.pitch?.id || pitch.id),
+      mode: 'review-only-api',
+      publishAfter: '',
+      gapMinutes: 0,
+      draftArticleId: '',
     };
   }
 
-  const { gapMinutes, publishAfter } = nextPublishAfterForCategory(pitch.category);
   d1(
-    `INSERT INTO editorial_queue (id, pitch_id, category, status, publish_after, draft_article_id, error, updated_at)
-     VALUES (${sqlString(`queue:${pitch.id}`)}, ${sqlString(pitch.id)}, ${sqlString(pitch.category)}, 'queued', ${sqlString(publishAfter)}, '', '', ${sqlString(now)})
-     ON CONFLICT(pitch_id) DO UPDATE SET
-       category = excluded.category,
-       status = 'queued',
-       publish_after = excluded.publish_after,
-       error = '',
-       updated_at = excluded.updated_at`,
+    `DELETE FROM editorial_queue
+     WHERE pitch_id = ${sqlString(pitch.id)}
+       AND status = 'queued'
+       AND COALESCE(NULLIF(draft_article_id, ''), '') = ''`,
   );
   d1(
     `UPDATE editorial_pitches
-     SET status = 'queued', category = ${sqlString(pitch.category)}, updated_at = ${sqlString(now)}
+     SET status = 'reviewed', category = ${sqlString(pitch.category)}, updated_at = ${sqlString(now)}
      WHERE id = ${sqlString(pitch.id)}`,
   );
   return {
-    id: `queue:${pitch.id}`,
-    mode: 'queued-d1',
-    publishAfter,
-    gapMinutes,
+    id: pitch.id,
+    mode: 'review-only-d1',
+    publishAfter: '',
+    gapMinutes: 0,
     draftArticleId: '',
   };
 };
@@ -731,25 +652,22 @@ const main = async () => {
   const openSlots = Math.max(0, MAX_OPEN_QUEUE - existingQueued.length);
   const targetQueueCount = Math.max(0, Math.min(MAX_QUEUE_PER_RUN, openSlots));
 
-  const queued = [];
+  const reviewed = [];
   const errors = [];
   for (const pitch of candidates) {
-    if (queued.length >= targetQueueCount) break;
+    if (reviewed.length >= targetQueueCount) break;
     try {
       const imageCount = apiAvailable ? await fetchImages(pitch) : 0;
-      const queue = await enqueuePitch(pitch, apiAvailable);
-      queued.push({
+      const review = await enqueuePitch(pitch, apiAvailable);
+      reviewed.push({
         id: pitch.id,
-        queueId: queue?.id || '',
+        reviewId: review?.id || '',
         title: pitch.title,
         category: pitch.category,
         score: pitch.score,
         sourceCount: pitch.source_count,
         imageCount,
-        mode: queue?.mode || '',
-        publishAfter: queue?.publishAfter || '',
-        gapMinutes: queue?.gapMinutes || 0,
-        draftArticleId: queue?.draftArticleId || '',
+        mode: review?.mode || '',
       });
     } catch (error) {
       errors.push({
@@ -768,12 +686,13 @@ const main = async () => {
         ok: true,
         mode: apiAvailable ? 'api' : ADMIN_TOKEN ? 'd1-fallback-api-unavailable' : 'd1-fallback-without-admin-token',
         published,
-        queued,
+        queued: [],
+        reviewed,
         errors,
         duplicates,
         candidates: candidates.length,
         existingQueued,
-        note: 'Pautas automaticas ficam em editorial_queue como queued; o pulso da fila controla a publicacao.',
+        note: 'Pautas automaticas ficam em revisao. A fila publicavel exige rascunho editado/aprovado no admin.',
       },
       null,
       2,
