@@ -2,28 +2,28 @@
 title: "Equatorial vence privatização da Copasa com proposta de R$ 7,9 bi"
 slug: "privatizacao-da-copasa-csmg3-aegea-abandona-processo-e-deixa-area-livre-para-equatorial-eqtl3"
 summary: "A Equatorial Energia foi escolhida como investidora de referência na privatização da Copasa (CSMG3), após a Aegea abandonar o processo. A proposta da Equatorial pode chegar a R$ 7,9 bilhões."
-seoDescription: "A Equatorial Energia foi escolhida como investidora de referência na privatização da Copasa (CSMG3), após a Aegea abandonar o processo. A proposta da"
+seoDescription: "Economia: A Equatorial Energia foi escolhida como investidora de referência na privatização da Copasa (CSMG3), após a Aegea abandonar o processo. A proposta…"
 category: "Economia"
 author: "Redação Novo Alvo"
 sources: ["Seu Dinheiro", "InvestNews", "Money Times", "Valor Econômico", "Estadão", "NeoFeed", "O TEMPO", "InfoMoney"]
 publishedAt: "2026-06-05T14:44:58.084Z"
-updatedAt: "2026-06-05T14:45:40.317Z"
+updatedAt: "2026-06-05T15:39:27.856Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/privatizacao-da-copasa-csmg3-aegea-abandona-processo-e-deixa-area-livre-para-equatorial-eqtl3-cover-20260605144540.webp"
-  alt: "Logotipo da Copasa e da Equatorial Energia, representando a privatização do saneamento em Minas Gerais."
-  caption: "InvestNews"
+  src: "https://portalnovoalvo.com.br/media/news/privatizacao-da-copasa-csmg3-aegea-abandona-processo-e-deixa-area-livre-para-equatorial-eqtl3-cover-20260605153927.jpg"
+  alt: "Créditos: Reprodução/Divulgação"
+  caption: "Credito: InvestNews"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/privatizacao-da-copasa-csmg3-aegea-abandona-processo-e-deixa-area-livre-para-equatorial-eqtl3-cover-20260605144540.webp"
+ogImage: "https://portalnovoalvo.com.br/media/news/privatizacao-da-copasa-csmg3-aegea-abandona-processo-e-deixa-area-livre-para-equatorial-eqtl3-cover-20260605153927.jpg"
 tags: ["economia", "privatizacao", "copasa", "csmg3", "aegea", "abandona", "processo", "deixa", "area", "livre"]
 ---
 
 <p>A Equatorial Energia foi escolhida como a investidora de referência na privatização da Companhia de Saneamento de Minas Gerais (Copasa), marcando um avanço significativo no processo de desestatização.</p><p>A decisão veio após o consórcio Livorno Participações, liderado pela Aegea, anunciar sua retirada da disputa, deixando o caminho livre para a empresa de energia, que apresentou uma proposta robusta, com potencial de investimento de até R$ 7,9 bilhões.</p>
-<p>A saída do Livorno Participações, que incluía a Itaúsa (ITSA4), o fundo soberano de Cingapura GIC e a Equipav, foi comunicada pela Itaúsa em fato relevante.</p><figure class="editorial-inline-image editorial-inline-image--wide"><img src="/media/news/privatizacao-da-copasa-csmg3-aegea-abandona-processo-e-deixa-area-livre-para-equatorial-eqtl3-1.avif" alt="Logotipo da Copasa e da Equatorial Energia, representando a privatização do saneamento em Minas Gerais." loading="lazy" referrerpolicy="no-referrer" /></figure><p>O consórcio justificou a decisão pela não apresentação de uma nova proposta devido a alterações promovidas pela Copasa nas condições do processo de escolha do seu investidor de referência, anunciadas no último dia 28 de maio.</p>
+<p>A saída do Livorno Participações, que incluía a Itaúsa (ITSA4), o fundo soberano de Cingapura GIC e a Equipav, foi comunicada pela Itaúsa em fato relevante.</p><p><br></p><p>O consórcio justificou a decisão pela não apresentação de uma nova proposta devido a alterações promovidas pela Copasa nas condições do processo de escolha do seu investidor de referência, anunciadas no último dia 28 de maio.</p>
 <p>Com a desistência da Aegea, a Equatorial Energia (EQTL3) emergiu como a única proponente para adquirir uma participação de 30% do capital da Copasa (CSMG3).</p><p>A empresa, que já havia feito uma nova proposta na segunda tentativa de privatização da estatal mineira, consolidou sua posição como a principal candidata para se tornar sócia estratégica da companhia de saneamento.</p>
 <h2>Detalhes da Proposta e Reação do Mercado</h2>
 <p>A proposta da Equatorial Energia para a Copasa foi de R$ 49,03 por ação, superando o preço mínimo estabelecido pelo governo de Minas Gerais, que era de R$ 47,23. Este valor inicial corresponde a aproximadamente R$ 5,6 bilhões pela fatia de 30% do capital social.</p><p>Além disso, a Equatorial manifestou o desejo de participar de uma eventual alocação adicional, equivalente a 12,6% do capital social da Copasa, o que poderia elevar o investimento total para até R$ 7,9 bilhões.</p>
