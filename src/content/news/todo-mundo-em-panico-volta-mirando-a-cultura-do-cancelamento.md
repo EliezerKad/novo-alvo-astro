@@ -6,8 +6,8 @@ seoDescription: "Cinema: Nova fase da franquia aposta em humor ácido, elenco co
 category: "Cinema"
 author: "Redação Novo Alvo"
 sources: ["Terra", "AdoroCinema", "Nave Criativa", "Paramount", "Omelete", "Rolling Stone Brasil", "IMDb"]
-publishedAt: "2026-06-05T01:31:12.583Z"
-updatedAt: "2026-06-05T01:31:12.700Z"
+publishedAt: "2026-06-05T01:36:34.559Z"
+updatedAt: "2026-06-05T01:36:34.734Z"
 featured: false
 isFeatured: false
 urgent: false
