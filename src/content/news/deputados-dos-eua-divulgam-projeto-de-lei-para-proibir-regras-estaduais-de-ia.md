@@ -6,8 +6,8 @@ seoDescription: "Tecnologia: Projeto bipartidário visa proibir regulamentaçõe
 category: "Tecnologia"
 author: "Redação Novo Alvo"
 sources: ["Terra", "VEJA", "BBC", "R7", "Meio e Mensagem", "CNN Brasil", "UOL Notícias", "Jovem Pan", "Olhar Digital", "Valor Econômico", "G1", "Quatro Rodas"]
-publishedAt: "2026-06-05T21:09:58.812Z"
-updatedAt: "2026-06-05T21:09:58.978Z"
+publishedAt: "2026-06-05T21:11:04.774Z"
+updatedAt: "2026-06-05T21:11:04.961Z"
 featured: false
 isFeatured: false
 urgent: false
