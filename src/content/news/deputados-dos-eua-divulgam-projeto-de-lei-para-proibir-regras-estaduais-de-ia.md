@@ -6,8 +6,8 @@ seoDescription: "Tecnologia: Projeto bipartidário visa proibir regulamentaçõe
 category: "Tecnologia"
 author: "Redação Novo Alvo"
 sources: ["Terra", "VEJA", "BBC", "R7", "Meio e Mensagem", "CNN Brasil", "UOL Notícias", "Jovem Pan", "Olhar Digital", "Valor Econômico", "G1", "Quatro Rodas"]
-publishedAt: "2026-06-05T21:29:24.002Z"
-updatedAt: "2026-06-05T21:29:24.147Z"
+publishedAt: "2026-06-05T21:33:23.285Z"
+updatedAt: "2026-06-05T21:33:23.700Z"
 featured: false
 isFeatured: false
 urgent: false
@@ -36,7 +36,7 @@ tags: ["tecnologia", "deputados", "divulgam", "projeto", "proibir", "regras", "e
           <button type="button" data-media-action="large">Full</button>
           <button type="button" data-media-action="remove">Remover</button>
         </div>
-      <img src="/uploads/news/deputados-dos-eua-divulgam-projeto-de-lei-para-proibir-regras-estaduais-de-ia-1.jpg" alt="Representação artística de figuras femininas em um ambiente interno."><figcaption><span data-caption="">Representação artística de figuras femininas em um ambiente interno.</span><span class="media-credit" data-credit-label=""></span></figcaption></figure><p><br></p><p>Essa abordagem é vista por empresas de tecnologia como um passo positivo para garantir um ambiente de negócios mais previsível e para fomentar a inovação sem barreiras regulatórias estaduais.</p>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/A_Message_from_President-Elect_Donald_J._Trump.webm/1920px--A_Message_from_President-Elect_Donald_J._Trump.webm.jpg" alt="Representação artística de figuras femininas em um ambiente interno."><figcaption><span data-caption="">Representação artística de figuras femininas em um ambiente interno.</span><span class="media-credit" data-credit-label=""></span></figcaption></figure><p><br></p><p>Essa abordagem é vista por empresas de tecnologia como um passo positivo para garantir um ambiente de negócios mais previsível e para fomentar a inovação sem barreiras regulatórias estaduais.</p>
 <p>No entanto, a proposta já enfrenta críticas de grupos de defesa dos direitos do consumidor, que temem que a ausência de regulamentações estaduais possa deixar lacunas na proteção dos cidadãos e na fiscalização do uso ético da IA.</p><p>A discussão reflete um dilema crescente nos Estados Unidos sobre como equilibrar o avanço tecnológico com a segurança e os direitos individuais.</p>
 <h2>Contexto Econômico e Tecnológico</h2>
 <p>A iniciativa surge em um momento de intensa atividade no setor de tecnologia, com avanços significativos em IA e aprendizado de máquina.</p><p>Paralelamente, o mercado financeiro dos EUA tem demonstrado otimismo em relação às ações de tecnologia, impulsionado por revisões de lucros, conforme apontado por Luis Stuhlberger, da Verde Asset Management.</p><p>Essa efervescência econômica contrasta com a complexidade regulatória que a IA apresenta.</p>
