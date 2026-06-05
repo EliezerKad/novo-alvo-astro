@@ -6,8 +6,8 @@ seoDescription: "Games: A Netflix renovou a série animada Devil May Cry para su
 category: "Games"
 author: "Redação Novo Alvo"
 sources: ["Alternativa Nerd", "Omelete", "Animation Magazine", "Manual dos Games", "PSX Brasil", "nosbastidores.com.br", "Insider Gaming", "GameVicio", "Olhar Digital"]
-publishedAt: "2026-06-05T15:48:45.026Z"
-updatedAt: "2026-06-05T15:48:45.234Z"
+publishedAt: "2026-06-05T15:48:47.499Z"
+updatedAt: "2026-06-05T15:48:47.652Z"
 featured: false
 isFeatured: false
 urgent: false
