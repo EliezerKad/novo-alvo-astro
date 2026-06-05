@@ -6,8 +6,8 @@ seoDescription: "Cultura: Mostra associa esporte, corpo e emoção para tratar o
 category: "Cultura"
 author: "Redação Novo Alvo"
 sources: ["Correio Braziliense", "Agência Brasil", "Ministério da Cultura", "Secretaria de Cultura", "G1", "UOL", "Terra"]
-publishedAt: "2026-06-05T01:31:12.583Z"
-updatedAt: "2026-06-05T01:31:13.649Z"
+publishedAt: "2026-06-05T01:36:34.559Z"
+updatedAt: "2026-06-05T01:36:36.367Z"
 featured: false
 isFeatured: false
 urgent: false
