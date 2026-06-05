@@ -7,18 +7,18 @@ category: "Games"
 author: "Redação Novo Alvo"
 sources: ["Alternativa Nerd", "Omelete", "Animation Magazine", "Manual dos Games", "PSX Brasil", "nosbastidores.com.br", "Insider Gaming", "GameVicio", "Olhar Digital"]
 publishedAt: "2026-06-05T15:52:08.516Z"
-updatedAt: "2026-06-05T15:52:08.654Z"
+updatedAt: "2026-06-05T15:54:27.699Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/netflix-confirma-3-temporada-de-devil-may-cry-como-desfecho-planejado-da-serie-cover-20260605154212.jpg"
+  src: "https://portalnovoalvo.com.br/media/news/netflix-confirma-3-temporada-de-devil-may-cry-como-desfecho-planejado-da-serie-cover-20260605155427.jpg"
   alt: "Créditos: Reprodução/Divulgação/Netflix"
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/netflix-confirma-3-temporada-de-devil-may-cry-como-desfecho-planejado-da-serie-cover-20260605154212.jpg"
+ogImage: "https://portalnovoalvo.com.br/media/news/netflix-confirma-3-temporada-de-devil-may-cry-como-desfecho-planejado-da-serie-cover-20260605155427.jpg"
 tags: ["games", "devil", "renovada", "ultima", "temporada", "netflix"]
 ---
 
