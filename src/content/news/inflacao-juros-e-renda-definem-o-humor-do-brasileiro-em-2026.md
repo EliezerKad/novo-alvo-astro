@@ -6,19 +6,19 @@ seoDescription: "Economia: Projeções para inflação e Selic ajudam a explicar
 category: "Economia"
 author: "Redação Novo Alvo"
 sources: ["Agência Brasil", "Banco Central", "InfoMoney", "Valor Econômico", "CNN Brasil", "UOL Economia", "IBGE"]
-publishedAt: "2026-06-05T04:54:58.896Z"
-updatedAt: "2026-06-05T04:54:59.174Z"
+publishedAt: "2026-06-05T04:55:00.637Z"
+updatedAt: "2026-06-05T04:55:00.904Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/inflacao-juros-e-renda-definem-o-humor-do-brasileiro-em-2026-cover-20260605045459.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/inflacao-juros-e-renda-definem-o-humor-do-brasileiro-em-2026-cover-20260605045500.avif"
   alt: "(Foto de Chris Briggs na Unsplash)"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/inflacao-juros-e-renda-definem-o-humor-do-brasileiro-em-2026-cover-20260605045459.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/inflacao-juros-e-renda-definem-o-humor-do-brasileiro-em-2026-cover-20260605045500.avif"
 tags: ["Inflação", "Juros", "Selic", "Renda", "Economia brasileira"]
 ---
 
