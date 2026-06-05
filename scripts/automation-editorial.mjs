@@ -536,6 +536,37 @@ const pulseQueue = async () => {
   return data.published || [];
 };
 
+const computeQueueWindow = (pitch) => {
+  const gapMinutes = 40 + Math.floor(Math.random() * 51);
+  const category = String(pitch.category || '').trim() || 'Brasil';
+  const [lastQueued] = d1(
+    `SELECT publish_after
+     FROM editorial_queue
+     WHERE category = ${sqlString(category)}
+       AND status = 'queued'
+     ORDER BY publish_after DESC
+     LIMIT 1`,
+  );
+  const [lastArticle] = d1(
+    `SELECT published_at
+     FROM articles
+     WHERE category = ${sqlString(category)}
+       AND COALESCE(NULLIF(published_at, ''), '') != ''
+     ORDER BY published_at DESC
+     LIMIT 1`,
+  );
+  const baseTime = Math.max(
+    Date.now(),
+    lastQueued?.publish_after ? Date.parse(lastQueued.publish_after) || 0 : 0,
+    lastArticle?.published_at ? Date.parse(lastArticle.published_at) || 0 : 0,
+  );
+  return {
+    category,
+    gapMinutes,
+    publishAfter: new Date(baseTime + gapMinutes * 60 * 1000).toISOString(),
+  };
+};
+
 const fetchImages = async (pitch) => {
   try {
     const data = await requestJson('/api/admin/pitch-images', {
@@ -551,41 +582,52 @@ const fetchImages = async (pitch) => {
 
 const enqueuePitch = async (pitch, apiAvailable) => {
   const now = new Date().toISOString();
+  const { category, gapMinutes, publishAfter } = computeQueueWindow(pitch);
   if (apiAvailable) {
-    const data = await requestJson('/api/admin/pitches', {
-      method: 'PATCH',
-      body: JSON.stringify({
-        id: pitch.id,
-        clusterKey: pitch.cluster_key,
-        status: 'reviewed',
-        category: pitch.category,
-      }),
-    });
-    return {
-      id: String(data.pitch?.id || pitch.id),
-      mode: 'review-only-api',
-      publishAfter: '',
-      gapMinutes: 0,
-      draftArticleId: '',
-    };
+    try {
+      const data = await requestJson('/api/admin/pitches', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          id: pitch.id,
+          clusterKey: pitch.cluster_key,
+          status: 'queued',
+          category,
+        }),
+      });
+      return {
+        id: String(data.queue?.id || `queue:${pitch.id}`),
+        mode: 'queued-api',
+        publishAfter: String(data.queue?.publishAfter || ''),
+        gapMinutes: Number(data.queue?.gapMinutes || 0),
+        draftArticleId: String(data.queue?.draftArticleId || ''),
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!message.includes('rascunho revisado') && !isNetworkError(error)) throw error;
+      console.warn(`[queue] ${pitch.title}: ${message}. Aplicando fallback D1 para manter item revisavel na fila.`);
+    }
   }
 
   d1(
-    `DELETE FROM editorial_queue
-     WHERE pitch_id = ${sqlString(pitch.id)}
-       AND status = 'queued'
-       AND COALESCE(NULLIF(draft_article_id, ''), '') = ''`,
+    `INSERT INTO editorial_queue (id, pitch_id, category, status, publish_after, draft_article_id, error, updated_at)
+     VALUES (${sqlString(`queue:${pitch.id}`)}, ${sqlString(pitch.id)}, ${sqlString(category)}, 'queued', ${sqlString(publishAfter)}, '', '', ${sqlString(now)})
+     ON CONFLICT(pitch_id) DO UPDATE SET
+       category = excluded.category,
+       status = 'queued',
+       publish_after = excluded.publish_after,
+       error = '',
+       updated_at = excluded.updated_at`,
   );
   d1(
     `UPDATE editorial_pitches
-     SET status = 'reviewed', category = ${sqlString(pitch.category)}, updated_at = ${sqlString(now)}
+     SET status = 'queued', category = ${sqlString(category)}, updated_at = ${sqlString(now)}
      WHERE id = ${sqlString(pitch.id)}`,
   );
   return {
-    id: pitch.id,
-    mode: 'review-only-d1',
-    publishAfter: '',
-    gapMinutes: 0,
+    id: `queue:${pitch.id}`,
+    mode: apiAvailable ? 'queued-d1-fallback' : 'queued-d1',
+    publishAfter,
+    gapMinutes,
     draftArticleId: '',
   };
 };
@@ -652,22 +694,24 @@ const main = async () => {
   const openSlots = Math.max(0, MAX_OPEN_QUEUE - existingQueued.length);
   const targetQueueCount = Math.max(0, Math.min(MAX_QUEUE_PER_RUN, openSlots));
 
-  const reviewed = [];
+  const queued = [];
   const errors = [];
   for (const pitch of candidates) {
-    if (reviewed.length >= targetQueueCount) break;
+    if (queued.length >= targetQueueCount) break;
     try {
       const imageCount = apiAvailable ? await fetchImages(pitch) : 0;
       const review = await enqueuePitch(pitch, apiAvailable);
-      reviewed.push({
+      queued.push({
         id: pitch.id,
-        reviewId: review?.id || '',
+        queueId: review?.id || '',
         title: pitch.title,
         category: pitch.category,
         score: pitch.score,
         sourceCount: pitch.source_count,
         imageCount,
         mode: review?.mode || '',
+        publishAfter: review?.publishAfter || '',
+        gapMinutes: review?.gapMinutes || 0,
       });
     } catch (error) {
       errors.push({
@@ -686,13 +730,12 @@ const main = async () => {
         ok: true,
         mode: apiAvailable ? 'api' : ADMIN_TOKEN ? 'd1-fallback-api-unavailable' : 'd1-fallback-without-admin-token',
         published,
-        queued: [],
-        reviewed,
+        queued,
         errors,
         duplicates,
         candidates: candidates.length,
         existingQueued,
-        note: 'Pautas automaticas ficam em revisao. A fila publicavel exige rascunho editado/aprovado no admin.',
+        note: 'Novas pautas entram em editorial_queue como revisaveis; somente o pulso da fila tenta publicar itens vencidos.',
       },
       null,
       2,
