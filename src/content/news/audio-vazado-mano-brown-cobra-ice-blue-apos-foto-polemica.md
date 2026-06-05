@@ -15,7 +15,7 @@ homeSection: ""
 views: 0
 cover:
   src: "https://portalnovoalvo.com.br/media/news/audio-vazado-mano-brown-cobra-ice-blue-apos-foto-polemica-cover-20260605140352.webp"
-  alt: "Montagem com Mano Brown e Ice Blue em meio à polêmica do áudio vazado"
+  alt: "Mano Brown e Ice Blue em meio à polêmica do áudio vazado"
   caption: ""
   layout: "full"
 ogImage: "https://portalnovoalvo.com.br/media/news/audio-vazado-mano-brown-cobra-ice-blue-apos-foto-polemica-cover-20260605140352.webp"
