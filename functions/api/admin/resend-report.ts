@@ -216,9 +216,33 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
                 COUNT(*) AS total,
                 SUM(CASE WHEN status = 'subscribed' THEN 1 ELSE 0 END) AS subscribed,
                 SUM(CASE WHEN status = 'unsubscribed' THEN 1 ELSE 0 END) AS unsubscribed,
-                SUM(CASE WHEN last_auto_response_at IS NOT NULL AND last_auto_response_at != '' THEN 1 ELSE 0 END) AS sent,
-                SUM(CASE WHEN last_auto_response_at IS NULL OR last_auto_response_at = '' THEN 1 ELSE 0 END) AS pending,
-                SUM(CASE WHEN status = 'unsubscribed' AND last_auto_response_at IS NOT NULL AND last_auto_response_at != '' THEN 1 ELSE 0 END) AS unsubscribed_after_send
+                (
+                  SELECT COUNT(DISTINCT lower(ns.email))
+                    FROM newsletter_sends ns
+                   WHERE ns.campaign = 'first_contact_2026_05_28'
+                ) AS sent,
+                (
+                  SELECT COUNT(*)
+                    FROM newsletter_subscribers pending_subscriber
+                   WHERE pending_subscriber.status = 'subscribed'
+                     AND NOT EXISTS (
+                       SELECT 1
+                         FROM newsletter_sends sent_campaign
+                        WHERE sent_campaign.campaign = 'first_contact_2026_05_28'
+                          AND lower(sent_campaign.email) = lower(pending_subscriber.email)
+                     )
+                ) AS pending,
+                (
+                  SELECT COUNT(*)
+                    FROM newsletter_subscribers unsubscribed_subscriber
+                   WHERE unsubscribed_subscriber.status = 'unsubscribed'
+                     AND EXISTS (
+                       SELECT 1
+                         FROM newsletter_sends sent_campaign
+                        WHERE sent_campaign.campaign = 'first_contact_2026_05_28'
+                          AND lower(sent_campaign.email) = lower(unsubscribed_subscriber.email)
+                     )
+                ) AS unsubscribed_after_send
                FROM newsletter_subscribers`,
           )
             .bind()
@@ -230,8 +254,12 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
             `SELECT email, updated_at
                FROM newsletter_subscribers
               WHERE status = 'unsubscribed'
-                AND last_auto_response_at IS NOT NULL
-                AND last_auto_response_at != ''
+                AND EXISTS (
+                  SELECT 1
+                    FROM newsletter_sends sent_campaign
+                   WHERE sent_campaign.campaign = 'first_contact_2026_05_28'
+                     AND lower(sent_campaign.email) = lower(newsletter_subscribers.email)
+                )
               ORDER BY updated_at DESC
               LIMIT 8`,
           )
