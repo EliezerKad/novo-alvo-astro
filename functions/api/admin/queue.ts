@@ -1955,11 +1955,15 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   const published: unknown[] = [];
   let checked = 0;
   const origin = new URL(request.url).origin;
+  const allowRawQueuePublish = String((env as { ALLOW_RAW_QUEUE_PUBLISH?: string }).ALLOW_RAW_QUEUE_PUBLISH || '').toLowerCase() === 'true';
 
   for (const item of due.results || []) {
     if (published.length >= limit) break;
     checked += 1;
     try {
+      if (!clean(item.draft_article_id, 120) && !allowRawQueuePublish) {
+        throw new Error('Publicacao automatica bloqueada: item da fila nao possui rascunho revisado.');
+      }
       const article = (await buildArticlePayloadFromDraft(db, item)) || (await buildArticlePayload(item, env));
       if (!(article as { generatedWithAi?: boolean }).generatedWithAi) {
         throw new Error((article as { generationError?: string }).generationError || 'Materia bloqueada pela validacao editorial.');

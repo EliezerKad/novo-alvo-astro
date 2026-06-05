@@ -727,6 +727,23 @@ export const onRequestPatch = async ({ request, env }: { request: Request; env: 
 
   let queue = null;
   if (status === 'queued') {
+    const allowRawPitchQueue = String((env as { ALLOW_RAW_PITCH_QUEUE?: string }).ALLOW_RAW_PITCH_QUEUE || '').toLowerCase() === 'true';
+    if (!draftArticleId && !allowRawPitchQueue) {
+      await db
+        .prepare('UPDATE editorial_pitches SET status = ?, category = ?, updated_at = ? WHERE id = ? OR cluster_key = ?')
+        .bind('reviewed', nextCategory, now, existing.id, lookupKey)
+        .run();
+      await rememberExistingPitch(db, existingForMemory, 'reviewed');
+      return json(
+        {
+          error: 'Pauta automatica precisa virar rascunho revisado antes de entrar na fila de publicacao.',
+          ok: false,
+          queue: null,
+          status: 'reviewed',
+        },
+        { status: 409 },
+      );
+    }
     const queueId = `queue:${existing.id}`;
     const gapMinutes = 40 + Math.floor(Math.random() * 51);
     const category = nextCategory;

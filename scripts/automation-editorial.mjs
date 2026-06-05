@@ -550,43 +550,33 @@ const fetchImages = async (pitch) => {
 };
 
 const enqueuePitch = async (pitch, apiAvailable) => {
+  const now = new Date().toISOString();
+  const reviewOnly = {
+    id: pitch.id,
+    mode: apiAvailable ? 'review-only-api' : 'review-only-d1',
+    publishAfter: '',
+    gapMinutes: 0,
+  };
+
   if (apiAvailable) {
-    const data = await requestJson('/api/admin/pitches', {
+    await requestJson('/api/admin/pitches', {
       method: 'PATCH',
       body: JSON.stringify({
         id: pitch.id,
         clusterKey: pitch.cluster_key,
-        status: 'queued',
+        status: 'reviewed',
         category: pitch.category,
       }),
     });
-    return data.queue;
+    return reviewOnly;
   }
-
-  const now = new Date().toISOString();
-  const lastQueued = listQueued()
-    .filter((item) => item.category === pitch.category)
-    .map((item) => parseDate(item.publish_after))
-    .sort((a, b) => b - a)[0] || 0;
-  const baseTime = Math.max(Date.now(), lastQueued);
-  const gapMinutes = 40 + Math.floor(Math.random() * 51);
-  const publishAfter = new Date(baseTime + gapMinutes * 60 * 1000).toISOString();
-  const queueId = `queue:${pitch.id}`;
 
   d1(
     `UPDATE editorial_pitches
-     SET status = 'queued', updated_at = ${sqlString(now)}
-     WHERE id = ${sqlString(pitch.id)};
-     INSERT INTO editorial_queue (id, pitch_id, category, status, publish_after, updated_at)
-     VALUES (${sqlString(queueId)}, ${sqlString(pitch.id)}, ${sqlString(pitch.category)}, 'queued', ${sqlString(publishAfter)}, ${sqlString(now)})
-     ON CONFLICT(pitch_id) DO UPDATE SET
-       category = excluded.category,
-       status = 'queued',
-       publish_after = excluded.publish_after,
-       error = '',
-       updated_at = excluded.updated_at`,
+     SET status = 'reviewed', category = ${sqlString(pitch.category)}, updated_at = ${sqlString(now)}
+     WHERE id = ${sqlString(pitch.id)}`,
   );
-  return { id: queueId, publishAfter, gapMinutes, mode: 'd1-fallback' };
+  return reviewOnly;
 };
 
 const main = async () => {
@@ -652,17 +642,18 @@ const main = async () => {
   const selected = candidates.slice(0, Math.max(0, Math.min(MAX_QUEUE_PER_RUN, openSlots)));
 
   const queued = [];
+  const reviewed = [];
   for (const pitch of selected) {
     const imageCount = apiAvailable ? await fetchImages(pitch) : 0;
     const queue = await enqueuePitch(pitch, apiAvailable);
-    queued.push({
+    reviewed.push({
       id: pitch.id,
       title: pitch.title,
       category: pitch.category,
       score: pitch.score,
       sourceCount: pitch.source_count,
       imageCount,
-      publishAfter: queue?.publishAfter || '',
+      mode: queue?.mode || '',
     });
   }
 
@@ -673,14 +664,11 @@ const main = async () => {
         mode: apiAvailable ? 'api' : ADMIN_TOKEN ? 'd1-fallback-api-unavailable' : 'd1-fallback-without-admin-token',
         published,
         queued,
+        reviewed,
         duplicates,
         candidates: candidates.length,
         existingQueued,
-        note: apiAvailable
-          ? ''
-          : ADMIN_TOKEN
-            ? 'ADMIN_TOKEN configurado, mas API indisponivel nesta rodada: enfileira pelo D1 e nao publica direto.'
-            : 'Sem ADMIN_TOKEN: enfileira pelo D1, mas nao pulsa/publica nem busca imagens pela API.',
+        note: 'Pautas automaticas agora ficam em revisao. A fila publicavel exige rascunho editado/aprovado no admin.',
       },
       null,
       2,
