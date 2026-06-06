@@ -6,8 +6,8 @@ seoDescription: "Economia: David Vélez, fundador e CEO do Nubank, é reconhecid
 category: "Economia"
 author: "Redação Novo Alvo"
 sources: ["Seu Dinheiro", "Estadão", "NeoFeed", "Tecnoblog", "Brazil Journal", "VEJA", "Meio e Mensagem", "CoinDesk"]
-publishedAt: "2026-06-06T16:38:01.716Z"
-updatedAt: "2026-06-06T16:38:01.870Z"
+publishedAt: "2026-06-06T16:50:40.649Z"
+updatedAt: "2026-06-06T16:50:40.868Z"
 featured: false
 isFeatured: false
 urgent: false
