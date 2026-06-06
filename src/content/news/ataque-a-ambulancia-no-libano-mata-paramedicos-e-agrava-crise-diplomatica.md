@@ -6,8 +6,8 @@ seoDescription: "Mundo: Ataque israelense a veículo de emergência no sul do L�
 category: "Mundo"
 author: "Redação Novo Alvo"
 sources: ["Opera Mundi", "Campo Grande News", "CartaCapital", "ContilNet Notícias", "Brasil de Fato", "Diario de Pernambuco", "CNN Brasil", "((o))eco | Jornalismo Ambiental"]
-publishedAt: "2026-06-06T19:01:44.751Z"
-updatedAt: "2026-06-06T19:01:46.630Z"
+publishedAt: "2026-06-06T19:36:45.982Z"
+updatedAt: "2026-06-06T19:36:46.893Z"
 featured: false
 isFeatured: false
 urgent: false
