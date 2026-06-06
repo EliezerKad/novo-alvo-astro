@@ -6,8 +6,8 @@ seoDescription: "Lifestyle: Ao mostrar bastidores do parto do segundo filho, Lor
 category: "Lifestyle"
 author: "Redação Novo Alvo"
 sources: ["UOL Splash", "SBT", "Instagram", "Quem", "Caras", "Gshow", "LeoDias", "Metrópoles"]
-publishedAt: "2026-06-06T12:43:01.601Z"
-updatedAt: "2026-06-06T12:43:02.014Z"
+publishedAt: "2026-06-06T12:43:07.573Z"
+updatedAt: "2026-06-06T12:43:07.716Z"
 featured: false
 isFeatured: false
 urgent: false
