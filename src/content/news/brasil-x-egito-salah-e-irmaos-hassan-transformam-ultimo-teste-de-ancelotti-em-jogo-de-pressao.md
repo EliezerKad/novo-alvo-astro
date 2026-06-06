@@ -6,8 +6,8 @@ seoDescription: "Futebol: Antes da Copa, o Brasil encara o Egito em Cleveland co
 category: "Futebol"
 author: "Redação Novo Alvo"
 sources: ["ge", "FIFA", "CBF", "ESPN", "Lance!", "Reuters", "AP", "CAF"]
-publishedAt: "2026-06-06T00:15:31.419Z"
-updatedAt: "2026-06-06T00:15:31.565Z"
+publishedAt: "2026-06-06T00:16:28.538Z"
+updatedAt: "2026-06-06T00:16:28.689Z"
 featured: false
 isFeatured: false
 urgent: false
