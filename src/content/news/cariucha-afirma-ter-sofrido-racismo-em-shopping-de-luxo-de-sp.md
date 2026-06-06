@@ -6,19 +6,19 @@ seoDescription: "Famosos: A apresentadora Cariúcha, de 42 anos, afirma ter sido
 category: "Famosos"
 author: "Redação Novo Alvo"
 sources: ["redeutv.com.br", "Estado de Minas", "Tribuna Online", "Bnews", "Portal ABC do ABC", "diário do estado", "Rondônia Dinâmica", "CNN Brasil"]
-publishedAt: "2026-06-06T14:32:27.917Z"
-updatedAt: "2026-06-06T14:32:31.720Z"
+publishedAt: "2026-06-06T14:32:37.044Z"
+updatedAt: "2026-06-06T14:32:40.845Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/media/news/cariucha-afirma-ter-sofrido-racismo-em-shopping-de-luxo-de-sp-cover-20260606143231.jpg"
+  src: "https://portalnovoalvo.com.br/media/news/cariucha-afirma-ter-sofrido-racismo-em-shopping-de-luxo-de-sp-cover-20260606143240.jpg"
   alt: "Foto: Reprodução/Instagram"
   caption: "Credito: Unsplash"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/media/news/cariucha-afirma-ter-sofrido-racismo-em-shopping-de-luxo-de-sp-cover-20260606143231.jpg"
+ogImage: "https://portalnovoalvo.com.br/media/news/cariucha-afirma-ter-sofrido-racismo-em-shopping-de-luxo-de-sp-cover-20260606143240.jpg"
 tags: ["brasil", "cariucha", "afirma", "sofrido", "racismo", "shopping", "luxo"]
 ---
 
