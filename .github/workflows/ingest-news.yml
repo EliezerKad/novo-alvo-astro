@@ -1,8 +1,6 @@
 name: Ingest editorial pitches
 
 on:
-  schedule:
-    - cron: '*/30 * * * *'
   workflow_dispatch:
     inputs:
       category:
@@ -86,71 +84,4 @@ jobs:
           RADAR_BATCHES_PER_CATEGORY: 5
           SOURCE_EXPANSION_TARGET: 16
           SOURCE_TEXT_TARGET: 15
-          HOUSEKEEPING_DAYS: 30
-
-  ingest-scheduled:
-    if: github.event_name == 'schedule'
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    strategy:
-      fail-fast: false
-      max-parallel: 4
-      matrix:
-        category:
-          - Brasil
-          - Politica
-          - Mundo
-          - Economia
-          - Tecnologia
-          - Entretenimento
-          - Esportes
-          - Ciencia
-          - Saude
-          - Famosos
-          - Futebol
-          - Games
-          - Lifestyle
-          - Educacao
-          - Cultura
-          - Moda
-          - Musica
-          - Cinema
-          - Ocorrencias
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci --progress=false
-
-      - name: Ingest ${{ matrix.category }} RSS into editorial pitches
-        run: npm run ingest:news
-        env:
-          PORTAL_ORIGIN: https://portalnovoalvo.com.br
-          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
-          GNEWS_API_KEY: ${{ secrets.GNEWS_API_KEY }}
-          GOOGLE_SEARCH_API_KEY: ${{ secrets.GOOGLE_SEARCH_API_KEY }}
-          GOOGLE_SEARCH_CX: ${{ secrets.GOOGLE_SEARCH_CX }}
-          INGEST_DISCOVERY: rss
-          GNEWS_QUERIES_PER_CATEGORY: 1
-          GNEWS_MAX_RESULTS: 10
-          GOOGLE_SEARCH_PAGES_PER_QUERY: 1
-          GOOGLE_SEARCH_QUERIES_PER_CATEGORY: 4
-          MAX_ITEMS_PER_FEED: 80
-          MAX_PITCHES: 80
-          CATEGORY_MAX_PITCHES: 10
-          ABSOLUTE_MIN_SOURCES: 8
-          CATEGORY_MIN_SOURCES: 8
-          CATEGORY_FLOOR_MIN_SOURCES: 8
-          INGEST_CATEGORY: ${{ matrix.category }}
-          MIN_SOURCES: 8
-          MAX_ITEM_AGE_HOURS: 48
-          RADAR_BATCHES_PER_CATEGORY: 4
-          SOURCE_EXPANSION_TARGET: 14
           HOUSEKEEPING_DAYS: 30
