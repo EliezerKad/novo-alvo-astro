@@ -127,6 +127,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   const limit = Math.min(100, Math.max(1, Math.floor(Number(payload.limit || 100))));
   const dryRun = Boolean(payload.dryRun);
   const onlyUnsent = Boolean(payload.onlyUnsent);
+  const campaign = 'first_contact_2026_05_28';
   const origin = clean(payload.origin, 200) || new URL(request.url).origin;
   const from = clean(env.NEWSLETTER_FROM, 180) || 'Portal Novo Alvo <newsletter@portalnovoalvo.com.br>';
   const replyTo = clean(env.NEWSLETTER_REPLY_TO, 180) || 'contato@portalnovoalvo.com.br';
@@ -158,11 +159,21 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
          FROM newsletter_subscribers
          WHERE email IS NOT NULL
            AND email != ''
-           ${onlyUnsent ? "AND (last_auto_response_at IS NULL OR last_auto_response_at = '')" : ''}
+           AND status = 'subscribed'
+           ${
+             onlyUnsent
+               ? `AND NOT EXISTS (
+                    SELECT 1
+                      FROM newsletter_sends sent_campaign
+                     WHERE sent_campaign.campaign = ?
+                       AND lower(sent_campaign.email) = lower(newsletter_subscribers.email)
+                  )`
+               : ''
+           }
          ORDER BY lower(email)
          LIMIT ? OFFSET ?`,
       )
-      .bind(limit, offset)
+      .bind(...(onlyUnsent ? [campaign] : []), limit, offset)
       .all<Subscriber>();
     contacts = subscribers.results || [];
   }
@@ -200,7 +211,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
           text: welcomeText(origin, subscriber.unsub_token),
           tags: [
             { name: 'kind', value: 'welcome' },
-            { name: 'campaign', value: 'first_contact_2026_05_28' },
+            { name: 'campaign', value: campaign },
           ],
         })),
       ),
@@ -259,7 +270,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
         resendId,
         subscriber.email,
         'O que importa, do jeito que da vontade de ler',
-        'first_contact_2026_05_28',
+        campaign,
         now,
         now,
       )
