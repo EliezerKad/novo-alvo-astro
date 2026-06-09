@@ -6,8 +6,8 @@ seoDescription: "Cinema: A animação 'Super Mario Galaxy: O Filme', da Illumina
 category: "Cinema"
 author: "Redação Novo Alvo"
 sources: ["Critical Hits", "Vietnam.vn", "News Rondônia", "Canaltech", "tracklist.com.br", "A Província do Pará", "Money Times", "games.gg", "Caderno Pop"]
-publishedAt: "2026-06-09T23:32:24.378Z"
-updatedAt: "2026-06-09T23:32:24.403Z"
+publishedAt: "2026-06-09T23:33:16.014Z"
+updatedAt: "2026-06-09T23:33:16.136Z"
 featured: false
 isFeatured: false
 urgent: false
