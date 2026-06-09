@@ -6,19 +6,19 @@ seoDescription: "Entretenimento: Lista da semana organiza o que acompanhar em Ne
 category: "Entretenimento"
 author: "Redação Novo Alvo"
 sources: ["https://news.google.com/rss/articles/CBMi6AFBVV95cUxPbHpFNTJSbHNuLWJJd2FXY1ZYeGYwTG0wME9tRkwyeWxmZTVPVTQ5NTI1eFVrMG00UFRCazRWTDd6MVJPLUt5LU9KTFN0Z2Itck52Tzlwekh", "https://news.google.com/rss/articles/CBMiyAFBVV95cUxNZHJ4bXRDbkNicTZRQVZTZjRucHVhNWtDdnl0WmV5Wm5ySTQwcFY2MlZ2eWN3TjVjck84V2VqckdIZEdlUmZwV1VYd2dGczc0bmtCcWR4LTN", "https://news.google.com/rss/articles/CBMi2gFBVV95cUxOa3JPeDhqbU9ZWFJ6WHE1eG1odHFXM3FnZWJvdVN0QWlxemY0aGphOGt2LUVxTF8yaHA3X0Vxdk0wUl9ocklXQV9LYWJ3WmlsNDY2UGxpeDR", "https://news.google.com/rss/articles/CBMiqwFBVV95cUxOVHVFbjUzSzB5UUlTci1rSjhtaFFSUUd3ZUw0WGFGdnhXd1VWZEJaQnBzWjdVc1AwQ0xQUDdMbDlra2xyM2Z4VDBBeWhxSUt0R19yVUhtWmZ", "https://news.google.com/rss/articles/CBMi1wFBVV95cUxNalRGMWtMb3o1UW55VmM1ZUpNMlREc3o2cWNNNTJ6NVBleU8yR2NRMzFfZTFDTG1aenFVdU1TbGxENVNKcml1TXlnS2JfLUM3VzVyMmlNU1Z", "https://news.google.com/rss/articles/CBMihwFBVV95cUxPYzFuSXNmTm1WLXJBMG8yU013dHJZMmpHWFJfSFJmQm5NbEM4OGFQcTZYTUFVVzVhRWxfMWc0bFhmOUVUc2pzZlRPSF9DY2hNREZlVHJEeTF", "https://news.google.com/rss/articles/CBMikAFBVV95cUxPTnc4Nl8ybmdYeXpZSWw2N3dDR0JKaWlvZTNGZHhTaHRlbEsySDF6V1pmRlFuZ2hlNnhxUld0eXVvNE5vR251N05sV3ExbTNxdHBmLWtUNXd", "https://news.google.com/rss/articles/CBMiqwFBVV95cUxOVHVFbjUzSzB5UUlTci1rSjhtaFFSUUd3ZUw0WGFGdnhXd1VWZEJaQnBzWjdVc1AwQ0xQUDdMbDlra2xyM2Z4VDBBeWhxSUt0R19yVUhtWmZ"]
-publishedAt: "2026-06-09T16:55:00.243Z"
-updatedAt: "2026-06-09T16:55:02.087Z"
+publishedAt: "2026-06-09T17:07:08.244Z"
+updatedAt: "2026-06-09T17:07:09.827Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/streaming-guia-da-semana-organiza-as-melhores-estreias-de-netflix-max-e-disney-cover-20260609165502.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/streaming-guia-da-semana-organiza-as-melhores-estreias-de-netflix-max-e-disney-cover-20260609170709.avif"
   alt: "Foto de Thibault Penin na Unsplash"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/streaming-guia-da-semana-organiza-as-melhores-estreias-de-netflix-max-e-disney-cover-20260609165502.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/streaming-guia-da-semana-organiza-as-melhores-estreias-de-netflix-max-e-disney-cover-20260609170709.avif"
 tags: ["streaming", "Netflix", "Max", "Prime Video", "Disney+", "MUBI", "k-dramas"]
 ---
 
