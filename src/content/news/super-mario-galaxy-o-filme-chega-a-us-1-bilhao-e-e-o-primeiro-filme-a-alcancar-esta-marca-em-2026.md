@@ -6,8 +6,8 @@ seoDescription: "Cinema: A animação 'Super Mario Galaxy: O Filme', da Illumina
 category: "Cinema"
 author: "Redação Novo Alvo"
 sources: ["Critical Hits", "Vietnam.vn", "News Rondônia", "Canaltech", "tracklist.com.br", "A Província do Pará", "Money Times", "games.gg", "Caderno Pop"]
-publishedAt: "2026-06-09T23:32:22.116Z"
-updatedAt: "2026-06-09T23:32:22.520Z"
+publishedAt: "2026-06-09T23:32:24.378Z"
+updatedAt: "2026-06-09T23:32:24.403Z"
 featured: false
 isFeatured: false
 urgent: false
@@ -35,7 +35,7 @@ tags: ["cinema", "super", "mario", "galaxy", "filme", "chega", "bilhao", "primei
           <button type="button" data-media-action="large">Full</button>
           <button type="button" data-media-action="remove">Remover</button>
         </div>
-      <img src="/media/news/super-mario-galaxy-o-filme-chega-a-us-1-bilhao-e-e-o-primeiro-filme-a-alcancar-esta-marca-em-2026-1.jpg" alt="Logo de Star Wars"><figcaption><span data-caption="">Logo de Star Wars</span><span class="media-credit" data-credit-label=""></span></figcaption></figure><p><br></p>
+      <img src="https://upload.wikimedia.org/wikipedia/pt/5/59/Captain_Marvel_%282018%29.jpg" alt="Logo de Star Wars"><figcaption><span data-caption="">Logo de Star Wars</span><span class="media-credit" data-credit-label=""></span></figcaption></figure><p><br></p>
 <h2>Franquia Super Mario se consolida</h2>
 <p>Apesar do marco, Super Mario Galaxy: O Filme ainda fica atrás de seu predecessor, Super Mario Bros. : O Filme , que encerrou sua corrida em 2023 com cerca de US$ 1,36 bilhão.</p><p>Juntos, os dois filmes da franquia Super Mario demonstram o potencial de público e o retorno financeiro de investimentos em propriedades intelectuais de games.</p>
 <p>Com um orçamento estimado em US$ 110 milhões , o retorno sobre o investimento de Super Mario Galaxy: O Filme é notável. A produção da Universal Pictures e Nintendo reforça a viabilidade de grandes apostas em animações baseadas em universos de jogos.</p>
