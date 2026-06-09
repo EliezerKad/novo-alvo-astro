@@ -6,8 +6,8 @@ seoDescription: "Musica: Rapper baiana vive fase de consolidação em 2026, com 
 category: "Musica"
 author: "Redação Novo Alvo"
 sources: ["https://www.jornaldorap.com.br/rap-nacional/duquesa-estreia-no-tiny-desk-brasil-com-banda-formada-exclusivamente-por-mulheres-negras/", "https://www.universalmusic.com.br/2026/03/20/feat-do-ano-budah-e-duquesa-lancam-vip/", "https://www.agazeta.com.br/hz/cultura/rapper-capixaba-budah-lanca-album-com-iza-pabllo-vittar-e-duquesa-frequencia-lunar-0526", "https://www.terra.com.br/diversao/musica/rock-in-rio/precisava-ser-com-ela-budah-atracao-do-rock-in-rio-celebra-clipe-com-duquesa-entrevista%2Cf88e287034646fab7", "https://www.rapdab.com.br/2026/04/16/mano-a-mano-recebe-duquesa/", "https://www.uol.com.br/splash/noticias/2024/05/10/duquesa.htm", "https://tracklist.com.br/entrevista-duquesa-taurus-vol-2/", "https://rapgol.com.br/duquesa-conversa-com-a-rapgol-sobre-o-seu-novo-projeto-taurus-vol-2/", "https://www.concertarchives.org/bands/duquesa", "https://www.famousbirthdays.com/people/duquesa.html"]
-publishedAt: "2026-06-09T16:54:04.697Z"
-updatedAt: "2026-06-09T16:54:04.855Z"
+publishedAt: "2026-06-09T16:55:00.243Z"
+updatedAt: "2026-06-09T16:55:00.432Z"
 featured: false
 isFeatured: false
 urgent: false
