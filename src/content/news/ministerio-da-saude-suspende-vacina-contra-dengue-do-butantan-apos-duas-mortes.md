@@ -6,19 +6,19 @@ seoDescription: "Saude: Decisão do Ministério da Saúde suspende temporariamen
 category: "Saude"
 author: "Redação Novo Alvo"
 sources: ["NSC Total", "Maringa.Com Notícias", "TVT News", "Tribuna de Minas", "Jovem Pan", "Ceará Agora", "sampi.net.br", "Correio do Povo", "Portal Você Online", "Revista Oeste", "OitoMeia", "band.com.br", "Correio Braziliense", "Brasil 247"]
-publishedAt: "2026-06-10T02:29:30.550Z"
-updatedAt: "2026-06-10T02:29:31.861Z"
+publishedAt: "2026-06-10T03:31:12.094Z"
+updatedAt: "2026-06-10T03:31:12.297Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/ministerio-da-saude-suspende-vacina-contra-dengue-do-butantan-apos-duas-mortes-cover-20260610022931.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/ministerio-da-saude-suspende-vacina-contra-dengue-do-butantan-apos-duas-mortes-cover-20260610033112.avif"
   alt: "Foto de Mufid Majnun na Unsplash"
   caption: "Credito: Unsplash"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/ministerio-da-saude-suspende-vacina-contra-dengue-do-butantan-apos-duas-mortes-cover-20260610022931.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/ministerio-da-saude-suspende-vacina-contra-dengue-do-butantan-apos-duas-mortes-cover-20260610033112.avif"
 tags: ["esportes", "ministerio", "saude", "suspende", "vacina", "contra", "dengue", "butantan", "duas", "mortes"]
 ---
 
