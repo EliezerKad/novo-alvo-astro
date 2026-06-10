@@ -6,19 +6,19 @@ seoDescription: "Saude: A Polícia Civil do Rio de Janeiro deflagrou a Operaçã
 category: "Saude"
 author: "Redação Novo Alvo"
 sources: ["CNN Brasil", "SBT News", "CBN", "O Dia", "viva.com.br", "Povo na Rua", "Terra Brasil Notícias", "VEJA", "Estadão", "O Globo"]
-publishedAt: "2026-06-10T02:28:30.671Z"
-updatedAt: "2026-06-10T02:28:31.090Z"
+publishedAt: "2026-06-10T02:29:30.552Z"
+updatedAt: "2026-06-10T02:29:30.710Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/operacao-mira-venda-ilegal-de-canetas-emagrecedoras-em-academias-cover-20260610022831.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/operacao-mira-venda-ilegal-de-canetas-emagrecedoras-em-academias-cover-20260610022930.avif"
   alt: "Foto de Haberdoedas na Unsplash"
   caption: "Credito: Wikimedia Commons"
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/operacao-mira-venda-ilegal-de-canetas-emagrecedoras-em-academias-cover-20260610022831.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/operacao-mira-venda-ilegal-de-canetas-emagrecedoras-em-academias-cover-20260610022930.avif"
 tags: ["saude", "operacao", "mira", "venda", "ilegal", "canetas", "emagrecedoras"]
 ---
 
