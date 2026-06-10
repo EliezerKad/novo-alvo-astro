@@ -6,19 +6,19 @@ seoDescription: "Brasil: Nova legislação endurece punições para quem atua se
 category: "Brasil"
 author: "Redação Novo Alvo"
 sources: ["n3news.com.br", "paranahoje.com.br", "Diário da Região", "Diario de Pernambuco", "Notícia Toda Hora", "Agora No Vale", "Clarim Araxá", "Folha do Estado da Bahia", "Portal da Câmara dos Deputados", "Portal DBO", "Marília Notícia", "A TARDE", "Poços Já", "Congresso em Foco", "Agência Brasil", "Senado"]
-publishedAt: "2026-06-10T03:31:39.802Z"
-updatedAt: "2026-06-10T03:31:40.953Z"
+publishedAt: "2026-06-10T03:31:52.323Z"
+updatedAt: "2026-06-10T03:31:54.274Z"
 featured: false
 isFeatured: false
 urgent: false
 homeSection: ""
 views: 0
 cover:
-  src: "https://portalnovoalvo.com.br/uploads/news/lei-torna-crime-o-exercicio-ilegal-da-medicina-veterinaria-no-brasil-cover-20260610033140.avif"
+  src: "https://portalnovoalvo.com.br/uploads/news/lei-torna-crime-o-exercicio-ilegal-da-medicina-veterinaria-no-brasil-cover-20260610033154.avif"
   alt: "Foto de Jonatan Bustos na Unsplash"
   caption: ""
   layout: "full"
-ogImage: "https://portalnovoalvo.com.br/uploads/news/lei-torna-crime-o-exercicio-ilegal-da-medicina-veterinaria-no-brasil-cover-20260610033140.avif"
+ogImage: "https://portalnovoalvo.com.br/uploads/news/lei-torna-crime-o-exercicio-ilegal-da-medicina-veterinaria-no-brasil-cover-20260610033154.avif"
 tags: ["ocorrencias", "torna", "crime", "exercicio", "ilegal", "medicina", "veterinaria"]
 ---
 
