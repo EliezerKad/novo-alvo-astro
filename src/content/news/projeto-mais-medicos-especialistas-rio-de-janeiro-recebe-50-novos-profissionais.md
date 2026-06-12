@@ -6,8 +6,8 @@ seoDescription: "Brasil: O Projeto Mais Médicos Especialistas ampliou o atendim
 category: "Brasil"
 author: "Redação Novo Alvo"
 sources: ["Diário Goianiense", "iBand CE", "O POVO", "Agência Brasil", "Tribuna do Sertão", "Metrô News Jornal", "RCWTV", "CenárioMT", "Diário do Rio", "GOV.BR"]
-publishedAt: "2026-06-12T15:12:47.270Z"
-updatedAt: "2026-06-12T15:12:49.270Z"
+publishedAt: "2026-06-12T15:23:19.887Z"
+updatedAt: "2026-06-12T15:23:21.795Z"
 featured: false
 isFeatured: false
 urgent: false
