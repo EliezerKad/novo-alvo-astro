@@ -6,8 +6,8 @@ seoDescription: "Famosos: Bruna Marquezine e Shawn Mendes, IZA e João Vitor Sil
 category: "Famosos"
 author: "Redação Novo Alvo"
 sources: ["R7 Entretenimento", "CLAUDIA - o sentido feminino", "Portal Tela", "Terra", "Gshow", "Portal UAI", "brasilemfolhas.com.br", "revistaquem.globo.com", "CNN Brasil"]
-publishedAt: "2026-06-12T15:23:19.887Z"
-updatedAt: "2026-06-12T15:23:20.267Z"
+publishedAt: "2026-06-12T16:11:36.512Z"
+updatedAt: "2026-06-12T16:11:36.877Z"
 featured: false
 isFeatured: false
 urgent: false
