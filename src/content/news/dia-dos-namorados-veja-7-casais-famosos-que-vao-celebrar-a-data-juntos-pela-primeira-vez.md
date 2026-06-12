@@ -7,7 +7,7 @@ category: "Famosos"
 author: "Redação Novo Alvo"
 sources: ["R7 Entretenimento", "CLAUDIA - o sentido feminino", "Portal Tela", "Terra", "Gshow", "Portal UAI", "brasilemfolhas.com.br", "revistaquem.globo.com", "CNN Brasil"]
 publishedAt: "2026-06-12T14:00:00.000Z"
-updatedAt: "2026-06-12T14:34:07.512Z"
+updatedAt: "2026-06-12T14:34:56.471Z"
 featured: false
 isFeatured: false
 urgent: false
