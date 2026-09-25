@@ -7,236 +7,479 @@ const contactUrl = 'mailto:elidepaula@msn.com';
 ---
 
 <BaseLayout
-  title="x.a preto | Portal Novo Alvo"
+  title="Portal Novo Alvo | x.a preto"
   canonical={new URL('/', Astro.site ?? Astro.url.origin).href}
-  description="Official landing page for x.a preto, an independent producer sharing new music, edits and collaborations with DJs and selectors."
+  description="Portal Novo Alvo is an independent Brazilian music label and artist home led by x.a preto."
 >
-  <main class="xap-site">
-    <section class="xap-hero">
-      <div class="xap-badge">Portal Novo Alvo</div>
-      <h1>x.a preto</h1>
-      <p class="xap-lead">
-        Independent producer shaping warm club music, edits and left-field grooves from Brazil to selectors around the world.
-      </p>
-      <div class="xap-actions">
-        <a class="xap-primary" href={soundcloudUrl} target="_blank" rel="noreferrer">Listen to “oh lala/space jam” ↗</a>
-        <a class="xap-secondary" href={instagramUrl} target="_blank" rel="noreferrer">Instagram @eliezerman</a>
+  <main class="pna-site" data-lang="pt">
+    <nav class="pna-nav" aria-label="Portal Novo Alvo navigation">
+      <a class="pna-logo" href="/" aria-label="Portal Novo Alvo home">
+        <span></span>
+        Portal Novo Alvo
+      </a>
+      <div class="pna-nav-links">
+        <a href="#releases" data-i18n="navReleases">Lançamentos</a>
+        <a href="#artist" data-i18n="navArtist">Artista</a>
+        <a href={instagramUrl} target="_blank" rel="noreferrer">Instagram</a>
+        <button class="pna-lang" type="button" aria-label="Switch language" data-lang-toggle>
+          <strong data-lang-current>PT</strong> / EN
+        </button>
+      </div>
+    </nav>
+
+    <section class="pna-hero" id="artist">
+      <div class="pna-hero-copy">
+        <p class="pna-kicker" data-i18n="heroKicker">Selo brasileiro independente</p>
+        <h1>PORTAL<br />NOVO<br />ALVO</h1>
+        <p class="pna-lead" data-i18n="heroLead">
+          Um selo/casa criativa para música eletrônica, edits e grooves de pista, com x.a preto como artista principal.
+        </p>
+        <div class="pna-actions">
+          <a class="pna-primary" href={soundcloudUrl} target="_blank" rel="noreferrer" data-i18n="heroListen">Ouça “oh lala/space jam” ↗</a>
+          <a class="pna-secondary" href={contactUrl} data-i18n="heroContact">Contato / promo</a>
+        </div>
+      </div>
+
+      <div class="pna-artist-card" aria-label="Featured artist x.a preto">
+        <div class="pna-card-top">
+          <span data-i18n="featuredArtist">Artista principal</span>
+          <small>001</small>
+        </div>
+        <div class="pna-orb" aria-hidden="true"></div>
+        <h2>x.a preto</h2>
+        <p data-i18n="artistShort">Producer · edits · club music · Brazil</p>
+        <a href={instagramUrl} target="_blank" rel="noreferrer">@eliezerman ↗</a>
       </div>
     </section>
 
-    <section class="xap-cards" aria-label="Highlights">
-      <article>
+    <section class="pna-marquee" aria-label="Portal Novo Alvo keywords">
+      <div>
+        <span>SELECTORS</span><span>RADIO</span><span>CLUB CUTS</span><span>EDITS</span><span>BRAZIL</span><span>GLOBAL EAR</span>
+      </div>
+    </section>
+
+    <section class="pna-release" id="releases">
+      <div class="pna-release-image">
+        <div class="pna-release-title">
+          <span>OH LALA</span>
+          <span>SPACE JAM</span>
+        </div>
+      </div>
+      <div class="pna-release-copy">
+        <p class="pna-kicker" data-i18n="releaseKicker">Lançamento em foco</p>
+        <h2>oh lala/space jam</h2>
+        <p data-i18n="releaseText">
+          Um link direto para DJs, rádios, curadores e artistas que chegaram pelo domínio ou receberam uma mensagem de x.a preto.
+        </p>
+        <a class="pna-primary wide" href={soundcloudUrl} target="_blank" rel="noreferrer" data-i18n="releaseCta">Abrir no SoundCloud ↗</a>
+      </div>
+    </section>
+
+    <section class="pna-lineup" aria-label="Label pillars">
+      <article class="is-active">
         <span>01</span>
-        <h2>For DJs and selectors</h2>
-        <p>New music, WAVs and unreleased ideas are available for sets, radio folders and personal listening.</p>
+        <h3 data-i18n="pillarOneTitle">Promo para DJs</h3>
+        <p data-i18n="pillarOneText">WAVs, demos e ideias inéditas para sets, rádio, playlists e escuta pessoal.</p>
       </article>
       <article>
         <span>02</span>
-        <h2>Worldwide ear</h2>
-        <p>Some earlier x.a preto tracks have reached Soulection-related sets, radio selections and independent selectors.</p>
+        <h3 data-i18n="pillarTwoTitle">Som sem fronteira</h3>
+        <p data-i18n="pillarTwoText">Faixas anteriores de x.a preto já chegaram a sets, rádios e selectors ao redor do mundo.</p>
       </article>
       <article>
         <span>03</span>
-        <h2>Open to build</h2>
-        <p>Remixes, edits, guest mixes and collab ideas are welcome when the sound connects.</p>
+        <h3 data-i18n="pillarThreeTitle">Colaborações</h3>
+        <p data-i18n="pillarThreeText">Aberto para remixes, edits, guest mixes, collabs e conexões reais quando a estética conversa.</p>
       </article>
     </section>
 
-    <section class="xap-track">
+    <footer class="pna-footer">
       <div>
-        <p>Current focus</p>
-        <h2>oh lala/space jam</h2>
-        <span>A direct link for anyone checking the domain after receiving a message from x.a preto.</span>
+        <strong>Portal Novo Alvo</strong>
+        <span data-i18n="footerLine">Independent music label · São Paulo / Brazil</span>
       </div>
-      <a class="xap-primary" href={soundcloudUrl} target="_blank" rel="noreferrer">Open SoundCloud ↗</a>
-    </section>
-
-    <footer class="xap-footer">
-      <span>Contact / replies</span>
-      <a href={contactUrl}>elidepaula@msn.com</a>
+      <div class="pna-footer-links">
+        <a href={contactUrl}>elidepaula@msn.com</a>
+        <a href={instagramUrl} target="_blank" rel="noreferrer">instagram.com/eliezerman</a>
+      </div>
     </footer>
   </main>
+
+  <script is:inline>
+    (() => {
+      const copy = {
+        pt: {
+          navReleases: 'Lançamentos', navArtist: 'Artista', heroKicker: 'Selo brasileiro independente',
+          heroLead: 'Um selo/casa criativa para música eletrônica, edits e grooves de pista, com x.a preto como artista principal.',
+          heroListen: 'Ouça “oh lala/space jam” ↗', heroContact: 'Contato / promo', featuredArtist: 'Artista principal',
+          artistShort: 'Producer · edits · club music · Brasil', releaseKicker: 'Lançamento em foco',
+          releaseText: 'Um link direto para DJs, rádios, curadores e artistas que chegaram pelo domínio ou receberam uma mensagem de x.a preto.',
+          releaseCta: 'Abrir no SoundCloud ↗', pillarOneTitle: 'Promo para DJs',
+          pillarOneText: 'WAVs, demos e ideias inéditas para sets, rádio, playlists e escuta pessoal.',
+          pillarTwoTitle: 'Som sem fronteira', pillarTwoText: 'Faixas anteriores de x.a preto já chegaram a sets, rádios e selectors ao redor do mundo.',
+          pillarThreeTitle: 'Colaborações', pillarThreeText: 'Aberto para remixes, edits, guest mixes, collabs e conexões reais quando a estética conversa.',
+          footerLine: 'Selo musical independente · São Paulo / Brasil'
+        },
+        en: {
+          navReleases: 'Releases', navArtist: 'Artist', heroKicker: 'Independent Brazilian label',
+          heroLead: 'A creative label/home for electronic music, edits and club-driven grooves, led by x.a preto as the main artist.',
+          heroListen: 'Listen to “oh lala/space jam” ↗', heroContact: 'Contact / promo', featuredArtist: 'Main artist',
+          artistShort: 'Producer · edits · club music · Brazil', releaseKicker: 'Focus release',
+          releaseText: 'A direct link for DJs, radio hosts, curators and artists who arrived through the domain or received a message from x.a preto.',
+          releaseCta: 'Open on SoundCloud ↗', pillarOneTitle: 'DJ promos',
+          pillarOneText: 'WAVs, demos and unreleased ideas for sets, radio folders, playlists and personal listening.',
+          pillarTwoTitle: 'Borderless sound', pillarTwoText: 'Earlier x.a preto tracks have reached sets, radio selections and selectors around the world.',
+          pillarThreeTitle: 'Collaborations', pillarThreeText: 'Open to remixes, edits, guest mixes, collabs and real connections when the aesthetic makes sense.',
+          footerLine: 'Independent music label · São Paulo / Brazil'
+        }
+      };
+
+      const root = document.querySelector('.pna-site');
+      const button = document.querySelector('[data-lang-toggle]');
+      const current = document.querySelector('[data-lang-current]');
+      const setLang = (lang) => {
+        root?.setAttribute('data-lang', lang);
+        document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+        document.querySelectorAll('[data-i18n]').forEach((node) => {
+          const key = node.getAttribute('data-i18n');
+          if (key && copy[lang]?.[key]) node.textContent = copy[lang][key];
+        });
+        if (current) current.textContent = lang.toUpperCase();
+        try { localStorage.setItem('pna-lang', lang); } catch {}
+      };
+
+      let initial = 'pt';
+      try { initial = localStorage.getItem('pna-lang') || 'pt'; } catch {}
+      setLang(initial === 'en' ? 'en' : 'pt');
+      button?.addEventListener('click', () => setLang(root?.getAttribute('data-lang') === 'pt' ? 'en' : 'pt'));
+    })();
+  </script>
 
   <style>
     :global(body) {
       margin: 0;
       background:
-        radial-gradient(circle at 20% 10%, rgba(255, 122, 54, 0.32), transparent 34rem),
-        radial-gradient(circle at 80% 20%, rgba(105, 79, 255, 0.28), transparent 28rem),
-        linear-gradient(145deg, #090706 0%, #17100c 48%, #050505 100%);
-      color: #f7efe5;
+        radial-gradient(circle at 16% 12%, rgba(229, 255, 0, 0.18), transparent 26rem),
+        radial-gradient(circle at 84% 28%, rgba(103, 55, 255, 0.36), transparent 34rem),
+        linear-gradient(145deg, #050505 0%, #10120f 48%, #08050f 100%);
+      color: #f3f0e7;
     }
 
-    .xap-site {
-      width: min(1120px, calc(100% - 40px));
-      min-height: 100vh;
+    .pna-site {
+      width: min(1240px, calc(100% - 36px));
       margin: 0 auto;
-      padding: 48px 0 30px;
+      padding: 26px 0 34px;
       display: grid;
-      gap: 26px;
+      gap: 18px;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    .xap-hero,
-    .xap-track,
-    .xap-cards article,
-    .xap-footer {
-      border: 1px solid rgba(247, 239, 229, 0.14);
-      background: rgba(15, 12, 10, 0.72);
-      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+    .pna-nav,
+    .pna-hero,
+    .pna-release,
+    .pna-lineup article,
+    .pna-footer {
+      border: 1px solid rgba(243, 240, 231, 0.13);
+      background: rgba(7, 7, 7, 0.72);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
       backdrop-filter: blur(18px);
     }
 
-    .xap-hero {
-      min-height: 560px;
+    .pna-nav {
+      min-height: 72px;
       display: flex;
-      flex-direction: column;
-      justify-content: end;
-      border-radius: 42px;
-      padding: clamp(28px, 7vw, 72px);
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      border-radius: 999px;
+      padding: 0 20px;
+      position: sticky;
+      top: 16px;
+      z-index: 20;
+    }
+
+    .pna-logo,
+    .pna-nav-links,
+    .pna-actions,
+    .pna-card-top,
+    .pna-footer,
+    .pna-footer-links {
+      display: flex;
+      align-items: center;
+    }
+
+    .pna-logo {
+      gap: 10px;
+      color: #f3f0e7;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    .pna-logo span {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid #e6ff00;
+      box-shadow: 0 0 24px rgba(230, 255, 0, 0.42);
+    }
+
+    .pna-nav-links { gap: 18px; }
+
+    .pna-nav a,
+    .pna-lang {
+      color: rgba(243, 240, 231, 0.74);
+      background: transparent;
+      border: 0;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 800;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .pna-lang {
+      border: 1px solid rgba(243, 240, 231, 0.18);
+      border-radius: 999px;
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+
+    .pna-lang strong { color: #e6ff00; }
+
+    .pna-hero {
+      min-height: 680px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(330px, 0.72fr);
+      gap: 18px;
+      border-radius: 38px;
+      padding: 22px;
       overflow: hidden;
       position: relative;
     }
 
-    .xap-hero::before {
+    .pna-hero::before {
       content: '';
       position: absolute;
-      inset: 26px;
-      border-radius: 32px;
-      border: 1px solid rgba(247, 239, 229, 0.08);
+      inset: 22px 40% 22px 22px;
+      background: linear-gradient(135deg, rgba(230, 255, 0, 0.88), rgba(84, 44, 255, 0.4));
+      filter: blur(80px);
+      opacity: 0.44;
       pointer-events: none;
     }
 
-    .xap-badge {
-      width: fit-content;
-      margin-bottom: 22px;
-      border-radius: 999px;
-      padding: 10px 14px;
-      color: #ffd1aa;
-      background: rgba(255, 122, 54, 0.16);
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
+    .pna-hero-copy {
+      position: relative;
+      z-index: 1;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(24px, 5vw, 70px);
+    }
+
+    .pna-kicker {
+      margin: 0 0 20px;
+      color: #e6ff00;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
     }
 
-    .xap-site h1,
-    .xap-site h2,
-    .xap-site p { margin: 0; }
+    .pna-site h1,
+    .pna-site h2,
+    .pna-site h3,
+    .pna-site p { margin: 0; }
 
-    .xap-site h1 {
-      max-width: 900px;
-      font-size: clamp(64px, 15vw, 170px);
-      line-height: 0.82;
-      letter-spacing: -0.09em;
-      text-transform: lowercase;
+    .pna-site h1 {
+      max-width: 800px;
+      font-size: clamp(58px, 11vw, 156px);
+      line-height: 0.78;
+      letter-spacing: -0.095em;
+      text-transform: uppercase;
     }
 
-    .xap-lead {
-      max-width: 720px;
-      margin-top: 28px !important;
-      color: rgba(247, 239, 229, 0.78);
-      font-size: clamp(19px, 3vw, 30px);
+    .pna-lead {
+      max-width: 610px;
+      margin-top: 30px !important;
+      color: rgba(243, 240, 231, 0.72);
+      font-size: clamp(18px, 2.3vw, 28px);
       line-height: 1.22;
     }
 
-    .xap-actions {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-top: 34px;
-    }
+    .pna-actions { gap: 12px; flex-wrap: wrap; margin-top: 34px; }
 
-    .xap-primary,
-    .xap-secondary {
+    .pna-primary,
+    .pna-secondary {
+      min-height: 52px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 52px;
       border-radius: 999px;
       padding: 0 20px;
-      font-weight: 800;
+      font-weight: 900;
       text-decoration: none;
     }
 
-    .xap-primary {
-      color: #120a05;
-      background: #ffb36b;
-    }
+    .pna-primary { color: #080808; background: #e6ff00; }
+    .pna-secondary { color: #f3f0e7; background: rgba(243, 240, 231, 0.1); }
+    .pna-primary.wide { width: min(100%, 360px); border-radius: 0; }
 
-    .xap-secondary {
-      color: #f7efe5;
-      background: rgba(247, 239, 229, 0.1);
-    }
-
-    .xap-cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-
-    .xap-cards article {
-      min-height: 220px;
+    .pna-artist-card {
+      position: relative;
+      min-height: 100%;
       border-radius: 28px;
-      padding: 24px;
-    }
-
-    .xap-cards span,
-    .xap-track p { color: #ffb36b; }
-
-    .xap-cards span,
-    .xap-track p {
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    .xap-cards h2,
-    .xap-track h2 {
-      margin-top: 18px;
-      font-size: 24px;
-      letter-spacing: -0.04em;
-    }
-
-    .xap-cards p,
-    .xap-track span {
-      display: block;
-      margin-top: 12px;
-      color: rgba(247, 239, 229, 0.68);
-      line-height: 1.55;
-    }
-
-    .xap-track {
+      overflow: hidden;
+      padding: 28px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.06), transparent 38%),
+        radial-gradient(circle at 50% 42%, rgba(230, 255, 0, 0.36), transparent 19rem),
+        linear-gradient(155deg, #111 0%, #090909 55%, #2d0f63 100%);
       display: flex;
-      align-items: center;
+      flex-direction: column;
       justify-content: space-between;
-      gap: 24px;
-      border-radius: 32px;
+    }
+
+    .pna-card-top { justify-content: space-between; color: rgba(243, 240, 231, 0.66); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.14em; }
+
+    .pna-orb {
+      width: min(72vw, 390px);
+      aspect-ratio: 1;
+      margin: auto;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 42% 34%, #f3f0e7 0 7%, transparent 8%),
+        radial-gradient(circle at 60% 44%, #e6ff00 0 0.5rem, transparent 0.55rem),
+        radial-gradient(circle at 50% 50%, #242424 0 32%, #0b0b0b 33% 54%, #e6ff00 55% 58%, #080808 59% 100%);
+      box-shadow: 0 0 70px rgba(230, 255, 0, 0.25);
+    }
+
+    .pna-artist-card h2 { font-size: clamp(44px, 7vw, 88px); line-height: 0.85; letter-spacing: -0.08em; text-transform: lowercase; }
+    .pna-artist-card p { margin-top: 8px; color: rgba(243, 240, 231, 0.68); font-weight: 700; }
+    .pna-artist-card a { margin-top: 18px; width: fit-content; color: #e6ff00; font-weight: 900; text-decoration: none; }
+
+    .pna-marquee {
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e6ff00;
+      color: #080808;
+      font-weight: 1000;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .pna-marquee div {
+      display: flex;
+      gap: 30px;
+      width: max-content;
+      padding: 11px 0;
+      animation: pna-scroll 22s linear infinite;
+    }
+
+    .pna-marquee span { font-size: clamp(18px, 2.6vw, 32px); }
+
+    .pna-release {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-radius: 34px;
+      overflow: hidden;
+      min-height: 440px;
+    }
+
+    .pna-release-image {
+      min-height: 440px;
+      background:
+        linear-gradient(140deg, rgba(230, 255, 0, 0.12), transparent 42%),
+        repeating-linear-gradient(135deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 14px),
+        #111;
+      display: flex;
+      align-items: end;
       padding: 28px;
     }
 
-    .xap-footer {
+    .pna-release-title span {
+      display: block;
+      color: #f3f0e7;
+      font-size: clamp(38px, 6vw, 84px);
+      line-height: 0.86;
+      font-weight: 1000;
+      letter-spacing: -0.075em;
+    }
+
+    .pna-release-copy {
+      background: #080808;
       display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(28px, 5vw, 70px);
+    }
+
+    .pna-release-copy h2 { font-size: clamp(34px, 5vw, 76px); line-height: 0.9; letter-spacing: -0.08em; }
+    .pna-release-copy p:not(.pna-kicker) { margin: 20px 0 30px; max-width: 520px; color: rgba(243, 240, 231, 0.68); font-size: 18px; line-height: 1.5; }
+
+    .pna-lineup {
+      display: grid;
+      gap: 12px;
+    }
+
+    .pna-lineup article {
+      min-height: 136px;
+      display: grid;
+      grid-template-columns: 90px minmax(220px, 0.45fr) 1fr;
+      align-items: center;
+      gap: 22px;
       border-radius: 24px;
-      padding: 20px 24px;
-      color: rgba(247, 239, 229, 0.7);
+      padding: 22px 28px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .xap-footer a {
-      color: #ffd1aa;
-      font-weight: 800;
-      text-decoration: none;
+    .pna-lineup article.is-active { background: #6237ff; }
+    .pna-lineup span { color: #e6ff00; font-size: 18px; font-weight: 1000; }
+    .pna-lineup h3 { font-size: clamp(28px, 5vw, 56px); line-height: 0.86; letter-spacing: -0.08em; text-transform: uppercase; }
+    .pna-lineup p { color: rgba(243, 240, 231, 0.7); line-height: 1.45; }
+
+    .pna-footer {
+      justify-content: space-between;
+      gap: 18px;
+      border-radius: 24px;
+      padding: 22px 26px;
+      color: rgba(243, 240, 231, 0.68);
+      flex-wrap: wrap;
     }
 
-    @media (max-width: 760px) {
-      .xap-site { width: min(100% - 24px, 1120px); padding-top: 24px; }
-      .xap-hero { min-height: 520px; border-radius: 30px; }
-      .xap-cards { grid-template-columns: 1fr; }
-      .xap-track { align-items: stretch; flex-direction: column; }
+    .pna-footer strong { display: block; color: #f3f0e7; }
+    .pna-footer-links { gap: 16px; flex-wrap: wrap; }
+    .pna-footer a { color: #e6ff00; font-weight: 900; text-decoration: none; }
+
+    @keyframes pna-scroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    @media (max-width: 900px) {
+      .pna-nav { align-items: flex-start; flex-direction: column; border-radius: 24px; padding: 18px; }
+      .pna-nav-links { width: 100%; flex-wrap: wrap; }
+      .pna-hero,
+      .pna-release { grid-template-columns: 1fr; }
+      .pna-hero { min-height: auto; }
+      .pna-artist-card { min-height: 520px; }
+      .pna-lineup article { grid-template-columns: 1fr; align-items: start; }
+    }
+
+    @media (max-width: 560px) {
+      .pna-site { width: min(100% - 20px, 1240px); padding-top: 14px; }
+      .pna-hero { padding: 10px; border-radius: 26px; }
+      .pna-hero-copy { padding: 24px 14px; }
+      .pna-site h1 { font-size: clamp(52px, 18vw, 84px); }
+      .pna-actions a { width: 100%; }
+      .pna-release-image { min-height: 320px; }
+      .pna-footer-links { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </BaseLayout>
