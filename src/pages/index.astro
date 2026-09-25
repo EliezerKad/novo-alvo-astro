@@ -7,42 +7,42 @@ const contactUrl = 'mailto:elidepaula@msn.com';
 ---
 
 <BaseLayout
-  title="Portal Novo Alvo | x.a preto"
+  title="Novo Alvo Productions | x.a preto"
   canonical={new URL('/', Astro.site ?? Astro.url.origin).href}
-  description="Portal Novo Alvo is an independent Brazilian music label and artist home led by x.a preto."
+  description="Novo Alvo Productions is an independent Brazilian music label and artist home led by x.a preto."
 >
-  <main class="pna-site" data-lang="pt">
-    <nav class="pna-nav" aria-label="Portal Novo Alvo navigation">
-      <a class="pna-logo" href="/" aria-label="Portal Novo Alvo home">
+  <main class="pna-site" data-lang="en">
+    <nav class="pna-nav" aria-label="Novo Alvo Productions navigation">
+      <a class="pna-logo" href="/" aria-label="Novo Alvo Productions home">
         <span></span>
-        Portal Novo Alvo
+        Novo Alvo Productions
       </a>
       <div class="pna-nav-links">
-        <a href="#releases" data-i18n="navReleases">Lançamentos</a>
-        <a href="#artist" data-i18n="navArtist">Artista</a>
+        <a href="#releases" data-i18n="navReleases">Releases</a>
+        <a href="#artist" data-i18n="navArtist">Artist</a>
         <a href={instagramUrl} target="_blank" rel="noreferrer">Instagram</a>
         <button class="pna-lang" type="button" aria-label="Switch language" data-lang-toggle>
-          <strong data-lang-current>PT</strong> / EN
+          <strong data-lang-current>EN</strong> / PT
         </button>
       </div>
     </nav>
 
     <section class="pna-hero" id="artist">
       <div class="pna-hero-copy">
-        <p class="pna-kicker" data-i18n="heroKicker">Selo brasileiro independente</p>
-        <h1>PORTAL<br />NOVO<br />ALVO</h1>
+        <p class="pna-kicker" data-i18n="heroKicker">Independent Brazilian label</p>
+        <h1>NOVO<br />ALVO<br />PRODUCTIONS</h1>
         <p class="pna-lead" data-i18n="heroLead">
-          Um selo/casa criativa para música eletrônica, edits e grooves de pista, com x.a preto como artista principal.
+          A creative label/home for electronic music, edits and club-driven grooves, led by x.a preto as the main artist.
         </p>
         <div class="pna-actions">
-          <a class="pna-primary" href={soundcloudUrl} target="_blank" rel="noreferrer" data-i18n="heroListen">Ouça “oh lala/space jam” ↗</a>
-          <a class="pna-secondary" href={contactUrl} data-i18n="heroContact">Contato / promo</a>
+          <a class="pna-primary" href={soundcloudUrl} target="_blank" rel="noreferrer" data-i18n="heroListen">Listen to “oh lala/space jam” ↗</a>
+          <a class="pna-secondary" href={contactUrl} data-i18n="heroContact">Contact / promo</a>
         </div>
       </div>
 
       <div class="pna-artist-card" aria-label="Featured artist x.a preto">
         <div class="pna-card-top">
-          <span data-i18n="featuredArtist">Artista principal</span>
+          <span data-i18n="featuredArtist">Main artist</span>
           <small>001</small>
         </div>
         <div class="pna-orb" aria-hidden="true"></div>
@@ -52,7 +52,7 @@ const contactUrl = 'mailto:elidepaula@msn.com';
       </div>
     </section>
 
-    <section class="pna-marquee" aria-label="Portal Novo Alvo keywords">
+    <section class="pna-marquee" aria-label="Novo Alvo Productions keywords">
       <div>
         <span>SELECTORS</span><span>RADIO</span><span>CLUB CUTS</span><span>EDITS</span><span>BRAZIL</span><span>GLOBAL EAR</span>
       </div>
@@ -66,36 +66,36 @@ const contactUrl = 'mailto:elidepaula@msn.com';
         </div>
       </div>
       <div class="pna-release-copy">
-        <p class="pna-kicker" data-i18n="releaseKicker">Lançamento em foco</p>
+        <p class="pna-kicker" data-i18n="releaseKicker">Focus release</p>
         <h2>oh lala/space jam</h2>
         <p data-i18n="releaseText">
-          Um link direto para DJs, rádios, curadores e artistas que chegaram pelo domínio ou receberam uma mensagem de x.a preto.
+          A direct link for DJs, radio hosts, curators and artists who arrived through the domain or received a message from x.a preto.
         </p>
-        <a class="pna-primary wide" href={soundcloudUrl} target="_blank" rel="noreferrer" data-i18n="releaseCta">Abrir no SoundCloud ↗</a>
+        <a class="pna-primary wide" href={soundcloudUrl} target="_blank" rel="noreferrer" data-i18n="releaseCta">Open on SoundCloud ↗</a>
       </div>
     </section>
 
     <section class="pna-lineup" aria-label="Label pillars">
       <article class="is-active">
         <span>01</span>
-        <h3 data-i18n="pillarOneTitle">Promo para DJs</h3>
-        <p data-i18n="pillarOneText">WAVs, demos e ideias inéditas para sets, rádio, playlists e escuta pessoal.</p>
+        <h3 data-i18n="pillarOneTitle">DJ promos</h3>
+        <p data-i18n="pillarOneText">WAVs, demos and unreleased ideas for sets, radio folders, playlists and personal listening.</p>
       </article>
       <article>
         <span>02</span>
-        <h3 data-i18n="pillarTwoTitle">Som sem fronteira</h3>
-        <p data-i18n="pillarTwoText">Faixas anteriores de x.a preto já chegaram a sets, rádios e selectors ao redor do mundo.</p>
+        <h3 data-i18n="pillarTwoTitle">Borderless sound</h3>
+        <p data-i18n="pillarTwoText">Earlier x.a preto tracks have reached sets, radio selections and selectors around the world.</p>
       </article>
       <article>
         <span>03</span>
-        <h3 data-i18n="pillarThreeTitle">Colaborações</h3>
-        <p data-i18n="pillarThreeText">Aberto para remixes, edits, guest mixes, collabs e conexões reais quando a estética conversa.</p>
+        <h3 data-i18n="pillarThreeTitle">Collaborations</h3>
+        <p data-i18n="pillarThreeText">Open to remixes, edits, guest mixes, collabs and real connections when the aesthetic makes sense.</p>
       </article>
     </section>
 
     <footer class="pna-footer">
       <div>
-        <strong>Portal Novo Alvo</strong>
+        <strong>Novo Alvo Productions</strong>
         <span data-i18n="footerLine">Independent music label · São Paulo / Brazil</span>
       </div>
       <div class="pna-footer-links">
@@ -145,12 +145,14 @@ const contactUrl = 'mailto:elidepaula@msn.com';
           if (key && copy[lang]?.[key]) node.textContent = copy[lang][key];
         });
         if (current) current.textContent = lang.toUpperCase();
+        const other = lang === 'en' ? 'PT' : 'EN';
+        if (button) button.innerHTML = `<strong data-lang-current>${lang.toUpperCase()}</strong> / ${other}`;
         try { localStorage.setItem('pna-lang', lang); } catch {}
       };
 
-      let initial = 'pt';
-      try { initial = localStorage.getItem('pna-lang') || 'pt'; } catch {}
-      setLang(initial === 'en' ? 'en' : 'pt');
+      let initial = 'en';
+      try { initial = localStorage.getItem('pna-lang') || 'en'; } catch {}
+      setLang(initial === 'pt' ? 'pt' : 'en');
       button?.addEventListener('click', () => setLang(root?.getAttribute('data-lang') === 'pt' ? 'en' : 'pt'));
     })();
   </script>
@@ -296,8 +298,8 @@ const contactUrl = 'mailto:elidepaula@msn.com';
     .pna-site p { margin: 0; }
 
     .pna-site h1 {
-      max-width: 800px;
-      font-size: clamp(58px, 11vw, 156px);
+      max-width: 880px;
+      font-size: clamp(52px, 9.7vw, 138px);
       line-height: 0.78;
       letter-spacing: -0.095em;
       text-transform: uppercase;
@@ -476,7 +478,7 @@ const contactUrl = 'mailto:elidepaula@msn.com';
       .pna-site { width: min(100% - 20px, 1240px); padding-top: 14px; }
       .pna-hero { padding: 10px; border-radius: 26px; }
       .pna-hero-copy { padding: 24px 14px; }
-      .pna-site h1 { font-size: clamp(52px, 18vw, 84px); }
+      .pna-site h1 { font-size: clamp(48px, 15vw, 76px); }
       .pna-actions a { width: 100%; }
       .pna-release-image { min-height: 320px; }
       .pna-footer-links { flex-direction: column; align-items: flex-start; }
