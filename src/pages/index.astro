@@ -1,701 +1,242 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Navbar from '../components/Navbar.astro';
-import AdCard from '../components/AdCard.astro';
-import ArticleCard from '../components/ArticleCard.astro';
-import Icon from '../components/Icon.astro';
-import NewsletterBlock from '../components/NewsletterBlock.astro';
-import { getCollection } from 'astro:content';
-import {
-  categoriesList,
-  categoryUrl,
-  displayCategory,
-  featuredNews,
-  newsEntryToArticle,
-  sortNewsByDate,
-  subCategoriesList,
-  urgentNews,
-} from '../lib/news';
-import { formatRelativeDate, getCategoryColor } from '../lib/utils';
 
-const newsEntries = sortNewsByDate(await getCollection('news'));
-const articles = newsEntries.map(newsEntryToArticle);
-const category = Astro.url.searchParams.get('category') || undefined;
-const filteredArticles = articles.filter((article) => {
-  if (category && category !== 'Início' && article.category !== category) return false;
-  return true;
-});
-
-const visibleArticles = filteredArticles.length > 0 ? filteredArticles : articles;
-const featuredArticles = featuredNews(newsEntries).map(newsEntryToArticle);
-const tickerArticles = urgentNews(newsEntries).map(newsEntryToArticle);
-const featured = featuredArticles[0] || visibleArticles[0];
-const topNews = visibleArticles.filter((article) => article.id !== featured.id).slice(0, 4);
-const pulseArticles = visibleArticles.filter((article) => article.id !== featured.id).slice(0, 3);
-const nowCandidates = visibleArticles.filter((article) => article.homeSection === 'now');
-const nowLead = nowCandidates[0] || topNews[0] || featured;
-const nowRows = [
-  ...nowCandidates.filter((article) => article.id !== nowLead.id),
-  ...visibleArticles.filter(
-    (article) => article.id !== nowLead.id && article.id !== featured.id && article.homeSection !== 'now',
-  ),
-].slice(0, 4);
-const mostRead = [...articles].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
-const priorityCategorySections = [
-  'Brasil',
-  'Politica',
-  'Cultura',
-  'Saude',
-  'Ocorrencias',
-  'Famosos',
-  'Futebol',
-  'Economia',
-  'Musica',
-];
-const orderedCategoryList = [
-  ...priorityCategorySections,
-  ...[...categoriesList, ...subCategoriesList].filter((sectionCategory) => !priorityCategorySections.includes(sectionCategory)),
-];
-const categorySections = orderedCategoryList
-  .map((sectionCategory) => ({
-    category: sectionCategory,
-    articles: articles.filter((article) => article.category === sectionCategory).slice(0, 4),
-  }))
-  .filter((section) => section.articles.length > 0);
-const initialCategorySections = priorityCategorySections.length;
-const hasMoreCategorySections = categorySections.length > initialCategorySections;
-const isCategoryView = !!category && category !== 'Início';
+const soundcloudUrl = 'https://soundcloud.com/xapreto/oh-lala-space-jam-by-x-a-preto';
+const instagramUrl = 'https://instagram.com/eliezerman';
+const contactUrl = 'mailto:elidepaula@msn.com';
 ---
 
 <BaseLayout
-  title="Portal Novo Alvo - Notícias, Fatos e Impacto"
+  title="x.a preto | Portal Novo Alvo"
   canonical={new URL('/', Astro.site ?? Astro.url.origin).href}
-  description="Portal Novo Alvo reúne notícias, análise e cobertura editorial com foco em fatos relevantes do Brasil e do mundo."
+  description="Official landing page for x.a preto, an independent producer sharing new music, edits and collaborations with DJs and selectors."
 >
-  <div class="min-h-screen bg-[#f5f3ee] transition-colors duration-300 dark:bg-[radial-gradient(circle_at_50%_0%,rgba(138,31,45,0.10),transparent_28%),linear-gradient(180deg,#080809_0%,#141416_48%,#080809_100%)]">
-    <Navbar tickerArticles={tickerArticles} category={category} categories={categoriesList} subCategories={subCategoriesList} />
-
-    <div class="border-b border-black/10 bg-[#ebe8df]/70 py-3 transition-colors duration-300 dark:border-zinc-800 dark:bg-zinc-900 md:py-4">
-      <div class="max-w-7xl mx-auto px-4 md:px-6 flex justify-center">
-        <AdCard size="728x90" class="w-full max-w-[728px] h-[60px] md:h-[90px]" />
+  <main class="xap-site">
+    <section class="xap-hero">
+      <div class="xap-badge">Portal Novo Alvo</div>
+      <h1>x.a preto</h1>
+      <p class="xap-lead">
+        Independent producer shaping warm club music, edits and left-field grooves from Brazil to selectors around the world.
+      </p>
+      <div class="xap-actions">
+        <a class="xap-primary" href={soundcloudUrl} target="_blank" rel="noreferrer">Listen to “oh lala/space jam” ↗</a>
+        <a class="xap-secondary" href={instagramUrl} target="_blank" rel="noreferrer">Instagram @eliezerman</a>
       </div>
-    </div>
+    </section>
 
-    <main class="mx-auto mb-16 mt-4 max-w-[1240px] px-3 transition-all duration-500 sm:px-4 md:mb-20 md:mt-10">
-      <div class={isCategoryView ? 'grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-11' : 'space-y-10 md:space-y-16'}>
-        <div class={isCategoryView ? 'space-y-10 md:space-y-16 lg:col-span-9' : 'space-y-10 md:space-y-16'}>
-          {
-            isCategoryView ? (
-              <div class="space-y-12">
-                <header class="space-y-2">
-                  <div class="flex items-center gap-4">
-                    <div class={`w-2 h-10 ${getCategoryColor(category || '')} rounded-full`}></div>
-                    <h2 class="text-5xl font-sans font-black tracking-[-0.075em] text-zinc-900 dark:text-zinc-50 uppercase">
-                      {displayCategory(category)}
-                    </h2>
-                  </div>
-                  <p class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 ml-6">
-                    Cobertura Completa e Fatos Relevantes
-                  </p>
-                </header>
+    <section class="xap-cards" aria-label="Highlights">
+      <article>
+        <span>01</span>
+        <h2>For DJs and selectors</h2>
+        <p>New music, WAVs and unreleased ideas are available for sets, radio folders and personal listening.</p>
+      </article>
+      <article>
+        <span>02</span>
+        <h2>Worldwide ear</h2>
+        <p>Some earlier x.a preto tracks have reached Soulection-related sets, radio selections and independent selectors.</p>
+      </article>
+      <article>
+        <span>03</span>
+        <h2>Open to build</h2>
+        <p>Remixes, edits, guest mixes and collab ideas are welcome when the sound connects.</p>
+      </article>
+    </section>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                  {visibleArticles.map((article) => <ArticleCard article={article} variant="pulse" />)}
-                </div>
-              </div>
-            ) : (
-              <>
-                <section class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-8">
-                  <div class="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.12fr)_minmax(280px,.88fr)] lg:gap-6">
-                    <ArticleCard article={featured} variant="feature" />
-
-                    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 lg:gap-6">
-                      {topNews.slice(0, 2).map((article) => (
-                        <ArticleCard article={article} variant="pulse" />
-                      ))}
-                    </div>
-                  </div>
-
-                  <aside class="grid gap-5 md:grid-cols-2 xl:grid-cols-1 xl:gap-6">
-                    <section class="overflow-hidden rounded-[1.55rem] border border-black/10 bg-white shadow-[0_18px_50px_rgba(16,16,16,0.055)] dark:border-zinc-800 dark:bg-zinc-900 md:rounded-[1.875rem]">
-                      <div class="flex min-h-[58px] items-center justify-between gap-3 border-b border-black/10 px-4 py-4 dark:border-zinc-800 md:min-h-[66px] md:px-6 md:py-5">
-                        <h2 class="text-lg font-black leading-none tracking-tighter text-zinc-950 dark:text-zinc-50 md:text-xl">
-                          Pulso do Brasil
-                        </h2>
-                        <span class="text-[10px] font-black uppercase tracking-[0.1em] text-[#8A1F2D]">
-                          Agora
-                        </span>
-                      </div>
-                      <div class="px-4 py-1 md:px-6" data-live-pulse-list>
-                        {pulseArticles.map((article) => (
-                          <a href={`/noticia/${article.slug}`} class="group grid min-h-[84px] grid-cols-[58px_minmax(0,1fr)] items-center gap-3 rounded-2xl border-b border-black/10 px-2 py-3.5 transition-colors duration-300 last:border-b-0 hover:bg-[#f5f3ee] hover:shadow-[inset_3px_0_0_#8A1F2D] dark:border-zinc-800 dark:hover:bg-zinc-800/60 md:min-h-[92px] md:grid-cols-[64px_minmax(0,1fr)] md:py-4">
-                            <div class="h-14 w-[58px] overflow-hidden rounded-xl bg-[#ebe8df] shadow-sm transition-shadow duration-300 group-hover:shadow-md dark:bg-zinc-800 md:w-16 md:rounded-2xl">
-                              {article.imageUrl ? (
-                                <img src={article.imageUrl} alt={article.title} class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
-                              ) : (
-                                <div class="grid h-full place-items-center text-zinc-300">
-                                  <Icon name="image" class="h-5 w-5 opacity-30" />
-                                </div>
-                              )}
-                            </div>
-                            <div class="min-w-0">
-                              <h3 class="line-clamp-3 text-sm font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50 md:text-[15px]">
-                                {article.title}
-                              </h3>
-                              <p class="mt-1 text-xs font-bold text-zinc-400">{formatRelativeDate(article.publishedAt)} • <span data-live-view-count={article.slug}>{article.views || 0} views</span></p>
-                            </div>
-                          </a>
-                        ))}
-                      </div>
-                    </section>
-
-                    <div class="min-h-[210px] rounded-[1.55rem] border border-dashed border-black/20 bg-[#ebe8df] p-4 text-center text-[11px] font-black uppercase tracking-[0.12em] text-zinc-400 shadow-[0_18px_50px_rgba(16,16,16,0.045)] dark:border-zinc-800 dark:bg-zinc-900 md:min-h-[270px] md:rounded-[1.875rem] md:p-5">
-                      <div class="grid h-full place-items-center">
-                        <AdCard label="Publicidade editorial" class="h-full min-h-[230px] w-full" />
-                      </div>
-                    </div>
-                  </aside>
-                </section>
-
-                <section class="border-t border-black/10 pt-10 dark:border-zinc-800 md:pt-20">
-                  <div class="mb-6 flex flex-col justify-between gap-3 md:mb-8 md:flex-row md:items-end md:gap-4">
-                    <div>
-                        <h2 class="font-sans text-[2.35rem] font-black leading-[0.9] tracking-[-0.075em] text-zinc-950 dark:text-zinc-50 md:text-6xl">
-                        Agora no portal
-                      </h2>
-                      <p class="mt-2 max-w-xl text-sm font-medium leading-6 text-zinc-500 dark:text-zinc-400 md:mt-3">
-                        Os fatos mais recentes organizados para você entender o que importa agora.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div class="grid grid-cols-1 gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:gap-7">
-                    <a href={`/noticia/${nowLead.slug}`} class="group relative flex min-h-[340px] items-end overflow-hidden rounded-[1.55rem] bg-zinc-200 p-5 text-white shadow-[0_24px_70px_rgba(16,16,16,0.10)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_32px_88px_rgba(16,16,16,0.16)] dark:bg-zinc-800 md:min-h-[420px] md:rounded-[2.125rem] md:p-8">
-                      {nowLead.imageUrl && (
-                        <img src={nowLead.imageUrl} alt={nowLead.title} class="absolute inset-0 h-full w-full object-cover transition-transform duration-[2s] group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
-                      )}
-                      <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/80"></div>
-                      <div class="relative z-10">
-                        <div class="mb-4 text-[11px] font-black uppercase tracking-[0.08em] text-[#e6c7cd]">{displayCategory(nowLead.category)}</div>
-                        <h3 class="font-sans text-[2.15rem] font-black leading-[0.94] tracking-[-0.075em] md:text-5xl">{nowLead.title}</h3>
-                        <p class="mt-4 line-clamp-3 max-w-xl text-sm font-medium leading-6 text-white/75">{nowLead.summary}</p>
-                        <div class="mt-4 text-xs font-black uppercase tracking-widest text-white/60">{formatRelativeDate(nowLead.publishedAt)} • <span data-live-view-count={nowLead.slug}>{nowLead.views || 0} views</span></div>
-                      </div>
-                    </a>
-
-                    <div class="overflow-hidden rounded-[1.55rem] border border-black/10 bg-white shadow-[0_18px_50px_rgba(16,16,16,0.055)] dark:border-zinc-800 dark:bg-zinc-900 md:rounded-[2.125rem]">
-                      {nowRows.map((article) => (
-                        <a href={`/noticia/${article.slug}`} class="group grid grid-cols-[84px_1fr] items-center gap-3 border-b border-black/10 p-3.5 transition-all duration-300 last:border-b-0 hover:bg-[#f5f3ee] hover:shadow-[inset_4px_0_0_#8A1F2D] dark:border-zinc-800 dark:hover:bg-zinc-800/60 sm:grid-cols-[112px_1fr] md:grid-cols-[128px_1fr] md:gap-5 md:p-5">
-                          <div class="h-[68px] w-[84px] overflow-hidden rounded-[1rem] bg-[#ebe8df] shadow-sm transition-all duration-300 group-hover:shadow-md sm:h-[78px] sm:w-[112px] md:h-[88px] md:w-32 md:rounded-[1.25rem]">
-                            {article.imageUrl ? (
-                              <img src={article.imageUrl} alt={article.title} class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
-                            ) : (
-                              <div class="grid h-full place-items-center text-zinc-300">
-                                <Icon name="image" class="h-5 w-5 opacity-30" />
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <div class="mb-2 text-[10px] font-black uppercase tracking-[0.08em] text-[#8A1F2D]">{displayCategory(article.category)}</div>
-                            <h3 class="font-sans text-base font-black leading-[1.05] tracking-[-0.055em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50 md:text-xl">{article.title}</h3>
-                            <div class="mt-2 text-xs font-bold text-zinc-400">{formatRelativeDate(article.publishedAt)} • <span data-live-view-count={article.slug}>{article.views || 0} views</span></div>
-                          </div>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                </section>
-
-                <section class="border-t border-black/10 pt-10 dark:border-zinc-800 md:pt-14">
-                  <NewsletterBlock class="mx-auto max-w-[980px]" />
-                </section>
-
-                <section class="grid grid-cols-1 gap-5 border-t border-black/10 pt-10 dark:border-zinc-800 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] md:pt-16">
-                  <div class="overflow-hidden rounded-[1.55rem] border border-black/10 bg-white shadow-[0_18px_50px_rgba(16,16,16,0.055)] dark:border-zinc-800 dark:bg-zinc-900 md:rounded-[1.875rem]">
-                    <div class="flex min-h-[64px] items-center justify-between gap-3 border-b border-black/10 px-5 py-4 dark:border-zinc-800 md:px-6 md:py-5">
-                      <h2 class="text-xl font-black leading-none tracking-tighter text-zinc-950 dark:text-zinc-50">
-                        Últimas notícias
-                      </h2>
-                      <span class="text-[10px] font-black uppercase tracking-[0.1em] text-[#8A1F2D]">10 manchetes</span>
-                    </div>
-                    <div class="divide-y divide-black/10 dark:divide-zinc-800" data-latest-news-list>
-                      {visibleArticles.slice(0, 10).map((article) => (
-                        <a href={`/noticia/${article.slug}/`} class="group grid grid-cols-[72px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#f5f3ee] dark:hover:bg-zinc-800/60 md:grid-cols-[88px_minmax(0,1fr)_auto] md:px-6">
-                          <div class="h-14 w-[72px] overflow-hidden rounded-2xl bg-[#ebe8df] dark:bg-zinc-800 md:w-[88px]">
-                            {article.imageUrl ? (
-                              <img src={article.imageUrl} alt={article.title} class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
-                            ) : (
-                              <div class="grid h-full place-items-center text-zinc-300"><Icon name="image" class="h-5 w-5 opacity-30" /></div>
-                            )}
-                          </div>
-                          <div class="min-w-0">
-                            <div class="mb-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#8A1F2D]">{displayCategory(article.category)}</div>
-                            <h3 class="line-clamp-2 text-[15px] font-black leading-tight tracking-[-0.025em] text-zinc-950 group-hover:text-[#8A1F2D] dark:text-zinc-50 md:text-base">{article.title}</h3>
-                            <p class="mt-1 text-xs font-bold text-zinc-400">{formatRelativeDate(article.publishedAt)} • <span data-live-view-count={article.slug}>{article.views || 0} views</span></p>
-                          </div>
-                          <Icon name="chevronRight" class="hidden h-4 w-4 text-zinc-300 transition-transform group-hover:translate-x-1 group-hover:text-[#8A1F2D] sm:block" />
-                        </a>
-                      ))}
-                    </div>
-                    <div class="border-t border-black/10 p-5 dark:border-zinc-800 md:p-6">
-                      <div class="min-h-[180px] rounded-[1.25rem] border border-dashed border-black/20 bg-[#f5f3ee]/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/35 md:min-h-[230px]">
-                        <AdCard label="Publicidade editorial" class="h-full min-h-[180px] w-full md:min-h-[230px]" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="grid gap-6">
-                    {[
-                      ['Em alta 24h', 'Movimento recente', 'data-trending-24-list', true],
-                      ['Mais lidas 7 dias', 'Semana', 'data-most-7-list', true],
-                      ['Mais lidas geral', 'Histórico', 'data-most-all-list', false],
-                    ].map(([title, label, attr, withImage]) => (
-                      <section class="overflow-hidden rounded-[1.55rem] border border-black/10 bg-white shadow-[0_18px_50px_rgba(16,16,16,0.055)] dark:border-zinc-800 dark:bg-zinc-900 md:rounded-[1.875rem]">
-                        <div class="flex items-center justify-between gap-3 border-b border-black/10 px-5 py-5 dark:border-zinc-800">
-                          <h3 class="text-base font-black leading-none tracking-tighter text-zinc-950 dark:text-zinc-50">{title}</h3>
-                          <span class="text-[9px] font-black uppercase tracking-[0.1em] text-[#8A1F2D]">{label}</span>
-                        </div>
-                        <div class="px-5 py-3" {...{ [String(attr)]: true }}>
-                          {mostRead.slice(0, 4).map((article) => (
-                            <a href={`/noticia/${article.slug}/`} class={`group grid ${withImage ? 'grid-cols-[76px_minmax(0,1fr)]' : 'grid-cols-[minmax(0,1fr)_auto]'} gap-3 border-b border-black/10 py-4 last:border-b-0 dark:border-zinc-800`}>
-                              {withImage && (
-                                <div class="h-[62px] w-[76px] overflow-hidden rounded-2xl bg-[#ebe8df] dark:bg-zinc-800">
-                                  {article.imageUrl ? (
-                                    <img src={article.imageUrl} alt={article.title} class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />
-                                  ) : (
-                                    <div class="grid h-full place-items-center text-zinc-300"><Icon name="image" class="h-5 w-5 opacity-30" /></div>
-                                  )}
-                                </div>
-                              )}
-                              <div class="min-w-0">
-                                <div class="mb-1 text-[8px] font-black uppercase tracking-[0.12em] text-[#8A1F2D]">{displayCategory(article.category)}</div>
-                                <h4 class="line-clamp-2 text-sm font-black leading-tight tracking-[-0.02em] text-zinc-950 group-hover:text-[#8A1F2D] dark:text-zinc-50">{article.title}</h4>
-                                {withImage && <span class="mt-1 block text-xs font-black text-zinc-400" data-live-view-count={article.slug}>{article.views || 0} views</span>}
-                              </div>
-                              {!withImage && <span class="shrink-0 text-xs font-black text-zinc-400" data-live-view-count={article.slug}>{article.views || 0} views</span>}
-                            </a>
-                          ))}
-                        </div>
-                      </section>
-                    ))}
-                  </div>
-                </section>
-
-                <script is:inline>
-                  (() => {
-                    const escapeHtml = (value) =>
-                      String(value || '')
-                        .replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;')
-                        .replace(/"/g, '&quot;')
-                        .replace(/'/g, '&#039;');
-                    const categoryLabel = (value) =>
-                      ({ Politica: 'Política', Saude: 'Saúde', Ciencia: 'Ciência', Educacao: 'Educação', Musica: 'Música', Ocorrencias: 'Ocorrências' }[value] || value || 'Notícias');
-                    const formatDate = (value) => {
-                      const date = new Date(value || Date.now());
-                      const diff = Date.now() - date.getTime();
-                      const minutes = Math.max(1, Math.floor(diff / 60000));
-                      if (minutes < 60) return `há ${minutes} min`;
-                      const hours = Math.floor(minutes / 60);
-                      if (hours < 24) return `há ${hours}h`;
-                      return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(date);
-                    };
-                    const fetchArticles = async (url) => {
-                      const response = await fetch(url, { cache: 'no-store' });
-                      if (!response.ok) return [];
-                      const data = await response.json().catch(() => ({ articles: [] }));
-                      return Array.isArray(data.articles) ? data.articles.filter((article) => article?.slug) : [];
-                    };
-                    const renderLatest = (list, articles) => {
-                      if (!list || !articles.length) return;
-                      list.innerHTML = articles.slice(0, 10).map((article) => `
-                        <a href="/noticia/${encodeURIComponent(article.slug)}/" class="group grid grid-cols-[72px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#f5f3ee] dark:hover:bg-zinc-800/60 md:grid-cols-[88px_minmax(0,1fr)_auto] md:px-6">
-                          <div class="h-14 w-[72px] overflow-hidden rounded-2xl bg-[#ebe8df] dark:bg-zinc-800 md:w-[88px]">
-                            ${article.cover_url ? `<img src="${escapeHtml(article.cover_url)}" alt="${escapeHtml(article.cover_alt || article.title)}" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />` : `<div class="grid h-full place-items-center text-zinc-300"></div>`}
-                          </div>
-                          <div class="min-w-0">
-                            <div class="mb-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#8A1F2D]">${escapeHtml(categoryLabel(article.category))}</div>
-                            <h3 class="line-clamp-2 text-[15px] font-black leading-tight tracking-[-0.025em] text-zinc-950 group-hover:text-[#8A1F2D] dark:text-zinc-50 md:text-base">${escapeHtml(article.title)}</h3>
-                            <p class="mt-1 text-xs font-bold text-zinc-400">${formatDate(article.published_at || article.scheduled_at || article.updated_at)} • <span data-live-view-count="${escapeHtml(article.slug)}">${Number(article.total_views ?? article.views ?? 0)} views</span></p>
-                          </div>
-                          <span class="hidden text-zinc-300 transition-transform group-hover:translate-x-1 group-hover:text-[#8A1F2D] sm:block">›</span>
-                        </a>
-                      `).join('');
-                      window.__novoAlvoHydrateViews?.(list);
-                    };
-                    const renderCompact = (list, articles, withImage = false) => {
-                      if (!list || !articles.length) return;
-                      list.innerHTML = articles.slice(0, 4).map((article) => `
-                        <a href="/noticia/${encodeURIComponent(article.slug)}/" class="group grid ${withImage ? 'grid-cols-[76px_minmax(0,1fr)]' : 'grid-cols-[minmax(0,1fr)_auto]'} gap-3 border-b border-black/10 py-4 last:border-b-0 dark:border-zinc-800">
-                          ${withImage ? `
-                            <div class="h-[62px] w-[76px] overflow-hidden rounded-2xl bg-[#ebe8df] dark:bg-zinc-800">
-                              ${article.cover_url ? `<img src="${escapeHtml(article.cover_url)}" alt="${escapeHtml(article.cover_alt || article.title)}" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />` : `<div class="grid h-full place-items-center text-zinc-300"></div>`}
-                            </div>
-                          ` : ''}
-                          <div class="min-w-0">
-                            <div class="mb-1 text-[8px] font-black uppercase tracking-[0.12em] text-[#8A1F2D]">${escapeHtml(categoryLabel(article.category))}</div>
-                            <h4 class="line-clamp-2 text-sm font-black leading-tight tracking-[-0.02em] text-zinc-950 group-hover:text-[#8A1F2D] dark:text-zinc-50">${escapeHtml(article.title)}</h4>
-                            ${withImage ? `<span class="mt-1 block text-xs font-black text-zinc-400" data-live-view-count="${escapeHtml(article.slug)}">${Number(article.total_views ?? article.views ?? 0)} views</span>` : ''}
-                          </div>
-                          ${withImage ? '' : `<span class="shrink-0 text-xs font-black text-zinc-400" data-live-view-count="${escapeHtml(article.slug)}">${Number(article.total_views ?? article.views ?? 0)} views</span>`}
-                        </a>
-                      `).join('');
-                      window.__novoAlvoHydrateViews?.(list);
-                    };
-
-                    Promise.all([
-                      fetchArticles('/api/public/articles?limit=10'),
-                      fetchArticles('/api/public/articles?limit=4&sort=views&period=24h'),
-                      fetchArticles('/api/public/articles?limit=4&sort=views&period=7d'),
-                      fetchArticles('/api/public/articles?limit=4&sort=views&period=all'),
-                    ]).then(([latest, hot24, top7, topAll]) => {
-                      renderLatest(document.querySelector('[data-latest-news-list]'), latest);
-                      renderCompact(document.querySelector('[data-trending-24-list]'), hot24, true);
-                      renderCompact(document.querySelector('[data-most-7-list]'), top7, true);
-                      renderCompact(document.querySelector('[data-most-all-list]'), topAll);
-                    }).catch(() => {});
-                  })();
-                </script>
-
-                <div id="editorias" class="space-y-10 border-t border-black/10 pt-10 dark:border-zinc-800 md:space-y-20 md:pt-20" data-category-sections>
-                  {categorySections.map((section, sectionIndex) => {
-                    const isHiddenCategorySection = sectionIndex >= initialCategorySections;
-                    const shouldShowAdAfterSection = (sectionIndex + 1) % 3 === 0;
-                    const shouldShowNewsletterAfterSection = hasMoreCategorySections && sectionIndex === initialCategorySections + 1;
-
-                    return (
-                      <>
-                        <section
-                          id={`category-section-${sectionIndex}`}
-                          class={`space-y-5 md:space-y-8 ${isHiddenCategorySection ? 'hidden' : ''}`}
-                          data-category-section
-                          data-category-hidden={isHiddenCategorySection ? 'true' : 'false'}
-                        >
-                          <div class="flex items-end justify-between gap-4 md:gap-6">
-                            <div class="flex items-center gap-3 md:gap-4">
-                              <div class={`w-1.5 h-7 ${getCategoryColor(section.category)} rounded-full md:w-2 md:h-8`}></div>
-                              <h3 class="text-[2rem] md:text-5xl font-sans font-black tracking-[-0.075em] leading-none text-zinc-950 dark:text-zinc-50">
-                                {displayCategory(section.category)}
-                              </h3>
-                            </div>
-                            <a href={categoryUrl(section.category)} class="hidden md:inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-[#8A1F2D] hover:text-[#501620]">
-                              Ver tudo
-                              <Icon name="chevronRight" class="w-3 h-3" />
-                            </a>
-                          </div>
-
-                          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6">
-                            {section.articles.slice(0, 3).map((article) => <ArticleCard article={article} variant="pulse" />)}
-                          </div>
-                        </section>
-
-                        {shouldShowAdAfterSection && (
-                          <div
-                            class={`py-12 border-y border-zinc-100 dark:border-zinc-800 flex flex-col items-center gap-4 bg-zinc-50/50 dark:bg-zinc-900/30 rounded-[3rem] ${isHiddenCategorySection ? 'hidden' : ''}`}
-                            data-category-ad
-                            data-category-hidden={isHiddenCategorySection ? 'true' : 'false'}
-                          >
-                            <span class="text-[7px] font-black text-zinc-300 dark:text-zinc-700 uppercase tracking-[0.4em]">
-                              PUBLICIDADE EDITORIAL NOVO ALVO
-                            </span>
-                            <AdCard size="728x90" class="w-full max-w-[728px] h-[90px]" />
-                          </div>
-                        )}
-
-                        {shouldShowNewsletterAfterSection && (
-                          <section
-                            class="hidden border-y border-black/10 py-8 dark:border-zinc-800 md:py-12"
-                            data-category-hidden="true"
-                          >
-                            <NewsletterBlock class="mx-auto max-w-[980px]" />
-                          </section>
-                        )}
-                      </>
-                    );
-                  })}
-
-                  {hasMoreCategorySections && (
-                    <div class="flex justify-center pt-1">
-                      <button
-                        type="button"
-                        class="inline-flex items-center justify-center rounded-full border border-[#8A1F2D]/15 bg-white/55 px-5 py-3 text-[10px] font-black uppercase tracking-[0.16em] text-[#8A1F2D] shadow-[0_12px_30px_rgba(16,16,16,0.055)] backdrop-blur transition-all hover:-translate-y-0.5 hover:border-[#8A1F2D]/30 hover:bg-[#8A1F2D]/8 hover:shadow-[0_18px_42px_rgba(16,16,16,0.08)] focus:outline-none focus:ring-2 focus:ring-[#8A1F2D] focus:ring-offset-2 dark:border-white/10 dark:bg-zinc-900/70 dark:text-[#f4c8cf] dark:hover:bg-zinc-800 dark:focus:ring-offset-zinc-950"
-                        data-show-more-categories
-                      >
-                        Mostrar mais editorias
-                        <span class="ml-2 text-xs leading-none">→</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <script is:inline>
-                  (() => {
-                    const button = document.querySelector('[data-show-more-categories]');
-                    if (button) {
-                      button.addEventListener('click', () => {
-                        document.querySelectorAll('[data-category-hidden="true"]').forEach((section) => {
-                          section.classList.remove('hidden');
-                          section.dataset.categoryHidden = 'false';
-                        });
-                        button.closest('div')?.remove();
-                        window.__novoAlvoHydrateViews?.();
-                      });
-                    }
-
-                    const hydrateViews = async (root = document) => {
-                      const nodes = Array.from(root.querySelectorAll('[data-live-view-count]'));
-                      const slugs = [...new Set(nodes.map((node) => node.dataset.liveViewCount).filter(Boolean))];
-                      if (!slugs.length) return;
-
-                      try {
-                        const response = await fetch(`/api/public/views?slugs=${encodeURIComponent(slugs.join(','))}`);
-                        if (!response.ok) return;
-                        const data = await response.json();
-                        const views = data && typeof data.views === 'object' ? data.views : {};
-                        nodes.forEach((node) => {
-                          const slug = node.dataset.liveViewCount || '';
-                          const value = Number(views[slug] || 0);
-                          node.textContent = node.dataset.viewFormat === 'number' ? String(value) : `${value} views`;
-                        });
-                      } catch {}
-                    };
-
-                    window.__novoAlvoHydrateViews = hydrateViews;
-                    void hydrateViews();
-
-                    const pulseList = document.querySelector('[data-live-pulse-list]');
-                    if (!pulseList) return;
-                    const initialPulseItems = Array.from(pulseList.querySelectorAll('a[href]')).map((item) => {
-                      const href = item.getAttribute('href') || '';
-                      const slug = decodeURIComponent(href.replace(/^\/noticia\//, '').replace(/\/$/, ''));
-                      const title = item.querySelector('h3')?.textContent || '';
-                      return { slug, subject: subjectKey(title), html: item.outerHTML };
-                    });
-                    function subjectKey(value) {
-                      return String(value || '')
-                        .normalize('NFD')
-                        .replace(/[\u0300-\u036f]/g, '')
-                        .toLowerCase()
-                        .replace(/\b(conselho nacional de justica|cnj)\b/g, 'cnj')
-                        .replace(/[^a-z0-9]+/g, ' ')
-                        .split(/\s+/)
-                        .filter((token) => token.length >= 4 && !['novo', 'nova', 'para', 'pode', 'mesmo', 'com', 'das', 'dos', 'uma', 'por', 'sobre'].includes(token))
-                        .sort()
-                        .slice(0, 14)
-                        .join('-');
-                    }
-                    function imageKey(value) {
-                      try {
-                        const url = new URL(String(value || ''), window.location.origin);
-                        return url.pathname
-                          .replace(/-\d{8,}(\.[a-z0-9]+)$/i, '$1')
-                          .replace(/-cover(\.[a-z0-9]+)$/i, '$1')
-                          .toLowerCase();
-                      } catch {
-                        return String(value || '').toLowerCase();
-                      }
-                    }
-                    function sameGoogleAiTopic(article, subjects) {
-                      const haystack = `${article.category || ''} ${article.title || ''} ${article.summary || ''}`
-                        .normalize('NFD')
-                        .replace(/[\u0300-\u036f]/g, '')
-                        .toLowerCase();
-                      if (!haystack.includes('google') || !haystack.includes('busca')) return false;
-                      if (!haystack.includes('ia') && !haystack.includes('inteligencia artificial')) return false;
-                      return Array.from(subjects).some((subject) => subject.includes('google') && subject.includes('busca'));
-                    }
-                    const categoryColors = {
-                      Brasil: 'bg-emerald-600',
-                      Mundo: 'bg-blue-900',
-                      Politica: 'bg-zinc-800',
-                      'Política': 'bg-zinc-800',
-                      Economia: 'bg-green-700',
-                      Tecnologia: 'bg-cyan-600',
-                      Esportes: 'bg-orange-500',
-                      Cinema: 'bg-red-700',
-                      Saude: 'bg-emerald-500',
-                      'Saúde': 'bg-emerald-500',
-                      Ciencia: 'bg-teal-600',
-                      'Ciência': 'bg-teal-600',
-                      Educacao: 'bg-blue-600',
-                      'Educação': 'bg-blue-600',
-                      Cultura: 'bg-violet-600',
-                      Famosos: 'bg-yellow-500',
-                      Entretenimento: 'bg-fuchsia-600',
-                      Lifestyle: 'bg-amber-600',
-                      Games: 'bg-indigo-600',
-                      Moda: 'bg-pink-500',
-                      Musica: 'bg-purple-600',
-                      'Música': 'bg-purple-600',
-                      Futebol: 'bg-orange-500',
-                    };
-
-                    const escapeHtml = (value) =>
-                      String(value || '')
-                        .replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;')
-                        .replace(/"/g, '&quot;')
-                        .replace(/'/g, '&#039;');
-
-                    const formatDate = (value) => {
-                      const date = new Date(value || Date.now());
-                      const diff = Date.now() - date.getTime();
-                      const minutes = Math.max(1, Math.floor(diff / 60000));
-                      if (minutes < 60) return `há ${minutes} min`;
-                      const hours = Math.floor(minutes / 60);
-                      if (hours < 24) return `há ${hours}h`;
-                      return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(date);
-                    };
-
-                    const categoryClass = (value) => categoryColors[value] || 'bg-zinc-600';
-                    void categoryClass;
-
-                    fetch('/api/public/articles?limit=10')
-                      .then((response) => (response.ok ? response.json() : { articles: [] }))
-                      .then((data) => {
-                        const articles = Array.isArray(data.articles)
-                          ? data.articles.filter((article) => article?.slug)
-                          : [];
-                        if (!articles.length) return;
-                        const seen = new Set();
-                        const seenSubjects = new Set();
-                        const seenImages = new Set();
-                        const liveItems = articles.filter((article) => {
-                            const key = subjectKey(`${article.category || ''} ${article.title || ''} ${article.summary || ''}`);
-                            const coverKey = imageKey(article.cover_url || '');
-                            if (coverKey && seenImages.has(coverKey)) return false;
-                            if (sameGoogleAiTopic(article, seenSubjects)) return false;
-                            if (key && seenSubjects.has(key)) return false;
-                            if (key) seenSubjects.add(key);
-                            if (coverKey) seenImages.add(coverKey);
-                            return true;
-                          }).slice(0, 3).map((article) => {
-                            seen.add(article.slug);
-                            seenSubjects.add(subjectKey(`${article.category || ''} ${article.title || ''} ${article.summary || ''}`));
-                            const url = `/noticia/${encodeURIComponent(article.slug)}/`;
-                            return `
-                              <a href="${url}" class="group grid min-h-[92px] grid-cols-[64px_minmax(0,1fr)] items-center gap-3 rounded-2xl border-b border-black/10 px-2 py-4 transition-colors duration-300 last:border-b-0 hover:bg-[#f5f3ee] hover:shadow-[inset_3px_0_0_#8A1F2D] dark:border-zinc-800 dark:hover:bg-zinc-800/60">
-                                <div class="h-14 w-16 overflow-hidden rounded-2xl bg-[#ebe8df] shadow-sm transition-shadow duration-300 group-hover:shadow-md dark:bg-zinc-800">
-                                  ${article.cover_url ? `<img src="${escapeHtml(article.cover_url)}" alt="${escapeHtml(article.cover_alt || article.title)}" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/og-default.svg';" />` : ''}
-                                </div>
-                                <div class="min-w-0">
-                                  <h3 class="line-clamp-3 text-[15px] font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors group-hover:text-[#8A1F2D] dark:text-zinc-50">${escapeHtml(article.title)}</h3>
-                                  <p class="mt-1 text-xs font-bold text-zinc-400">${formatDate(article.published_at || article.scheduled_at || article.updated_at)} • <span data-live-view-count="${escapeHtml(article.slug)}">${Number(article.views || 0)} views</span></p>
-                                </div>
-                              </a>
-                            `;
-                          });
-                        const fallbackItems = initialPulseItems
-                          .filter((item) => item.slug && !seen.has(item.slug) && (!item.subject || !seenSubjects.has(item.subject)))
-                          .map((item) => item.html);
-                        pulseList.innerHTML = [...liveItems, ...fallbackItems].slice(0, 3).join('');
-                        window.__novoAlvoHydrateViews?.(pulseList);
-                      })
-                      .catch(() => {});
-                  })();
-                </script>
-
-                <section class="grid grid-cols-1 gap-8 border-t border-black/10 pt-14 dark:border-zinc-800 xl:grid-cols-[minmax(0,1fr)_360px]">
-                  <section class="overflow-hidden rounded-[1.875rem] border border-black/10 bg-white shadow-[0_18px_50px_rgba(16,16,16,0.055)] dark:border-zinc-800 dark:bg-zinc-900">
-                    <div class="flex min-h-[66px] items-center justify-between gap-3 border-b border-black/10 px-6 py-5 dark:border-zinc-800">
-                      <h2 class="text-xl font-black leading-none tracking-tighter text-zinc-950 dark:text-zinc-50">
-                        Mais acessadas
-                      </h2>
-                      <span class="text-[10px] font-black uppercase tracking-[0.1em] text-[#8A1F2D]">
-                        Ranking
-                      </span>
-                    </div>
-                    <div class="px-6 py-1" data-real-most-read-list>
-                      {mostRead.map((article, index) => (
-                        <a href={`/noticia/${article.slug}`} class="grid grid-cols-[34px_1fr_auto] gap-3 border-b border-black/10 py-4 last:border-b-0 dark:border-zinc-800">
-                          <div class="text-2xl font-black leading-none tracking-tighter text-[#8A1F2D]">{index + 1}</div>
-                          <h3 class="text-[15px] font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors hover:text-[#8A1F2D] dark:text-zinc-50">{article.title}</h3>
-                          <div class="text-xs font-black text-zinc-400" data-live-view-count={article.slug} data-view-format="number">{article.views || 0}</div>
-                        </a>
-                      ))}
-                    </div>
-                  </section>
-
-                  <aside class="min-h-[360px] rounded-[1.875rem] border border-dashed border-black/20 bg-[#ebe8df] p-5 text-center text-[11px] font-black uppercase tracking-[0.12em] text-zinc-400 shadow-[0_18px_50px_rgba(16,16,16,0.045)] dark:border-zinc-800 dark:bg-zinc-900">
-                    <div class="grid h-full place-items-center">
-                      <AdCard label="Publicidade lateral" class="h-full min-h-[320px] w-full" />
-                    </div>
-                  </aside>
-                </section>
-
-                <script is:inline>
-                  (() => {
-                    const list = document.querySelector('[data-real-most-read-list]');
-                    if (!list) return;
-                    const escapeHtml = (value) =>
-                      String(value || '')
-                        .replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;')
-                        .replace(/"/g, '&quot;')
-                        .replace(/'/g, '&#039;');
-
-                    fetch('/api/public/articles?limit=5&sort=views')
-                      .then((response) => (response.ok ? response.json() : { articles: [] }))
-                      .then((data) => {
-                        const ranked = Array.isArray(data.articles)
-                          ? data.articles.filter((article) => article?.slug && Number(article.views || 0) > 0)
-                          : [];
-                        if (!ranked.length) return;
-                        list.innerHTML = ranked
-                          .slice(0, 5)
-                          .map((article, index) => {
-                            const views = Number(article.views || 0);
-                            return `
-                              <a href="/noticia/${encodeURIComponent(article.slug)}/" class="grid grid-cols-[34px_1fr_auto] gap-3 border-b border-black/10 py-4 last:border-b-0 dark:border-zinc-800">
-                                <div class="text-2xl font-black leading-none tracking-tighter text-[#8A1F2D]">${index + 1}</div>
-                                <h3 class="text-[15px] font-black leading-snug tracking-[-0.025em] text-zinc-950 transition-colors hover:text-[#8A1F2D] dark:text-zinc-50">${escapeHtml(article.title)}</h3>
-                                <div class="text-xs font-black text-zinc-400" data-live-view-count="${escapeHtml(article.slug)}" data-view-format="number">${views}</div>
-                              </a>
-                            `;
-                          })
-                          .join('');
-                        window.__novoAlvoHydrateViews?.(list);
-                      })
-                      .catch(() => {});
-                  })();
-                </script>
-              </>
-            )
-          }
-        </div>
-
-        {isCategoryView && (
-          <aside class="relative h-full border-black/10 transition-colors duration-300 dark:border-zinc-800 lg:col-span-3 lg:border-l lg:pl-10">
-            <div class="space-y-12 h-full flex flex-col">
-              <section class="space-y-8 flex-shrink-0">
-                <div class="mb-4 flex items-center gap-3 border-b border-black/10 pb-4 dark:border-zinc-800">
-                  <Icon name="trending" class="h-5 w-5 text-[#8A1F2D]" />
-                  <h3 class="uppercase text-xs font-black tracking-[0.22em] text-zinc-900 dark:text-zinc-50">
-                    MAIS ACESSADAS
-                  </h3>
-                </div>
-                <div class="space-y-8">
-                  {mostRead.map((article, index) => <ArticleCard article={article} variant="side" index={index} />)}
-                </div>
-              </section>
-
-              <div class="sticky top-28 transition-[top] duration-700 ease-in-out space-y-10 h-fit pb-10 z-10">
-                <div class="h-[500px] w-full shrink-0">
-                  <AdCard label="Publicidade Lateral" class="h-full w-full" />
-                </div>
-
-              </div>
-            </div>
-          </aside>
-        )}
+    <section class="xap-track">
+      <div>
+        <p>Current focus</p>
+        <h2>oh lala/space jam</h2>
+        <span>A direct link for anyone checking the domain after receiving a message from x.a preto.</span>
       </div>
+      <a class="xap-primary" href={soundcloudUrl} target="_blank" rel="noreferrer">Open SoundCloud ↗</a>
+    </section>
 
-      <div class="mt-10 md:mt-14">
-        <NewsletterBlock class="mx-auto max-w-[900px]" />
-      </div>
-    </main>
-  </div>
+    <footer class="xap-footer">
+      <span>Contact / replies</span>
+      <a href={contactUrl}>elidepaula@msn.com</a>
+    </footer>
+  </main>
+
+  <style>
+    :global(body) {
+      margin: 0;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255, 122, 54, 0.32), transparent 34rem),
+        radial-gradient(circle at 80% 20%, rgba(105, 79, 255, 0.28), transparent 28rem),
+        linear-gradient(145deg, #090706 0%, #17100c 48%, #050505 100%);
+      color: #f7efe5;
+    }
+
+    .xap-site {
+      width: min(1120px, calc(100% - 40px));
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 48px 0 30px;
+      display: grid;
+      gap: 26px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .xap-hero,
+    .xap-track,
+    .xap-cards article,
+    .xap-footer {
+      border: 1px solid rgba(247, 239, 229, 0.14);
+      background: rgba(15, 12, 10, 0.72);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(18px);
+    }
+
+    .xap-hero {
+      min-height: 560px;
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+      border-radius: 42px;
+      padding: clamp(28px, 7vw, 72px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .xap-hero::before {
+      content: '';
+      position: absolute;
+      inset: 26px;
+      border-radius: 32px;
+      border: 1px solid rgba(247, 239, 229, 0.08);
+      pointer-events: none;
+    }
+
+    .xap-badge {
+      width: fit-content;
+      margin-bottom: 22px;
+      border-radius: 999px;
+      padding: 10px 14px;
+      color: #ffd1aa;
+      background: rgba(255, 122, 54, 0.16);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .xap-site h1,
+    .xap-site h2,
+    .xap-site p { margin: 0; }
+
+    .xap-site h1 {
+      max-width: 900px;
+      font-size: clamp(64px, 15vw, 170px);
+      line-height: 0.82;
+      letter-spacing: -0.09em;
+      text-transform: lowercase;
+    }
+
+    .xap-lead {
+      max-width: 720px;
+      margin-top: 28px !important;
+      color: rgba(247, 239, 229, 0.78);
+      font-size: clamp(19px, 3vw, 30px);
+      line-height: 1.22;
+    }
+
+    .xap-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 34px;
+    }
+
+    .xap-primary,
+    .xap-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      border-radius: 999px;
+      padding: 0 20px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .xap-primary {
+      color: #120a05;
+      background: #ffb36b;
+    }
+
+    .xap-secondary {
+      color: #f7efe5;
+      background: rgba(247, 239, 229, 0.1);
+    }
+
+    .xap-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .xap-cards article {
+      min-height: 220px;
+      border-radius: 28px;
+      padding: 24px;
+    }
+
+    .xap-cards span,
+    .xap-track p { color: #ffb36b; }
+
+    .xap-cards span,
+    .xap-track p {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .xap-cards h2,
+    .xap-track h2 {
+      margin-top: 18px;
+      font-size: 24px;
+      letter-spacing: -0.04em;
+    }
+
+    .xap-cards p,
+    .xap-track span {
+      display: block;
+      margin-top: 12px;
+      color: rgba(247, 239, 229, 0.68);
+      line-height: 1.55;
+    }
+
+    .xap-track {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      border-radius: 32px;
+      padding: 28px;
+    }
+
+    .xap-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      border-radius: 24px;
+      padding: 20px 24px;
+      color: rgba(247, 239, 229, 0.7);
+    }
+
+    .xap-footer a {
+      color: #ffd1aa;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    @media (max-width: 760px) {
+      .xap-site { width: min(100% - 24px, 1120px); padding-top: 24px; }
+      .xap-hero { min-height: 520px; border-radius: 30px; }
+      .xap-cards { grid-template-columns: 1fr; }
+      .xap-track { align-items: stretch; flex-direction: column; }
+    }
+  </style>
 </BaseLayout>
