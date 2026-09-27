@@ -1,4 +1,4 @@
-﻿---
+---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const soundcloudUrl = 'https://soundcloud.com/xapreto/oh-lala-space-jam-by-x-a-preto';
@@ -100,24 +100,22 @@ const soundcloudEmbed = 'https://w.soundcloud.com/player/?url=https%3A//api.soun
 
     <section class="pna-notes" id="notes" aria-labelledby="notes-title">
       <div class="pna-notes-head">
-        <p class="pna-kicker" data-i18n="notesKicker">What this is</p>
-        <h2 id="notes-title" data-i18n="notesTitle">No pitch deck, just signal.</h2>
+        <p class="pna-kicker" data-i18n="notesKicker">Label note</p>
+        <h2 id="notes-title" data-i18n="notesTitle">Built for records, edits and moving images.</h2>
       </div>
       <div class="pna-manifesto">
-        <p class="pna-manifesto-lead" data-i18n="manifestoLead">For ears that dig before they post.</p>
-        <p data-i18n="manifestoText">Promos, WAVs and unfinished ideas move through DJs, radio people, selectors and artists who hear the same pressure points. R&B, rap, soul, baile, electronic music and sample culture stay in one conversation — with room for original tracks, backing vocals, dubbing memory and soundtrack work when the image needs a pulse.</p>
+        <p class="pna-manifesto-lead" data-i18n="manifestoLead">Novo Alvo is a working room.</p>
+        <p data-i18n="manifestoText">A place to organize x.a preto releases, edits, voice work and soundtrack ideas with the same ear: Black music, club pressure, sample memory and audiovisual timing. The label is small on purpose — direct contact, careful files, real context.</p>
       </div>
     </section>
 
-    <section class="pna-archive" aria-label="Release notes">
-      <p data-i18n="archiveLine">Built from Campinas/Votuporanga to anywhere the drum lands. First stop: “oh lala/space jam”.</p>
-    </section>
 
     <footer class="pna-footer">
       <div>
         <strong data-brand-name>Novo Alvo Productions</strong>
-        <span data-i18n="footerLine">Independent music label · Brazil</span>
+        <span data-i18n="footerLine">Files, soundtrack ideas, voice work and collaborations.</span>
       </div>
+      <a class="pna-footer-cta" href={contactUrl} data-i18n="footerCta">Contact Novo Alvo ↗</a>
       <div class="pna-footer-links">
         <a href={contactUrl}>elidepaula@msn.com</a>
         <a href={instagramUrl} target="_blank" rel="noreferrer">instagram.com/eliezerman</a>
@@ -138,11 +136,11 @@ const soundcloudEmbed = 'https://w.soundcloud.com/player/?url=https%3A//api.soun
           releaseText: 'Uma releitura crua de dois momentos da Justine Skye produzidos originalmente por Kaytranada, levada para um edit de pista com referência a “Space Jam”, do Quad City DJ’s, tema clássico do filme que nunca saiu da cabeça.',
           releaseCta: 'Abrir no SoundCloud ↗',
           creditsKicker: 'Créditos no som', creditsTitle: 'O som já atravessou telas.', creditsText: 'Faixas, edits e trabalhos de voz conectados a produções e estúdios ligados a:',
-          notesKicker: 'O que é isso', notesTitle: 'Sem pitch deck. Só sinal.',
-          manifestoLead: 'Para quem garimpa antes de postar.',
-          manifestoText: 'Promos, WAVs e ideias ainda abertas circulam por DJs, rádios, selectors e artistas que escutam os mesmos pontos de pressão. R&B, rap, soul, baile, eletrônica e sample culture seguem como uma conversa só — com espaço para faixas originais, backing vocal, memória de dublagem e trilha quando a imagem precisa de pulso.',
-          archiveLine: 'Feito entre Campinas/Votuporanga e qualquer lugar onde o beat pousa. Primeiro registro: “oh lala/space jam”.',
-          footerLine: 'Selo musical independente · Brasil'
+          notesKicker: 'Nota do selo', notesTitle: 'Feito para faixas, edits e imagens em movimento.',
+          manifestoLead: 'Novo Alvo é uma sala de trabalho.',
+          manifestoText: 'Um lugar para organizar lançamentos, edits, voz e ideias de trilha de x.a preto com a mesma escuta: black music, pressão de pista, memória de sample e tempo de audiovisual. O selo é pequeno de propósito — contato direto, arquivos bem cuidados e contexto real.',
+          footerLine: 'Arquivos, ideias de trilha, voz e colaborações.',
+          footerCta: 'Falar com a Novo Alvo ↗'
         },
         en: {
           navRelease: 'Release', navArtist: 'Artist', navCredits: 'Credits',
@@ -154,11 +152,11 @@ const soundcloudEmbed = 'https://w.soundcloud.com/player/?url=https%3A//api.soun
           releaseText: 'A rough little flip of two Justine Skye moments originally produced by Kaytranada, pushed into a club edit with a nod to Quad City DJ’s “Space Jam” from the film that never left our heads.',
           releaseCta: 'Open on SoundCloud ↗',
           creditsKicker: 'Credits in the room', creditsTitle: 'Sound already crossed screens.', creditsText: 'Tracks, edits and voice work connected to productions and studios linked to:',
-          notesKicker: 'What this is', notesTitle: 'No pitch deck, just signal.',
-          manifestoLead: 'For ears that dig before they post.',
-          manifestoText: 'Promos, WAVs and unfinished ideas move through DJs, radio people, selectors and artists who hear the same pressure points. R&B, rap, soul, baile, electronic music and sample culture stay in one conversation — with room for original tracks, backing vocals, dubbing memory and soundtrack work when the image needs a pulse.',
-          archiveLine: 'Built from Campinas/Votuporanga to anywhere the drum lands. First stop: “oh lala/space jam”.',
-          footerLine: 'Independent music label · Brazil'
+          notesKicker: 'Label note', notesTitle: 'Built for records, edits and moving images.',
+          manifestoLead: 'Novo Alvo is a working room.',
+          manifestoText: 'A place to organize x.a preto releases, edits, voice work and soundtrack ideas with the same ear: Black music, club pressure, sample memory and audiovisual timing. The label is small on purpose — direct contact, careful files, real context.',
+          footerLine: 'Files, soundtrack ideas, voice work and collaborations.',
+          footerCta: 'Contact Novo Alvo ↗'
         }
       };
 
@@ -632,7 +630,6 @@ const soundcloudEmbed = 'https://w.soundcloud.com/player/?url=https%3A//api.soun
     .pna-credits,
     .pna-notes-head,
     .pna-manifesto,
-    .pna-archive,
     .pna-footer {
       border: 1px solid var(--na-line);
       background: rgba(7,7,7,0.72);
@@ -736,24 +733,6 @@ const soundcloudEmbed = 'https://w.soundcloud.com/player/?url=https%3A//api.soun
       letter-spacing: -0.025em;
     }
 
-    .pna-archive {
-      padding: clamp(28px, 5vw, 64px);
-      min-height: 170px;
-      display: grid;
-      place-items: center start;
-      background:
-        linear-gradient(90deg, rgba(216,255,0,0.16), transparent 38%),
-        rgba(7,7,7,0.72);
-    }
-
-    .pna-archive p {
-      max-width: 880px;
-      font-family: var(--na-display);
-      font-size: clamp(28px, 5vw, 74px);
-      line-height: 0.88;
-      letter-spacing: -0.075em;
-      text-transform: uppercase;
-    }
 
     .pna-footer {
       justify-content: space-between;
@@ -766,6 +745,7 @@ const soundcloudEmbed = 'https://w.soundcloud.com/player/?url=https%3A//api.soun
     }
 
     .pna-footer strong { display: block; color: var(--na-ink); text-transform: uppercase; }
+    .pna-footer-cta { color: #090909; background: var(--na-lime); padding: 13px 15px; font-weight: 700; text-decoration: none; text-transform: uppercase; }
     .pna-footer-links { gap: 16px; flex-wrap: wrap; }
     .pna-footer a { color: var(--na-lime); font-weight: 700; text-decoration: none; }
 
@@ -801,3 +781,4 @@ const soundcloudEmbed = 'https://w.soundcloud.com/player/?url=https%3A//api.soun
     }
   </style>
 </BaseLayout>
+
