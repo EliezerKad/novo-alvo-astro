@@ -1,25 +1,27 @@
----
+﻿---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const soundcloudUrl = 'https://soundcloud.com/xapreto/oh-lala-space-jam-by-x-a-preto';
 const instagramUrl = 'https://instagram.com/eliezerman';
 const contactUrl = 'mailto:elidepaula@msn.com';
+const soundcloudEmbed = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/soundcloud%253Atracks%253A2397068337&color=%23c8d7ff&inverse=false&auto_play=true&show_user=true';
 ---
 
 <BaseLayout
   title="Novo Alvo Productions | x.a preto"
   canonical={new URL('/', Astro.site ?? Astro.url.origin).href}
-  description="Novo Alvo Productions is an independent Brazilian music label and artist home led by x.a preto."
+  description="Novo Alvo Productions is an independent Brazilian music label and production house for edits, club grooves, R&B, soul, audiovisual music and x.a preto releases."
 >
   <main class="pna-site" data-lang="en">
     <nav class="pna-nav" aria-label="Novo Alvo Productions navigation">
       <a class="pna-logo" href="/" aria-label="Novo Alvo Productions home">
-        <span></span>
-        Novo Alvo Productions
+        <img src="/novo-alvo-symbol-clean.png" alt="" width="42" height="42" />
+        <b data-brand-name>Novo Alvo Productions</b>
       </a>
       <div class="pna-nav-links">
-        <a href="#releases" data-i18n="navReleases">Releases</a>
+        <a href="#release" data-i18n="navRelease">Release</a>
         <a href="#artist" data-i18n="navArtist">Artist</a>
+        <a href="#notes" data-i18n="navNotes">Notes</a>
         <a href={instagramUrl} target="_blank" rel="noreferrer">Instagram</a>
         <button class="pna-lang" type="button" aria-label="Switch language" data-lang-toggle>
           <strong data-lang-current>EN</strong> / PT
@@ -27,12 +29,14 @@ const contactUrl = 'mailto:elidepaula@msn.com';
       </div>
     </nav>
 
-    <section class="pna-hero" id="artist">
+    <section class="pna-hero" id="artist" aria-labelledby="hero-title">
+      <div class="pna-hero-tag" aria-hidden="true">NA001 / EDITS / RADIO COPY / CLUB MEMORY</div>
       <div class="pna-hero-copy">
         <p class="pna-kicker" data-i18n="heroKicker">Independent Brazilian label</p>
-        <h1>NOVO<br />ALVO<br />PRODUCTIONS</h1>
+        <h1 id="hero-title"><span>NOVO</span><span>ALVO</span></h1>
+        <div class="pna-title-tag" data-brand-tag>PRODUCTIONS</div>
         <p class="pna-lead" data-i18n="heroLead">
-          A creative label/home for electronic music, edits and club-driven grooves, led by x.a preto as the main artist.
+          A label room for edits, R&B cuts, club memories and soundtrack ideas. Built around x.a preto, but open to the people who hear the same frequency.
         </p>
         <div class="pna-actions">
           <a class="pna-primary" href={soundcloudUrl} target="_blank" rel="noreferrer" data-i18n="heroListen">Listen to “oh lala/space jam” ↗</a>
@@ -40,63 +44,81 @@ const contactUrl = 'mailto:elidepaula@msn.com';
         </div>
       </div>
 
-      <div class="pna-artist-card" aria-label="Featured artist x.a preto">
+      <aside class="pna-artist-card" aria-label="x.a preto artist card">
         <div class="pna-card-top">
-          <span data-i18n="featuredArtist">Main artist</span>
-          <small>001</small>
+          <span>NA001</span>
+          <small data-i18n="catalogLabel">artist file</small>
         </div>
-        <div class="pna-orb" aria-hidden="true"></div>
-        <h2>x.a preto</h2>
-        <p data-i18n="artistShort">Producer · edits · club music · Brazil</p>
-        <a href={instagramUrl} target="_blank" rel="noreferrer">@eliezerman ↗</a>
-      </div>
+        <figure class="pna-portrait">
+          <img src="/xapreto-studio-portrait.png" alt="x.a preto in the studio" />
+        </figure>
+        <div class="pna-artist-text">
+          <h2>x.a preto</h2>
+          <p data-i18n="artistShort">Producer, vocalist and edit maker moving between R&B, rap, soul, club grooves and music for picture.</p>
+          <a href={instagramUrl} target="_blank" rel="noreferrer">@eliezerman ↗</a>
+        </div>
+      </aside>
     </section>
 
-    <section class="pna-marquee" aria-label="Novo Alvo Productions keywords">
-      <div>
-        <span>SELECTORS</span><span>RADIO</span><span>CLUB CUTS</span><span>EDITS</span><span>BRAZIL</span><span>GLOBAL EAR</span>
-      </div>
-    </section>
-
-    <section class="pna-release" id="releases">
+    <section class="pna-release" id="release" aria-labelledby="release-title" data-tilt-release>
       <div class="pna-release-image">
-        <div class="pna-release-title">
-          <span>OH LALA</span>
-          <span>SPACE JAM</span>
+        <div class="pna-cover-card">
+          <img src="/oh-lala-space-jam-cover.png" alt="oh lala/space jam cover art" />
+        </div>
+        <div class="pna-soundcloud">
+          <iframe allow="autoplay; encrypted-media" src={soundcloudEmbed} title="SoundCloud player for oh lala/space jam"></iframe>
+          <div class="pna-soundcloud-credit">
+            <a href="https://soundcloud.com/xapreto" target="_blank" rel="noreferrer">x.a preto</a> ·
+            <a href={soundcloudUrl} target="_blank" rel="noreferrer">oh lala/space jam (by x.a preto)</a>
+          </div>
         </div>
       </div>
       <div class="pna-release-copy">
-        <p class="pna-kicker" data-i18n="releaseKicker">Focus release</p>
-        <h2>oh lala/space jam</h2>
+        <p class="pna-kicker" data-i18n="releaseKicker">Current plate</p>
+        <h2 id="release-title">oh lala/<br />space jam</h2>
         <p data-i18n="releaseText">
-          A direct link for DJs, radio hosts, curators and artists who arrived through the domain or received a message from x.a preto.
+          A rough little flip of two Justine Skye moments originally produced by Kaytranada, pushed into a club edit with a nod to Quad City DJ’s “Space Jam” from the film that never left our heads.
         </p>
         <a class="pna-primary wide" href={soundcloudUrl} target="_blank" rel="noreferrer" data-i18n="releaseCta">Open on SoundCloud ↗</a>
       </div>
     </section>
 
-    <section class="pna-lineup" aria-label="Label pillars">
-      <article class="is-active">
-        <span>01</span>
-        <h3 data-i18n="pillarOneTitle">DJ promos</h3>
-        <p data-i18n="pillarOneText">WAVs, demos and unreleased ideas for sets, radio folders, playlists and personal listening.</p>
-      </article>
-      <article>
-        <span>02</span>
-        <h3 data-i18n="pillarTwoTitle">Borderless sound</h3>
-        <p data-i18n="pillarTwoText">Earlier x.a preto tracks have reached sets, radio selections and selectors around the world.</p>
-      </article>
-      <article>
-        <span>03</span>
-        <h3 data-i18n="pillarThreeTitle">Collaborations</h3>
-        <p data-i18n="pillarThreeText">Open to remixes, edits, guest mixes, collabs and real connections when the aesthetic makes sense.</p>
-      </article>
+    <section class="pna-notes" id="notes" aria-labelledby="notes-title">
+      <div class="pna-notes-head">
+        <p class="pna-kicker" data-i18n="notesKicker">What this is</p>
+        <h2 id="notes-title" data-i18n="notesTitle">No pitch deck, just signal.</h2>
+      </div>
+      <div class="pna-notes-grid">
+        <article>
+          <span>01</span>
+          <h3 data-i18n="noteOneTitle">For ears that dig</h3>
+          <p data-i18n="noteOneText">Promos, WAVs and ideas for DJs, radio people, selectors and artists who actually listen before they post.</p>
+        </article>
+        <article class="is-tall">
+          <span>02</span>
+          <h3 data-i18n="noteTwoTitle">Black music as language</h3>
+          <p data-i18n="noteTwoText">R&B, rap, soul, baile, electronic music and sample culture treated like one conversation, not separate rooms.</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3 data-i18n="noteThreeTitle">Sound for picture</h3>
+          <p data-i18n="noteThreeText">Original tracks, edits, backing vocals, dubbing experience and soundtrack ideas for audiovisual work that needs a pulse.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Cultural reach / client logo grid was intentionally removed from the visible page.
+      If proof-of-work returns later, keep it editorial and contextual instead of a generic SaaS-style logo strip.
+      Suggested future component: <section class="pna-archive"> with real screenshots, credits and notes per work. -->
+
+    <section class="pna-archive" aria-label="Release notes">
+      <p data-i18n="archiveLine">Built from Campinas/Votuporanga to anywhere the drum lands. First stop: “oh lala/space jam”.</p>
     </section>
 
     <footer class="pna-footer">
       <div>
-        <strong>Novo Alvo Productions</strong>
-        <span data-i18n="footerLine">Independent music label · São Paulo / Brazil</span>
+        <strong data-brand-name>Novo Alvo Productions</strong>
+        <span data-i18n="footerLine">Independent music label · Brazil</span>
       </div>
       <div class="pna-footer-links">
         <a href={contactUrl}>elidepaula@msn.com</a>
@@ -109,168 +131,255 @@ const contactUrl = 'mailto:elidepaula@msn.com';
     (() => {
       const copy = {
         pt: {
-          navReleases: 'Lançamentos', navArtist: 'Artista', heroKicker: 'Selo brasileiro independente',
-          heroLead: 'Um selo/casa criativa para música eletrônica, edits e grooves de pista, com x.a preto como artista principal.',
-          heroListen: 'Ouça “oh lala/space jam” ↗', heroContact: 'Contato / promo', featuredArtist: 'Artista principal',
-          artistShort: 'Producer · edits · club music · Brasil', releaseKicker: 'Lançamento em foco',
-          releaseText: 'Um link direto para DJs, rádios, curadores e artistas que chegaram pelo domínio ou receberam uma mensagem de x.a preto.',
-          releaseCta: 'Abrir no SoundCloud ↗', pillarOneTitle: 'Promo para DJs',
-          pillarOneText: 'WAVs, demos e ideias inéditas para sets, rádio, playlists e escuta pessoal.',
-          pillarTwoTitle: 'Som sem fronteira', pillarTwoText: 'Faixas anteriores de x.a preto já chegaram a sets, rádios e selectors ao redor do mundo.',
-          pillarThreeTitle: 'Colaborações', pillarThreeText: 'Aberto para remixes, edits, guest mixes, collabs e conexões reais quando a estética conversa.',
-          footerLine: 'Selo musical independente · São Paulo / Brasil'
+          navRelease: 'Faixa', navArtist: 'Artista', navNotes: 'Notas',
+          heroKicker: 'Selo brasileiro independente',
+          heroLead: 'Uma casa para edits, R&B, memórias de pista e ideias de trilha. Nasce em torno de x.a preto, mas fica aberta para quem escuta na mesma frequência.',
+          heroListen: 'Ouça “oh lala/space jam” ↗', heroContact: 'Contato / promo', catalogLabel: 'arquivo de artista',
+          artistShort: 'Produtor, voz e criador de edits entre R&B, rap, soul, grooves de pista e música para imagem.',
+          releaseKicker: 'Faixa atual',
+          releaseText: 'Uma releitura crua de dois momentos da Justine Skye produzidos originalmente por Kaytranada, levada para um edit de pista com referência a “Space Jam”, do Quad City DJ’s, tema clássico do filme que nunca saiu da cabeça.',
+          releaseCta: 'Abrir no SoundCloud ↗',
+          notesKicker: 'O que é isso', notesTitle: 'Sem pitch deck. Só sinal.',
+          noteOneTitle: 'Para quem garimpa', noteOneText: 'Promos, WAVs e ideias para DJs, rádios, selectors e artistas que escutam antes de postar.',
+          noteTwoTitle: 'Black music como língua', noteTwoText: 'R&B, rap, soul, baile, eletrônica e sample culture tratados como uma conversa só, não como salas separadas.',
+          noteThreeTitle: 'Som para imagem', noteThreeText: 'Faixas originais, edits, backing vocal, experiência com dublagem e trilhas para audiovisual que precisa de pulso.',
+          archiveLine: 'Feito entre Campinas/Votuporanga e qualquer lugar onde o beat pousa. Primeiro registro: “oh lala/space jam”.',
+          footerLine: 'Selo musical independente · Brasil'
         },
         en: {
-          navReleases: 'Releases', navArtist: 'Artist', heroKicker: 'Independent Brazilian label',
-          heroLead: 'A creative label/home for electronic music, edits and club-driven grooves, led by x.a preto as the main artist.',
-          heroListen: 'Listen to “oh lala/space jam” ↗', heroContact: 'Contact / promo', featuredArtist: 'Main artist',
-          artistShort: 'Producer · edits · club music · Brazil', releaseKicker: 'Focus release',
-          releaseText: 'A direct link for DJs, radio hosts, curators and artists who arrived through the domain or received a message from x.a preto.',
-          releaseCta: 'Open on SoundCloud ↗', pillarOneTitle: 'DJ promos',
-          pillarOneText: 'WAVs, demos and unreleased ideas for sets, radio folders, playlists and personal listening.',
-          pillarTwoTitle: 'Borderless sound', pillarTwoText: 'Earlier x.a preto tracks have reached sets, radio selections and selectors around the world.',
-          pillarThreeTitle: 'Collaborations', pillarThreeText: 'Open to remixes, edits, guest mixes, collabs and real connections when the aesthetic makes sense.',
-          footerLine: 'Independent music label · São Paulo / Brazil'
+          navRelease: 'Release', navArtist: 'Artist', navNotes: 'Notes',
+          heroKicker: 'Independent Brazilian label',
+          heroLead: 'A label room for edits, R&B cuts, club memories and soundtrack ideas. Built around x.a preto, but open to the people who hear the same frequency.',
+          heroListen: 'Listen to “oh lala/space jam” ↗', heroContact: 'Contact / promo', catalogLabel: 'artist file',
+          artistShort: 'Producer, vocalist and edit maker moving between R&B, rap, soul, club grooves and music for picture.',
+          releaseKicker: 'Current plate',
+          releaseText: 'A rough little flip of two Justine Skye moments originally produced by Kaytranada, pushed into a club edit with a nod to Quad City DJ’s “Space Jam” from the film that never left our heads.',
+          releaseCta: 'Open on SoundCloud ↗',
+          notesKicker: 'What this is', notesTitle: 'No pitch deck, just signal.',
+          noteOneTitle: 'For ears that dig', noteOneText: 'Promos, WAVs and ideas for DJs, radio people, selectors and artists who actually listen before they post.',
+          noteTwoTitle: 'Black music as language', noteTwoText: 'R&B, rap, soul, baile, electronic music and sample culture treated like one conversation, not separate rooms.',
+          noteThreeTitle: 'Sound for picture', noteThreeText: 'Original tracks, edits, backing vocals, dubbing experience and soundtrack ideas for audiovisual work that needs a pulse.',
+          archiveLine: 'Built from Campinas/Votuporanga to anywhere the drum lands. First stop: “oh lala/space jam”.',
+          footerLine: 'Independent music label · Brazil'
         }
       };
 
       const root = document.querySelector('.pna-site');
       const button = document.querySelector('[data-lang-toggle]');
-      const current = document.querySelector('[data-lang-current]');
       const setLang = (lang) => {
         root?.setAttribute('data-lang', lang);
         document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+        document.querySelectorAll('[data-brand-name]').forEach((node) => {
+          node.textContent = lang === 'pt' ? 'Novo Alvo Produções' : 'Novo Alvo Productions';
+        });
+        document.querySelectorAll('[data-brand-tag]').forEach((node) => {
+          node.textContent = lang === 'pt' ? 'PRODUÇÕES' : 'PRODUCTIONS';
+        });
         document.querySelectorAll('[data-i18n]').forEach((node) => {
           const key = node.getAttribute('data-i18n');
           if (key && copy[lang]?.[key]) node.textContent = copy[lang][key];
         });
-        if (current) current.textContent = lang.toUpperCase();
         const other = lang === 'en' ? 'PT' : 'EN';
         if (button) button.innerHTML = `<strong data-lang-current>${lang.toUpperCase()}</strong> / ${other}`;
         try { localStorage.setItem('pna-lang', lang); } catch {}
       };
 
-      let initial = 'en';
-      try { initial = localStorage.getItem('pna-lang') || 'en'; } catch {}
-      setLang(initial === 'pt' ? 'pt' : 'en');
-      button?.addEventListener('click', () => setLang(root?.getAttribute('data-lang') === 'pt' ? 'en' : 'pt'));
+      const detectLocale = async () => {
+        try {
+          const saved = localStorage.getItem('pna-lang-manual');
+          if (saved === 'pt' || saved === 'en') return saved;
+        } catch {}
+        try {
+          const res = await fetch('/cdn-cgi/trace', { cache: 'no-store' });
+          if (res.ok) {
+            const text = await res.text();
+            if (/(?:^|\n)loc=BR(?:\n|$)/.test(text)) return 'pt';
+            if (/(?:^|\n)loc=[A-Z]{2}(?:\n|$)/.test(text)) return 'en';
+          }
+        } catch {}
+        const language = (navigator.language || '').toLowerCase();
+        const languages = (navigator.languages || []).join(',').toLowerCase();
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        if (language === 'pt-br' || languages.includes('pt-br') || tz === 'America/Sao_Paulo') return 'pt';
+        return 'en';
+      };
+
+      detectLocale().then((lang) => setLang(lang === 'pt' ? 'pt' : 'en'));
+      button?.addEventListener('click', () => {
+        const lang = root?.getAttribute('data-lang') === 'pt' ? 'en' : 'pt';
+        try { localStorage.setItem('pna-lang-manual', lang); } catch {}
+        setLang(lang);
+      });
+
+      document.querySelectorAll('[data-tilt-release]').forEach((card) => {
+        card.addEventListener('pointermove', (event) => {
+          const rect = card.getBoundingClientRect();
+          const x = ((event.clientX - rect.left) / rect.width) * 100;
+          const y = ((event.clientY - rect.top) / rect.height) * 100;
+          card.style.setProperty('--mx', `${x}%`);
+          card.style.setProperty('--my', `${y}%`);
+          card.style.setProperty('--rx', `${(y - 50) * -0.035}deg`);
+          card.style.setProperty('--ry', `${(x - 50) * 0.035}deg`);
+        });
+        card.addEventListener('pointerleave', () => {
+          card.style.setProperty('--mx', '50%');
+          card.style.setProperty('--my', '50%');
+          card.style.setProperty('--rx', '0deg');
+          card.style.setProperty('--ry', '0deg');
+        });
+      });
     })();
   </script>
 
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@500;700&family=Space+Mono:wght@400;700&display=swap');
+
+    :global(:root) {
+      --na-bg: #070707;
+      --na-ink: #f4efe1;
+      --na-muted: rgba(244, 239, 225, 0.66);
+      --na-blue: #9db7ec;
+      --na-blue-deep: #263c68;
+      --na-lime: #d8ff00;
+      --na-brown: #3b2b24;
+      --na-paper: #d4c9ad;
+      --na-purple: #33204f;
+      --na-line: rgba(244, 239, 225, 0.16);
+      --na-display: 'Archivo Black', Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+      --na-body: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+      --na-mono: 'Space Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
     :global(body) {
       margin: 0;
+      color: var(--na-ink);
       background:
-        radial-gradient(circle at 16% 12%, rgba(229, 255, 0, 0.18), transparent 26rem),
-        radial-gradient(circle at 84% 28%, rgba(103, 55, 255, 0.36), transparent 34rem),
-        linear-gradient(145deg, #050505 0%, #10120f 48%, #08050f 100%);
-      color: #f3f0e7;
+        radial-gradient(circle at 15% 12%, rgba(157, 183, 236, 0.24), transparent 28rem),
+        radial-gradient(circle at 78% 16%, rgba(216, 255, 0, 0.16), transparent 21rem),
+        radial-gradient(circle at 84% 88%, rgba(51, 32, 79, 0.5), transparent 30rem),
+        linear-gradient(135deg, #060606 0%, #11100e 46%, #09080d 100%);
+      font-family: var(--na-body);
+    }
+
+    :global(body::before) {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.12;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.58'/%3E%3C/svg%3E");
     }
 
     .pna-site {
-      width: min(1240px, calc(100% - 36px));
+      width: min(1320px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 26px 0 34px;
+      padding: 20px 0 34px;
       display: grid;
-      gap: 18px;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      gap: 14px;
     }
 
-    .pna-nav,
-    .pna-hero,
-    .pna-release,
-    .pna-lineup article,
-    .pna-footer {
-      border: 1px solid rgba(243, 240, 231, 0.13);
-      background: rgba(7, 7, 7, 0.72);
-      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
-      backdrop-filter: blur(18px);
-    }
+    .pna-site a { color: inherit; }
+    .pna-site h1, .pna-site h2, .pna-site h3, .pna-site p, .pna-site figure { margin: 0; }
 
     .pna-nav {
-      min-height: 72px;
+      min-height: 70px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 18px;
-      border-radius: 999px;
-      padding: 0 20px;
+      border: 1px solid var(--na-line);
+      border-radius: 2px;
+      padding: 10px 14px 10px 10px;
       position: sticky;
-      top: 16px;
-      z-index: 20;
+      top: 12px;
+      z-index: 30;
+      background: rgba(7, 7, 7, 0.76);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 18px 58px rgba(0, 0, 0, 0.42);
     }
 
-    .pna-logo,
-    .pna-nav-links,
-    .pna-actions,
-    .pna-card-top,
-    .pna-footer,
-    .pna-footer-links {
-      display: flex;
-      align-items: center;
-    }
+    .pna-logo, .pna-nav-links, .pna-actions, .pna-card-top, .pna-footer, .pna-footer-links { display: flex; align-items: center; }
 
     .pna-logo {
       gap: 10px;
-      color: #f3f0e7;
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: 0.14em;
       text-decoration: none;
+      font-family: var(--na-mono);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
       text-transform: uppercase;
     }
 
-    .pna-logo span {
-      width: 28px;
-      height: 28px;
+    .pna-logo img {
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
-      border: 2px solid #e6ff00;
-      box-shadow: 0 0 24px rgba(230, 255, 0, 0.42);
+      box-shadow: 0 0 24px rgba(216, 255, 0, 0.35);
     }
 
-    .pna-nav-links { gap: 18px; }
+    .pna-nav-links { gap: 14px; flex-wrap: wrap; justify-content: flex-end; }
 
-    .pna-nav a,
-    .pna-lang {
-      color: rgba(243, 240, 231, 0.74);
+    .pna-nav a, .pna-lang {
+      color: rgba(244, 239, 225, 0.76);
       background: transparent;
       border: 0;
-      font: inherit;
-      font-size: 12px;
-      font-weight: 800;
+      font: 700 11px/1 var(--na-mono);
       text-decoration: none;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.02em;
     }
 
+    .pna-nav a:hover { color: var(--na-lime); }
+
     .pna-lang {
-      border: 1px solid rgba(243, 240, 231, 0.18);
-      border-radius: 999px;
-      padding: 10px 12px;
+      border: 1px solid rgba(244, 239, 225, 0.22);
+      padding: 11px 12px;
       cursor: pointer;
     }
 
-    .pna-lang strong { color: #e6ff00; }
+    .pna-lang strong { color: var(--na-lime); }
 
     .pna-hero {
-      min-height: 680px;
+      min-height: 720px;
       display: grid;
-      grid-template-columns: minmax(0, 1.08fr) minmax(330px, 0.72fr);
-      gap: 18px;
-      border-radius: 38px;
-      padding: 22px;
-      overflow: hidden;
+      grid-template-columns: minmax(0, 1.1fr) minmax(330px, 0.62fr);
+      gap: 12px;
       position: relative;
+      overflow: hidden;
+      border: 1px solid var(--na-line);
+      background:
+        linear-gradient(90deg, rgba(157, 183, 236, 0.1), transparent 42%),
+        linear-gradient(155deg, rgba(22, 19, 15, 0.92), rgba(5, 5, 5, 0.96));
     }
 
     .pna-hero::before {
-      content: '';
+      content: 'NOVO ALVO PRODUCTIONS / NA001 / SAMPLE CULTURE / R&B / CLUB MEMORY / ';
       position: absolute;
-      inset: 22px 40% 22px 22px;
-      background: linear-gradient(135deg, rgba(230, 255, 0, 0.88), rgba(84, 44, 255, 0.4));
-      filter: blur(80px);
-      opacity: 0.44;
+      left: -1vw;
+      right: -1vw;
+      bottom: -0.21em;
+      z-index: 0;
+      color: rgba(244, 239, 225, 0.045);
+      font-family: var(--na-display);
+      font-size: clamp(84px, 16vw, 250px);
+      line-height: 0.8;
+      letter-spacing: -0.08em;
+      white-space: nowrap;
       pointer-events: none;
+    }
+
+    .pna-hero-tag {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      z-index: 2;
+      color: var(--na-lime);
+      font: 700 11px/1 var(--na-mono);
+      letter-spacing: 0.06em;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
     }
 
     .pna-hero-copy {
@@ -280,208 +389,325 @@ const contactUrl = 'mailto:elidepaula@msn.com';
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: clamp(24px, 5vw, 70px);
+      padding: clamp(48px, 8vw, 110px) clamp(26px, 6vw, 94px);
     }
 
     .pna-kicker {
-      margin: 0 0 20px;
-      color: #e6ff00;
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: 0.18em;
+      width: fit-content;
+      margin-bottom: 18px !important;
+      color: var(--na-lime);
+      font: 700 11px/1 var(--na-mono);
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
-    .pna-site h1,
-    .pna-site h2,
-    .pna-site h3,
-    .pna-site p { margin: 0; }
-
     .pna-site h1 {
-      max-width: 880px;
-      font-size: clamp(52px, 9.7vw, 138px);
-      line-height: 0.78;
-      letter-spacing: -0.095em;
+      font-family: var(--na-display);
+      font-size: clamp(70px, 13vw, 190px);
+      line-height: 0.72;
+      letter-spacing: -0.1em;
       text-transform: uppercase;
+      max-width: 900px;
+    }
+
+    .pna-site h1 span { display: block; }
+
+    .pna-title-tag {
+      width: fit-content;
+      margin-top: 14px;
+      color: #090909;
+      background: var(--na-blue);
+      padding: 8px 12px 7px;
+      font: 700 clamp(14px, 1.5vw, 20px)/1 var(--na-mono);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      transform: rotate(-1.2deg);
     }
 
     .pna-lead {
-      max-width: 610px;
-      margin-top: 30px !important;
-      color: rgba(243, 240, 231, 0.72);
-      font-size: clamp(18px, 2.3vw, 28px);
-      line-height: 1.22;
+      max-width: 620px;
+      margin-top: 32px !important;
+      color: rgba(244, 239, 225, 0.76);
+      font-size: clamp(20px, 2.1vw, 30px);
+      line-height: 1.12;
+      letter-spacing: -0.04em;
     }
 
-    .pna-actions { gap: 12px; flex-wrap: wrap; margin-top: 34px; }
+    .pna-actions { gap: 10px; flex-wrap: wrap; margin-top: 34px; }
 
-    .pna-primary,
-    .pna-secondary {
-      min-height: 52px;
+    .pna-primary, .pna-secondary {
+      min-height: 50px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border-radius: 999px;
-      padding: 0 20px;
-      font-weight: 900;
+      padding: 0 17px;
       text-decoration: none;
+      font: 700 12px/1 var(--na-mono);
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      border: 1px solid var(--na-line);
+      transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
     }
 
-    .pna-primary { color: #080808; background: #e6ff00; }
-    .pna-secondary { color: #f3f0e7; background: rgba(243, 240, 231, 0.1); }
-    .pna-primary.wide { width: min(100%, 360px); border-radius: 0; }
+    .pna-primary { color: #090909; background: var(--na-lime); border-color: var(--na-lime); }
+    .pna-secondary { color: var(--na-ink); background: rgba(244, 239, 225, 0.06); }
+    .pna-primary:hover, .pna-secondary:hover { transform: translateY(-2px) skewX(-2deg); }
+    .pna-primary.wide { width: min(100%, 390px); }
 
     .pna-artist-card {
       position: relative;
+      z-index: 1;
       min-height: 100%;
-      border-radius: 28px;
-      overflow: hidden;
-      padding: 28px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      border-left: 1px solid var(--na-line);
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.06), transparent 38%),
-        radial-gradient(circle at 50% 42%, rgba(230, 255, 0, 0.36), transparent 19rem),
-        linear-gradient(155deg, #111 0%, #090909 55%, #2d0f63 100%);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+        radial-gradient(circle at 50% 18%, rgba(216, 255, 0, 0.18), transparent 14rem),
+        linear-gradient(180deg, rgba(157, 183, 236, 0.09), rgba(0, 0, 0, 0.24));
+      padding: 22px;
     }
 
-    .pna-card-top { justify-content: space-between; color: rgba(243, 240, 231, 0.66); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.14em; }
+    .pna-card-top { justify-content: space-between; font: 700 11px/1 var(--na-mono); color: rgba(244, 239, 225, 0.72); text-transform: uppercase; }
+    .pna-card-top span { color: var(--na-lime); }
 
-    .pna-orb {
-      width: min(72vw, 390px);
-      aspect-ratio: 1;
-      margin: auto;
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at 42% 34%, #f3f0e7 0 7%, transparent 8%),
-        radial-gradient(circle at 60% 44%, #e6ff00 0 0.5rem, transparent 0.55rem),
-        radial-gradient(circle at 50% 50%, #242424 0 32%, #0b0b0b 33% 54%, #e6ff00 55% 58%, #080808 59% 100%);
-      box-shadow: 0 0 70px rgba(230, 255, 0, 0.25);
-    }
-
-    .pna-artist-card h2 { font-size: clamp(44px, 7vw, 88px); line-height: 0.85; letter-spacing: -0.08em; text-transform: lowercase; }
-    .pna-artist-card p { margin-top: 8px; color: rgba(243, 240, 231, 0.68); font-weight: 700; }
-    .pna-artist-card a { margin-top: 18px; width: fit-content; color: #e6ff00; font-weight: 900; text-decoration: none; }
-
-    .pna-marquee {
+    .pna-portrait {
+      align-self: center;
+      width: min(78vw, 410px);
+      aspect-ratio: 4 / 5;
+      margin: 28px auto;
+      position: relative;
       overflow: hidden;
-      border-radius: 999px;
-      background: #e6ff00;
-      color: #080808;
-      font-weight: 1000;
-      letter-spacing: -0.04em;
-      text-transform: uppercase;
-      white-space: nowrap;
+      border: 1px solid rgba(157, 183, 236, 0.44);
+      background: #0e0e0e;
+      box-shadow: 0 35px 100px rgba(0,0,0,0.6), 0 0 56px rgba(157, 183, 236, 0.18);
+      transform: rotate(1.4deg);
     }
 
-    .pna-marquee div {
-      display: flex;
-      gap: 30px;
-      width: max-content;
-      padding: 11px 0;
-      animation: pna-scroll 22s linear infinite;
+    .pna-portrait::before {
+      content: '';
+      position: absolute;
+      inset: -24%;
+      background: url('/xapreto-studio-portrait.png') center/cover;
+      filter: blur(24px) saturate(1.15);
+      opacity: 0.35;
+      transform: scale(1.12);
     }
 
-    .pna-marquee span { font-size: clamp(18px, 2.6vw, 32px); }
+    .pna-portrait img {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: contrast(1.08) saturate(0.92) sepia(0.12);
+    }
+
+    .pna-portrait::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(157,183,236,0.12), transparent 44%, rgba(0,0,0,0.28));
+      mix-blend-mode: screen;
+    }
+
+    .pna-artist-text h2 {
+      font-family: var(--na-display);
+      font-size: clamp(44px, 6vw, 82px);
+      line-height: 0.86;
+      letter-spacing: -0.075em;
+      text-transform: lowercase;
+    }
+
+    .pna-artist-text p { margin-top: 10px; color: var(--na-muted); font-size: 16px; line-height: 1.38; }
+    .pna-artist-text a { display: inline-block; margin-top: 16px; color: var(--na-lime); font: 700 12px/1 var(--na-mono); text-decoration: none; }
 
     .pna-release {
+      min-height: 560px;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      border-radius: 34px;
+      grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+      border: 1px solid var(--na-line);
+      background: #080808;
       overflow: hidden;
-      min-height: 440px;
+      --mx: 50%;
+      --my: 50%;
+      --rx: 0deg;
+      --ry: 0deg;
     }
 
     .pna-release-image {
-      min-height: 440px;
-      background:
-        linear-gradient(140deg, rgba(230, 255, 0, 0.12), transparent 42%),
-        repeating-linear-gradient(135deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 14px),
-        #111;
-      display: flex;
-      align-items: end;
-      padding: 28px;
+      min-height: 560px;
+      display: grid;
+      place-items: center;
+      padding: clamp(26px, 4vw, 54px);
+      position: relative;
+      overflow: hidden;
+      background: #101010;
     }
 
-    .pna-release-title span {
-      display: block;
-      color: #f3f0e7;
-      font-size: clamp(38px, 6vw, 84px);
-      line-height: 0.86;
-      font-weight: 1000;
-      letter-spacing: -0.075em;
+    .pna-release-image::before {
+      content: '';
+      position: absolute;
+      inset: -25%;
+      background:
+        radial-gradient(circle at var(--mx) var(--my), rgba(216, 255, 0, 0.22), transparent 14rem),
+        url('/oh-lala-space-jam-cover.png') center/cover;
+      filter: blur(35px) saturate(1.2);
+      opacity: 0.62;
+      transform: scale(1.12);
     }
+
+    .pna-release-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 4px);
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
+    .pna-cover-card {
+      width: min(84%, 410px);
+      aspect-ratio: 1;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+      border: 1px solid rgba(244, 239, 225, 0.26);
+      box-shadow: 0 35px 110px rgba(0,0,0,0.62);
+      transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
+      transition: transform 0.18s ease;
+    }
+
+    .pna-cover-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .pna-soundcloud {
+      position: absolute;
+      z-index: 4;
+      left: 24px;
+      right: 24px;
+      bottom: 24px;
+      background: rgba(7,7,7,0.72);
+      border: 1px solid rgba(244,239,225,0.18);
+      padding: 10px;
+      backdrop-filter: blur(14px);
+    }
+
+    .pna-soundcloud iframe { width: 100%; height: 20px; border: 0; display: block; background: white; }
+    .pna-soundcloud-credit { margin-top: 7px; color: rgba(244,239,225,0.58); font: 400 10px/1.2 var(--na-mono); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .pna-soundcloud-credit a { color: rgba(244,239,225,0.72); text-decoration: none; }
 
     .pna-release-copy {
-      background: #080808;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: clamp(28px, 5vw, 70px);
+      padding: clamp(34px, 6vw, 78px);
+      background:
+        linear-gradient(125deg, rgba(157, 183, 236, 0.08), transparent 42%),
+        #070707;
     }
 
-    .pna-release-copy h2 { font-size: clamp(34px, 5vw, 76px); line-height: 0.9; letter-spacing: -0.08em; }
-    .pna-release-copy p:not(.pna-kicker) { margin: 20px 0 30px; max-width: 520px; color: rgba(243, 240, 231, 0.68); font-size: 18px; line-height: 1.5; }
+    .pna-release-copy h2 {
+      font-family: var(--na-display);
+      font-size: clamp(48px, 7vw, 104px);
+      line-height: 0.82;
+      letter-spacing: -0.09em;
+      text-transform: lowercase;
+    }
 
-    .pna-lineup {
+    .pna-release-copy p:not(.pna-kicker) {
+      margin: 24px 0 34px;
+      max-width: 590px;
+      color: rgba(244, 239, 225, 0.72);
+      font-size: clamp(17px, 1.55vw, 21px);
+      line-height: 1.42;
+    }
+
+    .pna-notes {
       display: grid;
+      grid-template-columns: minmax(280px, 0.78fr) minmax(0, 1.22fr);
       gap: 12px;
     }
 
-    .pna-lineup article {
-      min-height: 136px;
-      display: grid;
-      grid-template-columns: 90px minmax(220px, 0.45fr) 1fr;
-      align-items: center;
-      gap: 22px;
-      border-radius: 24px;
-      padding: 22px 28px;
-      position: relative;
-      overflow: hidden;
+    .pna-notes-head, .pna-notes-grid article, .pna-archive, .pna-footer {
+      border: 1px solid var(--na-line);
+      background: rgba(7,7,7,0.72);
     }
 
-    .pna-lineup article.is-active { background: #6237ff; }
-    .pna-lineup span { color: #e6ff00; font-size: 18px; font-weight: 1000; }
-    .pna-lineup h3 { font-size: clamp(28px, 5vw, 56px); line-height: 0.86; letter-spacing: -0.08em; text-transform: uppercase; }
-    .pna-lineup p { color: rgba(243, 240, 231, 0.7); line-height: 1.45; }
+    .pna-notes-head { padding: clamp(28px, 4vw, 52px); min-height: 320px; display: flex; flex-direction: column; justify-content: flex-end; }
+    .pna-notes-head h2 { font-family: var(--na-display); font-size: clamp(44px, 6vw, 92px); line-height: 0.84; letter-spacing: -0.08em; text-transform: uppercase; }
+
+    .pna-notes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .pna-notes-grid article { min-height: 210px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; transition: background 0.2s ease, transform 0.2s ease; }
+    .pna-notes-grid article:hover { background: var(--na-blue-deep); transform: translateY(-3px); }
+    .pna-notes-grid article.is-tall { grid-row: span 2; background: linear-gradient(160deg, rgba(216,255,0,0.14), rgba(157,183,236,0.06)); }
+    .pna-notes-grid span { color: var(--na-lime); font: 700 12px/1 var(--na-mono); }
+    .pna-notes-grid h3 { margin-top: 50px; font-family: var(--na-display); font-size: clamp(28px, 4vw, 52px); line-height: 0.86; letter-spacing: -0.075em; text-transform: uppercase; }
+    .pna-notes-grid p { margin-top: 16px; color: var(--na-muted); line-height: 1.44; }
+
+    .pna-archive {
+      padding: clamp(28px, 5vw, 64px);
+      min-height: 170px;
+      display: grid;
+      place-items: center start;
+      background:
+        linear-gradient(90deg, rgba(216,255,0,0.16), transparent 38%),
+        rgba(7,7,7,0.72);
+    }
+
+    .pna-archive p {
+      max-width: 880px;
+      font-family: var(--na-display);
+      font-size: clamp(28px, 5vw, 74px);
+      line-height: 0.88;
+      letter-spacing: -0.075em;
+      text-transform: uppercase;
+    }
 
     .pna-footer {
       justify-content: space-between;
       gap: 18px;
-      border-radius: 24px;
-      padding: 22px 26px;
-      color: rgba(243, 240, 231, 0.68);
+      padding: 22px 24px;
+      color: var(--na-muted);
       flex-wrap: wrap;
+      font-family: var(--na-mono);
+      font-size: 12px;
     }
 
-    .pna-footer strong { display: block; color: #f3f0e7; }
+    .pna-footer strong { display: block; color: var(--na-ink); text-transform: uppercase; }
     .pna-footer-links { gap: 16px; flex-wrap: wrap; }
-    .pna-footer a { color: #e6ff00; font-weight: 900; text-decoration: none; }
+    .pna-footer a { color: var(--na-lime); font-weight: 700; text-decoration: none; }
 
-    @keyframes pna-scroll {
-      from { transform: translateX(0); }
-      to { transform: translateX(-50%); }
-    }
-
-    @media (max-width: 900px) {
-      .pna-nav { align-items: flex-start; flex-direction: column; border-radius: 24px; padding: 18px; }
-      .pna-nav-links { width: 100%; flex-wrap: wrap; }
-      .pna-hero,
-      .pna-release { grid-template-columns: 1fr; }
+    @media (max-width: 980px) {
+      .pna-nav { align-items: flex-start; flex-direction: column; position: relative; top: auto; }
+      .pna-nav-links { justify-content: flex-start; }
+      .pna-hero, .pna-release, .pna-notes { grid-template-columns: 1fr; }
       .pna-hero { min-height: auto; }
-      .pna-artist-card { min-height: 520px; }
-      .pna-lineup article { grid-template-columns: 1fr; align-items: start; }
+      .pna-artist-card { border-left: 0; border-top: 1px solid var(--na-line); }
+      .pna-release-image { min-height: 520px; }
+      .pna-notes-grid article.is-tall { grid-row: auto; }
     }
 
-    @media (max-width: 560px) {
-      .pna-site { width: min(100% - 20px, 1240px); padding-top: 14px; }
-      .pna-hero { padding: 10px; border-radius: 26px; }
-      .pna-hero-copy { padding: 24px 14px; }
-      .pna-site h1 { font-size: clamp(48px, 15vw, 76px); }
+    @media (max-width: 620px) {
+      .pna-site { width: min(100% - 18px, 1320px); padding-top: 10px; }
+      .pna-logo b { font-size: 11px; }
+      .pna-logo img { width: 34px; height: 34px; }
+      .pna-nav-links { gap: 10px; }
+      .pna-nav a, .pna-lang { font-size: 10px; }
+      .pna-hero-tag { display: none; }
+      .pna-hero-copy { padding: 34px 18px; }
+      .pna-site h1 { font-size: clamp(60px, 21vw, 108px); }
+      .pna-lead { font-size: 18px; }
       .pna-actions a { width: 100%; }
-      .pna-release-image { min-height: 320px; }
-      .pna-footer-links { flex-direction: column; align-items: flex-start; }
+      .pna-artist-card { padding: 18px; }
+      .pna-portrait { width: min(78vw, 300px); }
+      .pna-release-image { min-height: 430px; padding: 18px; }
+      .pna-soundcloud { left: 12px; right: 12px; bottom: 12px; }
+      .pna-release-copy { padding: 28px 20px; }
+      .pna-notes-grid { grid-template-columns: 1fr; }
+      .pna-notes-head { min-height: 220px; }
+      .pna-footer, .pna-footer-links { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </BaseLayout>
