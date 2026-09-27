@@ -21,7 +21,7 @@ interface Props {
 
 const {
   title,
-  description = 'Novo Alvo reúne notícias, análise e cobertura editorial com foco em fatos relevantes.',
+  description = 'Novo Alvo Produções reúne música, edits, trilhas, voz e colaborações com curadoria direta de x.a preto.',
   canonical = Astro.url.href,
   image,
   type = 'website',
@@ -35,7 +35,7 @@ const {
   preloadImageSizes,
   breadcrumbs = [],
 } = Astro.props;
-const siteName = 'Portal Novo Alvo';
+const siteName = 'Novo Alvo Produções';
 const fallbackImage = new URL('/og-default.svg', Astro.site ?? Astro.url.origin).href;
 const socialImage = image || fallbackImage;
 const fontStylesheet = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@300;700&family=Playfair+Display:ital,wght@0,900;1,900&family=Syncopate:wght@700&display=swap';
@@ -70,7 +70,7 @@ const breadcrumbSchema = breadcrumbs.length > 0
     <meta name="description" content={description} />
     <meta name="google-adsense-account" content="ca-pub-4967503094814982" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" content="#8A1F2D" />
+    <meta name="theme-color" content="#d7ff00" />
     <link rel="canonical" href={canonical} />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="alternate" type="application/rss+xml" title="Portal Novo Alvo RSS" href="/rss.xml" />
@@ -127,23 +127,23 @@ const breadcrumbSchema = breadcrumbs.length > 0
       aria-label="Aviso de cookies"
     >
       <div class="flex items-start gap-3">
-        <div class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#8A1F2D] shadow-[0_0_0_5px_rgba(138,31,45,0.12)]"></div>
+        <div class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#d7ff00] shadow-[0_0_0_5px_rgba(138,31,45,0.12)]"></div>
         <div class="min-w-0">
-          <h2 class="text-xs font-black uppercase tracking-[0.18em] text-[#8A1F2D]">Aviso de cookies</h2>
+          <h2 class="text-xs font-black uppercase tracking-[0.18em] text-[#d7ff00]">Aviso de cookies</h2>
           <p class="mt-2 text-sm font-semibold leading-6 text-zinc-600 dark:text-zinc-300">
             Usamos cookies essenciais, preferências de navegação e tecnologias de publicidade para manter o portal funcionando, medir audiência e melhorar sua experiência.
           </p>
           <div class="mt-4 flex flex-wrap items-center gap-2">
             <button
               type="button"
-              class="rounded-full bg-[#8A1F2D] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_12px_26px_rgba(138,31,45,0.22)] transition hover:-translate-y-0.5 hover:bg-[#6f1723]"
+              class="rounded-full bg-[#d7ff00] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_12px_26px_rgba(138,31,45,0.22)] transition hover:-translate-y-0.5 hover:bg-[#6f1723]"
               data-cookie-accept
             >
               Aceitar
             </button>
             <a
               href="/politica-de-privacidade/"
-              class="rounded-full border border-black/10 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:-translate-y-0.5 hover:border-[#8A1F2D]/30 hover:text-[#8A1F2D] dark:border-white/10 dark:text-zinc-400"
+              class="rounded-full border border-black/10 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:-translate-y-0.5 hover:border-[#d7ff00]/30 hover:text-[#d7ff00] dark:border-white/10 dark:text-zinc-400"
             >
               Saiba mais
             </a>
@@ -198,3 +198,4 @@ const breadcrumbSchema = breadcrumbs.length > 0
     </script>
   </body>
 </html>
+
