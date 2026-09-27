@@ -449,10 +449,10 @@ const soundcloudEmbed = 'https://w.soundcloud.com/player/?url=https%3A//api.soun
     .pna-primary:visited,
     .pna-primary:hover,
     .pna-primary:focus-visible {
-      color: #050505;
+      color: #050505 !important;
       background: var(--na-lime);
       border-color: var(--na-lime);
-      text-shadow: 0 1px 0 rgba(255,255,255,0.18);
+      text-shadow: none;
     }
     .pna-secondary { color: var(--na-ink); background: rgba(244, 239, 225, 0.06); }
     .pna-primary:hover, .pna-secondary:hover { transform: translateY(-2px) skewX(-2deg); }
@@ -709,7 +709,7 @@ const soundcloudEmbed = 'https://w.soundcloud.com/player/?url=https%3A//api.soun
     .pna-notes-head h2 {
       font-family: var(--na-display);
       position: relative;
-      z-index: 2;
+      z-index: 5;
       width: min(132%, 700px);
       max-width: none;
       font-size: clamp(44px, 6vw, 92px);
@@ -793,6 +793,7 @@ const soundcloudEmbed = 'https://w.soundcloud.com/player/?url=https%3A//api.soun
     .pna-footer-cta { color: #090909; background: var(--na-lime); padding: 13px 15px; font-weight: 700; text-decoration: none; text-transform: uppercase; }
     .pna-footer-links { gap: 16px; flex-wrap: wrap; }
     .pna-footer a { color: var(--na-lime); font-weight: 700; text-decoration: none; }
+    .pna-footer a.pna-footer-cta { color: #050505 !important; }
 
     @media (max-width: 980px) {
       .pna-nav { align-items: flex-start; flex-direction: column; position: relative; top: auto; }
